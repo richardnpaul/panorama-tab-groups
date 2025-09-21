@@ -87,7 +87,8 @@ async function openBackup(data) {
     value: true
   });
 
-  data.windows.forEach(async (wi) => {
+  // Use Promise.all to wait for all windows to be processed
+  await Promise.all(data.windows.map(async (wi) => {
     const groups = [];
 
     if (wi.groups.length === 0) {
@@ -136,7 +137,8 @@ async function openBackup(data) {
     await browser.sessions.setWindowValue(window.id, 'activeGroup', wi.activeGroup);
     await browser.sessions.setWindowValue(window.id, 'groupIndex', wi.groupIndex);
 
-    wi.tabs.forEach(async (ti) => {
+    // Use Promise.all to wait for all tabs to be created
+    await Promise.all(wi.tabs.map(async (ti) => {
       // pinned tabs are not allowed to be discarded
       let bdiscarded;
       if (ti.pinned === true) {
@@ -157,7 +159,7 @@ async function openBackup(data) {
         await browser.sessions.setTabValue(tab.id, 'groupId', parseInt(ti.groupId, 10));
         // await browser.tabs.discard(tab.id);
       }
-    });
+    }));
 
     if ((await currentOptions).view === 'freeform') {
       // Show freeform view
@@ -177,8 +179,13 @@ async function openBackup(data) {
         await browser.tabs.remove(activeNewTabs[0].id);
       }
     }
+  }));
+
+  await browser.runtime.sendMessage({
+    action: 'setBackgroundState',
+    key: 'openingBackup',
+    value: false,
   });
-  background.backgroundState.openingBackup = false;
 }
 
 export function loadBackup(input) {
@@ -244,7 +251,8 @@ export async function saveBackup() {
 
   const windows = await browser.windows.getAll({});
 
-  windows.forEach(async (wi, index) => {
+  // Use Promise.all to wait for all window processing to complete
+  await Promise.all(windows.map(async (wi, index) => {
     const groups = await browser.sessions.getWindowValue(wi.id, 'groups');
     const groupIndex = await browser.sessions.getWindowValue(wi.id, 'groupIndex');
     const activeGroup = await browser.sessions.getWindowValue(wi.id, 'activeGroup');
@@ -253,16 +261,20 @@ export async function saveBackup() {
       groups: [], tabs: [], activeGroup, groupIndex,
     };
 
-    groups.forEach((gi) => {
-      data.windows[index].groups.push({
-        id: gi.id,
-        name: gi.name,
-        rect: gi.rect,
+    if (groups) {
+      groups.forEach((gi) => {
+        data.windows[index].groups.push({
+          id: gi.id,
+          name: gi.name,
+          rect: gi.rect,
+        });
       });
-    });
+    }
 
     const tabs = await browser.tabs.query({ windowId: wi.id });
-    tabs.forEach(async (tab) => {
+
+    // Use Promise.all to wait for all tab processing to complete
+    await Promise.all(tabs.map(async (tab) => {
       const groupId = await browser.sessions.getTabValue(tab.id, 'groupId');
 
       if (groupId !== -1) {
@@ -275,8 +287,8 @@ export async function saveBackup() {
           pinned: tab.pinned,
         });
       }
-    });
-  });
+    }));
+  }));
 
   const blob = new Blob([JSON.stringify(data, null, '\t')], { type: 'application/json' });
   const dataUrl = window.URL.createObjectURL(blob);

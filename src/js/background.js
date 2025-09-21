@@ -16,9 +16,19 @@ function mod(x, n) {
   return (((x % n) + n) % n);
 }
 
-function addRefreshMenuItem() {
-  browser.menus.remove('refresh-groups');
-  browser.menus.remove('refresh-spacer');
+async function addRefreshMenuItem() {
+  // Safely remove existing menu items (ignore errors if they don't exist)
+  try {
+    await browser.menus.remove('refresh-groups');
+  } catch (error) {
+    // Ignore error if menu item doesn't exist
+  }
+  try {
+    await browser.menus.remove('refresh-spacer');
+  } catch (error) {
+    // Ignore error if menu item doesn't exist
+  }
+
   browser.menus.create({
     id: 'refresh-spacer',
     type: 'separator',
@@ -34,46 +44,50 @@ function addRefreshMenuItem() {
 }
 
 async function createMenuList() {
-  const windowId = (await browser.windows.getCurrent()).id;
-  const groups = (await browser.sessions.getWindowValue(windowId, 'groups'));
   browser.menus.removeAll();
 
-  browser.menus.create({
-    id: 'send-tab',
-    title: browser.i18n.getMessage('sendTab'),
-    contexts: ['tab'],
-  });
+  // new menu for each group
+  // for groups that have no tabs, make a disabled menu item
 
-  // throws silent error if groups is undefined
+  // Get current window and its groups
+  const currentWindow = await browser.windows.getCurrent();
+  const groups = await browser.sessions.getWindowValue(currentWindow.id, 'groups');
+
+  // Check if groups is initialized before proceeding
+  if (!groups || !Array.isArray(groups)) {
+    console.log('Groups not yet initialized, skipping menu creation');
+    return;
+  }
+
   groups.forEach((group) => {
     browser.menus.create({
-      id: group.id.toString(),
+      id: String(group.id),
       title: `${group.id}: ${group.name}`,
       parentId: 'send-tab',
       contexts: ['tab'],
     });
   });
-  addRefreshMenuItem();
+  await addRefreshMenuItem();
 }
 
 createMenuList();
 
-function changeMenu(message) {
+async function changeMenu(message) {
   switch (message.action) {
     case 'createMenuItem':
       browser.menus.create({
-        id: message.groupId,
+        id: String(message.groupId),
         title: `${message.groupId}: ${message.groupName}`,
         parentId: 'send-tab',
         contexts: ['tab'],
       });
-      addRefreshMenuItem(); // move refresh menu to end
+      await addRefreshMenuItem(); // move refresh menu to end
       break;
     case 'removeMenuItem':
-      browser.menus.remove(message.groupId);
+      browser.menus.remove(String(message.groupId));
       break;
     case 'updateMenuItem':
-      browser.menus.update(message.groupId, { title: `${message.groupId}: ${message.groupName}` });
+      browser.menus.update(String(message.groupId), { title: `${message.groupId}: ${message.groupName}` });
       break;
     default:
       break;
@@ -368,9 +382,9 @@ async function createGroupInWindowIfMissing(browserWindow) {
 async function setupWindows() {
   const windows = await browser.windows.getAll({});
 
-  windows.forEach(async (window) => {
+  await Promise.all(windows.map(async (window) => {
     await createGroupInWindowIfMissing(window);
-  });
+  }));
 }
 
 /** Put any tabs that do not have a group into the active group */
@@ -379,19 +393,26 @@ async function salvageGrouplessTabs() {
   const windows = {};
   const tWindows = await browser.windows.getAll({});
 
-  tWindows.forEach(async (window) => {
+  // Use Promise.all to ensure all async operations complete
+  await Promise.all(tWindows.map(async (window) => {
     windows[window.id] = { groups: null };
     windows[window.id].groups = await browser.sessions.getWindowValue(window.id, 'groups');
-  });
+  }));
 
   // check all tabs
   const tabs = await browser.tabs.query({});
 
-  tabs.forEach(async (tab) => {
+  await Promise.all(tabs.map(async (tab) => {
     const groupId = await browser.sessions.getTabValue(tab.id, 'groupId');
 
+    // Check if windows[tab.windowId] and its groups exist
+    if (!windows[tab.windowId] || !windows[tab.windowId].groups) {
+      console.log(`No groups found for window ${tab.windowId}, skipping tab ${tab.id}`);
+      return;
+    }
+
     let groupExists = false;
-    (windows[tab.windowId].groups).forEach((group) => {
+    windows[tab.windowId].groups.forEach((group) => {
       if (group.id === groupId) {
         groupExists = true;
       }
@@ -401,7 +422,7 @@ async function salvageGrouplessTabs() {
       const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
       await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
     }
-  });
+  }));
 }
 
 async function init() {

@@ -61,21 +61,30 @@ function attachEventHandler(options, loadedShortcuts) {
       return;
     }
 
-    shortcutNode.querySelector('input').value = shortcut.shortcut;
-    shortcutNode
-      .querySelector('.updateShortcut')
-      .addEventListener('click', updateShortcut);
-    shortcutNode
-      .querySelector('.resetShortcut')
-      .addEventListener('click', resetShortcut);
-    shortcutNode
-      .querySelector('.enableShortcut')
-      .addEventListener('click', enableShortcut.bind(this, options));
+    const inputElement = shortcutNode.querySelector('input');
+    const updateButton = shortcutNode.querySelector('.updateShortcut');
+    const resetButton = shortcutNode.querySelector('.resetShortcut');
+    const enableButton = shortcutNode.querySelector('.enableShortcut');
+    const disableButton = shortcutNode.querySelector('.disableShortcut');
 
-    if (Object.prototype.hasOwnProperty.call(shortcut, 'name')) {
-      shortcutNode
-        .querySelector('.disableShortcut')
-        .addEventListener('click', disableShortcut.bind(this, options));
+    if (inputElement) {
+      inputElement.value = shortcut.shortcut;
+    }
+
+    if (updateButton) {
+      updateButton.addEventListener('click', updateShortcut);
+    }
+
+    if (resetButton) {
+      resetButton.addEventListener('click', resetShortcut);
+    }
+
+    if (enableButton) {
+      enableButton.addEventListener('click', enableShortcut.bind(this, options));
+    }
+
+    if (Object.prototype.hasOwnProperty.call(shortcut, 'name') && disableButton) {
+      disableButton.addEventListener('click', disableShortcut.bind(this, options));
     }
   });
 
