@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<link rel="stylesheet" type="text/css" href="css/options.css">
+		<link rel="stylesheet" type="text/css" href="css/browser-style.css">
 		<script type="module" src="js/options/index.js"></script>
 	</head>
 	<body>
@@ -15,8 +16,8 @@
 				<em>Users can also update shortcuts via the "Manage Extension Shortcuts" option at about:addons in Firefox as seen <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Updating_shortcuts">in the example video</a>.</em>
 			</p>
 			<div class="keyboardShortcuts">
-				<form id="_execute_browser_action" class="browser-style">
-					<label for="_execute_browser_action">Toggle Panorama View</label>
+				<form id="_execute_action" class="browser-style">
+					<label for="_execute_action">Toggle Panorama View</label>
 					<input type="text">
 					<button class="updateShortcut" class="browser-style">Update</button>
 					<button class="resetShortcut" class="browser-style">Reset</button>
@@ -52,14 +53,14 @@
 					<div class="input-radio-image input-radio-image--extended">
 						<input type="radio" id="viewFreeform" name="view" value="freeform" />
 						<label for="viewFreeform">
-							<img src="/icons/options/view-freeform.svg" height="40" alt="" />
+							<img src="/icons/options/view-freeform.svg" alt="" />
 							<span>Freeform (classic)</span>
 						</label>
 					</div>
 					<div class="input-radio-image input-radio-image--extended">
 						<input type="radio" id="viewPopup" name="view" value="popup" />
 						<label for="viewPopup">
-							<img src="/icons/options/view-popup.svg" height="40" alt="" />
+							<img src="/icons/options/view-popup.svg" alt="" />
 							<span>Popup</span>
 						</label>
 					</div>
@@ -105,17 +106,24 @@
 			<h2>Theme</h2>
 			<form class="browser-style" name="formTheme">
 				<div class="input-radio-image">
+				  <input type="radio" id="themeAuto" name="theme" value="auto"/>
+				  <label for="themeAuto">
+						<img src="/icons/options/theme-auto.png" alt="" />
+						<span>Follow System</span>
+					</label>
+				</div>
+				<div class="input-radio-image">
 				  <input type="radio" id="themeLight" name="theme" value="light"/>
 				  <label for="themeLight">
 						<img src="/icons/options/theme-light.png" alt="" />
-						<span>light</span>
+						<span>Light</span>
 					</label>
 				</div>
 				<div class="input-radio-image">
 				  <input type="radio" id="themeDark" name="theme" value="dark"/>
 				  <label for="themeDark">
 						<img src="/icons/options/theme-dark.png" alt="" />
-						<span>dark</span>
+						<span>Dark</span>
 					</label>
 				</div>
 			</form>

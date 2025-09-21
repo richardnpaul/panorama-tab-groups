@@ -33,9 +33,18 @@ function restoreOptions(options, loadedShortcuts) {
   showViewSpecificOptions(options.view);
 
   // Theme
-  document.querySelector(
+  const themeElement = document.querySelector(
     `input[name="theme"][value="${options.theme}"]`,
-  ).checked = true;
+  );
+  if (themeElement) {
+    themeElement.checked = true;
+  } else {
+    // Fallback to 'auto' if the stored theme value doesn't exist
+    const autoElement = document.querySelector('input[name="theme"][value="auto"]');
+    if (autoElement) {
+      autoElement.checked = true;
+    }
+  }
 
   // Toolbar
   document.querySelector(

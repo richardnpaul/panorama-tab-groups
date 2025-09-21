@@ -1,74 +1,76 @@
 {
-    "manifest_version": 2,
-    "name": "Panorama Tab Groups",
-    "description": "Tab Groups with Panorama View",
-    "version": "0.8.12",
-    "default_locale": "en",
-    "applications": {
-        "gecko": {
-            "id": "panorama-tab-groups@example.com"
-        }
+  "manifest_version": 3,
+  "name": "Panorama Tab Groups",
+  "description": "Tab Groups with Panorama View",
+  "version": "0.8.12",
+  "default_locale": "en",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "panorama-tab-groups@example.com"
+    }
+  },
+  "icons": {
+    "16": "icons/logo/logo-16.png",
+    "24": "icons/logo/logo-24.png",
+    "32": "icons/logo/logo-32.png",
+    "48": "icons/logo/logo-48.png",
+    "64": "icons/logo/logo-64.png",
+    "96": "icons/logo/logo-96.png"
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F"
+      },
+      "description": "Toggle Panorama View"
     },
-    "icons": {
-        "16": "icons/logo/logo-16.png",
-        "24": "icons/logo/logo-24.png",
-        "32": "icons/logo/logo-32.png",
-        "48": "icons/logo/logo-48.png",
-        "64": "icons/logo/logo-64.png",
-        "96": "icons/logo/logo-96.png"
+    "activate-next-group": {
+      "suggested_key": {
+        "default": "Alt+W"
+      },
+      "description": "Switch to the next Tab Group"
     },
-    "commands": {
-        "_execute_browser_action": {
-            "suggested_key": {
-                "default": "Ctrl+Shift+F"
-            },
-            "description": "Toggle Panorama View"
-        },
-        "activate-next-group": {
-            "suggested_key": {
-                "default": "Alt+W"
-            },
-            "description": "Switch to the next Tab Group"
-        },
-        "activate-previous-group": {
-            "suggested_key": {
-                "default": "Alt+Shift+W"
-            },
-            "description": "Switch to the previous Tab Group"
-        }
-    },
+    "activate-previous-group": {
+      "suggested_key": {
+        "default": "Alt+Shift+W"
+      },
+      "description": "Switch to the previous Tab Group"
+    }
+  },
 
-    "background": {
-        "page": "background.html"
-    },
+  "background": {
+    "scripts": ["js/background.js"],
+    "type": "module"
+  },
 
-    "browser_action": {
-        "browser_style": true,
-        "default_icon": "icons/icon.svg",
-        "theme_icons": [{
-            "light": "icons/icon_light.svg",
-            "dark": "icons/icon.svg",
-            "size": 16
-        }, {
+  "action": {
+    "default_icon": "icons/icon.svg",
+    "theme_icons": [
+      {
+        "light": "icons/icon_light.svg",
+        "dark": "icons/icon.svg",
+        "size": 16
+      },
+      {
         "light": "icons/icon_light.svg",
         "dark": "icons/icon.svg",
         "size": 32
-        }],
-        "default_popup": "popup-view/index.html"
-    },
+      }
+    ],
+    "default_popup": "popup-view/index.html"
+  },
 
-    "options_ui": {
-        "browser_style": true,
-        "page": "options.html"
-    },
+  "options_ui": {
+    "page": "options.html"
+  },
 
-    "permissions": [
-        "<all_urls>",
-        "tabs",
-        "tabHide",
-        "storage",
-        "sessions",
-        "downloads",
-        "menus"
-    ]
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "tabHide",
+    "storage",
+    "sessions",
+    "downloads",
+    "menus"
+  ]
 }

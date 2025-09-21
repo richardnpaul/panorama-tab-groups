@@ -14,12 +14,12 @@ export const defaultOptions = (() => {
 
   if (majorVersion >= 1) {
     options = Object.assign(options, {
-      theme: 'dark',
+      theme: 'auto',
       view: 'popup',
     });
   } else {
     options = Object.assign(options, {
-      theme: 'light',
+      theme: 'auto',
       view: 'freeform',
     });
   }

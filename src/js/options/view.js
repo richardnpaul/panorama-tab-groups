@@ -21,8 +21,9 @@ export async function saveOptionView() {
     view: currentView,
   });
 
-  const background = browser.extension.getBackgroundPage();
-  background.refreshView();
+  await browser.runtime.sendMessage({
+    action: 'refreshView'
+  });
 
   showViewSpecificOptions(currentView);
 }

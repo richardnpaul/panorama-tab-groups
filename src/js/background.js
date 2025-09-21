@@ -96,9 +96,9 @@ async function setActionTitle(windowId, activeGroup = null) {
       name = group.name;
     }
   });
-  browser.browserAction.setTitle({ title: `Active Group: ${name}`, windowId });
-  browser.browserAction.setBadgeText({ text: String(groups.length), windowId });
-  browser.browserAction.setBadgeBackgroundColor({ color: '#666666' });
+  browser.action.setTitle({ title: `Active Group: ${name}`, windowId });
+  browser.action.setBadgeText({ text: String(groups.length), windowId });
+  browser.action.setBadgeBackgroundColor({ color: '#666666' });
 }
 
 async function toggleVisibleTabs(activeGroup, noTabSelected) {
@@ -233,7 +233,7 @@ async function triggerCommand(command) {
 
 /** Open the Panorama View tab, or return to the last open tab if Panorama View is currently open */
 async function toggleView() {
-  const extTabs = await browser.tabs.query({ url: browser.extension.getURL('view.html'), currentWindow: true });
+  const extTabs = await browser.tabs.query({ url: browser.runtime.getURL('view.html'), currentWindow: true });
   if (extTabs.length > 0) {
     const currentTab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
     // switch to last accessed tab in window
@@ -360,9 +360,9 @@ async function createGroupInWindowIfMissing(browserWindow) {
     console.log(`No groups found for window ${browserWindow.id}!`);
     await createGroupInWindow(browserWindow);
   }
-  browser.browserAction.setTitle({ title: 'Active Group: Unnamed group', windowId: browserWindow.id });
-  browser.browserAction.setBadgeText({ text: '1', windowId: browserWindow.id });
-  browser.browserAction.setBadgeBackgroundColor({ color: '#666666' });
+  browser.action.setTitle({ title: 'Active Group: Unnamed group', windowId: browserWindow.id });
+  browser.action.setBadgeText({ text: '1', windowId: browserWindow.id });
+  browser.action.setBadgeBackgroundColor({ color: '#666666' });
 }
 /** Make sure each window has a group */
 async function setupWindows() {
@@ -417,11 +417,11 @@ async function init() {
   const disablePopupView = options.view !== 'popup';
   if (disablePopupView) {
     // Disable popup
-    browser.browserAction.setPopup({
+    browser.action.setPopup({
       popup: '',
     });
 
-    browser.browserAction.onClicked.addListener(toggleView);
+    browser.action.onClicked.addListener(toggleView);
   }
 
   browser.commands.onCommand.addListener(triggerCommand);
@@ -440,7 +440,7 @@ window.refreshView = async function refreshView() {
   console.log('Refresh Panorama Tab View');
   window.viewRefreshOrdered = true;
 
-  browser.browserAction.onClicked.removeListener(toggleView);
+  browser.action.onClicked.removeListener(toggleView);
   browser.commands.onCommand.removeListener(triggerCommand);
   browser.windows.onCreated.removeListener(createGroupInWindowIfMissing);
   browser.tabs.onCreated.removeListener(tabCreated);
@@ -451,14 +451,14 @@ window.refreshView = async function refreshView() {
   const disablePopupView = options.view !== 'popup';
   if (disablePopupView) {
     // Disable popup
-    browser.browserAction.setPopup({
+    browser.action.setPopup({
       popup: '',
     });
 
-    browser.browserAction.onClicked.addListener(toggleView);
+    browser.action.onClicked.addListener(toggleView);
   } else {
     // Re-enable popup
-    browser.browserAction.setPopup({
+    browser.action.setPopup({
       popup: 'popup-view/index.html',
     });
   }
@@ -480,6 +480,25 @@ function handleMessage(message, sender) { // eslint-disable-line no-unused-vars
   }
 }
 
+// Handle internal extension messages
+function handleInternalMessage(message, sender, sendResponse) {
+  switch (message.action) {
+    case 'setBackgroundState':
+      window.backgroundState[message.key] = message.value;
+      break;
+    case 'refreshView':
+      refreshView();
+      break;
+    case 'checkViewRefresh':
+      sendResponse({ viewRefreshOrdered: window.viewRefreshOrdered });
+      break;
+    case 'clearViewRefresh':
+      window.viewRefreshOrdered = false;
+      break;
+  }
+}
+
+browser.runtime.onMessage.addListener(handleInternalMessage);
 browser.runtime.onMessageExternal.addListener(handleMessage);
 
 /*

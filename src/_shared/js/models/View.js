@@ -2,14 +2,22 @@ import { loadOptions } from '../../../js/_share/options.js';
 import Group from './Group.js';
 import Tab from './Tab.js';
 
-function updateViewSetting(prefix, value) {
-  const { classList } = document.getElementsByTagName('body')[0];
-  for (const classObject of classList) {
-    if (classObject.startsWith(`${prefix}-`)) {
-      classList.remove(classObject);
-    }
+function getEffectiveTheme(themePreference) {
+  if (themePreference === 'auto') {
+    // Detect system theme preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
-  classList.add(`${prefix}-${value}`);
+  return themePreference;
+}
+
+function updateViewSetting(prefix, value) {
+  const effectiveValue = prefix === 'theme' ? getEffectiveTheme(value) : value;
+  const { classList } = document.getElementsByTagName('body')[0];
+  const classesToRemove = Array.from(classList).filter((classObject) => classObject.startsWith(`${prefix}-`));
+  classesToRemove.forEach((classObject) => {
+    classList.remove(classObject);
+  });
+  classList.add(`${prefix}-${effectiveValue}`);
 }
 
 export default class View {
@@ -179,5 +187,16 @@ export default class View {
 
   static setTheme(theme) {
     updateViewSetting('theme', theme);
+
+    // Listen for system theme changes when auto theme is selected
+    if (theme === 'auto') {
+      const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleSystemThemeChange = () => {
+        updateViewSetting('theme', 'auto');
+      };
+      // Remove any existing listener first
+      systemThemeMedia.removeListener(handleSystemThemeChange);
+      systemThemeMedia.addListener(handleSystemThemeChange);
+    }
   }
 }

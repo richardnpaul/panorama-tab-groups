@@ -377,12 +377,16 @@ async function initView() {
     createGroup(event.clientX, event.clientY);
   }, false);
 
-  document.addEventListener('visibilitychange', () => {
+  document.addEventListener('visibilitychange', async () => {
     if (!document.hidden) {
-      const background = browser.extension.getBackgroundPage();
+      const response = await browser.runtime.sendMessage({
+        action: 'checkViewRefresh'
+      });
 
-      if (pendingReload || background.viewRefreshOrdered) {
-        background.viewRefreshOrdered = false;
+      if (pendingReload || response.viewRefreshOrdered) {
+        await browser.runtime.sendMessage({
+          action: 'clearViewRefresh'
+        });
         window.location.reload();
       }
 
@@ -423,16 +427,24 @@ async function initView() {
 
 function replaceClass(prefix, value) {
   const { classList } = document.getElementsByTagName('body')[0];
-  classList.forEach((classObject) => {
-    if (classObject.startsWith(`${prefix}-`)) {
-      classList.remove(classObject);
-    }
+  const classesToRemove = Array.from(classList).filter((classObject) => classObject.startsWith(`${prefix}-`));
+  classesToRemove.forEach((classObject) => {
+    classList.remove(classObject);
   });
   classList.add(`${prefix}-${value}`);
 }
 
+function getEffectiveTheme(themePreference) {
+  if (themePreference === 'auto') {
+    // Detect system theme preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return themePreference;
+}
+
 function setTheme(theme) {
-  replaceClass('theme', theme);
+  const effectiveTheme = getEffectiveTheme(theme);
+  replaceClass('theme', effectiveTheme);
 }
 
 function setToolbarPosition(position) {
@@ -442,7 +454,7 @@ function setToolbarPosition(position) {
 // Load settings
 browser.storage.sync.get({
   useDarkTheme: false,
-  theme: 'light',
+  theme: 'auto',
   toolbarPosition: 'top',
 }).then((options) => {
   /*
@@ -459,10 +471,27 @@ browser.storage.sync.get({
   setTheme(options.theme);
   setToolbarPosition(options.toolbarPosition);
 
+  // Listen for system theme changes when auto theme is selected
+  const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+  const handleSystemThemeChange = () => {
+    if (options.theme === 'auto') {
+      setTheme('auto');
+    }
+  };
+  systemThemeMedia.addListener(handleSystemThemeChange);
+
   browser.storage.onChanged.addListener((changes, area) => {
     if (area === 'sync') {
       if (changes.theme) {
+        options.theme = changes.theme.newValue;
         setTheme(changes.theme.newValue);
+
+        // Update system theme listener
+        if (changes.theme.newValue === 'auto') {
+          systemThemeMedia.addListener(handleSystemThemeChange);
+        } else {
+          systemThemeMedia.removeListener(handleSystemThemeChange);
+        }
       }
       if (changes.toolbarPosition) {
         setToolbarPosition(changes.toolbarPosition.newValue);

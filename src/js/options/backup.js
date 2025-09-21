@@ -81,9 +81,11 @@ function getGroupIdsFromTabs(window) {
 }
 
 async function openBackup(data) {
-  const background = browser.extension.getBackgroundPage();
-
-  background.backgroundState.openingBackup = true;
+  await browser.runtime.sendMessage({
+    action: 'setBackgroundState',
+    key: 'openingBackup',
+    value: true
+  });
 
   data.windows.forEach(async (wi) => {
     const groups = [];

@@ -21,9 +21,30 @@ h2 {
 
 .input-radio-image {
   display: inline-block;
-  margin-right: 10px;
+  padding-right: 10px;
   position: relative;
   text-align: center;
+  height: 40px;
+  width: 40px;
+}
+
+.input-radio-image label {
+  height: 60px;
+}
+
+
+.input-radio-image label::before,
+.input-radio-image label img {
+  width: 40px;
+  height: 40px;
+}
+
+#optionsView .input-radio-image,
+#optionsView .input-radio-image label,
+#optionsView .input-radio-image label::before,
+#optionsView .input-radio-image label img,
+#optionsView .input-radio-image input {
+  width: 76px;
 }
 
 .input-radio-image input {
@@ -41,32 +62,28 @@ h2 {
 .input-radio-image input:checked ~ label:before {
   content: "";
   border: 2px solid #0a84ff;
-  width: 36px;
-  height: 36px;
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .input-radio-image--extended img {
-  margin-bottom: 2px;
+  padding-bottom: 2px;
 }
 
 .input-radio-image--extended input ~ label:before {
   content: "";
   outline: 2px solid #737373;
-  width: 75px;
-  height: 40px;
   position: absolute;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 .input-radio-image--extended input:checked ~ label:before {
   border: none;
   outline-color: #0a84ff;
-  width: 75px;
-  height: 40px;
 }
+
+/* Simple styling for theme options text */
+/* #optionsTheme .input-radio-image label span {
+  font-size: 13px;
+  white-space: nowrap;
+} */
