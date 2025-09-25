@@ -8,21 +8,17 @@ import GroupsFrame from './js/GroupsFrame.js';
  * - async more things
  */
 
-new (class PopupView extends View {
-  constructor() {
-    super();
-    return (async () => {
-      await this.initializeView();
-      window.PopupView = this; // TODO: Any smarter way?
-
-      this.setTheme(this.options.theme);
-      GroupsFrame.render();
-
-      return this;
-    })();
+(async () => {
+  class PopupView extends View {
+    static close() {
+      window.close();
+    }
   }
 
-  close() {
-    window.close();
-  }
+  const popupView = new PopupView();
+  await popupView.initializeView();
+  window.PopupView = popupView; // TODO: Any smarter way?
+
+  popupView.setTheme(popupView.options.theme);
+  GroupsFrame.render();
 })();

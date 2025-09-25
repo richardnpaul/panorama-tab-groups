@@ -84,7 +84,7 @@ async function openBackup(data) {
   await browser.runtime.sendMessage({
     action: 'setBackgroundState',
     key: 'openingBackup',
-    value: true
+    value: true,
   });
 
   // Use Promise.all to wait for all windows to be processed

@@ -455,7 +455,7 @@ async function init() {
 
 init();
 
-window.refreshView = async function refreshView() {
+async function refreshView() {
   const options = await loadOptions();
 
   console.log('Refresh Panorama Tab View');
@@ -490,7 +490,7 @@ window.refreshView = async function refreshView() {
   browser.tabs.onAttached.addListener(tabAttached);
   browser.tabs.onDetached.addListener(tabDetached);
   browser.tabs.onActivated.addListener(tabActivated);
-};
+}
 
 // TODO: Remove? Is this used?
 function handleMessage(message, sender) { // eslint-disable-line no-unused-vars
@@ -503,6 +503,7 @@ function handleMessage(message, sender) { // eslint-disable-line no-unused-vars
 
 // Handle internal extension messages
 function handleInternalMessage(message, sender, sendResponse) {
+  // eslint-disable-next-line default-case
   switch (message.action) {
     case 'setBackgroundState':
       window.backgroundState[message.key] = message.value;
@@ -530,7 +531,7 @@ function onRuntimeInstallNotification(details) {
   // Open new tab to the release notes after update
   if (details.reason === 'update') {
     browser.tabs.create({
-      url: `https://github.com/projectdelphai/panorama-tab-groups/releases/tag/${manifest.version}`,
+      url: `https://github.com/richardnpaul/panorama-tab-groups/releases/tag/${manifest.version}`,
     });
   }
 }

@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "Panorama Tab Groups",
-  "description": "Tab Groups with Panorama View",
-  "version": "0.8.12",
+  "name": "Tab Groups Viewer",
+  "description": "Tab Groups Viewer",
+  "version": "0.9.0",
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
-      "id": "panorama-tab-groups@example.com"
+      "id": "@tab-groups-viewer"
     }
   },
   "icons": {
@@ -22,7 +22,7 @@
       "suggested_key": {
         "default": "Ctrl+Shift+F"
       },
-      "description": "Toggle Panorama View"
+      "description": "Toggle Tab Groups Viewer"
     },
     "activate-next-group": {
       "suggested_key": {

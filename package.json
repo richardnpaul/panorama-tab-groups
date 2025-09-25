@@ -1,7 +1,7 @@
 {
   "name": "panorama-tab-groups",
   "version": "0.9.0",
-  "description": "Tab Groups with Panorama View",
+  "description": "Panorama Tab Groups",
   "main": "index.js",
   "scripts": {
     "test": "npm-run-all test:*",
@@ -35,6 +35,6 @@
     "web-ext": "^7.11.0"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=20.0.0"
   }
 }

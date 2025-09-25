@@ -23,11 +23,8 @@
   const EventListener = 'EventListener';
   const addEventListener = `add${EventListener}`;
   const removeEventListener = `remove${EventListener}`;
-  let newScrollX; let
-    newScrollY;
-
   let dragged = [];
-  const reset = function f(i, el) {
+  const reset = function resetFn(i, el) {
     for (i = 0; i < dragged.length;) {
       el = dragged[i++];
       el = el.container || el;
@@ -39,42 +36,48 @@
     // cloning into array since HTMLCollection is updated dynamically
     dragged = [].slice.call(tDocument.getElementsByClassName('dragscroll'));
     for (i = 0; i < dragged.length;) {
-      (function f(el, lastClientX, lastClientY, pushed, scroller, cont) {
-        (cont = el.container || el)[addEventListener](
+      (function dragHandler(element, lastClientX, lastClientY, pushed, scroller, cont) {
+        let localScrollX;
+        let localScrollY;
+
+        (cont = element.container || element)[addEventListener](
           mousedown,
-          cont.md = function f(e) {
-            if (!el.hasAttribute('nochilddrag')
-                            || tDocument.elementFromPoint(
-                              e.pageX, e.pageY,
-                            ) === cont
-            ) {
+          cont.md = function mouseDownHandler(e) {
+            if (!element.hasAttribute('nochilddrag')
+                || tDocument.elementFromPoint(e.pageX, e.pageY) === cont) {
               pushed = 1;
               lastClientX = e.clientX;
               lastClientY = e.clientY;
 
               e.preventDefault();
             }
-          }, 0,
+          },
+          0,
         );
 
         tWindow[addEventListener](
-          mouseup, cont.mu = function f() { pushed = 0; }, 0,
+          mouseup,
+          cont.mu = function mouseUpHandler() {
+            pushed = 0;
+          },
+          0,
         );
 
         tWindow[addEventListener](
           mousemove,
-          cont.mm = function f(e) {
+          cont.mm = function mouseMoveHandler(e) {
             if (pushed) {
-              (scroller = el.scroller || el).scrollLeft
-                                -= newScrollX = (-lastClientX + (lastClientX = e.clientX));
-              scroller.scrollTop
-                                -= newScrollY = (-lastClientY + (lastClientY = e.clientY));
-              if (el === tDocument.body) {
-                (scroller = tDocument.documentElement).scrollLeft -= newScrollX;
-                scroller.scrollTop -= newScrollY;
+              localScrollX = -lastClientX + (lastClientX = e.clientX);
+              (scroller = element.scroller || element).scrollLeft -= localScrollX;
+              localScrollY = -lastClientY + (lastClientY = e.clientY);
+              scroller.scrollTop -= localScrollY;
+              if (element === tDocument.body) {
+                (scroller = tDocument.documentElement).scrollLeft -= localScrollX;
+                scroller.scrollTop -= localScrollY;
               }
             }
-          }, 0,
+          },
+          0,
         );
       }(dragged[i++]));
     }
