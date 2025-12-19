@@ -1,7 +1,7 @@
 {
-  "name": "panorama-tab-groups",
+  "name": "tab-groups-viewer",
   "version": "0.9.0",
-  "description": "Tab Groups with Panorama View",
+  "description": "Tab Groups Viewer",
   "main": "index.js",
   "scripts": {
     "test": "npm-run-all test:*",

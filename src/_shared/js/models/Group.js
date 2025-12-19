@@ -1,12 +1,14 @@
 export default class Group {
   constructor(View, group) {
-    return (async () => {
-      Object.assign(this, group);
-      this.View = View;
-      this.status = group.status || 'default';
+    // Initialize synchronously
+    Object.assign(this, group);
+    this.View = View;
+    this.status = group.status || 'default';
+  }
 
-      return this;
-    })();
+  static async create(View, group) {
+    const instance = new Group(View, group);
+    return instance;
   }
 
   async setActive() {

@@ -22,7 +22,7 @@ export async function saveOptionView() {
   });
 
   await browser.runtime.sendMessage({
-    action: 'refreshView'
+    action: 'refreshView',
   });
 
   showViewSpecificOptions(currentView);

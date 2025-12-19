@@ -380,12 +380,12 @@ async function initView() {
   document.addEventListener('visibilitychange', async () => {
     if (!document.hidden) {
       const response = await browser.runtime.sendMessage({
-        action: 'checkViewRefresh'
+        action: 'checkViewRefresh',
       });
 
       if (pendingReload || response.viewRefreshOrdered) {
         await browser.runtime.sendMessage({
-          action: 'clearViewRefresh'
+          action: 'clearViewRefresh',
         });
         window.location.reload();
       }

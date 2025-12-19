@@ -65,8 +65,8 @@
   },
 
   "permissions": [
-    "<all_urls>",
     "tabs",
+    "tabGroups",
     "tabHide",
     "storage",
     "sessions",

@@ -115,6 +115,15 @@ async function setActionTitle(windowId, activeGroup = null) {
   browser.action.setBadgeBackgroundColor({ color: '#666666' });
 }
 
+/**
+ * Get a color for a group based on its ID
+ * Cycles through available colors
+ */
+function getColorForGroupId(groupId) {
+  const colors = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
+  return colors[groupId % colors.length];
+}
+
 async function toggleVisibleTabs(activeGroup, noTabSelected) {
   // Show and hide the appropriate tabs
   const tabs = await browser.tabs.query({ currentWindow: true });
@@ -155,6 +164,28 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
 async function moveTab(tabId, groupId) {
   const windowId = (await browser.windows.getCurrent()).id;
   await browser.sessions.setTabValue(tabId, 'groupId', parseInt(groupId, 10));
+
+  // Also move tab to native browser group if available (but only for visible tabs)
+  try {
+    const groups = await browser.sessions.getWindowValue(windowId, 'groups');
+    const targetGroup = groups.find((g) => g.id === parseInt(groupId, 10));
+    const activeGroup = await browser.sessions.getWindowValue(windowId, 'activeGroup');
+
+    // Only assign to native group if this is the currently active group
+    // This prevents conflicts with hidden tabs
+    if (targetGroup && targetGroup.nativeGroupId && parseInt(groupId, 10) === activeGroup) {
+      await browser.tabs.group({
+        tabIds: [tabId],
+        groupId: targetGroup.nativeGroupId,
+      });
+    } else if (targetGroup && targetGroup.nativeGroupId) {
+      // For inactive groups, remove from native groups to avoid confusion
+      await browser.tabs.ungroup([tabId]);
+    }
+  } catch (error) {
+    // Native tabGroups might not be available
+    console.warn('Could not assign tab to native group:', error);
+  }
 
   const toIndex = -1;
   await browser.tabs.move(tabId, { index: toIndex });
@@ -284,6 +315,29 @@ async function tabCreated(tab) {
       const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
 
       await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
+
+      // Only assign to native browser group if this is the active group
+      // This prevents tabs from disappearing from panorama view
+      try {
+        const groups = await browser.sessions.getWindowValue(tab.windowId, 'groups');
+        const currentGroup = groups.find((g) => g.id === activeGroup);
+
+        // Only assign to native group for the currently active/visible group
+        if (currentGroup && currentGroup.nativeGroupId) {
+          // Check if this group is currently active (visible)
+          const currentActiveGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
+          if (activeGroup === currentActiveGroup) {
+            await browser.tabs.group({
+              tabIds: [tab.id],
+              groupId: currentGroup.nativeGroupId,
+            });
+          }
+          // For inactive groups, don't assign to native groups to prevent conflicts
+        }
+      } catch (error) {
+        // Native tabGroups might not be available
+        console.warn('Could not assign new tab to native group:', error);
+      }
     }
   } else {
     // Opening the Panorama View tab
@@ -349,10 +403,25 @@ async function createGroupInWindow(browserWindow) {
 
   const groupId = await newGroupUid(browserWindow.id);
 
+  // Create native browser tab group
+  let nativeGroupId = null;
+  try {
+    const nativeGroup = await browser.tabGroups.create({
+      title: `${groupId}: ${browser.i18n.getMessage('defaultGroupName')}`,
+      color: 'grey',
+      windowId: browserWindow.id,
+    });
+    nativeGroupId = nativeGroup.id;
+  } catch (error) {
+    // TabGroups API might not be available in all browsers
+    console.warn('Native tabGroups API not available:', error);
+  }
+
   const groups = [{
     id: groupId,
     name: `${groupId}: ${browser.i18n.getMessage('defaultGroupName')}`,
     containerId: 'firefox-default',
+    nativeGroupId, // Store reference to native group
     rect: {
       x: 0, y: 0, w: 0.5, h: 0.5,
     },
@@ -425,6 +494,160 @@ async function salvageGrouplessTabs() {
   }));
 }
 
+/**
+ * Migration Utility: Convert existing groups to hybrid system with native tab groups
+ * This ensures existing users' groups get native tab group counterparts
+ */
+async function migrateToHybridGroups() {
+  try {
+    console.log('Starting migration to hybrid tab groups...');
+
+    // Check if migration has already been done
+    const migrationComplete = await browser.storage.local.get('hybridGroupsMigrationComplete');
+    if (migrationComplete.hybridGroupsMigrationComplete) {
+      console.log('Migration already completed, skipping...');
+      return;
+    }
+
+    const windows = await browser.windows.getAll({});
+
+    await Promise.all(windows.map(async (window) => {
+      const groups = await browser.sessions.getWindowValue(window.id, 'groups');
+
+      if (!groups || !Array.isArray(groups) || groups.length === 0) {
+        console.log(`No groups to migrate for window ${window.id}`);
+        return;
+      }
+
+      console.log(`Migrating ${groups.length} groups for window ${window.id}`);
+
+      const updatedGroups = await Promise.all(groups.map(async (group) => {
+        // Skip if already has a native group ID
+        if (group.nativeGroupId !== undefined && group.nativeGroupId !== null) {
+          console.log(`Group ${group.id} already has native group ${group.nativeGroupId}`);
+          return group;
+        }
+
+        try {
+          // Get all tabs for this group
+          const tabs = await browser.tabs.query({ windowId: window.id });
+
+          const groupTabIds = await Promise.all(tabs.map(async (tab) => {
+            const tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+            if (tabGroupId === group.id) {
+              return tab.id;
+            }
+            return null;
+          }));
+
+          const validTabIds = groupTabIds.filter((id) => id !== null);
+
+          if (validTabIds.length === 0) {
+            console.log(`Group ${group.id} has no tabs, skipping native group creation`);
+            return group;
+          }
+
+          // Check if this is the active group
+          const activeGroup = await browser.sessions.getWindowValue(window.id, 'activeGroup');
+
+          // Only create native groups for the active group
+          // Inactive groups will get native groups created when they become active
+          if (group.id === activeGroup) {
+            // Create native browser group by grouping tabs
+            const groupId = await browser.tabs.group({
+              tabIds: validTabIds,
+            });
+
+            console.log(`Created native group ${groupId} for active panorama group ${group.id} with ${validTabIds.length} tabs`);
+
+            // Update the native group with title and color
+            await browser.tabGroups.update(groupId, {
+              title: group.name || `Group ${group.id}`,
+              color: getColorForGroupId(group.id),
+            });
+
+            // Update group with native ID reference
+            return {
+              ...group,
+              nativeGroupId: groupId,
+            };
+          }
+
+          // For inactive groups, just mark as migrated without native group
+          // The native group will be created when the group becomes active
+          console.log(`Group ${group.id} is inactive, will create native group when activated`);
+          return group;
+        } catch (error) {
+          console.warn(`Failed to create native group for group ${group.id}:`, error);
+          // Keep the group without native ID if creation fails
+          return group;
+        }
+      }));
+
+      // Save updated groups back to session storage
+      await browser.sessions.setWindowValue(window.id, 'groups', updatedGroups);
+      console.log(`Migration complete for window ${window.id}`);
+    }));
+
+    // Mark migration as complete
+    await browser.storage.local.set({ hybridGroupsMigrationComplete: true });
+    console.log('Hybrid groups migration completed successfully!');
+  } catch (error) {
+    console.error('Migration to hybrid groups failed:', error);
+    // Don't mark as complete so it can retry on next startup
+  }
+}
+
+// Setup native browser tab group event listeners for hybrid functionality
+function setupTabGroupListeners() {
+  try {
+    // When user creates group through browser UI
+    browser.tabGroups.onCreated.addListener(async (group) => {
+      console.log('Native tab group created:', group);
+      // We could potentially sync this with our session storage if needed
+    });
+
+    // When user removes group through browser UI
+    browser.tabGroups.onRemoved.addListener(async (group) => {
+      console.log('Native tab group removed:', group);
+      // Handle cleanup if our session storage references this group
+      try {
+        const groups = await browser.sessions.getWindowValue(group.windowId, 'groups');
+        if (groups) {
+          const updatedGroups = groups.filter((g) => g.nativeGroupId !== group.id);
+          await browser.sessions.setWindowValue(group.windowId, 'groups', updatedGroups);
+        }
+      } catch (error) {
+        console.warn('Error syncing removed native group:', error);
+      }
+    });
+
+    // When user updates group through browser UI (name, color, etc.)
+    browser.tabGroups.onUpdated.addListener(async (group) => {
+      console.log('Native tab group updated:', group);
+      // Sync name changes back to our session storage
+      try {
+        const groups = await browser.sessions.getWindowValue(group.windowId, 'groups');
+        if (groups) {
+          const updatedGroups = groups.map((g) => {
+            if (g.nativeGroupId === group.id) {
+              return { ...g, name: group.title };
+            }
+            return g;
+          });
+          await browser.sessions.setWindowValue(group.windowId, 'groups', updatedGroups);
+        }
+      } catch (error) {
+        console.warn('Error syncing updated native group:', error);
+      }
+    });
+
+    console.log('Native tab group listeners setup successfully');
+  } catch (error) {
+    console.warn('Native tabGroups API not available:', error);
+  }
+}
+
 async function init() {
   const options = await loadOptions();
 
@@ -432,6 +655,9 @@ async function init() {
 
   await setupWindows();
   await salvageGrouplessTabs();
+
+  // Migrate existing groups to hybrid system with native tab groups
+  await migrateToHybridGroups();
 
   console.log('Finished setup');
 
@@ -451,6 +677,9 @@ async function init() {
   browser.tabs.onAttached.addListener(tabAttached);
   browser.tabs.onDetached.addListener(tabDetached);
   browser.tabs.onActivated.addListener(tabActivated);
+
+  // Add native tabGroups event listeners for hybrid functionality
+  setupTabGroupListeners();
 }
 
 init();
@@ -508,7 +737,7 @@ function handleInternalMessage(message, sender, sendResponse) {
       window.backgroundState[message.key] = message.value;
       break;
     case 'refreshView':
-      refreshView();
+      window.refreshView();
       break;
     case 'checkViewRefresh':
       sendResponse({ viewRefreshOrdered: window.viewRefreshOrdered });
@@ -516,7 +745,25 @@ function handleInternalMessage(message, sender, sendResponse) {
     case 'clearViewRefresh':
       window.viewRefreshOrdered = false;
       break;
+    case 'migrateToHybridGroups':
+      // Manual trigger for migration
+      migrateToHybridGroups().then(() => {
+        sendResponse({ success: true, message: 'Migration completed' });
+      }).catch((error) => {
+        sendResponse({ success: false, message: error.message });
+      });
+      return true; // Keep channel open for async response
+    case 'resetMigration':
+      // Reset migration flag for testing
+      browser.storage.local.set({ hybridGroupsMigrationComplete: false }).then(() => {
+        sendResponse({ success: true, message: 'Migration flag reset' });
+      });
+      return true;
+    default:
+      // Unknown action
+      break;
   }
+  return false;
 }
 
 browser.runtime.onMessage.addListener(handleInternalMessage);
