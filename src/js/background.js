@@ -1,4 +1,8 @@
 import { loadOptions } from './_share/options.js';
+import { stateManager } from './background/StateManager.js';
+import { mod, getColorForGroupId } from './background/utils.js';
+import { createMenuList, handleMenuChange } from './background/menu-manager.js';
+import { migrateToHybridGroups, setupTabGroupListeners } from './background/native-groups.js';
 
 const manifest = browser.runtime.getManifest();
 
@@ -47,102 +51,13 @@ function getWindowState(windowId) {
 
 window.viewRefreshOrdered = false;
 
-/** Modulo in javascript does not behave like modulo in mathematics when x is negative.
- * Following code is based from this:
- * https://stackoverflow.com/questions/4467539/javascript-modulo-gives-a-negative-result-for-negative-numbers */
-function mod(x, n) {
-  return (((x % n) + n) % n);
-}
-
-async function addRefreshMenuItem() {
-  // Safely remove existing menu items (ignore errors if they don't exist)
-  try {
-    await browser.menus.remove('refresh-groups');
-  } catch (error) {
-    // Ignore error if menu item doesn't exist
-  }
-  try {
-    await browser.menus.remove('refresh-spacer');
-  } catch (error) {
-    // Ignore error if menu item doesn't exist
-  }
-
-  browser.menus.create({
-    id: 'refresh-spacer',
-    type: 'separator',
-    parentId: 'send-tab',
-    contexts: ['tab'],
-  });
-  browser.menus.create({
-    id: 'refresh-groups',
-    title: browser.i18n.getMessage('refreshGroups'),
-    parentId: 'send-tab',
-    contexts: ['tab'],
-  });
-}
-
-async function createMenuList() {
-  try {
-    await browser.menus.removeAll();
-
-    // new menu for each group
-    // for groups that have no tabs, make a disabled menu item
-
-    // Get current window and its groups
-    const currentWindow = await browser.windows.getCurrent();
-    const groups = await browser.sessions.getWindowValue(currentWindow.id, 'groups');
-
-    // Check if groups is initialized before proceeding
-    if (!groups || !Array.isArray(groups)) {
-      console.log('Groups not yet initialized, skipping menu creation');
-      return;
-    }
-
-    groups.forEach((group) => {
-      browser.menus.create({
-        id: String(group.id),
-        title: `${group.id}: ${group.name}`,
-        parentId: 'send-tab',
-        contexts: ['tab'],
-      });
-    });
-    await addRefreshMenuItem();
-  } catch (error) {
-    console.error('Failed to create menu list:', error);
-  }
-}
-
-async function changeMenu(message) {
-  switch (message.action) {
-    case 'createMenuItem':
-      browser.menus.create({
-        id: String(message.groupId),
-        title: `${message.groupId}: ${message.groupName}`,
-        parentId: 'send-tab',
-        contexts: ['tab'],
-      });
-      await addRefreshMenuItem(); // move refresh menu to end
-      break;
-    case 'removeMenuItem':
-      browser.menus.remove(String(message.groupId));
-      break;
-    case 'updateMenuItem':
-      browser.menus.update(String(message.groupId), { title: `${message.groupId}: ${message.groupName}` });
-      break;
-    default:
-      break;
-  }
-}
-
-browser.runtime.onMessage.addListener(changeMenu);
-
 /** Set extension icon tooltip and numGroups to icon * */
 async function setActionTitle(windowId, activeGroup = null) {
   let name;
-  const groups = await browser.sessions.getWindowValue(windowId, 'groups');
+  const groups = await stateManager.getGroups(windowId);
 
   if (activeGroup === null) {
-    activeGroup = await browser.sessions.getWindowValue(windowId, 'activeGroup');
+    activeGroup = await stateManager.getActiveGroup(windowId);
   }
 
   groups.forEach((group) => {
@@ -153,15 +68,6 @@ async function setActionTitle(windowId, activeGroup = null) {
   browser.action.setTitle({ title: `Active Group: ${name}`, windowId });
   browser.action.setBadgeText({ text: String(groups.length), windowId });
   browser.action.setBadgeBackgroundColor({ color: '#666666' });
-}
-
-/**
- * Get a color for a group based on its ID
- * Cycles through available colors
- */
-function getColorForGroupId(groupId) {
-  const colors = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
-  return colors[groupId % colors.length];
 }
 
 async function toggleVisibleTabs(activeGroup, noTabSelected) {
@@ -191,7 +97,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
 
       // Handle panorama view tab (groupId -1)
       // Show it when activeGroup is -1 (view is active), hide it otherwise
-      const groupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+      const groupId = await stateManager.getTabGroup(tab.id);
       if (groupId === -1) {
         if (activeGroup === -1) {
           showTabIds.push(tab.id);
@@ -231,7 +137,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
   }
 
   // Get groups for native group management
-  const groups = hasTabGroups ? await browser.sessions.getWindowValue(windowId, 'groups') : null;
+  const groups = hasTabGroups ? await stateManager.getGroups(windowId) : null;
 
   // Step 1: Collapse and hide inactive groups
   if (hideTabIds.length > 0) {
@@ -282,14 +188,14 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
 
 async function moveTab(tabId, groupId) {
   const windowId = (await browser.windows.getCurrent()).id;
-  await browser.sessions.setTabValue(tabId, 'groupId', parseInt(groupId, 10));
+  await stateManager.setTabGroup(tabId, groupId);
 
   // Also move tab to native browser group if available (but only for visible tabs)
   if (hasTabGroups) {
     try {
-      const groups = await browser.sessions.getWindowValue(windowId, 'groups');
+      const groups = await stateManager.getGroups(windowId);
       const targetGroup = groups.find((g) => g.id === parseInt(groupId, 10));
-      const activeGroup = await browser.sessions.getWindowValue(windowId, 'activeGroup');
+      const activeGroup = await stateManager.getActiveGroup(windowId);
 
       // Only assign to native group if this is the currently active group
       // This prevents conflicts with hidden tabs
@@ -311,7 +217,7 @@ async function moveTab(tabId, groupId) {
   const toIndex = -1;
   await browser.tabs.move(tabId, { index: toIndex });
 
-  const activeGroup = (await browser.sessions.getWindowValue(windowId, 'activeGroup'));
+  const activeGroup = await stateManager.getActiveGroup(windowId);
   await toggleVisibleTabs(activeGroup);
 }
 
@@ -371,14 +277,14 @@ browser.menus.onClicked.addListener(menuClicked);
 /** Shift current active group by offset */
 async function changeActiveGroupBy(offset) {
   const windowId = (await browser.windows.getCurrent()).id;
-  const groups = await browser.sessions.getWindowValue(windowId, 'groups');
+  const groups = await stateManager.getGroups(windowId);
 
-  let activeGroup = (await browser.sessions.getWindowValue(windowId, 'activeGroup'));
+  let activeGroup = await stateManager.getActiveGroup(windowId);
   const activeIndex = groups.findIndex((group) => group.id === activeGroup);
   const newIndex = activeIndex + offset;
 
   activeGroup = groups[mod(newIndex, groups.length)].id;
-  await browser.sessions.setWindowValue(windowId, 'activeGroup', activeGroup);
+  await stateManager.setActiveGroup(windowId, activeGroup);
 
   await toggleVisibleTabs(activeGroup, true);
 }
@@ -485,7 +391,7 @@ async function tabCreated(tab) {
     }
 
     // Assign special group ID for panorama view tab
-    await browser.sessions.setTabValue(tab.id, 'groupId', -1);
+    await stateManager.setTabGroup(tab.id, -1);
     if (DEBUG) {
       console.log(`Created panorama view tab ${tab.id}, assigned groupId -1`);
     }
@@ -494,10 +400,10 @@ async function tabCreated(tab) {
 
   // Normal case: everything except the Panorama View tab
   // If the tab does not have a group, set its group to the current group
-  let tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+  let tabGroupId = await stateManager.getTabGroup(tab.id);
   if (tabGroupId === undefined) {
-    const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
-    await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
+    const activeGroup = await stateManager.getActiveGroup(tab.windowId);
+    await stateManager.setTabGroup(tab.id, activeGroup);
     tabGroupId = activeGroup;
     if (DEBUG) {
       console.log(`Tab ${tab.id} had no group, assigned to activeGroup ${activeGroup}`);
@@ -508,16 +414,16 @@ async function tabCreated(tab) {
   // This ensures tabs created by Group.addNewTab() get properly assigned to native groups
   if (hasTabGroups && tabGroupId !== -1) {
     try {
-      const groups = await browser.sessions.getWindowValue(tab.windowId, 'groups');
+      const groups = await stateManager.getGroups(tab.windowId);
       const currentGroup = groups?.find((g) => g.id === tabGroupId);
-      const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
+      const activeGroup = await stateManager.getActiveGroup(tab.windowId);
 
       // If group doesn't have a native group yet, create one now
       if (currentGroup && !currentGroup.nativeGroupId) {
         // Get all tabs in this group
         const allTabs = await browser.tabs.query({ windowId: tab.windowId });
-        const tabGroupIds = await Promise.all(
-          allTabs.map((t) => browser.sessions.getTabValue(t.id, 'groupId')),
+        const tabGroupIds = await stateManager.getTabGroups(
+          allTabs.map((t) => t.id),
         );
         const groupTabs = allTabs
           .filter((t, index) => tabGroupIds[index] === tabGroupId)
@@ -535,7 +441,7 @@ async function tabCreated(tab) {
 
           // Store the native group ID
           currentGroup.nativeGroupId = nativeGroupId;
-          await browser.sessions.setWindowValue(tab.windowId, 'groups', groups);
+          await stateManager.setGroups(tab.windowId, groups);
 
           if (DEBUG) {
             console.log(`Created native group ${nativeGroupId} for panorama group ${tabGroupId} with ${groupTabs.length} tabs (from tabCreated)`);
@@ -599,15 +505,15 @@ async function tabActivated(activeInfo) {
   // Set the window's active group to the new active tab's group
   // If this is a newly-created tab, tabCreated() might not have set a
   // groupId yet, so retry until it does.
-  const activeGroup = await browser.sessions.getTabValue(activeInfo.tabId, 'groupId');
+  const activeGroup = await stateManager.getTabGroup(activeInfo.tabId);
 
   if (activeGroup !== -1) {
     // activated tab is not Panorama View tab
-    await browser.sessions.setWindowValue(tab.windowId, 'activeGroup', activeGroup);
+    await stateManager.setActiveGroup(tab.windowId, activeGroup);
 
     // Create native tab group if needed (for groups created in panorama view)
     if (hasTabGroups) {
-      const groups = await browser.sessions.getWindowValue(tab.windowId, 'groups');
+      const groups = await stateManager.getGroups(tab.windowId);
       const currentGroup = groups?.find((g) => g.id === activeGroup);
 
       // Check if the current tab already has a native group assignment
@@ -625,8 +531,8 @@ async function tabActivated(activeInfo) {
         try {
           // Get all tabs in this group
           const allTabs = await browser.tabs.query({ windowId: tab.windowId });
-          const tabGroupIds = await Promise.all(
-            allTabs.map((t) => browser.sessions.getTabValue(t.id, 'groupId')),
+          const tabGroupIds = await stateManager.getTabGroups(
+            allTabs.map((t) => t.id),
           );
           const groupTabs = allTabs
             .filter((t, index) => tabGroupIds[index] === activeGroup)
@@ -644,7 +550,7 @@ async function tabActivated(activeInfo) {
 
             // Store the native group ID
             currentGroup.nativeGroupId = nativeGroupId;
-            await browser.sessions.setWindowValue(tab.windowId, 'groups', groups);
+            await stateManager.setGroups(tab.windowId, groups);
 
             if (DEBUG) {
               console.log(`Created native group ${nativeGroupId} for panorama group ${activeGroup} with ${groupTabs.length} tabs`);
@@ -656,7 +562,7 @@ async function tabActivated(activeInfo) {
       } else if (currentGroup && !currentGroup.nativeGroupId && existingNativeGroup) {
         // Tab is already in a native group, just store the reference
         currentGroup.nativeGroupId = existingNativeGroup.nativeGroupId;
-        await browser.sessions.setWindowValue(tab.windowId, 'groups', groups);
+        await stateManager.setGroups(tab.windowId, groups);
         if (DEBUG) {
           console.log(`Linked existing native group ${existingNativeGroup.nativeGroupId} to panorama group ${activeGroup}`);
         }
@@ -669,12 +575,12 @@ async function tabActivated(activeInfo) {
 
 /** Get a new UID for a group */
 async function newGroupUid(windowId) {
-  const groupIndex = await browser.sessions.getWindowValue(windowId, 'groupIndex');
+  const groupIndex = await stateManager.getGroupIndex(windowId);
 
   const uid = groupIndex || 0;
   const newGroupIndex = uid + 1;
 
-  await browser.sessions.setWindowValue(windowId, 'groupIndex', newGroupIndex);
+  await stateManager.setGroupIndex(windowId, newGroupIndex);
 
   return uid;
 }
@@ -705,8 +611,8 @@ async function createGroupInWindow(browserWindow) {
     lastMoved: (new Date()).getTime(),
   }];
 
-  await browser.sessions.setWindowValue(browserWindow.id, 'groups', groups);
-  await browser.sessions.setWindowValue(browserWindow.id, 'activeGroup', groupId);
+  await stateManager.setGroups(browserWindow.id, groups);
+  await stateManager.setActiveGroup(browserWindow.id, groupId);
 }
 /** Checks that group is missing before creating new one in window
  * This makes sure existing/restored windows are not reinitialized.
@@ -714,7 +620,7 @@ async function createGroupInWindow(browserWindow) {
  * trigger the onCreated event but still have the existing group data.
  */
 async function createGroupInWindowIfMissing(browserWindow) {
-  const groups = await browser.sessions.getWindowValue(browserWindow.id, 'groups');
+  const groups = await stateManager.getGroups(browserWindow.id);
 
   if (!groups || !groups.length) {
     console.log(`No groups found for window ${browserWindow.id}!`);
@@ -742,14 +648,14 @@ async function salvageGrouplessTabs() {
   // Use Promise.all to ensure all async operations complete
   await Promise.all(tWindows.map(async (window) => {
     windows[window.id] = { groups: null };
-    windows[window.id].groups = await browser.sessions.getWindowValue(window.id, 'groups');
+    windows[window.id].groups = await stateManager.getGroups(window.id);
   }));
 
   // check all tabs
   const tabs = await browser.tabs.query({});
 
   await Promise.all(tabs.map(async (tab) => {
-    const groupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+    const groupId = await stateManager.getTabGroup(tab.id);
 
     // Check if windows[tab.windowId] and its groups exist
     if (!windows[tab.windowId] || !windows[tab.windowId].groups) {
@@ -765,8 +671,8 @@ async function salvageGrouplessTabs() {
     });
 
     if (!groupExists && groupId !== -1) {
-      const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
-      await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
+      const activeGroup = await stateManager.getActiveGroup(tab.windowId);
+      await stateManager.setTabGroup(tab.id, activeGroup);
     }
   }));
 }
@@ -775,251 +681,6 @@ async function salvageGrouplessTabs() {
  * Migration Utility: Convert existing groups to hybrid system with native tab groups
  * This ensures existing users' groups get native tab group counterparts
  */
-/**
- * Verify that native tab group IDs are correctly persisted in session storage
- * This runs after migration to ensure data integrity
- */
-async function verifyNativeGroupPersistence() {
-  if (!hasTabGroups) {
-    return;
-  }
-
-  try {
-    if (DEBUG) {
-      console.log('Verifying native group persistence...');
-    }
-
-    const windows = await browser.windows.getAll({});
-
-    await Promise.all(windows.map(async (window) => {
-      const groups = await browser.sessions.getWindowValue(window.id, 'groups');
-
-      if (!groups || !Array.isArray(groups)) {
-        return;
-      }
-
-      await Promise.all(groups.map(async (group) => {
-        if (group.nativeGroupId === undefined || group.nativeGroupId === null) {
-          return;
-        }
-
-        try {
-          // Try to get the native group to verify it still exists
-          const nativeGroup = await browser.tabGroups.get(group.nativeGroupId);
-          if (DEBUG) {
-            console.log(`✓ Verified native group ${group.nativeGroupId} for panorama group ${group.id}`);
-          }
-
-          // Verify the title matches
-          if (nativeGroup.title !== group.name) {
-            console.warn(`Native group ${group.nativeGroupId} title mismatch: "${nativeGroup.title}" vs "${group.name}"`);
-          }
-        } catch (error) {
-          console.error(`✗ Native group ${group.nativeGroupId} not found for panorama group ${group.id}:`, error);
-
-          // Clean up the broken reference
-          const updatedGroups = groups.map((g) => {
-            if (g.id === group.id) {
-              return { ...g, nativeGroupId: null };
-            }
-            return g;
-          });
-          await browser.sessions.setWindowValue(window.id, 'groups', updatedGroups);
-          console.log(`Cleaned up broken native group reference for group ${group.id}`);
-        }
-      }));
-    }));
-
-    if (DEBUG) {
-      console.log('Native group persistence verification complete');
-    }
-  } catch (error) {
-    console.error('Failed to verify native group persistence:', error);
-  }
-}
-
-async function migrateToHybridGroups() {
-  // Skip migration if browser doesn't support tabGroups API
-  if (!hasTabGroups) {
-    console.log('Browser does not support tabGroups API, skipping migration');
-    return;
-  }
-
-  try {
-    if (DEBUG) {
-      console.log('Starting migration to hybrid tab groups...');
-    }
-
-    // Check if migration has already been done
-    const migrationComplete = await browser.storage.local.get('hybridGroupsMigrationComplete');
-    if (migrationComplete.hybridGroupsMigrationComplete) {
-      console.log('Migration already completed, skipping...');
-      return;
-    }
-
-    const windows = await browser.windows.getAll({});
-
-    await Promise.all(windows.map(async (window) => {
-      const groups = await browser.sessions.getWindowValue(window.id, 'groups');
-
-      if (!groups || !Array.isArray(groups) || groups.length === 0) {
-        console.log(`No groups to migrate for window ${window.id}`);
-        return;
-      }
-
-      if (DEBUG) {
-        console.log(`Migrating ${groups.length} groups for window ${window.id}`);
-      }
-
-      const updatedGroups = await Promise.all(groups.map(async (group) => {
-        // Skip if already has a native group ID
-        if (group.nativeGroupId !== undefined && group.nativeGroupId !== null) {
-          if (DEBUG) {
-            console.log(`Group ${group.id} already has native group ${group.nativeGroupId}`);
-          }
-          return group;
-        }
-
-        try {
-          // Get all tabs for this group
-          const tabs = await browser.tabs.query({ windowId: window.id });
-
-          const groupTabIds = await Promise.all(tabs.map(async (tab) => {
-            const tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
-            if (tabGroupId === group.id) {
-              return tab.id;
-            }
-            return null;
-          }));
-
-          const validTabIds = groupTabIds.filter((id) => id !== null);
-
-          if (validTabIds.length === 0) {
-            if (DEBUG) {
-              console.log(`Group ${group.id} has no tabs, skipping native group creation`);
-            }
-            return group;
-          }
-
-          // Check if this is the active group
-          const activeGroup = await browser.sessions.getWindowValue(window.id, 'activeGroup');
-
-          // Only create native groups for the active group
-          // Inactive groups will get native groups created when they become active
-          if (group.id === activeGroup) {
-            // Create native browser group by grouping tabs
-            const groupId = await browser.tabs.group({
-              tabIds: validTabIds,
-            });
-
-            if (DEBUG) {
-              console.log(`Created native group ${groupId} for active panorama group ${group.id} with ${validTabIds.length} tabs`);
-            }
-
-            // Update the native group with title and color
-            await browser.tabGroups.update(groupId, {
-              title: group.name || `Group ${group.id}`,
-              color: getColorForGroupId(group.id),
-            });
-
-            // Update group with native ID reference
-            return {
-              ...group,
-              nativeGroupId: groupId,
-            };
-          }
-
-          // For inactive groups, just mark as migrated without native group
-          // The native group will be created when the group becomes active
-          if (DEBUG) {
-            console.log(`Group ${group.id} is inactive, will create native group when activated`);
-          }
-          return group;
-        } catch (error) {
-          console.warn(`Failed to create native group for group ${group.id}:`, error);
-          // Keep the group without native ID if creation fails
-          return group;
-        }
-      }));
-
-      // Save updated groups back to session storage
-      await browser.sessions.setWindowValue(window.id, 'groups', updatedGroups);
-      if (DEBUG) {
-        console.log(`Migration complete for window ${window.id}`);
-      }
-    }));
-
-    // Mark migration as complete
-    await browser.storage.local.set({ hybridGroupsMigrationComplete: true });
-    if (DEBUG) {
-      console.log('Hybrid groups migration completed successfully!');
-    }
-
-    // Verify persistence after migration
-    await verifyNativeGroupPersistence();
-  } catch (error) {
-    console.error('Migration to hybrid groups failed:', error);
-    // Don't mark as complete so it can retry on next startup
-  }
-}
-
-// Setup native browser tab group event listeners for hybrid functionality
-function setupTabGroupListeners() {
-  // Only setup listeners if tabGroups API is available
-  if (!hasTabGroups) {
-    console.log('Browser does not support tabGroups API, skipping listener setup');
-    return;
-  }
-
-  try {
-    // When user creates group through browser UI
-    browser.tabGroups.onCreated.addListener(async (group) => {
-      console.log('Native tab group created:', group);
-      // We could potentially sync this with our session storage if needed
-    });
-
-    // When user removes group through browser UI
-    browser.tabGroups.onRemoved.addListener(async (group) => {
-      console.log('Native tab group removed:', group);
-      // Handle cleanup if our session storage references this group
-      try {
-        const groups = await browser.sessions.getWindowValue(group.windowId, 'groups');
-        if (groups) {
-          const updatedGroups = groups.filter((g) => g.nativeGroupId !== group.id);
-          await browser.sessions.setWindowValue(group.windowId, 'groups', updatedGroups);
-        }
-      } catch (error) {
-        console.warn('Error syncing removed native group:', error);
-      }
-    });
-
-    // When user updates group through browser UI (name, color, etc.)
-    browser.tabGroups.onUpdated.addListener(async (group) => {
-      console.log('Native tab group updated:', group);
-      // Sync name changes back to our session storage
-      try {
-        const groups = await browser.sessions.getWindowValue(group.windowId, 'groups');
-        if (groups) {
-          const updatedGroups = groups.map((g) => {
-            if (g.nativeGroupId === group.id) {
-              return { ...g, name: group.title };
-            }
-            return g;
-          });
-          await browser.sessions.setWindowValue(group.windowId, 'groups', updatedGroups);
-        }
-      } catch (error) {
-        console.warn('Error syncing updated native group:', error);
-      }
-    });
-
-    if (DEBUG) {
-      console.log('Native tab group listeners setup successfully');
-    }
-  } catch (error) {
-    console.warn('Native tabGroups API not available:', error);
-  }
-}
 
 async function init() {
   const options = await loadOptions();
@@ -1030,7 +691,7 @@ async function init() {
   await salvageGrouplessTabs();
 
   // Migrate existing groups to hybrid system with native tab groups
-  await migrateToHybridGroups();
+  await migrateToHybridGroups(hasTabGroups, DEBUG);
 
   // Create menus after groups are initialized
   await createMenuList();
@@ -1083,7 +744,7 @@ async function init() {
   });
 
   // Add native tabGroups event listeners for hybrid functionality
-  setupTabGroupListeners();
+  setupTabGroupListeners(hasTabGroups, DEBUG);
 }
 
 init();
@@ -1137,6 +798,12 @@ function handleMessage(message, sender) { // eslint-disable-line no-unused-vars
 // Handle internal extension messages
 function handleInternalMessage(message, sender, sendResponse) {
   switch (message.action) {
+    case 'createMenuItem':
+    case 'removeMenuItem':
+    case 'updateMenuItem':
+      // Handle menu change messages
+      handleMenuChange(message);
+      break;
     case 'setBackgroundState':
       window.backgroundState[message.key] = message.value;
       break;
@@ -1151,7 +818,7 @@ function handleInternalMessage(message, sender, sendResponse) {
       break;
     case 'migrateToHybridGroups':
       // Manual trigger for migration
-      migrateToHybridGroups().then(() => {
+      migrateToHybridGroups(hasTabGroups, DEBUG).then(() => {
         sendResponse({ success: true, message: 'Migration completed' });
       }).catch((error) => {
         sendResponse({ success: false, message: error.message });
