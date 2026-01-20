@@ -29,9 +29,21 @@ if (DEBUG) {
 }
 
 window.backgroundState = {
-  openingView: false,
+  openingView: null, // Changed: stores { tabId, timeout, windowId } or null
   openingBackup: false,
 };
+
+// Per-window state tracking for multi-window support
+window.windowStates = new Map(); // windowId -> { viewTabId }
+
+function getWindowState(windowId) {
+  if (!window.windowStates.has(windowId)) {
+    window.windowStates.set(windowId, {
+      viewTabId: null,
+    });
+  }
+  return window.windowStates.get(windowId);
+}
 
 window.viewRefreshOrdered = false;
 
@@ -350,8 +362,14 @@ async function triggerCommand(command) {
 
 /** Open the Panorama View tab, or return to the last open tab if Panorama View is currently open */
 async function toggleView() {
-  const extTabs = await browser.tabs.query({ url: browser.runtime.getURL('view.html'), currentWindow: true });
+  const windowId = (await browser.windows.getCurrent()).id;
+  const windowState = getWindowState(windowId);
+  const extTabs = await browser.tabs.query({ url: browser.runtime.getURL('view.html'), windowId });
+
   if (extTabs.length > 0) {
+    // Update tracked viewTabId
+    windowState.viewTabId = extTabs[0].id;
+
     const currentTab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
     // switch to last accessed tab in window
     if (extTabs[0].id === currentTab.id) {
@@ -368,8 +386,31 @@ async function toggleView() {
       await browser.tabs.update(extTabs[0].id, { active: true });
     }
   } else { // if there is no Panorama View tab, make one
-    window.backgroundState.openingView = true;
-    await browser.tabs.create({ url: '/view.html', active: true });
+    // Clear any existing timeout if we're re-creating
+    if (window.backgroundState.openingView) {
+      clearTimeout(window.backgroundState.openingView.timeout);
+    }
+
+    // Create the tab first to get its ID
+    const tab = await browser.tabs.create({ url: '/view.html', active: true });
+
+    // Track in per-window state
+    windowState.viewTabId = tab.id;
+
+    // Set timeout to auto-clear state if tabCreated doesn't fire within 5 seconds
+    const timeout = setTimeout(() => {
+      if (DEBUG) {
+        console.warn('View tab creation timed out, clearing state');
+      }
+      window.backgroundState.openingView = null;
+    }, 5000);
+
+    // Store state with tabId for tracking
+    window.backgroundState.openingView = {
+      tabId: tab.id,
+      timeout,
+      windowId,
+    };
   }
 }
 
@@ -379,43 +420,47 @@ async function tabCreated(tab) {
     return;
   }
 
-  if (!window.backgroundState.openingView) {
-    // Normal case: everything except the Panorama View tab
-    // If the tab does not have a group, set its group to the current group
-    const tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
-    if (tabGroupId === undefined) {
-      const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
+  // Check if this is the view tab we're creating
+  if (window.backgroundState.openingView?.tabId === tab.id) {
+    // Clear the timeout since tab was created successfully
+    clearTimeout(window.backgroundState.openingView.timeout);
+    window.backgroundState.openingView = null;
 
-      await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
-
-      // Only assign to native browser group if this is the active group
-      // This prevents tabs from disappearing from panorama view
-      try {
-        const groups = await browser.sessions.getWindowValue(tab.windowId, 'groups');
-        const currentGroup = groups.find((g) => g.id === activeGroup);
-
-        // Only assign to native group for the currently active/visible group
-        if (currentGroup && currentGroup.nativeGroupId) {
-          // Check if this group is currently active (visible)
-          const currentActiveGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
-          if (activeGroup === currentActiveGroup) {
-            await browser.tabs.group({
-              tabIds: [tab.id],
-              groupId: currentGroup.nativeGroupId,
-            });
-          }
-          // For inactive groups, don't assign to native groups to prevent conflicts
-        }
-      } catch (error) {
-        // Native tabGroups might not be available
-        console.warn('Could not assign new tab to native group:', error);
-      }
-    }
-  } else {
-    // Opening the Panorama View tab
-    // Make sure it's in the special group
-    window.backgroundState.openingView = false;
+    // Assign special group ID for panorama view tab
     await browser.sessions.setTabValue(tab.id, 'groupId', -1);
+    return;
+  }
+
+  // Normal case: everything except the Panorama View tab
+  // If the tab does not have a group, set its group to the current group
+  const tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+  if (tabGroupId === undefined) {
+    const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
+
+    await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
+
+    // Only assign to native browser group if this is the active group
+    // This prevents tabs from disappearing from panorama view
+    try {
+      const groups = await browser.sessions.getWindowValue(tab.windowId, 'groups');
+      const currentGroup = groups.find((g) => g.id === activeGroup);
+
+      // Only assign to native group for the currently active/visible group
+      if (currentGroup && currentGroup.nativeGroupId) {
+        // Check if this group is currently active (visible)
+        const currentActiveGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
+        if (activeGroup === currentActiveGroup) {
+          await browser.tabs.group({
+            tabIds: [tab.id],
+            groupId: currentGroup.nativeGroupId,
+          });
+        }
+        // For inactive groups, don't assign to native groups to prevent conflicts
+      }
+    } catch (error) {
+      // Native tabGroups might not be available
+      console.warn('Could not assign new tab to native group:', error);
+    }
   }
 }
 
@@ -852,6 +897,32 @@ async function init() {
   browser.tabs.onDetached.addListener(tabDetached);
   browser.tabs.onActivated.addListener(tabActivated);
 
+  // Add tab removal listener to cleanup openingView state
+  browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+    // Clear openingView state if the view tab is removed before completion
+    if (window.backgroundState.openingView?.tabId === tabId) {
+      clearTimeout(window.backgroundState.openingView.timeout);
+      window.backgroundState.openingView = null;
+      if (DEBUG) {
+        console.log('View tab removed during creation, cleared state');
+      }
+    }
+
+    // Clear per-window viewTabId tracking
+    const windowState = getWindowState(removeInfo.windowId);
+    if (windowState.viewTabId === tabId) {
+      windowState.viewTabId = null;
+    }
+  });
+
+  // Add window removal listener to cleanup per-window state
+  browser.windows.onRemoved.addListener((windowId) => {
+    window.windowStates.delete(windowId);
+    if (DEBUG) {
+      console.log(`Cleaned up state for closed window ${windowId}`);
+    }
+  });
+
   // Add native tabGroups event listeners for hybrid functionality
   setupTabGroupListeners();
 }
@@ -918,6 +989,11 @@ function handleInternalMessage(message, sender, sendResponse) {
       break;
     case 'clearViewRefresh':
       window.viewRefreshOrdered = false;
+      break;
+    case 'updateTabVisibility':
+      // Update tab visibility after group operations (e.g., adding new tab)
+      // This ensures the panorama view tab is properly hidden
+      toggleVisibleTabs(message.groupId);
       break;
     case 'migrateToHybridGroups':
       // Manual trigger for migration

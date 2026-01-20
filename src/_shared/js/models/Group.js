@@ -40,6 +40,13 @@ export default class Group {
     await this.setActive();
     const tab = await browser.tabs.create({ active: true });
     await browser.sessions.setTabValue(tab.id, 'groupId', this.id);
+
+    // Request background script to update tab visibility
+    // This ensures the panorama view tab is properly hidden
+    await browser.runtime.sendMessage({
+      action: 'updateTabVisibility',
+      groupId: this.id,
+    });
   }
 
   /**
