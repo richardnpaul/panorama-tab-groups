@@ -21,7 +21,13 @@ export async function tabMoved(tabId, moveInfo) {
   if (windowId === moveInfo.windowId) {
     browser.tabs.get(tabId).then(async (tab) => {
       await insertTab(tab);
-      await Promise.all(groups.map(async (group) => updateGroupFit(group)));
+      const groupIds = groups.getIds();
+      await Promise.all(groupIds.map(async (groupId) => {
+        const group = groups.get(groupId);
+        if (group) {
+          await updateGroupFit(group);
+        }
+      }));
     });
   }
 }

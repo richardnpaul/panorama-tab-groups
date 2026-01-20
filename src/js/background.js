@@ -166,7 +166,9 @@ function getColorForGroupId(groupId) {
 
 async function toggleVisibleTabs(activeGroup, noTabSelected) {
   if (DEBUG) {
+    const stack = new Error().stack.split('\n').slice(2, 5).join('\n');
     console.log(`toggleVisibleTabs called: activeGroup=${activeGroup}, noTabSelected=${noTabSelected}`);
+    console.log(`  Call stack:\n${stack}`);
   }
 
   // Show and hide the appropriate tabs
@@ -510,8 +512,45 @@ async function tabCreated(tab) {
       const currentGroup = groups?.find((g) => g.id === tabGroupId);
       const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
 
-      // Only assign to native group for the currently active/visible group
-      if (currentGroup && currentGroup.nativeGroupId && tabGroupId === activeGroup) {
+      // If group doesn't have a native group yet, create one now
+      if (currentGroup && !currentGroup.nativeGroupId) {
+        // Get all tabs in this group
+        const allTabs = await browser.tabs.query({ windowId: tab.windowId });
+        const tabGroupIds = await Promise.all(
+          allTabs.map((t) => browser.sessions.getTabValue(t.id, 'groupId')),
+        );
+        const groupTabs = allTabs
+          .filter((t, index) => tabGroupIds[index] === tabGroupId)
+          .map((t) => t.id);
+
+        if (groupTabs.length > 0) {
+          // Create native group by grouping the tabs
+          const nativeGroupId = await browser.tabs.group({ tabIds: groupTabs });
+
+          // Update the native group with title and color
+          await browser.tabGroups.update(nativeGroupId, {
+            title: currentGroup.name || `Group ${tabGroupId}`,
+            color: getColorForGroupId(tabGroupId),
+          });
+
+          // Store the native group ID
+          currentGroup.nativeGroupId = nativeGroupId;
+          await browser.sessions.setWindowValue(tab.windowId, 'groups', groups);
+
+          if (DEBUG) {
+            console.log(`Created native group ${nativeGroupId} for panorama group ${tabGroupId} with ${groupTabs.length} tabs (from tabCreated)`);
+          }
+
+          // Update visibility to hide panorama view tab since we now have an active tab in a group
+          if (tab.active || tabGroupId === activeGroup) {
+            if (DEBUG) {
+              console.log(`Updating visibility for newly created native group (tab.active=${tab.active}, tabGroupId=${tabGroupId}, activeGroup=${activeGroup})`);
+            }
+            await toggleVisibleTabs(tabGroupId);
+          }
+        }
+      } else if (currentGroup && currentGroup.nativeGroupId && tabGroupId === activeGroup) {
+        // Group has native group and is active, assign tab to it
         await browser.tabs.group({
           tabIds: [tab.id],
           groupId: currentGroup.nativeGroupId,
@@ -519,8 +558,16 @@ async function tabCreated(tab) {
         if (DEBUG) {
           console.log(`Assigned tab ${tab.id} to native group ${currentGroup.nativeGroupId} (panorama group ${tabGroupId})`);
         }
+
+        // Update visibility to hide panorama view tab since we now have an active tab in this group
+        if (tab.active) {
+          if (DEBUG) {
+            console.log(`Updating visibility for existing native group (tab.active=${tab.active}, tabGroupId=${tabGroupId})`);
+          }
+          await toggleVisibleTabs(tabGroupId);
+        }
       } else if (DEBUG) {
-        console.log(`Skipped native group assignment for tab ${tab.id}: inactive group or no native group`);
+        console.log(`Skipped native group assignment for tab ${tab.id}: group inactive (will be grouped when activated)`);
       }
     } catch (error) {
       // Native tabGroups might not be available
@@ -557,6 +604,64 @@ async function tabActivated(activeInfo) {
   if (activeGroup !== -1) {
     // activated tab is not Panorama View tab
     await browser.sessions.setWindowValue(tab.windowId, 'activeGroup', activeGroup);
+
+    // Create native tab group if needed (for groups created in panorama view)
+    if (hasTabGroups) {
+      const groups = await browser.sessions.getWindowValue(tab.windowId, 'groups');
+      const currentGroup = groups?.find((g) => g.id === activeGroup);
+
+      // Check if the current tab already has a native group assignment
+      const currentTabGroups = await browser.tabGroups.query({ windowId: tab.windowId });
+      const tabsInNativeGroups = await Promise.all(
+        currentTabGroups.map(async (ng) => {
+          const tabs = await browser.tabs.query({ groupId: ng.id });
+          return { nativeGroupId: ng.id, tabIds: tabs.map((t) => t.id) };
+        }),
+      );
+      const existingNativeGroup = tabsInNativeGroups.find((ng) => ng.tabIds.includes(tab.id));
+
+      // If this group doesn't have a native group yet AND the tab isn't in one, create it
+      if (currentGroup && !currentGroup.nativeGroupId && !existingNativeGroup) {
+        try {
+          // Get all tabs in this group
+          const allTabs = await browser.tabs.query({ windowId: tab.windowId });
+          const tabGroupIds = await Promise.all(
+            allTabs.map((t) => browser.sessions.getTabValue(t.id, 'groupId')),
+          );
+          const groupTabs = allTabs
+            .filter((t, index) => tabGroupIds[index] === activeGroup)
+            .map((t) => t.id);
+
+          if (groupTabs.length > 0) {
+            // Create native group by grouping the tabs
+            const nativeGroupId = await browser.tabs.group({ tabIds: groupTabs });
+
+            // Update the native group with title and color
+            await browser.tabGroups.update(nativeGroupId, {
+              title: currentGroup.name || `Group ${activeGroup}`,
+              color: getColorForGroupId(activeGroup),
+            });
+
+            // Store the native group ID
+            currentGroup.nativeGroupId = nativeGroupId;
+            await browser.sessions.setWindowValue(tab.windowId, 'groups', groups);
+
+            if (DEBUG) {
+              console.log(`Created native group ${nativeGroupId} for panorama group ${activeGroup} with ${groupTabs.length} tabs`);
+            }
+          }
+        } catch (error) {
+          console.warn('Could not create native tab group:', error);
+        }
+      } else if (currentGroup && !currentGroup.nativeGroupId && existingNativeGroup) {
+        // Tab is already in a native group, just store the reference
+        currentGroup.nativeGroupId = existingNativeGroup.nativeGroupId;
+        await browser.sessions.setWindowValue(tab.windowId, 'groups', groups);
+        if (DEBUG) {
+          console.log(`Linked existing native group ${existingNativeGroup.nativeGroupId} to panorama group ${activeGroup}`);
+        }
+      }
+    }
   }
 
   await toggleVisibleTabs(activeGroup);
