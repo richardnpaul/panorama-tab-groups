@@ -229,9 +229,9 @@ async function renderHeader() {
     `);
   const searchInput = searchNode.querySelector('[type="search"]');
   const groups = await window.PopupView.getGroups();
-  await groups.forEach(async (group) => {
+  await Promise.all(groups.map(async (group) => {
     await group.loadTabs();
-  });
+  }));
   const noResultNode = getElementNodeFromString(`
       <h2 class="list-title">${browser.i18n.getMessage(
     'searchForTab.noResults',

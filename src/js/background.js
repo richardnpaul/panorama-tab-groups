@@ -2,6 +2,32 @@ import { loadOptions } from './_share/options.js';
 
 const manifest = browser.runtime.getManifest();
 
+// Debug flag - set to false for production
+const DEBUG = false;
+
+// API Feature Detection
+const hasTabHide = typeof browser.tabs.hide !== 'undefined'; // Firefox 61+ only
+const hasTabGroups = typeof browser.tabGroups !== 'undefined'; // Firefox 139+, Chrome 89+
+
+// Determine operating mode
+let browserMode = 'unsupported';
+if (hasTabHide && hasTabGroups) {
+  browserMode = 'hybrid'; // Best: hide/show + native groups
+} else if (hasTabGroups) {
+  browserMode = 'collapse-only'; // Chrome/Edge: native groups only
+} else if (hasTabHide) {
+  browserMode = 'legacy'; // Old Firefox: hide/show only
+}
+
+// Log detected capabilities once on load
+if (DEBUG) {
+  console.log('Browser capabilities:', {
+    tabHide: hasTabHide,
+    tabGroups: hasTabGroups,
+    mode: browserMode,
+  });
+}
+
 window.backgroundState = {
   openingView: false,
   openingBackup: false,
@@ -44,33 +70,35 @@ async function addRefreshMenuItem() {
 }
 
 async function createMenuList() {
-  browser.menus.removeAll();
+  try {
+    await browser.menus.removeAll();
 
-  // new menu for each group
-  // for groups that have no tabs, make a disabled menu item
+    // new menu for each group
+    // for groups that have no tabs, make a disabled menu item
 
-  // Get current window and its groups
-  const currentWindow = await browser.windows.getCurrent();
-  const groups = await browser.sessions.getWindowValue(currentWindow.id, 'groups');
+    // Get current window and its groups
+    const currentWindow = await browser.windows.getCurrent();
+    const groups = await browser.sessions.getWindowValue(currentWindow.id, 'groups');
 
-  // Check if groups is initialized before proceeding
-  if (!groups || !Array.isArray(groups)) {
-    console.log('Groups not yet initialized, skipping menu creation');
-    return;
-  }
+    // Check if groups is initialized before proceeding
+    if (!groups || !Array.isArray(groups)) {
+      console.log('Groups not yet initialized, skipping menu creation');
+      return;
+    }
 
-  groups.forEach((group) => {
-    browser.menus.create({
-      id: String(group.id),
-      title: `${group.id}: ${group.name}`,
-      parentId: 'send-tab',
-      contexts: ['tab'],
+    groups.forEach((group) => {
+      browser.menus.create({
+        id: String(group.id),
+        title: `${group.id}: ${group.name}`,
+        parentId: 'send-tab',
+        contexts: ['tab'],
+      });
     });
-  });
-  await addRefreshMenuItem();
+    await addRefreshMenuItem();
+  } catch (error) {
+    console.error('Failed to create menu list:', error);
+  }
 }
-
-createMenuList();
 
 async function changeMenu(message) {
   switch (message.action) {
@@ -127,6 +155,7 @@ function getColorForGroupId(groupId) {
 async function toggleVisibleTabs(activeGroup, noTabSelected) {
   // Show and hide the appropriate tabs
   const tabs = await browser.tabs.query({ currentWindow: true });
+  const windowId = (await browser.windows.getCurrent()).id;
 
   const showTabIds = [];
   const hideTabIds = [];
@@ -152,8 +181,49 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
     await browser.tabs.update(showTabs[0].id, { active: true });
   }
 
-  await browser.tabs.hide(hideTabIds);
-  await browser.tabs.show(showTabIds);
+  // Get groups for native group management
+  const groups = hasTabGroups ? await browser.sessions.getWindowValue(windowId, 'groups') : null;
+
+  // Step 1: Collapse and hide inactive groups
+  if (hideTabIds.length > 0) {
+    // Collapse native groups first (if available)
+    if (hasTabGroups && groups) {
+      await Promise.all(groups.map(async (group) => {
+        if (group.nativeGroupId && group.id !== activeGroup) {
+          try {
+            await browser.tabGroups.update(group.nativeGroupId, { collapsed: true });
+          } catch (error) {
+            // Group might not exist anymore, ignore
+          }
+        }
+      }));
+    }
+
+    // Then hide tabs (Firefox only)
+    if (hasTabHide) {
+      await browser.tabs.hide(hideTabIds);
+    }
+  }
+
+  // Step 2: Show and uncollapse active group
+  if (showTabIds.length > 0) {
+    // Show tabs first (Firefox only)
+    if (hasTabHide) {
+      await browser.tabs.show(showTabIds);
+    }
+
+    // Then uncollapse native group (if available)
+    if (hasTabGroups && groups) {
+      const activeGroupData = groups.find((g) => g.id === activeGroup);
+      if (activeGroupData && activeGroupData.nativeGroupId) {
+        try {
+          await browser.tabGroups.update(activeGroupData.nativeGroupId, { collapsed: false });
+        } catch (error) {
+          // Group might not exist anymore, ignore
+        }
+      }
+    }
+  }
 
   if (activeGroup >= 0) {
     const window = await browser.windows.getLastFocused();
@@ -166,25 +236,27 @@ async function moveTab(tabId, groupId) {
   await browser.sessions.setTabValue(tabId, 'groupId', parseInt(groupId, 10));
 
   // Also move tab to native browser group if available (but only for visible tabs)
-  try {
-    const groups = await browser.sessions.getWindowValue(windowId, 'groups');
-    const targetGroup = groups.find((g) => g.id === parseInt(groupId, 10));
-    const activeGroup = await browser.sessions.getWindowValue(windowId, 'activeGroup');
+  if (hasTabGroups) {
+    try {
+      const groups = await browser.sessions.getWindowValue(windowId, 'groups');
+      const targetGroup = groups.find((g) => g.id === parseInt(groupId, 10));
+      const activeGroup = await browser.sessions.getWindowValue(windowId, 'activeGroup');
 
-    // Only assign to native group if this is the currently active group
-    // This prevents conflicts with hidden tabs
-    if (targetGroup && targetGroup.nativeGroupId && parseInt(groupId, 10) === activeGroup) {
-      await browser.tabs.group({
-        tabIds: [tabId],
-        groupId: targetGroup.nativeGroupId,
-      });
-    } else if (targetGroup && targetGroup.nativeGroupId) {
-      // For inactive groups, remove from native groups to avoid confusion
-      await browser.tabs.ungroup([tabId]);
+      // Only assign to native group if this is the currently active group
+      // This prevents conflicts with hidden tabs
+      if (targetGroup && targetGroup.nativeGroupId && parseInt(groupId, 10) === activeGroup) {
+        await browser.tabs.group({
+          tabIds: [tabId],
+          groupId: targetGroup.nativeGroupId,
+        });
+      } else if (targetGroup && targetGroup.nativeGroupId) {
+        // For inactive groups, remove from native groups to avoid confusion
+        await browser.tabs.ungroup([tabId]);
+      }
+    } catch (error) {
+      // Native tabGroups might not be available or tab might not exist
+      console.warn('Could not assign tab to native group:', error);
     }
-  } catch (error) {
-    // Native tabGroups might not be available
-    console.warn('Could not assign tab to native group:', error);
   }
 
   const toIndex = -1;
@@ -403,18 +475,19 @@ async function createGroupInWindow(browserWindow) {
 
   const groupId = await newGroupUid(browserWindow.id);
 
-  // Create native browser tab group
+  // Create native browser tab group if API is available
   let nativeGroupId = null;
-  try {
-    const nativeGroup = await browser.tabGroups.create({
-      title: `${groupId}: ${browser.i18n.getMessage('defaultGroupName')}`,
-      color: 'grey',
-      windowId: browserWindow.id,
-    });
-    nativeGroupId = nativeGroup.id;
-  } catch (error) {
-    // TabGroups API might not be available in all browsers
-    console.warn('Native tabGroups API not available:', error);
+  if (hasTabGroups) {
+    try {
+      const nativeGroup = await browser.tabGroups.create({
+        title: `${groupId}: ${browser.i18n.getMessage('defaultGroupName')}`,
+        color: 'grey',
+        windowId: browserWindow.id,
+      });
+      nativeGroupId = nativeGroup.id;
+    } catch (error) {
+      console.warn('Failed to create native tab group:', error);
+    }
   }
 
   const groups = [{
@@ -498,9 +571,80 @@ async function salvageGrouplessTabs() {
  * Migration Utility: Convert existing groups to hybrid system with native tab groups
  * This ensures existing users' groups get native tab group counterparts
  */
-async function migrateToHybridGroups() {
+/**
+ * Verify that native tab group IDs are correctly persisted in session storage
+ * This runs after migration to ensure data integrity
+ */
+async function verifyNativeGroupPersistence() {
+  if (!hasTabGroups) {
+    return;
+  }
+
   try {
-    console.log('Starting migration to hybrid tab groups...');
+    if (DEBUG) {
+      console.log('Verifying native group persistence...');
+    }
+
+    const windows = await browser.windows.getAll({});
+
+    await Promise.all(windows.map(async (window) => {
+      const groups = await browser.sessions.getWindowValue(window.id, 'groups');
+
+      if (!groups || !Array.isArray(groups)) {
+        return;
+      }
+
+      await Promise.all(groups.map(async (group) => {
+        if (group.nativeGroupId === undefined || group.nativeGroupId === null) {
+          return;
+        }
+
+        try {
+          // Try to get the native group to verify it still exists
+          const nativeGroup = await browser.tabGroups.get(group.nativeGroupId);
+          if (DEBUG) {
+            console.log(`✓ Verified native group ${group.nativeGroupId} for panorama group ${group.id}`);
+          }
+
+          // Verify the title matches
+          if (nativeGroup.title !== group.name) {
+            console.warn(`Native group ${group.nativeGroupId} title mismatch: "${nativeGroup.title}" vs "${group.name}"`);
+          }
+        } catch (error) {
+          console.error(`✗ Native group ${group.nativeGroupId} not found for panorama group ${group.id}:`, error);
+
+          // Clean up the broken reference
+          const updatedGroups = groups.map((g) => {
+            if (g.id === group.id) {
+              return { ...g, nativeGroupId: null };
+            }
+            return g;
+          });
+          await browser.sessions.setWindowValue(window.id, 'groups', updatedGroups);
+          console.log(`Cleaned up broken native group reference for group ${group.id}`);
+        }
+      }));
+    }));
+
+    if (DEBUG) {
+      console.log('Native group persistence verification complete');
+    }
+  } catch (error) {
+    console.error('Failed to verify native group persistence:', error);
+  }
+}
+
+async function migrateToHybridGroups() {
+  // Skip migration if browser doesn't support tabGroups API
+  if (!hasTabGroups) {
+    console.log('Browser does not support tabGroups API, skipping migration');
+    return;
+  }
+
+  try {
+    if (DEBUG) {
+      console.log('Starting migration to hybrid tab groups...');
+    }
 
     // Check if migration has already been done
     const migrationComplete = await browser.storage.local.get('hybridGroupsMigrationComplete');
@@ -519,12 +663,16 @@ async function migrateToHybridGroups() {
         return;
       }
 
-      console.log(`Migrating ${groups.length} groups for window ${window.id}`);
+      if (DEBUG) {
+        console.log(`Migrating ${groups.length} groups for window ${window.id}`);
+      }
 
       const updatedGroups = await Promise.all(groups.map(async (group) => {
         // Skip if already has a native group ID
         if (group.nativeGroupId !== undefined && group.nativeGroupId !== null) {
-          console.log(`Group ${group.id} already has native group ${group.nativeGroupId}`);
+          if (DEBUG) {
+            console.log(`Group ${group.id} already has native group ${group.nativeGroupId}`);
+          }
           return group;
         }
 
@@ -543,7 +691,9 @@ async function migrateToHybridGroups() {
           const validTabIds = groupTabIds.filter((id) => id !== null);
 
           if (validTabIds.length === 0) {
-            console.log(`Group ${group.id} has no tabs, skipping native group creation`);
+            if (DEBUG) {
+              console.log(`Group ${group.id} has no tabs, skipping native group creation`);
+            }
             return group;
           }
 
@@ -558,7 +708,9 @@ async function migrateToHybridGroups() {
               tabIds: validTabIds,
             });
 
-            console.log(`Created native group ${groupId} for active panorama group ${group.id} with ${validTabIds.length} tabs`);
+            if (DEBUG) {
+              console.log(`Created native group ${groupId} for active panorama group ${group.id} with ${validTabIds.length} tabs`);
+            }
 
             // Update the native group with title and color
             await browser.tabGroups.update(groupId, {
@@ -575,7 +727,9 @@ async function migrateToHybridGroups() {
 
           // For inactive groups, just mark as migrated without native group
           // The native group will be created when the group becomes active
-          console.log(`Group ${group.id} is inactive, will create native group when activated`);
+          if (DEBUG) {
+            console.log(`Group ${group.id} is inactive, will create native group when activated`);
+          }
           return group;
         } catch (error) {
           console.warn(`Failed to create native group for group ${group.id}:`, error);
@@ -586,12 +740,19 @@ async function migrateToHybridGroups() {
 
       // Save updated groups back to session storage
       await browser.sessions.setWindowValue(window.id, 'groups', updatedGroups);
-      console.log(`Migration complete for window ${window.id}`);
+      if (DEBUG) {
+        console.log(`Migration complete for window ${window.id}`);
+      }
     }));
 
     // Mark migration as complete
     await browser.storage.local.set({ hybridGroupsMigrationComplete: true });
-    console.log('Hybrid groups migration completed successfully!');
+    if (DEBUG) {
+      console.log('Hybrid groups migration completed successfully!');
+    }
+
+    // Verify persistence after migration
+    await verifyNativeGroupPersistence();
   } catch (error) {
     console.error('Migration to hybrid groups failed:', error);
     // Don't mark as complete so it can retry on next startup
@@ -600,6 +761,12 @@ async function migrateToHybridGroups() {
 
 // Setup native browser tab group event listeners for hybrid functionality
 function setupTabGroupListeners() {
+  // Only setup listeners if tabGroups API is available
+  if (!hasTabGroups) {
+    console.log('Browser does not support tabGroups API, skipping listener setup');
+    return;
+  }
+
   try {
     // When user creates group through browser UI
     browser.tabGroups.onCreated.addListener(async (group) => {
@@ -642,7 +809,9 @@ function setupTabGroupListeners() {
       }
     });
 
-    console.log('Native tab group listeners setup successfully');
+    if (DEBUG) {
+      console.log('Native tab group listeners setup successfully');
+    }
   } catch (error) {
     console.warn('Native tabGroups API not available:', error);
   }
@@ -659,7 +828,12 @@ async function init() {
   // Migrate existing groups to hybrid system with native tab groups
   await migrateToHybridGroups();
 
-  console.log('Finished setup');
+  // Create menus after groups are initialized
+  await createMenuList();
+
+  if (DEBUG) {
+    console.log('Finished setup');
+  }
 
   const disablePopupView = options.view !== 'popup';
   if (disablePopupView) {
