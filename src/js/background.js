@@ -472,7 +472,7 @@ async function tabCreated(tab) {
                             && window.backgroundState.openingView?.creationTimestamp
                             && (now - window.backgroundState.openingView.creationTimestamp) < 100;
   const isViewTabByUrl = tab.url === viewUrl || tab.pendingUrl === viewUrl;
-  
+
   if (DEBUG) {
     console.log(`tabCreated: tab ${tab.id}, url="${tab.url}", pendingUrl="${tab.pendingUrl}", viewUrl="${viewUrl}", isViewTabById=${isViewTabById}, isViewTabByWindow=${isViewTabByWindow}, isViewTabByUrl=${isViewTabByUrl}`);
   }

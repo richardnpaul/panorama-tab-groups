@@ -14,7 +14,7 @@ This document summarizes the modernization work completed to bring the Firefox e
   - Updated `moveTab()`, `createGroupInWindow()`, and `toggleVisibleTabs()` with conditional logic
   - Files modified: [src/js/background.js](src/js/background.js)
 
-### ✅ Step 2: Collapse/Uncollapse Integration  
+### ✅ Step 2: Collapse/Uncollapse Integration
 - **Status**: Complete
 - **Changes**:
   - Updated `toggleVisibleTabs()` to collapse native groups before hiding tabs
