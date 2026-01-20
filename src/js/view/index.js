@@ -82,6 +82,11 @@ async function setLayoutMode(mode) {
 }
 
 async function captureThumbnail(tab) {
+  // Check if captureTab API is available
+  if (typeof browser.tabs.captureTab !== 'function') {
+    return; // Skip thumbnail capture if API not available
+  }
+
   const tabId = tab.id;
 
   const cachedThumbnail = await browser.sessions.getTabValue(tabId, 'thumbnail');
@@ -314,11 +319,6 @@ async function singleClick(e) {
  * to respond to user actions and react to changes
  */
 async function initView() {
-  // set tiling off initially
-  // const windowId = (await browser.windows.getCurrent()).id;
-  // const tilingStatus = await browser.sessions.setWindowValue(windowId, 'tilingStatus', 'true');
-  setLayoutMode('freeform');
-
   // set locale specific titles
   document.getElementById('newGroup').title = browser.i18n.getMessage('newGroupButton');
   document.getElementById('settings').title = browser.i18n.getMessage('settingsButton');
@@ -331,11 +331,15 @@ async function initView() {
 
   view.groupsNode.appendChild(createDragIndicator());
 
+  // Initialize groups data BEFORE initializing nodes
   await groups.init();
 
-  // init Nodes
+  // init Nodes (must be done before setLayoutMode which calls resizeGroups)
   await initTabNodes(view.tabId);
   await initGroupNodes(view.groupsNode);
+
+  // Now set layout mode (calls resizeGroups which needs groupNodes to be initialized)
+  setLayoutMode('freeform');
 
   resizeGroups();
 
