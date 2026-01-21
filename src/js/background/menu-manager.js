@@ -89,7 +89,12 @@ export async function handleMenuChange(message) {
       await addRefreshMenuItem(); // move refresh menu to end
       break;
     case 'removeMenuItem':
-      browser.menus.remove(String(message.groupId));
+      try {
+        await browser.menus.remove(String(message.groupId));
+      } catch (error) {
+        // Menu item may not exist - log warning but don't throw
+        console.warn(`Could not remove menu item ${message.groupId}:`, error.message);
+      }
       break;
     case 'updateMenuItem':
       browser.menus.update(String(message.groupId), { title: `${message.groupId}: ${message.groupName}` });

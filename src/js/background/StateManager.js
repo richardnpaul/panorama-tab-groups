@@ -63,8 +63,16 @@ export class StateManager {
    * @param {number} groupId - The group ID to set as active
    */
   async setActiveGroup(windowId, groupId) {
-    await browser.sessions.setWindowValue(windowId, 'activeGroup', groupId);
-    this.invalidateCache(`activeGroup_${windowId}`);
+    console.log(`[StateManager] setActiveGroup called: windowId=${windowId}, groupId=${groupId}`);
+    try {
+      await browser.sessions.setWindowValue(windowId, 'activeGroup', groupId);
+      console.log('[StateManager] setWindowValue completed successfully');
+      this.invalidateCache(`activeGroup_${windowId}`);
+      console.log('[StateManager] setActiveGroup complete');
+    } catch (error) {
+      console.error(`[StateManager] ERROR in setWindowValue(${windowId}, 'activeGroup', ${groupId}):`, error);
+      throw error;
+    }
   }
 
   /**

@@ -14,6 +14,7 @@ import saveOptionToolbarPosition from './toolbar.js';
 import { loadBackup, saveBackup } from './backup.js';
 import getStatistics from './statistics.js';
 import resetPTG from './reset.js';
+import initNativeGroupsOption from './native-groups.js';
 
 function restoreOptions(options, loadedShortcuts) {
   // Shortcuts
@@ -119,6 +120,7 @@ async function init() {
   addTranslations();
   attachEventHandler(options, await shortcuts);
   getStatistics();
+  await initNativeGroupsOption();
 }
 
 document.addEventListener('DOMContentLoaded', init);

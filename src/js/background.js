@@ -2,7 +2,7 @@ import { loadOptions } from './_share/options.js';
 import { stateManager } from './background/StateManager.js';
 import { mod, getColorForGroupId } from './background/utils.js';
 import { createMenuList, handleMenuChange } from './background/menu-manager.js';
-import { migrateToHybridGroups, setupTabGroupListeners } from './background/native-groups.js';
+import { migrateToHybridGroups, setupTabGroupListeners, cleanupNativeGroups } from './background/native-groups.js';
 
 const manifest = browser.runtime.getManifest();
 
@@ -30,6 +30,19 @@ if (DEBUG) {
     tabGroups: hasTabGroups,
     mode: browserMode,
   });
+}
+
+/**
+ * Check if native tab groups should be used
+ * Requires both API availability AND user preference
+ * @returns {Promise<boolean>}
+ */
+async function shouldUseNativeGroups() {
+  if (!hasTabGroups) {
+    return false; // API not available
+  }
+  const options = await loadOptions();
+  return options.useNativeGroups !== false; // Default to true if not set
 }
 
 window.backgroundState = {
@@ -71,9 +84,13 @@ async function setActionTitle(windowId, activeGroup = null) {
 }
 
 async function toggleVisibleTabs(activeGroup, noTabSelected) {
+  const toggleStartTime = Date.now();
   if (DEBUG) {
     const stack = new Error().stack.split('\n').slice(2, 5).join('\n');
-    console.log(`toggleVisibleTabs called: activeGroup=${activeGroup}, noTabSelected=${noTabSelected}`);
+    console.log(`[ToggleVisibleTabs] START at ${toggleStartTime}: activeGroup=${activeGroup}, noTabSelected=${noTabSelected}`);
+    if (activeGroup === undefined) {
+      console.warn('[ToggleVisibleTabs] ⚠️ activeGroup is UNDEFINED - will cause unexpected behavior!');
+    }
     console.log(`  Call stack:\n${stack}`);
   }
 
@@ -117,19 +134,30 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
       if (groupId !== activeGroup) {
         hideTabIds.push(tab.id);
         if (DEBUG) {
-          console.log(`  Will hide tab ${tab.id} (${tab.title}) - groupId ${groupId}`);
+          console.log(`  Will hide tab ${tab.id} (${tab.title}) - groupId ${groupId} !== activeGroup ${activeGroup}`);
+          if (activeGroup === undefined) {
+            console.warn(`    ⚠️ Hiding because ${groupId} !== undefined (always true!)`);
+          }
         }
       } else {
         showTabIds.push(tab.id);
         showTabs.push(tab);
         if (DEBUG) {
-          console.log(`  Will show tab ${tab.id} (${tab.title}) - groupId ${groupId}`);
+          console.log(`  Will show tab ${tab.id} (${tab.title}) - groupId ${groupId} === activeGroup ${activeGroup}`);
         }
       }
     } catch {
       // The tab has probably been closed, this should be safe to ignore
     }
   }));
+
+  if (DEBUG) {
+    const elapsed = Date.now() - toggleStartTime;
+    console.log(`[ToggleVisibleTabs] Decision complete at +${elapsed}ms: ${hideTabIds.length} to hide, ${showTabIds.length} to show`);
+    if (showTabIds.length === 0 && hideTabIds.length > 0) {
+      console.error(`[ToggleVisibleTabs] ⚠️ ERROR: No tabs will be shown! All ${hideTabIds.length} tabs will be hidden!`);
+    }
+  }
 
   if (noTabSelected) {
     showTabs.sort((tabA, tabB) => tabB.lastAccessed - tabA.lastAccessed);
@@ -142,7 +170,8 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
   // Step 1: Collapse and hide inactive groups
   if (hideTabIds.length > 0) {
     // Collapse native groups first (if available)
-    if (hasTabGroups && groups) {
+    const useNativeGroups = await shouldUseNativeGroups();
+    if (useNativeGroups && groups) {
       await Promise.all(groups.map(async (group) => {
         if (group.nativeGroupId && group.id !== activeGroup) {
           try {
@@ -156,7 +185,15 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
 
     // Then hide tabs (Firefox only)
     if (hasTabHide) {
+      if (DEBUG) {
+        const elapsed = Date.now() - toggleStartTime;
+        console.log(`[ToggleVisibleTabs] About to hide ${hideTabIds.length} tabs at +${elapsed}ms`);
+      }
       await browser.tabs.hide(hideTabIds);
+      if (DEBUG) {
+        const elapsed = Date.now() - toggleStartTime;
+        console.log(`[ToggleVisibleTabs] Hide complete at +${elapsed}ms`);
+      }
     }
   }
 
@@ -164,11 +201,20 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
   if (showTabIds.length > 0) {
     // Show tabs first (Firefox only)
     if (hasTabHide) {
+      if (DEBUG) {
+        const elapsed = Date.now() - toggleStartTime;
+        console.log(`[ToggleVisibleTabs] About to show ${showTabIds.length} tabs at +${elapsed}ms`);
+      }
       await browser.tabs.show(showTabIds);
+      if (DEBUG) {
+        const elapsed = Date.now() - toggleStartTime;
+        console.log(`[ToggleVisibleTabs] Show complete at +${elapsed}ms`);
+      }
     }
 
     // Then uncollapse native group (if available)
-    if (hasTabGroups && groups) {
+    const useNativeGroups = await shouldUseNativeGroups();
+    if (useNativeGroups && groups) {
       const activeGroupData = groups.find((g) => g.id === activeGroup);
       if (activeGroupData && activeGroupData.nativeGroupId) {
         try {
@@ -184,6 +230,11 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
     const window = await browser.windows.getLastFocused();
     await setActionTitle(window.id, activeGroup);
   }
+  
+  if (DEBUG) {
+    const elapsed = Date.now() - toggleStartTime;
+    console.log(`[ToggleVisibleTabs] COMPLETE at +${elapsed}ms`);
+  }
 }
 
 async function moveTab(tabId, groupId) {
@@ -191,7 +242,8 @@ async function moveTab(tabId, groupId) {
   await stateManager.setTabGroup(tabId, groupId);
 
   // Also move tab to native browser group if available (but only for visible tabs)
-  if (hasTabGroups) {
+  const useNativeGroups = await shouldUseNativeGroups();
+  if (useNativeGroups) {
     try {
       const groups = await stateManager.getGroups(windowId);
       const targetGroup = groups.find((g) => g.id === parseInt(groupId, 10));
@@ -412,7 +464,9 @@ async function tabCreated(tab) {
 
   // Assign to native browser group (do this regardless of whether groupId was already set)
   // This ensures tabs created by Group.addNewTab() get properly assigned to native groups
-  if (hasTabGroups && tabGroupId !== -1) {
+  let visibilityUpdated = false;
+  const useNativeGroups = await shouldUseNativeGroups();
+  if (useNativeGroups && tabGroupId !== -1) {
     try {
       const groups = await stateManager.getGroups(tab.windowId);
       const currentGroup = groups?.find((g) => g.id === tabGroupId);
@@ -453,6 +507,7 @@ async function tabCreated(tab) {
               console.log(`Updating visibility for newly created native group (tab.active=${tab.active}, tabGroupId=${tabGroupId}, activeGroup=${activeGroup})`);
             }
             await toggleVisibleTabs(tabGroupId);
+            visibilityUpdated = true;
           }
         }
       } else if (currentGroup && currentGroup.nativeGroupId && tabGroupId === activeGroup) {
@@ -471,6 +526,7 @@ async function tabCreated(tab) {
             console.log(`Updating visibility for existing native group (tab.active=${tab.active}, tabGroupId=${tabGroupId})`);
           }
           await toggleVisibleTabs(tabGroupId);
+          visibilityUpdated = true;
         }
       } else if (DEBUG) {
         console.log(`Skipped native group assignment for tab ${tab.id}: group inactive (will be grouped when activated)`);
@@ -479,6 +535,16 @@ async function tabCreated(tab) {
       // Native tabGroups might not be available
       console.warn('Could not assign new tab to native group:', error);
     }
+  }
+  
+  // Update visibility if this is the active tab, regardless of native groups setting
+  // This ensures the panorama view is hidden when a new tab becomes active
+  // Only call if visibility wasn't already updated in the native groups block
+  if (tab.active && tabGroupId !== -1 && !visibilityUpdated) {
+    if (DEBUG) {
+      console.log(`[TabCreated] Updating visibility for active tab ${tab.id} in group ${tabGroupId}`);
+    }
+    await toggleVisibleTabs(tabGroupId);
   }
 }
 
@@ -496,6 +562,11 @@ async function tabDetached(tabId, detachInfo) { // eslint-disable-line no-unused
  * is from another group (or is Panorama Tab Groups tab).
  */
 async function tabActivated(activeInfo) {
+  const startTime = Date.now();
+  if (DEBUG) {
+    console.log(`[TabActivated] START at ${startTime}: tabId=${activeInfo.tabId}`);
+  }
+  
   const tab = await browser.tabs.get(activeInfo.tabId);
 
   if (tab.pinned) {
@@ -506,18 +577,59 @@ async function tabActivated(activeInfo) {
   // If this is a newly-created tab, tabCreated() might not have set a
   // groupId yet, so retry until it does.
   const activeGroup = await stateManager.getTabGroup(activeInfo.tabId);
+  
+  if (DEBUG) {
+    const elapsed = Date.now() - startTime;
+    console.log(`[TabActivated] Active group determined at +${elapsed}ms: activeGroup=${activeGroup}`);
+    if (activeGroup === undefined) {
+      console.warn('[TabActivated] ⚠️ activeGroup is UNDEFINED - race condition detected!');
+      console.log('[TabActivated] Skipping - tabCreated will handle visibility when group is assigned');
+    }
+  }
+  
+  // Skip processing if activeGroup is undefined (race condition with tabCreated)
+  // tabCreated will call toggleVisibleTabs once the group is properly assigned
+  if (activeGroup === undefined) {
+    return;
+  }
 
   if (activeGroup !== -1) {
     // activated tab is not Panorama View tab
-    await stateManager.setActiveGroup(tab.windowId, activeGroup);
+    if (DEBUG) {
+      console.log(`[TabActivated] Entering activeGroup !== -1 block (activeGroup=${activeGroup})`);
+    }
+    try {
+      await stateManager.setActiveGroup(tab.windowId, activeGroup);
+      if (DEBUG) {
+        console.log('[TabActivated] setActiveGroup completed');
+      }
+    } catch (error) {
+      console.error(`[TabActivated] ERROR in setActiveGroup(${tab.windowId}, ${activeGroup}):`, error);
+      if (DEBUG) {
+        console.log('[TabActivated] Continuing despite setActiveGroup error...');
+      }
+    }
 
     // Create native tab group if needed (for groups created in panorama view)
-    if (hasTabGroups) {
+    const useNativeGroups = await shouldUseNativeGroups();
+    if (DEBUG) {
+      console.log(`[TabActivated] shouldUseNativeGroups returned: ${useNativeGroups}`);
+    }
+    if (useNativeGroups) {
+      if (DEBUG) {
+        console.log('[TabActivated] Entering useNativeGroups block');
+      }
       const groups = await stateManager.getGroups(tab.windowId);
       const currentGroup = groups?.find((g) => g.id === activeGroup);
+      if (DEBUG) {
+        console.log(`[TabActivated] Found currentGroup: ${currentGroup?.name || 'none'}, querying tabGroups...`);
+      }
 
       // Check if the current tab already has a native group assignment
       const currentTabGroups = await browser.tabGroups.query({ windowId: tab.windowId });
+      if (DEBUG) {
+        console.log(`[TabActivated] tabGroups.query returned ${currentTabGroups.length} groups`);
+      }
       const tabsInNativeGroups = await Promise.all(
         currentTabGroups.map(async (ng) => {
           const tabs = await browser.tabs.query({ groupId: ng.id });
@@ -567,10 +679,24 @@ async function tabActivated(activeInfo) {
           console.log(`Linked existing native group ${existingNativeGroup.nativeGroupId} to panorama group ${activeGroup}`);
         }
       }
+    } else if (DEBUG) {
+      console.log('[TabActivated] Skipped useNativeGroups block (disabled)');
     }
+  } else if (DEBUG) {
+    console.log('[TabActivated] Skipped activeGroup !== -1 block (panorama view tab)');
   }
 
+  if (DEBUG) {
+    const elapsed = Date.now() - startTime;
+    console.log(`[TabActivated] About to call toggleVisibleTabs at +${elapsed}ms with activeGroup=${activeGroup}`);
+  }
+  
   await toggleVisibleTabs(activeGroup);
+  
+  if (DEBUG) {
+    const elapsed = Date.now() - startTime;
+    console.log(`[TabActivated] COMPLETE at +${elapsed}ms`);
+  }
 }
 
 /** Get a new UID for a group */
@@ -602,8 +728,8 @@ async function createGroupInWindow(browserWindow) {
 
   const groups = [{
     id: groupId,
-    name: `${groupId}: ${browser.i18n.getMessage('defaultGroupName')}`,
-    containerId: 'firefox-default',
+    name: `${browser.i18n.getMessage('defaultGroupName')}${groupId}`,
+    containerId: 'browser-default',
     nativeGroupId, // Store reference to native group
     rect: {
       x: 0, y: 0, w: 0.5, h: 0.5,
@@ -784,7 +910,128 @@ window.refreshView = async function refreshView() {
   browser.tabs.onAttached.addListener(tabAttached);
   browser.tabs.onDetached.addListener(tabDetached);
   browser.tabs.onActivated.addListener(tabActivated);
+
+  // Listen for useNativeGroups option changes
+  browser.storage.onChanged.addListener(async (changes, areaName) => {
+    if (DEBUG) {
+      console.log('[Storage] onChanged fired - areaName:', areaName, 'changes:', changes);
+    }
+
+    if (areaName === 'sync' && changes.useNativeGroups) {
+      const { oldValue, newValue } = changes.useNativeGroups;
+
+      if (DEBUG) {
+        console.log(`[Storage] useNativeGroups changed: ${oldValue} -> ${newValue}`);
+      }
+
+      // If native groups are being disabled, cleanup
+      if (oldValue === true && newValue === false) {
+        if (DEBUG) {
+          console.log('[Storage] Native groups disabled, starting cleanup...');
+        }
+        try {
+          await cleanupNativeGroups(DEBUG);
+          if (DEBUG) {
+            console.log('[Storage] Cleanup completed successfully');
+          }
+        } catch (error) {
+          console.error('[Storage] Cleanup failed:', error);
+        }
+      }
+    }
+  });
 };
+
+/**
+ * Delete a group with complete cleanup including native tab groups
+ * Handles ungrouping tabs, removing tabs, updating storage, and removing menu items
+ *
+ * @param {Object} params - Deletion parameters
+ * @param {number} params.groupId - ID of the group to delete
+ * @param {number} params.windowId - Window ID containing the group
+ * @param {number} params.nativeGroupId - Native group ID (if exists)
+ * @param {Array<number>} params.tabIds - Array of tab IDs in the group
+ * @returns {Promise<{success: boolean, error?: string}>}
+ */
+async function deleteGroupWithCleanup({
+  groupId, windowId, nativeGroupId, tabIds,
+}) {
+  if (DEBUG) {
+    console.log(`Deleting group ${groupId} with ${tabIds?.length || 0} tabs, nativeGroupId: ${nativeGroupId}`);
+  }
+
+  try {
+    // Step 1: Ungroup tabs from native group if applicable
+    if (hasTabGroups && nativeGroupId !== undefined && nativeGroupId !== null) {
+      try {
+        // Verify tabs still exist and are in the native group before ungrouping
+        const existingTabs = await browser.tabs.query({ windowId });
+        const tabsToUngroup = tabIds.filter((id) => existingTabs.some(
+          (t) => t.id === id && t.groupId === nativeGroupId,
+        ));
+
+        if (tabsToUngroup.length > 0) {
+          await browser.tabs.ungroup(tabsToUngroup);
+          if (DEBUG) {
+            console.log(`Ungrouped ${tabsToUngroup.length} tabs from native group ${nativeGroupId}`);
+          }
+        }
+      } catch (error) {
+        // Native group may already be removed or tabs already ungrouped - this is OK
+        if (DEBUG) {
+          console.log(`Could not ungroup tabs (group may already be removed): ${error.message}`);
+        }
+      }
+    }
+
+    // Step 2: Remove all tabs in the group
+    if (tabIds && tabIds.length > 0) {
+      await Promise.all(tabIds.map(async (id) => {
+        try {
+          await browser.tabs.remove(id);
+        } catch (error) {
+          // Tab may already be closed - this is OK
+          if (DEBUG) {
+            console.log(`Could not remove tab ${id}: ${error.message}`);
+          }
+        }
+      }));
+
+      if (DEBUG) {
+        console.log(`Removed ${tabIds.length} tabs from group ${groupId}`);
+      }
+    }
+
+    // Step 3: Update storage to remove group
+    const groups = await stateManager.getGroups(windowId);
+    if (groups) {
+      const leftGroups = groups.filter((g) => g.id !== groupId);
+      await stateManager.setGroups(windowId, leftGroups);
+
+      if (DEBUG) {
+        console.log(`Updated storage: ${leftGroups.length} groups remaining`);
+      }
+    }
+
+    // Step 4: Remove menu item
+    try {
+      await browser.menus.remove(String(groupId));
+      if (DEBUG) {
+        console.log(`Removed menu item for group ${groupId}`);
+      }
+    } catch (error) {
+      // Menu item may not exist - this is OK
+      if (DEBUG) {
+        console.log(`Could not remove menu item: ${error.message}`);
+      }
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error(`Group deletion failed for group ${groupId}:`, error);
+    return { success: false, error: error.message };
+  }
+}
 
 // TODO: Remove? Is this used?
 function handleMessage(message, sender) { // eslint-disable-line no-unused-vars
@@ -804,6 +1051,26 @@ function handleInternalMessage(message, sender, sendResponse) {
       // Handle menu change messages
       handleMenuChange(message);
       break;
+    case 'deleteGroup':
+      // Handle complete group deletion with native cleanup
+      deleteGroupWithCleanup(message).then((response) => {
+        sendResponse(response);
+      }).catch((error) => {
+        sendResponse({ success: false, error: error.message });
+      });
+      return true; // Keep message channel open for async response
+    case 'cleanupNativeGroups':
+      // Handle cleanup when native groups option is disabled
+      if (DEBUG) {
+        console.log('[Message] cleanupNativeGroups action received');
+      }
+      cleanupNativeGroups(DEBUG).then(() => {
+        sendResponse({ success: true });
+      }).catch((error) => {
+        console.error('[Message] Cleanup failed:', error);
+        sendResponse({ success: false, error: error.message });
+      });
+      return true; // Keep message channel open for async response
     case 'setBackgroundState':
       window.backgroundState[message.key] = message.value;
       break;

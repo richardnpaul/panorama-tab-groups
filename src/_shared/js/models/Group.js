@@ -56,14 +56,21 @@ export default class Group {
       await this.loadTabs();
     }
 
-    const leftGroups = groups.filter((group) => group.id !== this.id);
-
-    this.tabs.forEach((tab) => {
-      browser.tabs.remove(tab.id);
+    // Delegate to background script for proper cleanup including native groups
+    const response = await browser.runtime.sendMessage({
+      action: 'deleteGroup',
+      groupId: this.id,
+      windowId: this.View.windowId,
+      nativeGroupId: this.nativeGroupId,
+      tabIds: this.tabs.map(t => t.id),
     });
 
-    browser.sessions.setWindowValue(this.View.windowId, 'groups', leftGroups);
+    if (!response.success) {
+      console.error(`Failed to delete group ${this.id}:`, response.error);
+      throw new Error(`Group deletion failed: ${response.error}`);
+    }
 
+    const leftGroups = groups.filter((group) => group.id !== this.id);
     return leftGroups;
   }
 

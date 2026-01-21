@@ -269,3 +269,73 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
     console.warn('Native tabGroups API not available:', error);
   }
 }
+
+/**
+ * Cleanup all native tab groups when feature is disabled
+ * Ungroups all tabs while preserving the Panorama Tab Groups data
+ *
+ * @param {boolean} DEBUG - Debug flag for logging
+ */
+export async function cleanupNativeGroups(DEBUG) {
+  if (DEBUG) {
+    console.log('Starting native groups cleanup...');
+  }
+
+  try {
+    const windows = await browser.windows.getAll({});
+
+    await Promise.all(windows.map(async (window) => {
+      const groups = await stateManager.getGroups(window.id);
+
+      if (!groups || !Array.isArray(groups)) {
+        return;
+      }
+
+      if (DEBUG) {
+        console.log(`Cleaning up native groups for window ${window.id}`);
+      }
+
+      // Get ALL tabs in this window that are in any native group
+      try {
+        const allTabs = await browser.tabs.query({ windowId: window.id });
+        // Filter for tabs that are in a native group (groupId !== -1)
+        const allTabsInGroups = allTabs.filter((tab) => tab.groupId && tab.groupId !== -1);
+
+        if (allTabsInGroups.length > 0) {
+          const tabIds = allTabsInGroups.map((t) => t.id);
+          await browser.tabs.ungroup(tabIds);
+
+          if (DEBUG) {
+            console.log(`Ungrouped ${tabIds.length} tabs from native groups in window ${window.id}`);
+          }
+        } else if (DEBUG) {
+          console.log(`No tabs in native groups found for window ${window.id}`);
+        }
+      } catch (error) {
+        console.warn(`Failed to ungroup tabs in window ${window.id}:`, error);
+      }
+
+      // Clear nativeGroupId references from Panorama groups
+      const updatedGroups = groups.map((group) => {
+        if (group.nativeGroupId !== undefined && group.nativeGroupId !== null) {
+          if (DEBUG) {
+            console.log(`Clearing nativeGroupId ${group.nativeGroupId} from panorama group ${group.id}`);
+          }
+          // Return new object without nativeGroupId
+          const { nativeGroupId, ...groupWithoutNativeId } = group;
+          return groupWithoutNativeId;
+        }
+        return group;
+      });
+
+      await stateManager.setGroups(window.id, updatedGroups);
+    }));
+
+    if (DEBUG) {
+      console.log('Native groups cleanup completed successfully!');
+    }
+  } catch (error) {
+    console.error('Native groups cleanup failed:', error);
+    throw error; // Re-throw to allow error handling in caller
+  }
+}

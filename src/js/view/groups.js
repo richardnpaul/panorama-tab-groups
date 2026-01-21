@@ -53,7 +53,7 @@ export async function init() {
 
 export async function create() {
   const newId = await newUid();
-  const newName = browser.i18n.getMessage('defaultGroupName');
+  const newName = `${browser.i18n.getMessage('defaultGroupName')}${newId}`;
   const group = {
     id: newId,
     name: newName,
@@ -77,10 +77,37 @@ export async function remove(id) {
   if (index === -1) {
     return;
   }
-  groups.splice(index, 1);
-  browser.runtime.sendMessage({ action: 'removeMenuItem', groupId: id.toString() });
 
-  await save();
+  const group = groups[index];
+
+  // Gather tab IDs belonging to this group
+  const allTabs = await browser.tabs.query({ currentWindow: true });
+  const tabIds = [];
+
+  await Promise.all(allTabs.map(async (tab) => {
+    const tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+    if (tabGroupId === id) {
+      tabIds.push(tab.id);
+    }
+  }));
+
+  // Delegate to background for comprehensive cleanup including native groups
+  const response = await browser.runtime.sendMessage({
+    action: 'deleteGroup',
+    groupId: id,
+    windowId,
+    nativeGroupId: group.nativeGroupId,
+    tabIds,
+  });
+
+  if (!response || !response.success) {
+    console.error(`Failed to delete group ${id}:`, response?.error || 'No response');
+    return;
+  }
+
+  // Update local groups array to reflect deletion
+  groups.splice(index, 1);
+  // Note: Background already updated session storage via stateManager
 }
 
 export async function rename(id, newName) {
