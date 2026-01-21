@@ -12,9 +12,7 @@ export async function getAllTabsInWindow() {
 
 export async function forEachTab(callback) {
   const tabs = await getAllTabsInWindow();
-  tabs.forEach(async (tab, tabIndex) => {
-    await callback(tabs[tabIndex]);
-  });
+  await Promise.all(tabs.map(async (tab, tabIndex) => callback(tabs[tabIndex])));
 }
 
 export async function forEachTabSync(callback) {

@@ -23,15 +23,10 @@ export async function closeGroup(content, group) {
     console.log(tabCount);
     const confirmationText = getPluralForm(tabCount, browser.i18n.getMessage('closeGroupWarning', [tabCount]));
     if (window.confirm(confirmationText)) {
-      groups.remove(group.id);
+      await groups.remove(group.id);
       removeGroupNode(group.id);
 
-      forEachTab(async (tab) => {
-        const groupId = await getGroupId(tab.id);
-        if (groupId === group.id) {
-          browser.tabs.remove(tab.id);
-        }
-      });
+      // Tab removal now handled by groups.remove() -> deleteGroupWithCleanup
       const first = true;
       groups.forEach((g) => {
         if (first) {
@@ -40,7 +35,7 @@ export async function closeGroup(content, group) {
       });
     }
   } else {
-    groups.remove(group.id);
+    await groups.remove(group.id);
     removeGroupNode(group.id);
   }
 }

@@ -158,7 +158,7 @@ export default class View {
     const rectH = 1 / pitchY;
     const newGroup = {
       id: newGroupUid,
-      name: `${newGroupUid}: ${browser.i18n.getMessage('defaultGroupName')}`,
+      name: `${browser.i18n.getMessage('defaultGroupName')} ${newGroupUid}`,
       containerId: 'firefox-default',
       rect: {
         x: rectX,

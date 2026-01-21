@@ -4,12 +4,15 @@ async function getGroupId(Tab) {
 
 export default class Tab {
   constructor(tab) {
-    return (async () => {
-      Object.assign(this, tab);
-      this.groupId = await getGroupId(this);
+    // Initialize synchronously
+    Object.assign(this, tab);
+    this.groupId = null; // Will be loaded asynchronously
+  }
 
-      return this;
-    })();
+  static async create(tab) {
+    const instance = new Tab(tab);
+    instance.groupId = await getGroupId(instance);
+    return instance;
   }
 
   async open() {

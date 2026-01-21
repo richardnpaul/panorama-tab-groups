@@ -81,3 +81,28 @@ h2 {
   border: none;
   outline-color: #0a84ff;
 }
+
+#optionsNativeGroups {
+  margin: 2em 0;
+}
+
+#nativeGroupsContainer {
+  margin: 1em 0;
+}
+
+#nativeGroupsWarning {
+  margin: 0.5em 0 0 1.5em;
+  font-size: 0.9em;
+}
+
+.info-text {
+  color: #0060df;
+}
+
+.warning-text {
+  color: #ff9400;
+}
+
+.error-text {
+  color: #d70022;
+}

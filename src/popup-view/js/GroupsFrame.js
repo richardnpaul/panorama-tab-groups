@@ -130,7 +130,7 @@ async function renderGroupListItem(Group) {
   const tabCount = Group.tabs.length || 0;
   const isActive = Group.id === window.PopupView.lastActiveTab.groupId;
   const node = getElementNodeFromString(`
-        <li id="group-${Group.id}" 
+        <li id="group-${Group.id}"
             class="list__item ${
   isActive ? 'list__item--highlight' : ''
 }" data-nav-row>
@@ -139,7 +139,7 @@ async function renderGroupListItem(Group) {
                 <button class="list__link">
                     <span>${Group.name}</span>
                 </button>
-                <button class="list__close" 
+                <button class="list__close"
                         title="${browser.i18n.getMessage(
     'closeGroup',
   )}"></button>
@@ -221,7 +221,7 @@ async function renderGroupList() {
 async function renderHeader() {
   const searchNode = getElementNodeFromString(`
         <div class="form-field form-field--search">
-            <input class="form-field__input" type="search" name="query" 
+            <input class="form-field__input" type="search" name="query"
                    placeholder="${browser.i18n.getMessage(
     'searchForTab.placeholder',
   )}" />
@@ -229,9 +229,9 @@ async function renderHeader() {
     `);
   const searchInput = searchNode.querySelector('[type="search"]');
   const groups = await window.PopupView.getGroups();
-  await groups.forEach(async (group) => {
+  await Promise.all(groups.map(async (group) => {
     await group.loadTabs();
-  });
+  }));
   const noResultNode = getElementNodeFromString(`
       <h2 class="list-title">${browser.i18n.getMessage(
     'searchForTab.noResults',
@@ -310,7 +310,7 @@ async function renderHeader() {
   });
 
   const settingsNode = getElementNodeFromString(`
-        <button class="button-ghost button-ghost--settings" 
+        <button class="button-ghost button-ghost--settings"
                 title="${browser.i18n.getMessage('settingsButton')}"></button>
     `);
   settingsNode.addEventListener(

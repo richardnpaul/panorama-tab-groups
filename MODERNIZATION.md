@@ -1,124 +1,149 @@
-# Firefox Extension Modernization Summary
+# Panorama Tab Groups - Modernization Summary
 
-T### 7.### 8. CSS Modernization
+## Overview
+This document summarizes the modernization work completed to bring the Firefox extension from 2020 standards to 2025.
 
-- **Added9. `src/css/browser-style.css` - Browser-style replacement (new file)
-10. `src/icons/options/theme-auto.png` - Auto theme icon (new file)
+## Completed Work
 
-## Files Removed
+### ✅ Step 1: API Feature Detection & Fallback
+- **Status**: Complete
+- **Changes**:
+  - Added API detection for `browser.tabs.hide/show` (Firefox 61+) and `browser.tabGroups` (Firefox 139+/Chrome 89+)
+  - Implemented browser mode detection: `hybrid`, `collapse-only`, `legacy`, `unsupported`
+  - Added feature guards to all tabGroups API calls
+  - Updated `moveTab()`, `createGroupInWindow()`, and `toggleVisibleTabs()` with conditional logic
+  - Files modified: [src/js/background.js](src/js/background.js)
 
-1. `src/background.html` - No longer needed with Manifest V3
+### ✅ Step 2: Collapse/Uncollapse Integration
+- **Status**: Complete
+- **Changes**:
+  - Updated `toggleVisibleTabs()` to collapse native groups before hiding tabs
+  - Proper ordering: collapse → hide (for inactive), show → uncollapse (for active)
+  - Prevents native UI confusion with hidden but visible-appearing tabs
+  - Files modified: [src/js/background.js](src/js/background.js)
 
-## Modern Features Added
+### ✅ Step 3: Async/Await Pattern Fixes
+- **Status**: Complete (5/5 instances fixed)
+- **Problem**: `forEach(async)` doesn't wait for async operations
+- **Solution**: Replaced with `Promise.all(...map(async))`
+- **Files fixed**:
+  - [src/js/view/index.js](src/js/view/index.js#L124) - `captureThumbnails`
+  - [src/js/view/drag.js](src/js/view/drag.js#L24) - `tabMoved`
+  - [src/js/view/tabs.js](src/js/view/tabs.js#L14) - `forEachTab`
+  - [src/js/options/statistics.js](src/js/options/statistics.js#L9) - `getStatistics`
+  - [src/popup-view/js/GroupsFrame.js](src/popup-view/js/GroupsFrame.js#L232) - `renderHeader`
 
-- **System theme following**: Extension can automatically follow OS dark/light mode
-- **Real-time theme switching**: Responds to OS theme changes without reload
-- **Improved defaults**: Better out-of-box experience with system theme detectionser-style.css**: Custom CSS replacement for deprecated browser-style
-- **Dark theme support**: Added proper dark theme media queries
-- **Linked new CSS**: Updated options.html to include new browser-style.css
+### ✅ Step 4: Native Group ID Persistence Verification
+- **Status**: Complete
+- **Changes**:
+  - Added `verifyNativeGroupPersistence()` function to validate group IDs after migration
+  - Automatically cleans up broken native group references
+  - Logs verification status for debugging
+  - Files modified: [src/js/background.js](src/js/background.js)
 
-### 9. Modern UX Improvements
+### ✅ Step 5: Menu Creation Retry Mechanism
+- **Status**: Complete
+- **Changes**:
+  - Removed immediate `createMenuList()` call at module load (line 63)
+  - Moved menu creation to `init()` after groups are initialized
+  - Added try-catch error handling to menu creation
+  - Files modified: [src/js/background.js](src/js/background.js)
 
-- **Auto theme detection**: Added "Follow System" theme option that automatically switches based on OS/browser dark mode preference
-- **System theme listener**: Dynamically responds to OS theme changes in real-time
-- **Improved theme persistence**: Fixed theme selection not being remembered
-- **Better default experience**: New installations default to system theme following
+### ✅ Step 7: Debug Logging Cleanup
+- **Status**: Complete
+- **Changes**:
+  - Added `DEBUG` flag (set to `false` by default)
+  - Wrapped 15+ verbose console.log statements with DEBUG checks
+  - Kept error logs and important state changes
+  - Reduces console noise in production
+  - Files modified: [src/js/background.js](src/js/background.js)
 
-### 10. File Cleanupty and Permissions
+### ✅ Additional Fixes (From Earlier Sessions)
+- **Manifest V3 Conversion**: Updated from V2 to V3
+- **API Modernization**: Changed `browserAction` → `browser.action`
+- **Dark Mode Fix**: Fixed theme persistence and auto-theme feature
+- **Backup Functionality**: Fixed async forEach issues causing empty backups
+- **Menu IDs**: Converted number IDs to strings for API compatibility
+- **CI/CD**: Updated GitHub Actions to Node.js 20.x and 22.x
+- **Linting**: All files pass `web-ext lint` with 0 errors
 
-- **Removed `<all_urls>` permission**: Replaced overly broad `<all_urls>` with specific `activeTab` permission
-- **Principle of least privilege**: Extension now only requests permissions it actually needs
-- **Tab capture functionality**: Uses `activeTab` permission for `browser.tabs.captureTab()` API
+## Browser Compatibility Matrix
 
-### 8. CSS Modernizationis document outlines the changes made to modernize the Panorama Tab Groups Firefox extension from 2020 standards to current Firefox standards.
+| Feature | Firefox 61-138 | Firefox 139+ | Chrome/Edge |
+|---------|---------------|--------------|-------------|
+| tabs.hide/show | ✅ | ✅ | ❌ |
+| tabGroups API | ❌ | ✅ (future) | ✅ |
+| Operating Mode | legacy | hybrid | collapse-only |
 
-## Key Changes Made
+## Testing Status
 
-### 1. Manifest V2 → V3 Migration
+### ⚠️ Pending Tests
+- [ ] Test on Firefox 61-138 (legacy mode)
+- [ ] Test on Firefox 139+ (hybrid mode - when available)
+- [ ] Test on Chrome/Edge (collapse-only mode)
+- [ ] Verify backup/restore across browsers
+- [ ] Test menu creation timing
+- [ ] Verify migration runs only once
 
-- **Updated `manifest_version`**: Changed from 2 to 3
-- **Renamed `applications` to `browser_specific_settings`**: Updated to current naming convention
-- **Updated `browser_action` to `action`**: Manifest V3 standard
-- **Removed `browser_style`**: Deprecated property removed from action and options_ui
-- **Updated background scripts**: Removed background.html, switched to direct script import with `type: "module"`
+## Known Issues
 
-### 2. API Updates
+### 🔍 Step 6: Pinned Tab Reliability (Deferred)
+- **Status**: Investigation needed
+- **Issue**: FIXME in [src/js/view/index.js](src/js/view/index.js#L266) indicates pinned tabs don't update reliably
+- **Current Workaround**: `queueReload()` forces view refresh
+- **Recommendation**: Requires deeper investigation of tab update events
 
-- **browserAction → action**: All `browser.browserAction` calls updated to `browser.action`
-- **extension.getURL() → runtime.getURL()**: Updated deprecated API
-- **extension.getBackgroundPage() → message passing**: Replaced deprecated background page access with proper message passing
+## Code Quality
 
-### 3. Command Updates
+- **Lint Status**: ✅ 0 errors, 14 warnings (expected - Firefox doesn't support tabGroups yet)
+- **Async Patterns**: ✅ All async forEach anti-patterns fixed
+- **Error Handling**: ✅ Try-catch blocks added to API calls
+- **Debug Logging**: ✅ Controlled via DEBUG flag
 
-- **_execute_browser_action → _execute_action**: Updated keyboard shortcut command name
-- Updated related form IDs and labels in options.html
+## Architecture Improvements
 
-### 4. Message Passing Implementation
+### Hybrid Tab Groups System
+The extension now intelligently uses:
+1. **Native tabGroups API** (when available) - Provides browser-native UI for collapsed groups
+2. **Firefox tabs.hide/show** (when available) - Hides inactive tabs completely
+3. **Graceful degradation** - Falls back to available APIs
 
-Added proper message handling system to replace direct background page access:
-- `setBackgroundState`: Set background state variables
-- `refreshView`: Trigger view refresh
-- `checkViewRefresh`: Check if view refresh is needed
-- `clearViewRefresh`: Clear view refresh flag
+### Feature Detection Pattern
+```javascript
+const hasTabHide = typeof browser.tabs.hide !== 'undefined';
+const hasTabGroups = typeof browser.tabGroups !== 'undefined';
 
-### 5. Build System Modernization
-
-- **Updated package.json**:
-  - Bumped version to match manifest version (0.8.12)
-  - Updated dependencies to current versions
-  - Added new npm scripts (build, watch, start)
-  - Fixed repository URL
-  - Added engines specification
-- **Updated ESLint configuration**: Created modern .eslintrc.json with ES2021 support
-- **Created browser-style replacement**: Added custom CSS to replace deprecated browser-style
-
-### 6. CSS Modernization
-
-- **Added browser-style.css**: Custom CSS replacement for deprecated browser-style
-- **Dark theme support**: Added proper dark theme media queries
-- **Linked new CSS**: Updated options.html to include new browser-style.css
-
-### 7. File Cleanup
-
-- **Removed background.html**: No longer needed with Manifest V3
-- **Updated HTML references**: Fixed all references to deprecated command names
-
-## Files Modified
-
-1. `src/manifest.json` - Complete Manifest V3 update
-2. `src/js/background.js` - API updates and message handling
-3. `src/js/options/backup.js` - Message passing implementation
-4. `src/js/options/view.js` - Message passing implementation
-5. `src/js/view/index.js` - Message passing implementation
-6. `src/options.html` - Command name updates and CSS inclusion
-7. `src/js/options/translations.js` - Command name update
-8. `package.json` - Dependency and script updates
-9. `.eslintrc.json` - Modern ESLint configuration (new file)
-10. `src/css/browser-style.css` - Browser-style replacement (new file)
-
-## Files Removed
-
-1. `src/background.html` - No longer needed with Manifest V3
-
-## Testing
-
-- ✅ Web-ext lint passes with no errors, warnings, or notices
-- ✅ All deprecated APIs have been replaced
-- ✅ Manifest V3 compliance achieved
-- ✅ Modern build system configured
-- ✅ Security permissions minimized (removed `<all_urls>`)
-
-## Compatibility
-
-- **Firefox**: 109+ (Manifest V3 support)
-- **Node.js**: 16.0.0+ (specified in package.json)
-- **Build tools**: Updated to current versions
+if (hasTabGroups) {
+  // Use native groups
+}
+if (hasTabHide) {
+  // Use hide/show
+}
+```
 
 ## Next Steps
 
-1. Test the extension in Firefox Developer Edition
-2. Test all functionality (tab groups, popup view, options)
-3. Update documentation if needed
-4. Consider additional modern features (service worker optimizations, etc.)
+1. **Field Testing**: Deploy to test users on different browser versions
+2. **Performance Monitoring**: Watch for issues with large numbers of tabs/groups
+3. **Pinned Tab Investigation**: Address FIXME in view/index.js
+4. **Documentation**: Update README with new browser compatibility info
+5. **Release**: Prepare changelog for next version
 
-The extension is now fully modernized and compliant with current Firefox extension standards while maintaining all original functionality.
+## Files Modified
+
+- [src/js/background.js](src/js/background.js) - Core logic, API detection, migration
+- [src/js/view/index.js](src/js/view/index.js) - Async forEach fix
+- [src/js/view/drag.js](src/js/view/drag.js) - Async forEach fix
+- [src/js/view/tabs.js](src/js/view/tabs.js) - Async forEach fix
+- [src/js/options/statistics.js](src/js/options/statistics.js) - Async forEach fix
+- [src/popup-view/js/GroupsFrame.js](src/popup-view/js/GroupsFrame.js) - Async forEach fix
+
+## Migration Notes
+
+Users upgrading from the old version will:
+1. Trigger one-time migration on first load
+2. Get native tab groups created for active group (if browser supports it)
+3. Have persistence verified automatically
+4. See no UI changes (seamless upgrade)
+
+Migration flag is stored in `browser.storage.local.hybridGroupsMigrationComplete` and can be reset for testing via internal message handler.

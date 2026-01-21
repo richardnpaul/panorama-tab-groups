@@ -6,7 +6,7 @@ export default async function getStatistics() {
   let totalSize = 0;
   let numActiveTabs = 0;
 
-  tabs.forEach(async (tab) => {
+  await Promise.all(tabs.map(async (tab) => {
     const thumbnail = await browser.sessions.getTabValue(tab.id, 'thumbnail');
 
     if (thumbnail) {
@@ -19,7 +19,7 @@ export default async function getStatistics() {
     if (!tab.discarded) {
       numActiveTabs += 1;
     }
-  });
+  }));
   console.log(numActiveTabs);
 
   document.getElementById('thumbnailCacheSize').innerHTML = '';
