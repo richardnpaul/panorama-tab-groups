@@ -2,7 +2,9 @@ export const defaultOptions = (() => {
   const majorVersion = parseInt(browser.runtime.getManifest().version, 10);
 
   // Detect browser capabilities for default value
-  const hasTabGroupsAPI = typeof browser.tabGroups?.query === 'function' && typeof browser.tabs?.group === 'function';
+  const hasTabGroupsAPI =
+    typeof browser.tabGroups?.query === 'function' &&
+    typeof browser.tabs?.group === 'function';
 
   let options = {
     toolbarPosition: 'top',

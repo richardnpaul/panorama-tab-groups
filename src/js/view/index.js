@@ -1,14 +1,31 @@
 import { getGroupId } from './tabs.js';
 import {
-  tabMoved, groupDragOver, outsideDrop, createDragIndicator,
+  tabMoved,
+  groupDragOver,
+  outsideDrop,
+  createDragIndicator,
 } from './drag.js';
 import {
-  groupNodes, initGroupNodes, closeGroup, makeGroupNode,
-  fillGroupNodes, insertTab, resizeGroups, raiseGroup, updateGroupFit,
+  groupNodes,
+  initGroupNodes,
+  closeGroup,
+  makeGroupNode,
+  fillGroupNodes,
+  insertTab,
+  resizeGroups,
+  raiseGroup,
+  updateGroupFit,
 } from './groupNodes.js';
 import {
-  initTabNodes, makeTabNode, updateTabNode, setActiveTabNode,
-  setActiveTabNodeById, getActiveTabId, deleteTabNode, updateThumbnail, updateFavicon,
+  initTabNodes,
+  makeTabNode,
+  updateTabNode,
+  setActiveTabNode,
+  setActiveTabNodeById,
+  getActiveTabId,
+  deleteTabNode,
+  updateThumbnail,
+  updateFavicon,
 } from './tabNodes.js';
 import * as groups from './groups.js';
 
@@ -89,14 +106,23 @@ async function captureThumbnail(tab) {
 
   const tabId = tab.id;
 
-  const cachedThumbnail = await browser.sessions.getTabValue(tabId, 'thumbnail');
+  const cachedThumbnail = await browser.sessions.getTabValue(
+    tabId,
+    'thumbnail',
+  );
 
   // Only capture a new thumbnail if there's no cached one,
   // the cached one doesn't have a capturedTime,
   // or the tab was accessed since the cache was made
-  if (!cachedThumbnail || !cachedThumbnail.capturedTime
-    || cachedThumbnail.capturedTime < tab.lastAccessed) {
-    const data = await browser.tabs.captureTab(tabId, { format: 'jpeg', quality: 25 });
+  if (
+    !cachedThumbnail ||
+    !cachedThumbnail.capturedTime ||
+    cachedThumbnail.capturedTime < tab.lastAccessed
+  ) {
+    const data = await browser.tabs.captureTab(tabId, {
+      format: 'jpeg',
+      quality: 25,
+    });
     const img = new Image();
 
     img.onload = async function f() {
@@ -124,7 +150,10 @@ async function captureThumbnail(tab) {
 }
 
 async function captureThumbnails() {
-  const tabs = await browser.tabs.query({ currentWindow: true, discarded: false });
+  const tabs = await browser.tabs.query({
+    currentWindow: true,
+    discarded: false,
+  });
 
   await Promise.all(tabs.map((tab) => captureThumbnail(tab)));
 }
@@ -320,10 +349,14 @@ async function singleClick(e) {
  */
 async function initView() {
   // set locale specific titles
-  document.getElementById('newGroup').title = browser.i18n.getMessage('newGroupButton');
-  document.getElementById('settings').title = browser.i18n.getMessage('settingsButton');
-  document.getElementById('tiling').title = browser.i18n.getMessage('tilingButton');
-  document.getElementById('freeform').title = browser.i18n.getMessage('freeformButton');
+  document.getElementById('newGroup').title =
+    browser.i18n.getMessage('newGroupButton');
+  document.getElementById('settings').title =
+    browser.i18n.getMessage('settingsButton');
+  document.getElementById('tiling').title =
+    browser.i18n.getMessage('tilingButton');
+  document.getElementById('freeform').title =
+    browser.i18n.getMessage('freeformButton');
 
   view.windowId = (await browser.windows.getCurrent()).id;
   view.tabId = (await browser.tabs.getCurrent()).id;
@@ -349,53 +382,75 @@ async function initView() {
   // set all listeners
 
   // Listen for clicks on new group button
-  document.getElementById('newGroup').addEventListener('click', () => createGroup(), false);
+  document
+    .getElementById('newGroup')
+    .addEventListener('click', () => createGroup(), false);
 
   // Listen for clicks on settings button
-  document.getElementById('settings').addEventListener('click', () => {
-    browser.runtime.openOptionsPage();
-  }, false);
+  document.getElementById('settings').addEventListener(
+    'click',
+    () => {
+      browser.runtime.openOptionsPage();
+    },
+    false,
+  );
 
-  document.getElementById('freeform').addEventListener('click', () => {
-    setLayoutMode('freeform');
-  }, false);
+  document.getElementById('freeform').addEventListener(
+    'click',
+    () => {
+      setLayoutMode('freeform');
+    },
+    false,
+  );
 
   // Listen for tiling toggle
-  document.getElementById('tiling').addEventListener('click', () => {
-    setLayoutMode('tiling');
-  }, false);
+  document.getElementById('tiling').addEventListener(
+    'click',
+    () => {
+      setLayoutMode('tiling');
+    },
+    false,
+  );
 
   // Listen for search input
   document.getElementById('tab-search').addEventListener('input', searchTabs);
 
   // Listen for middle clicks in background to open new group
-  document.getElementById('groups').addEventListener('auxclick', async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  document.getElementById('groups').addEventListener(
+    'auxclick',
+    async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    if (event.target !== document.getElementById('groups')) return; // ignore middle clicks in foreground
-    if (event.button !== 1) return; // middle mouse
+      if (event.target !== document.getElementById('groups')) return; // ignore middle clicks in foreground
+      if (event.button !== 1) return; // middle mouse
 
-    createGroup(event.clientX, event.clientY);
-  }, false);
+      createGroup(event.clientX, event.clientY);
+    },
+    false,
+  );
 
-  document.addEventListener('visibilitychange', async () => {
-    if (!document.hidden) {
-      const response = await browser.runtime.sendMessage({
-        action: 'checkViewRefresh',
-      });
-
-      if (pendingReload || response.viewRefreshOrdered) {
-        await browser.runtime.sendMessage({
-          action: 'clearViewRefresh',
+  document.addEventListener(
+    'visibilitychange',
+    async () => {
+      if (!document.hidden) {
+        const response = await browser.runtime.sendMessage({
+          action: 'checkViewRefresh',
         });
-        window.location.reload();
-      }
 
-      setActiveTabNode(view.tabId);
-      captureThumbnails();
-    }
-  }, false);
+        if (pendingReload || response.viewRefreshOrdered) {
+          await browser.runtime.sendMessage({
+            action: 'clearViewRefresh',
+          });
+          window.location.reload();
+        }
+
+        setActiveTabNode(view.tabId);
+        captureThumbnails();
+      }
+    },
+    false,
+  );
 
   window.addEventListener('resize', resizeGroups);
   document.addEventListener('keydown', keyInput);
@@ -409,13 +464,7 @@ async function initView() {
     // We don't want to listen for every property because that includes
     // the hidden state changing which generates a ton of events
     // every time the active group changes
-    properties: [
-      'discarded',
-      'favIconUrl',
-      'pinned',
-      'title',
-      'status',
-    ],
+    properties: ['discarded', 'favIconUrl', 'pinned', 'title', 'status'],
   });
   browser.tabs.onMoved.addListener(tabMoved);
   browser.tabs.onAttached.addListener(tabAttached);
@@ -429,7 +478,9 @@ async function initView() {
 
 function replaceClass(prefix, value) {
   const { classList } = document.getElementsByTagName('body')[0];
-  const classesToRemove = Array.from(classList).filter((classObject) => classObject.startsWith(`${prefix}-`));
+  const classesToRemove = Array.from(classList).filter((classObject) =>
+    classObject.startsWith(`${prefix}-`),
+  );
   classesToRemove.forEach((classObject) => {
     classList.remove(classObject);
   });
@@ -439,7 +490,9 @@ function replaceClass(prefix, value) {
 function getEffectiveTheme(themePreference) {
   if (themePreference === 'auto') {
     // Detect system theme preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   }
   return themePreference;
 }
@@ -454,52 +507,54 @@ function setToolbarPosition(position) {
 }
 
 // Load settings
-browser.storage.sync.get({
-  useDarkTheme: false,
-  theme: 'auto',
-  toolbarPosition: 'top',
-}).then((options) => {
-  /*
+browser.storage.sync
+  .get({
+    useDarkTheme: false,
+    theme: 'auto',
+    toolbarPosition: 'top',
+  })
+  .then((options) => {
+    /*
      * Migrate legacy theme setting
      * @deprecate should be removed in v1.0.0
      */
-  if (options.useDarkTheme) {
-    options.theme = 'dark';
-    browser.storage.sync.set({
-      useDarkTheme: null,
-      theme: 'dark',
-    });
-  }
-  setTheme(options.theme);
-  setToolbarPosition(options.toolbarPosition);
-
-  // Listen for system theme changes when auto theme is selected
-  const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
-  const handleSystemThemeChange = () => {
-    if (options.theme === 'auto') {
-      setTheme('auto');
+    if (options.useDarkTheme) {
+      options.theme = 'dark';
+      browser.storage.sync.set({
+        useDarkTheme: null,
+        theme: 'dark',
+      });
     }
-  };
-  systemThemeMedia.addListener(handleSystemThemeChange);
+    setTheme(options.theme);
+    setToolbarPosition(options.toolbarPosition);
 
-  browser.storage.onChanged.addListener((changes, area) => {
-    if (area === 'sync') {
-      if (changes.theme) {
-        options.theme = changes.theme.newValue;
-        setTheme(changes.theme.newValue);
+    // Listen for system theme changes when auto theme is selected
+    const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleSystemThemeChange = () => {
+      if (options.theme === 'auto') {
+        setTheme('auto');
+      }
+    };
+    systemThemeMedia.addListener(handleSystemThemeChange);
 
-        // Update system theme listener
-        if (changes.theme.newValue === 'auto') {
-          systemThemeMedia.addListener(handleSystemThemeChange);
-        } else {
-          systemThemeMedia.removeListener(handleSystemThemeChange);
+    browser.storage.onChanged.addListener((changes, area) => {
+      if (area === 'sync') {
+        if (changes.theme) {
+          options.theme = changes.theme.newValue;
+          setTheme(changes.theme.newValue);
+
+          // Update system theme listener
+          if (changes.theme.newValue === 'auto') {
+            systemThemeMedia.addListener(handleSystemThemeChange);
+          } else {
+            systemThemeMedia.removeListener(handleSystemThemeChange);
+          }
+        }
+        if (changes.toolbarPosition) {
+          setToolbarPosition(changes.toolbarPosition.newValue);
         }
       }
-      if (changes.toolbarPosition) {
-        setToolbarPosition(changes.toolbarPosition.newValue);
-      }
-    }
-  });
+    });
 
-  initView();
-});
+    initView();
+  });

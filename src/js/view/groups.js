@@ -6,7 +6,10 @@ async function save() {
 }
 
 async function newUid() {
-  const groupIndex = (await browser.sessions.getWindowValue(windowId, 'groupIndex'));
+  const groupIndex = await browser.sessions.getWindowValue(
+    windowId,
+    'groupIndex',
+  );
 
   const uid = groupIndex || 0;
   const newGroupIndex = uid + 1;
@@ -28,7 +31,9 @@ function getIndex(id) {
 
 export function getLength() {
   let length = 0;
-  groups.forEach(() => { length += 1; });
+  groups.forEach(() => {
+    length += 1;
+  });
   return length;
 }
 
@@ -60,12 +65,19 @@ export async function create() {
     windowId,
     containerId: 'firefox-default',
     rect: {
-      x: 0, y: 0, w: 0.2, h: 0.2,
+      x: 0,
+      y: 0,
+      w: 0.2,
+      h: 0.2,
     },
-    lastMoved: (new Date()).getTime(),
+    lastMoved: new Date().getTime(),
   };
   groups.push(group);
-  browser.runtime.sendMessage({ action: 'createMenuItem', groupId: newId.toString(), groupName: newName });
+  browser.runtime.sendMessage({
+    action: 'createMenuItem',
+    groupId: newId.toString(),
+    groupName: newName,
+  });
 
   await save();
 
@@ -84,12 +96,14 @@ export async function remove(id) {
   const allTabs = await browser.tabs.query({ currentWindow: true });
   const tabIds = [];
 
-  await Promise.all(allTabs.map(async (tab) => {
-    const tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
-    if (tabGroupId === id) {
-      tabIds.push(tab.id);
-    }
-  }));
+  await Promise.all(
+    allTabs.map(async (tab) => {
+      const tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+      if (tabGroupId === id) {
+        tabIds.push(tab.id);
+      }
+    }),
+  );
 
   // Delegate to background for comprehensive cleanup including native groups
   const response = await browser.runtime.sendMessage({
@@ -101,7 +115,10 @@ export async function remove(id) {
   });
 
   if (!response || !response.success) {
-    console.error(`Failed to delete group ${id}:`, response?.error || 'No response');
+    console.error(
+      `Failed to delete group ${id}:`,
+      response?.error || 'No response',
+    );
     return;
   }
 
@@ -116,7 +133,11 @@ export async function rename(id, newName) {
     return;
   }
   groups[index].name = newName;
-  browser.runtime.sendMessage({ action: 'updateMenuItem', groupId: id.toString(), groupName: newName });
+  browser.runtime.sendMessage({
+    action: 'updateMenuItem',
+    groupId: id.toString(),
+    groupName: newName,
+  });
 
   await save();
 }
@@ -128,7 +149,7 @@ export async function transform(id, rect) {
   }
 
   groups[index].rect = rect;
-  groups[index].lastMoved = (new Date()).getTime();
+  groups[index].lastMoved = new Date().getTime();
 
   await save();
 }

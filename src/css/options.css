@@ -1,22 +1,21 @@
-
 h2 {
-	border-bottom: solid 1px #d7d7db;
-	line-height: 2em;
+  border-bottom: solid 1px #d7d7db;
+  line-height: 2em;
 }
 
 .keyboardShortcuts label {
-	width: 220px;
-	display: inline-block;
-	line-height: 2em;
+  width: 220px;
+  display: inline-block;
+  line-height: 2em;
 }
 
 .keyboardShortcuts button {
-	text-align: center;
-	margin: 0em;
+  text-align: center;
+  margin: 0em;
 }
 
 .keyboardShortcuts input {
-	width: 120px;
+  width: 120px;
 }
 
 .input-radio-image {
@@ -31,7 +30,6 @@ h2 {
 .input-radio-image label {
   height: 60px;
 }
-
 
 .input-radio-image label::before,
 .input-radio-image label img {
@@ -60,7 +58,7 @@ h2 {
 }
 
 .input-radio-image input:checked ~ label:before {
-  content: "";
+  content: '';
   border: 2px solid #0a84ff;
   position: absolute;
   top: 0;
@@ -71,7 +69,7 @@ h2 {
 }
 
 .input-radio-image--extended input ~ label:before {
-  content: "";
+  content: '';
   outline: 2px solid #737373;
   position: absolute;
   top: 0;

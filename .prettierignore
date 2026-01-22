@@ -1,0 +1,6 @@
+node_modules
+build
+dist
+src/js/depends/dragscroll.js
+src/popup-view/*
+src/_shared/js/models/View.js

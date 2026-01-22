@@ -93,11 +93,16 @@ export async function handleMenuChange(message) {
         await browser.menus.remove(String(message.groupId));
       } catch (error) {
         // Menu item may not exist - log warning but don't throw
-        console.warn(`Could not remove menu item ${message.groupId}:`, error.message);
+        console.warn(
+          `Could not remove menu item ${message.groupId}:`,
+          error.message,
+        );
       }
       break;
     case 'updateMenuItem':
-      browser.menus.update(String(message.groupId), { title: `${message.groupId}: ${message.groupName}` });
+      browser.menus.update(String(message.groupId), {
+        title: `${message.groupId}: ${message.groupName}`,
+      });
       break;
     default:
       break;

@@ -41,7 +41,9 @@ function restoreOptions(options, loadedShortcuts) {
     themeElement.checked = true;
   } else {
     // Fallback to 'auto' if the stored theme value doesn't exist
-    const autoElement = document.querySelector('input[name="theme"][value="auto"]');
+    const autoElement = document.querySelector(
+      'input[name="theme"][value="auto"]',
+    );
     if (autoElement) {
       autoElement.checked = true;
     }
@@ -81,11 +83,20 @@ function attachEventHandler(options, loadedShortcuts) {
     }
 
     if (enableButton) {
-      enableButton.addEventListener('click', enableShortcut.bind(this, options));
+      enableButton.addEventListener(
+        'click',
+        enableShortcut.bind(this, options),
+      );
     }
 
-    if (Object.prototype.hasOwnProperty.call(shortcut, 'name') && disableButton) {
-      disableButton.addEventListener('click', disableShortcut.bind(this, options));
+    if (
+      Object.prototype.hasOwnProperty.call(shortcut, 'name') &&
+      disableButton
+    ) {
+      disableButton.addEventListener(
+        'click',
+        disableShortcut.bind(this, options),
+      );
     }
   });
 

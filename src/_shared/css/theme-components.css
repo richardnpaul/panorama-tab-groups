@@ -38,7 +38,7 @@
 }
 
 .form-field::before {
-  content: "";
+  content: '';
   width: 16px;
   position: absolute;
   top: 0;
@@ -51,7 +51,7 @@
 }
 
 .form-field::after {
-  content: "";
+  content: '';
   width: 10px;
   position: absolute;
   top: 1px;
@@ -90,7 +90,7 @@
 }
 
 .button-ghost::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   right: 0;

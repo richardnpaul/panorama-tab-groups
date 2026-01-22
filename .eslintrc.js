@@ -1,25 +1,34 @@
 module.exports = {
   env: {
     browser: true,
-    es2020: true,
+    es2021: true,
     webextensions: true,
   },
-  extends: [
-    'airbnb-base',
-    'plugin:json/recommended',
-  ],
-  plugins: [
-    'json',
-  ],
+  extends: ['airbnb-base', 'plugin:json/recommended', 'prettier'],
+  plugins: ['json'],
   parserOptions: {
-    ecmaVersion: 11,
+    ecmaVersion: 2022,
     sourceType: 'module',
   },
   rules: {
-    'import/extensions': 0,
-    'import/no-cycle': 0,
-    'no-param-reassign': 0,
-    'no-console': 0,
-    'no-alert': 0,
+    'no-console': 'warn',
+    'no-param-reassign': 'off',
+    'no-alert': 'off',
+    'import/no-cycle': 'off',
+    'operator-linebreak': 'off',
+    'implicit-arrow-linebreak': 'off',
+    'function-paren-newline': 'off',
+    'class-methods-use-this': 'warn',
+    'no-restricted-syntax': ['error', 'WithStatement'],
+    'import/extensions': [
+      'error',
+      'ignorePackages',
+      {
+        js: 'always',
+      },
+    ],
+  },
+  globals: {
+    browser: 'readonly',
   },
 };

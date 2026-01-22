@@ -4,14 +4,18 @@ async function checkMigrationStatus() {
   const statusDiv = document.getElementById('migration-status');
 
   try {
-    const result = await browser.storage.local.get('hybridGroupsMigrationComplete');
+    const result = await browser.storage.local.get(
+      'hybridGroupsMigrationComplete',
+    );
 
     if (result.hybridGroupsMigrationComplete) {
       statusDiv.className = 'status-box success';
-      statusDiv.textContent = '✓ Migration Complete - All groups have been migrated to hybrid system';
+      statusDiv.textContent =
+        '✓ Migration Complete - All groups have been migrated to hybrid system';
     } else {
       statusDiv.className = 'status-box warning';
-      statusDiv.textContent = '⚠ Migration Pending - Groups have not been migrated yet';
+      statusDiv.textContent =
+        '⚠ Migration Pending - Groups have not been migrated yet';
     }
   } catch (error) {
     statusDiv.className = 'status-box warning';
@@ -25,7 +29,10 @@ async function loadGroups() {
 
   try {
     const currentWindow = await browser.windows.getCurrent();
-    const groups = await browser.sessions.getWindowValue(currentWindow.id, 'groups');
+    const groups = await browser.sessions.getWindowValue(
+      currentWindow.id,
+      'groups',
+    );
 
     if (!groups || groups.length === 0) {
       container.textContent = 'No groups found in current window';
@@ -77,25 +84,31 @@ document.getElementById('run-migration').addEventListener('click', async () => {
   }
 });
 
-document.getElementById('reset-migration').addEventListener('click', async () => {
-  // eslint-disable-next-line no-alert
-  if (!window.confirm('Reset migration flag? This will allow migration to run again.')) {
-    return;
-  }
-
-  try {
-    const response = await browser.runtime.sendMessage({
-      action: 'resetMigration',
-    });
-
-    if (response.success) {
-      alert('Migration flag reset successfully!');
-      await checkMigrationStatus();
+document
+  .getElementById('reset-migration')
+  .addEventListener('click', async () => {
+    // eslint-disable-next-line no-alert
+    if (
+      !window.confirm(
+        'Reset migration flag? This will allow migration to run again.',
+      )
+    ) {
+      return;
     }
-  } catch (error) {
-    alert(`Reset error: ${error.message}`);
-  }
-});
+
+    try {
+      const response = await browser.runtime.sendMessage({
+        action: 'resetMigration',
+      });
+
+      if (response.success) {
+        alert('Migration flag reset successfully!');
+        await checkMigrationStatus();
+      }
+    } catch (error) {
+      alert(`Reset error: ${error.message}`);
+    }
+  });
 
 // Initialize
 checkMigrationStatus();
