@@ -21,7 +21,10 @@ export async function closeGroup(content, group) {
 
   if (tabCount > 0) {
     console.log(tabCount);
-    const confirmationText = getPluralForm(tabCount, browser.i18n.getMessage('closeGroupWarning', [tabCount]));
+    const confirmationText = getPluralForm(
+      tabCount,
+      browser.i18n.getMessage('closeGroupWarning', [tabCount]),
+    );
     if (window.confirm(confirmationText)) {
       await groups.remove(group.id);
       removeGroupNode(group.id);
@@ -48,10 +51,12 @@ function snapValue(a, b, dst) {
 }
 
 function getFit(param) {
-  let a; let b; let ta; let
-    tb;
-  let pitch = 0; let
-    w = 0;
+  let a;
+  let b;
+  let ta;
+  let tb;
+  let pitch = 0;
+  let w = 0;
 
   let area = 0;
 
@@ -59,7 +64,9 @@ function getFit(param) {
     a = Math.min(param.width / i, param.maxWidth);
     b = a * param.ratio;
 
-    if (a < param.minWidth) { break; } // a bit janky
+    if (a < param.minWidth) {
+      break;
+    } // a bit janky
 
     ta = Math.floor((param.width + 1) / a);
     tb = Math.floor(param.height / b);
@@ -79,7 +86,7 @@ function getFit(param) {
   ta = Math.floor(param.width / a);
   tb = Math.floor(param.height / b);
 
-  if (ta * tb >= param.amount && (a * b > area)) {
+  if (ta * tb >= param.amount && a * b > area) {
     pitch = ta;
     w = a;
   }
@@ -169,7 +176,8 @@ export function updateGroupFit(group) {
     childNodes[i].style.width = `${w}px`;
     childNodes[i].style.height = `${h}px`;
     childNodes[i].style.left = `${w * (index % Math.floor(fit.pitch))}px`;
-    childNodes[i].style.top = `${h * Math.floor(index / Math.floor(fit.pitch))}px`;
+    childNodes[i].style.top =
+      `${h * Math.floor(index / Math.floor(fit.pitch))}px`;
 
     if (deck) {
       childNodes[i].style.left = `${0}px`;
@@ -214,8 +222,8 @@ export function resizeGroups(groupId, groupRect) {
     // ----
 
     node.style.top = `${rect.y * groupsRect.height}px`;
-    node.style.right = `${groupsRect.width - ((rect.x + rect.w) * groupsRect.width)}px`;
-    node.style.bottom = `${groupsRect.height - ((rect.y + rect.h) * groupsRect.height)}px`;
+    node.style.right = `${groupsRect.width - (rect.x + rect.w) * groupsRect.width}px`;
+    node.style.bottom = `${groupsRect.height - (rect.y + rect.h) * groupsRect.height}px`;
     node.style.left = `${rect.x * groupsRect.width}px`;
 
     let zIndex = group.id;
@@ -231,13 +239,18 @@ export function resizeGroups(groupId, groupRect) {
 async function groupTransform(group, node, top, right, bottom, left, elem) {
   // don't allow resizing if in tiling mode
   const windowId = (await browser.windows.getCurrent()).id;
-  const layoutMode = await browser.sessions.getWindowValue(windowId, 'layoutMode');
+  const layoutMode = await browser.sessions.getWindowValue(
+    windowId,
+    'layoutMode',
+  );
 
   if (layoutMode !== 'freeform') {
     return;
   }
 
-  document.getElementsByTagName('body')[0].setAttribute('style', `cursor: ${window.getComputedStyle(elem).cursor}`);
+  document
+    .getElementsByTagName('body')[0]
+    .setAttribute('style', `cursor: ${window.getComputedStyle(elem).cursor}`);
 
   const groupsRect = node.parentNode.getBoundingClientRect();
 
@@ -258,8 +271,10 @@ async function groupTransform(group, node, top, right, bottom, left, elem) {
   };
 
   let first = true;
-  let x; let y; let lx; let
-    ly;
+  let x;
+  let y;
+  let lx;
+  let ly;
 
   const rect = {};
 
@@ -283,10 +298,18 @@ async function groupTransform(group, node, top, right, bottom, left, elem) {
     rect.i = rect.x + rect.w;
     rect.j = rect.y + rect.h;
 
-    if (top) { rect.y += (y - ly); }
-    if (right) { rect.i += (x - lx); }
-    if (bottom) { rect.j += (y - ly); }
-    if (left) { rect.x += (x - lx); }
+    if (top) {
+      rect.y += y - ly;
+    }
+    if (right) {
+      rect.i += x - lx;
+    }
+    if (bottom) {
+      rect.j += y - ly;
+    }
+    if (left) {
+      rect.x += x - lx;
+    }
 
     // snap (seems a bit over complicated, but it works for now)
     groups.forEach((_group) => {
@@ -296,7 +319,12 @@ async function groupTransform(group, node, top, right, bottom, left, elem) {
           rect.y = snapValue(rect.y, _group.rect.y + _group.rect.h, snapDsty);
 
           rect.y = snapValue(rect.y + rect.h, _group.rect.y, snapDsty) - rect.h;
-          rect.y = snapValue(rect.y + rect.h, _group.rect.y + _group.rect.h, snapDsty) - rect.h;
+          rect.y =
+            snapValue(
+              rect.y + rect.h,
+              _group.rect.y + _group.rect.h,
+              snapDsty,
+            ) - rect.h;
         } else if (top) {
           rect.y = snapValue(rect.y, _group.rect.y, snapDsty);
           rect.y = snapValue(rect.y, _group.rect.y + _group.rect.h, snapDsty);
@@ -310,7 +338,12 @@ async function groupTransform(group, node, top, right, bottom, left, elem) {
           rect.x = snapValue(rect.x, _group.rect.x + _group.rect.w, snapDstx);
 
           rect.x = snapValue(rect.x + rect.w, _group.rect.x, snapDstx) - rect.w;
-          rect.x = snapValue(rect.x + rect.w, _group.rect.x + _group.rect.w, snapDstx) - rect.w;
+          rect.x =
+            snapValue(
+              rect.x + rect.w,
+              _group.rect.x + _group.rect.w,
+              snapDstx,
+            ) - rect.w;
         } else if (left) {
           rect.x = snapValue(rect.x, _group.rect.x, snapDstx);
           rect.x = snapValue(rect.x, _group.rect.x + _group.rect.w, snapDstx);
@@ -343,11 +376,19 @@ async function groupTransform(group, node, top, right, bottom, left, elem) {
         // rect.y = rect.j - rect.h;
       }
     } else {
-      if (left) { rect.x = clamp(rect.x, 0, rect.i - minw); }
-      if (right) { rect.i = clamp(rect.i, rect.x + minw, 1); }
+      if (left) {
+        rect.x = clamp(rect.x, 0, rect.i - minw);
+      }
+      if (right) {
+        rect.i = clamp(rect.i, rect.x + minw, 1);
+      }
 
-      if (top) { rect.y = clamp(rect.y, 0, rect.j - minh); }
-      if (bottom) { rect.j = clamp(rect.j, rect.y + minh, 1); }
+      if (top) {
+        rect.y = clamp(rect.y, 0, rect.j - minh);
+      }
+      if (bottom) {
+        rect.j = clamp(rect.j, rect.y + minh, 1);
+      }
 
       rect.w = Math.max(rect.i - rect.x, minw);
       rect.h = Math.max(rect.j - rect.y, minh);
@@ -357,14 +398,18 @@ async function groupTransform(group, node, top, right, bottom, left, elem) {
   };
 
   document.addEventListener('mousemove', onmousemove, false);
-  document.addEventListener('mouseup', () => {
-    if (rect.x !== undefined) {
-      groups.transform(group.id, rect);
-    }
-    document.getElementsByTagName('body')[0].removeAttribute('style');
+  document.addEventListener(
+    'mouseup',
+    () => {
+      if (rect.x !== undefined) {
+        groups.transform(group.id, rect);
+      }
+      document.getElementsByTagName('body')[0].removeAttribute('style');
 
-    document.removeEventListener('mousemove', onmousemove);
-  }, false);
+      document.removeEventListener('mousemove', onmousemove);
+    },
+    false,
+  );
 }
 
 export function makeGroupNode(group) {
@@ -388,31 +433,63 @@ export function makeGroupNode(group) {
   const groupId = newElement('spawn', { class: 'group_id', content: group.id });
   const tabCount = newElement('span', { class: 'tab_count' });
 
-  const close = newElement('div', { class: 'close', title: browser.i18n.getMessage('closeGroup') });
+  const close = newElement('div', {
+    class: 'close',
+    title: browser.i18n.getMessage('closeGroup'),
+  });
 
-  const header = newElement('div', { class: 'header', title: browser.i18n.getMessage('dragGroup') }, [name, input, spacer, groupId, tabCount, close]);
+  const header = newElement(
+    'div',
+    { class: 'header', title: browser.i18n.getMessage('dragGroup') },
+    [name, input, spacer, groupId, tabCount, close],
+  );
 
   // newtab
-  const newtab = newElement('div', { class: 'newtab' }, [newElement('div', { class: 'inner' })]);
+  const newtab = newElement('div', { class: 'newtab' }, [
+    newElement('div', { class: 'inner' }),
+  ]);
 
   // group
-  const content = newElement('div', { class: 'content transition', groupId: group.id }, [newtab]);
+  const content = newElement(
+    'div',
+    { class: 'content transition', groupId: group.id },
+    [newtab],
+  );
   content.addEventListener('dragover', groupDragOver, false);
   content.addEventListener('drop', groupDrop, false);
 
-  const inner = newElement('div', { class: 'inner' }, [top, right, bottom, left, topRight, bottomRight, bottomLeft, topLeft, header, content]);
+  const inner = newElement('div', { class: 'inner' }, [
+    top,
+    right,
+    bottom,
+    left,
+    topRight,
+    bottomRight,
+    bottomLeft,
+    topLeft,
+    header,
+    content,
+  ]);
   const node = newElement('div', { class: 'group' }, [inner]);
 
-  close.addEventListener('click', (event) => {
-    event.stopPropagation();
-    closeGroup(content, group);
-  }, false);
+  close.addEventListener(
+    'click',
+    (event) => {
+      event.stopPropagation();
+      closeGroup(content, group);
+    },
+    false,
+  );
 
-  newtab.addEventListener('click', async (event) => {
-    event.stopPropagation();
-    await groups.setActive(group.id);
-    await browser.tabs.create({ active: true });
-  }, false);
+  newtab.addEventListener(
+    'click',
+    async (event) => {
+      event.stopPropagation();
+      await groups.setActive(group.id);
+      await browser.tabs.create({ active: true });
+    },
+    false,
+  );
 
   // move content pane as a whole around
   const moveFunc = function f(event) {
@@ -423,92 +500,138 @@ export function makeGroupNode(group) {
   };
 
   // allow whole content to be moved except for new tab (existing tabs are done in newtab)
-  newtab.addEventListener('mousedown', (e) => { e.stopPropagation(); });
+  newtab.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+  });
   inner.addEventListener('mousedown', moveFunc, false);
 
   // renaming groups
   let editing = false;
 
-  header.addEventListener('dblclick', () => {
-    if (!editing) {
-      editing = true;
+  header.addEventListener(
+    'dblclick',
+    () => {
+      if (!editing) {
+        editing = true;
 
-      header.removeEventListener('mousedown', moveFunc, false);
+        header.removeEventListener('mousedown', moveFunc, false);
 
-      header.classList.add('edit');
-      input.setSelectionRange(0, input.value.length);
-      input.focus();
-    }
-  }, false);
+        header.classList.add('edit');
+        input.setSelectionRange(0, input.value.length);
+        input.focus();
+      }
+    },
+    false,
+  );
 
-  input.addEventListener('keydown', (event) => {
-    if (event.keyCode === 13) {
-      input.blur();
-    }
-  }, false);
+  input.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.keyCode === 13) {
+        input.blur();
+      }
+    },
+    false,
+  );
 
-  input.addEventListener('blur', () => {
-    header.classList.remove('edit');
-    input.setSelectionRange(0, 0);
+  input.addEventListener(
+    'blur',
+    () => {
+      header.classList.remove('edit');
+      input.setSelectionRange(0, 0);
 
-    name.innerHTML = '';
-    name.appendChild(document.createTextNode(this.value));
-    groups.rename(group.id, this.value);
+      name.innerHTML = '';
+      name.appendChild(document.createTextNode(this.value));
+      groups.rename(group.id, this.value);
 
-    header.addEventListener('mousedown', moveFunc, false);
+      header.addEventListener('mousedown', moveFunc, false);
 
-    editing = false;
-  }, false);
+      editing = false;
+    },
+    false,
+  );
   // ----
 
   // resize
-  top.addEventListener('mousedown', function f(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    groupTransform(group, node, 1, 0, 0, 0, this);
-  }, false);
+  top.addEventListener(
+    'mousedown',
+    function f(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      groupTransform(group, node, 1, 0, 0, 0, this);
+    },
+    false,
+  );
 
-  right.addEventListener('mousedown', function f(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    groupTransform(group, node, 0, 1, 0, 0, this);
-  }, false);
+  right.addEventListener(
+    'mousedown',
+    function f(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      groupTransform(group, node, 0, 1, 0, 0, this);
+    },
+    false,
+  );
 
-  bottom.addEventListener('mousedown', function f(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    groupTransform(group, node, 0, 0, 1, 0, this);
-  }, false);
+  bottom.addEventListener(
+    'mousedown',
+    function f(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      groupTransform(group, node, 0, 0, 1, 0, this);
+    },
+    false,
+  );
 
-  left.addEventListener('mousedown', function f(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    groupTransform(group, node, 0, 0, 0, 1, this);
-  }, false);
+  left.addEventListener(
+    'mousedown',
+    function f(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      groupTransform(group, node, 0, 0, 0, 1, this);
+    },
+    false,
+  );
 
-  topRight.addEventListener('mousedown', function f(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    groupTransform(group, node, 1, 1, 0, 0, this);
-  }, false);
+  topRight.addEventListener(
+    'mousedown',
+    function f(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      groupTransform(group, node, 1, 1, 0, 0, this);
+    },
+    false,
+  );
 
-  bottomRight.addEventListener('mousedown', function f(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    groupTransform(group, node, 0, 1, 1, 0, this);
-  }, false);
+  bottomRight.addEventListener(
+    'mousedown',
+    function f(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      groupTransform(group, node, 0, 1, 1, 0, this);
+    },
+    false,
+  );
 
-  bottomLeft.addEventListener('mousedown', function f(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    groupTransform(group, node, 0, 0, 1, 1, this);
-  }, false);
+  bottomLeft.addEventListener(
+    'mousedown',
+    function f(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      groupTransform(group, node, 0, 0, 1, 1, this);
+    },
+    false,
+  );
 
-  topLeft.addEventListener('mousedown', function f(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    groupTransform(group, node, 1, 0, 0, 1, this);
-  }, false);
+  topLeft.addEventListener(
+    'mousedown',
+    function f(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      groupTransform(group, node, 1, 0, 0, 1, this);
+    },
+    false,
+  );
 
   groupNodes[group.id] = {
     group: node,
@@ -549,7 +672,10 @@ export async function fillGroupNodes() {
     });
 
     groups.forEach((group) => {
-      groupNodes[group.id].content.insertBefore(fragment[group.id], groupNodes[group.id].newtab);
+      groupNodes[group.id].content.insertBefore(
+        fragment[group.id],
+        groupNodes[group.id].newtab,
+      );
       updateGroupFit(group);
     });
 
@@ -589,7 +715,7 @@ export async function insertTab(oldTab) {
       const tabIndexes = [];
       // Get tabs all at once to make sure the data doesn't change out from under us
       await forEachTab(async (otherTab) => {
-        if (groupId === await getGroupId(otherTab.id)) {
+        if (groupId === (await getGroupId(otherTab.id))) {
           childNodeTabsByIndex[otherTab.index] = otherTab;
           tabIndexes.push(otherTab.index);
         }
@@ -599,21 +725,34 @@ export async function insertTab(oldTab) {
       const lowerIndexes = tabIndexes.filter((idx) => idx < tab.index);
 
       if (higherIndexes.length === 0) {
-        groupNodes[groupId].newtab.insertAdjacentElement('beforebegin', tabNode.tab);
+        groupNodes[groupId].newtab.insertAdjacentElement(
+          'beforebegin',
+          tabNode.tab,
+        );
       } else {
         const childNodes = Array.from(groupNodes[groupId].content.childNodes);
         const sortedIndexes = higherIndexes.sort((a, b) => a - b);
         sortedIndexes.forEach((idx) => {
-          const candidateNodeIdx = childNodes.findIndex((node) => Number(node.getAttribute('tabId')) === childNodeTabsByIndex[idx].id);
+          const candidateNodeIdx = childNodes.findIndex(
+            (node) =>
+              Number(node.getAttribute('tabId')) ===
+              childNodeTabsByIndex[idx].id,
+          );
           if (candidateNodeIdx !== -1) {
             if (lowerIndexes.length > 0) {
               try {
                 const nextLowestIdx = Math.max(...lowerIndexes);
-                let precedingNodeID = Number(childNodes[candidateNodeIdx - 1].getAttribute('tabId'));
+                let precedingNodeID = Number(
+                  childNodes[candidateNodeIdx - 1].getAttribute('tabId'),
+                );
                 if (precedingNodeID === tab.id) {
-                  precedingNodeID = Number(childNodes[candidateNodeIdx - 2].getAttribute('tabId'));
+                  precedingNodeID = Number(
+                    childNodes[candidateNodeIdx - 2].getAttribute('tabId'),
+                  );
                 }
-                if (precedingNodeID !== childNodeTabsByIndex[nextLowestIdx].id) {
+                if (
+                  precedingNodeID !== childNodeTabsByIndex[nextLowestIdx].id
+                ) {
                   // Seems like more than one tab is being moved at once.
                   // Rebuild the full UI to maintain consistency.
                   setTimeout(() => fillGroupNodes(), 100);
@@ -623,7 +762,10 @@ export async function insertTab(oldTab) {
                 setTimeout(() => fillGroupNodes(), 100);
               }
             }
-            childNodes[candidateNodeIdx].insertAdjacentElement('beforebegin', tabNode.tab);
+            childNodes[candidateNodeIdx].insertAdjacentElement(
+              'beforebegin',
+              tabNode.tab,
+            );
           }
         });
         // Couldn't find any nodes with the next highest index.
@@ -637,7 +779,7 @@ export async function insertTab(oldTab) {
 }
 
 export function raiseGroup(groupId) {
-  const lastMoved = (new Date()).getTime();
+  const lastMoved = new Date().getTime();
   groups.get(groupId).lastMoved = lastMoved;
   groupNodes[groupId].group.style.zIndex = lastMoved.toString().substr(-9);
 }

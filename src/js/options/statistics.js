@@ -6,20 +6,22 @@ export default async function getStatistics() {
   let totalSize = 0;
   let numActiveTabs = 0;
 
-  await Promise.all(tabs.map(async (tab) => {
-    const thumbnail = await browser.sessions.getTabValue(tab.id, 'thumbnail');
+  await Promise.all(
+    tabs.map(async (tab) => {
+      const thumbnail = await browser.sessions.getTabValue(tab.id, 'thumbnail');
 
-    if (thumbnail) {
-      if (thumbnail.thumbnail) {
-        totalSize += thumbnail.thumbnail.length;
-      } else {
-        totalSize += thumbnail.length;
+      if (thumbnail) {
+        if (thumbnail.thumbnail) {
+          totalSize += thumbnail.thumbnail.length;
+        } else {
+          totalSize += thumbnail.length;
+        }
       }
-    }
-    if (!tab.discarded) {
-      numActiveTabs += 1;
-    }
-  }));
+      if (!tab.discarded) {
+        numActiveTabs += 1;
+      }
+    }),
+  );
   console.log(numActiveTabs);
 
   document.getElementById('thumbnailCacheSize').innerHTML = '';

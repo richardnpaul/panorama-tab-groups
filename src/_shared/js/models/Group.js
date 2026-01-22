@@ -62,7 +62,7 @@ export default class Group {
       groupId: this.id,
       windowId: this.View.windowId,
       nativeGroupId: this.nativeGroupId,
-      tabIds: this.tabs.map(t => t.id),
+      tabIds: this.tabs.map((t) => t.id),
     });
 
     if (!response.success) {
@@ -121,11 +121,12 @@ export default class Group {
 
   // TODO: How to resolve this duplicate?
   async getAll() {
-    const groups = (await browser.sessions.getWindowValue(this.View.windowId, 'groups'))
-      || [];
+    const groups =
+      (await browser.sessions.getWindowValue(this.View.windowId, 'groups')) ||
+      [];
 
     return Promise.all(
-      groups.map(async (group) => new Group(this.View, group)),
+      groups.map(async (group) => Group.create(this.View, group)),
     );
   }
 }

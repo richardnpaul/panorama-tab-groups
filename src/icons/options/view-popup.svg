@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 531" width="1000" height="531">
 	<style>
-		.shp0 { fill: #ffffff } 
-		.shp1 { fill: #323234 } 
-		.shp2 { fill: #89898a } 
-		.shp3 { fill: #474749 } 
+		.shp0 { fill: #ffffff }
+		.shp1 { fill: #323234 }
+		.shp2 { fill: #89898a }
+		.shp3 { fill: #474749 }
 	</style>
 	<path id="Body" class="shp0" d="M0 60L1000 60L1000 531L0 531L0 60Z" />
 	<g id="Header">

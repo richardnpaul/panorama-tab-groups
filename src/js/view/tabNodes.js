@@ -1,6 +1,11 @@
 import { forEachTab, forEachTabSync } from './tabs.js';
 import {
-  tabDragStart, tabDragEnter, tabDragOver, tabDragLeave, tabDrop, tabDragEnd,
+  tabDragStart,
+  tabDragEnter,
+  tabDragOver,
+  tabDragLeave,
+  tabDrop,
+  tabDragEnd,
 } from './drag.js';
 import { newElement } from '../_share/utils.js';
 
@@ -14,7 +19,10 @@ export function getTabNode(tabId) {
 export function makeTabNode(tab) {
   const thumbnail = newElement('div', { class: 'thumbnail' });
   const favicon = newElement('div', { class: 'favicon' });
-  const close = newElement('div', { class: 'close', title: browser.i18n.getMessage('closeTab') });
+  const close = newElement('div', {
+    class: 'close',
+    title: browser.i18n.getMessage('closeTab'),
+  });
   const name = newElement('div', { class: 'name' });
 
   const inner = newElement('div', { class: 'inner' }, [
@@ -24,28 +32,45 @@ export function makeTabNode(tab) {
     name,
   ]);
 
-  const node = newElement('div', { class: 'tab', draggable: 'true', tabId: tab.id }, [inner]);
+  const node = newElement(
+    'div',
+    { class: 'tab', draggable: 'true', tabId: tab.id },
+    [inner],
+  );
 
-  node.addEventListener('click', async (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  node.addEventListener(
+    'click',
+    async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    await browser.tabs.update(tab.id, { active: true });
-  }, false);
+      await browser.tabs.update(tab.id, { active: true });
+    },
+    false,
+  );
 
-  node.addEventListener('auxclick', (event) => {
-    event.preventDefault();
-    event.stopPropagation();
+  node.addEventListener(
+    'auxclick',
+    (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-    if (event.button === 1) { // middle mouse
+      if (event.button === 1) {
+        // middle mouse
+        browser.tabs.remove(tab.id);
+      }
+    },
+    false,
+  );
+
+  close.addEventListener(
+    'click',
+    (event) => {
+      event.stopPropagation();
       browser.tabs.remove(tab.id);
-    }
-  }, false);
-
-  close.addEventListener('click', (event) => {
-    event.stopPropagation();
-    browser.tabs.remove(tab.id);
-  }, false);
+    },
+    false,
+  );
 
   node.addEventListener('dragstart', tabDragStart, false);
   node.addEventListener('dragenter', tabDragEnter, false);
@@ -57,7 +82,9 @@ export function makeTabNode(tab) {
   // Stop new tab from bubbling mousedown to the content tab.
   // This allows you to move just the tab to a new group
   // and still allow you to move the whole pane around (see issue 10)
-  node.addEventListener('mousedown', (e) => { e.stopPropagation(); });
+  node.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+  });
 
   tabNodes[tab.id] = {
     tab: node,
@@ -188,9 +215,11 @@ export async function updateFavicon(tab) {
   const node = tabNodes[tab.id];
 
   if (node) {
-    if (tab.favIconUrl
-      && tab.favIconUrl.substr(0, 22) !== 'chrome://mozapps/skin/'
-      && tab.favIconUrl !== tab.url) {
+    if (
+      tab.favIconUrl &&
+      tab.favIconUrl.substr(0, 22) !== 'chrome://mozapps/skin/' &&
+      tab.favIconUrl !== tab.url
+    ) {
       try {
         await testImage(tab.favIconUrl);
         node.favicon.style.backgroundImage = `url(${tab.favIconUrl})`;

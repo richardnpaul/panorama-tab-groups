@@ -1,0 +1,44 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-illegal-windows-names
+      - id: check-executables-have-shebangs
+      - id: check-case-conflict
+      - id: check-added-large-files
+      - id: check-symlinks
+      - id: end-of-file-fixer
+      - id: fix-byte-order-marker
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-json
+      - id: check-yaml
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier
+        entry: npx prettier --write --ignore-unknown
+        language: system
+        types_or: [javascript, json, css, html, markdown]
+        exclude: |
+          (?x)^(
+            src/js/depends/dragscroll\.js|
+            src/popup-view/.*|
+            src/_shared/js/models/View\.js
+          )$
+
+      - id: eslint
+        name: eslint
+        entry: npx eslint
+        language: system
+        types: [file]
+        files: \.(js|json)$
+        exclude: |
+          (?x)^(
+            src/js/depends/dragscroll\.js|
+            src/popup-view/.*|
+            src/_shared/js/models/View\.js
+          )$

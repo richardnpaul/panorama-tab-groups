@@ -6,7 +6,9 @@
 import { loadOptions } from '../_share/options.js';
 
 // Detect browser capabilities
-const hasTabGroupsAPI = typeof browser.tabGroups?.query === 'function' && typeof browser.tabs?.group === 'function';
+const hasTabGroupsAPI =
+  typeof browser.tabGroups?.query === 'function' &&
+  typeof browser.tabs?.group === 'function';
 const hasTabHide = typeof browser.tabs.hide !== 'undefined';
 
 // Determine browser mode
@@ -29,25 +31,36 @@ function saveNativeGroupsOption() {
   console.log('[Options] saveNativeGroupsOption called, newValue:', newValue);
 
   // Save to storage
-  browser.storage.sync.set({
-    useNativeGroups: newValue,
-  }).then(() => {
-    console.log('[Options] storage.sync.set completed for useNativeGroups:', newValue);
+  browser.storage.sync
+    .set({
+      useNativeGroups: newValue,
+    })
+    .then(() => {
+      console.log(
+        '[Options] storage.sync.set completed for useNativeGroups:',
+        newValue,
+      );
 
-    // Trigger cleanup via message if disabling native groups
-    if (!newValue) {
-      console.log('[Options] Sending cleanupNativeGroups message to background');
-      browser.runtime.sendMessage({
-        action: 'cleanupNativeGroups',
-      }).then((response) => {
-        console.log('[Options] Cleanup response:', response);
-      }).catch((error) => {
-        console.error('[Options] Failed to send cleanup message:', error);
-      });
-    }
-  }).catch((error) => {
-    console.error('[Options] Failed to save useNativeGroups:', error);
-  });
+      // Trigger cleanup via message if disabling native groups
+      if (!newValue) {
+        console.log(
+          '[Options] Sending cleanupNativeGroups message to background',
+        );
+        browser.runtime
+          .sendMessage({
+            action: 'cleanupNativeGroups',
+          })
+          .then((response) => {
+            console.log('[Options] Cleanup response:', response);
+          })
+          .catch((error) => {
+            console.error('[Options] Failed to send cleanup message:', error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.error('[Options] Failed to save useNativeGroups:', error);
+    });
 
   // Show feedback
   const feedback = document.getElementById('nativeGroupsFeedback');
@@ -88,14 +101,16 @@ export default async function initNativeGroupsOption() {
     case 'hybrid':
       // Firefox 139+ with both APIs - fully functional
       checkbox.disabled = false;
-      warningText.textContent = 'Use native browser tab groups for visual organization and collapsing.';
+      warningText.textContent =
+        'Use native browser tab groups for visual organization and collapsing.';
       warningText.className = 'info-text';
       break;
 
     case 'collapse-only':
       // Chrome/Edge - has tabGroups but no tabHide
       checkbox.disabled = false;
-      warningText.textContent = 'Native groups will be used for collapsing only. Tab hiding is not supported in this browser.';
+      warningText.textContent =
+        'Native groups will be used for collapsing only. Tab hiding is not supported in this browser.';
       warningText.className = 'warning-text';
       break;
 
@@ -103,7 +118,8 @@ export default async function initNativeGroupsOption() {
       // Old Firefox - has tabHide but no tabGroups
       checkbox.disabled = true;
       checkbox.checked = false;
-      warningText.textContent = 'Native tab groups are not supported in this browser version. Please update to Firefox 139+ or use Chrome 89+.';
+      warningText.textContent =
+        'Native tab groups are not supported in this browser version. Please update to Firefox 139+ or use Chrome 89+.';
       warningText.className = 'error-text';
       container.style.opacity = '0.5';
       break;
@@ -113,7 +129,8 @@ export default async function initNativeGroupsOption() {
       // No APIs available
       checkbox.disabled = true;
       checkbox.checked = false;
-      warningText.textContent = 'Your browser does not support the required APIs for tab groups.';
+      warningText.textContent =
+        'Your browser does not support the required APIs for tab groups.';
       warningText.className = 'error-text';
       container.style.opacity = '0.5';
       break;

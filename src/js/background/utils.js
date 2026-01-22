@@ -12,7 +12,7 @@
  * @see https://stackoverflow.com/questions/4467539/javascript-modulo-gives-a-negative-result-for-negative-numbers
  */
 export function mod(x, n) {
-  return (((x % n) + n) % n);
+  return ((x % n) + n) % n;
 }
 
 /**
@@ -22,6 +22,16 @@ export function mod(x, n) {
  * @returns {string} Color name for the group
  */
 export function getColorForGroupId(groupId) {
-  const colors = ['grey', 'blue', 'red', 'yellow', 'green', 'pink', 'purple', 'cyan', 'orange'];
+  const colors = [
+    'grey',
+    'blue',
+    'red',
+    'yellow',
+    'green',
+    'pink',
+    'purple',
+    'cyan',
+    'orange',
+  ];
   return colors[groupId % colors.length];
 }

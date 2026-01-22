@@ -1,8 +1,9 @@
 # How to contribute
 
 **Table of content**
-* [In General](#in-general)
-* [Translations](#translations)
+
+- [In General](#in-general)
+- [Translations](#translations)
 
 ## In General
 

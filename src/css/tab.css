@@ -1,151 +1,153 @@
+.tab,
+.newtab {
+  position: absolute;
 
-.tab, .newtab {
-	position: absolute;
+  cursor: pointer;
 
-	cursor: pointer;
-
-	_transition: all 100ms cubic-bezier(.08,.82,.17,1);
-	_transition-property: width, height, top, left;
+  _transition: all 100ms cubic-bezier(0.08, 0.82, 0.17, 1);
+  _transition-property: width, height, top, left;
 }
 
 .tab:hover .inner {
-	outline-color: #ff9400 !important;
+  outline-color: #ff9400 !important;
 }
 
 .tab.selected .inner {
-	outline: #45a1ff 2px solid !important;
+  outline: #45a1ff 2px solid !important;
 }
 
-.tab .inner, .newtab .inner {
-	position: absolute;
-	top: 4px;
-	left: 4px;
-	right: 4px;
-	bottom: 4px;
+.tab .inner,
+.newtab .inner {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
 }
 
 .tab.inactive .inner {
-	opacity: 0.75;
+  opacity: 0.75;
 }
 
 .tab .inner {
-	border: 3px solid #ffffff;
+  border: 3px solid #ffffff;
 
-	outline: 1px solid rgba(12, 12, 13, 0.2);
+  outline: 1px solid rgba(12, 12, 13, 0.2);
 
-	background-color: #ffffff;
+  background-color: #ffffff;
 
-	transition: opacity 500ms cubic-bezier(.08,.82,.17,1), transform 500ms cubic-bezier(.08,.82,.17,1);
+  transition:
+    opacity 500ms cubic-bezier(0.08, 0.82, 0.17, 1),
+    transform 500ms cubic-bezier(0.08, 0.82, 0.17, 1);
 }
 
 .newtab .inner {
-	border: rgba(12, 12, 13, 1) 2px dashed;
+  border: rgba(12, 12, 13, 1) 2px dashed;
 
-	background-image: url(/icons/plus_dark.svg);
-	background-repeat: no-repeat;
-	background-size: 16px;
-	background-position: center;
+  background-image: url(/icons/plus_dark.svg);
+  background-repeat: no-repeat;
+  background-size: 16px;
+  background-position: center;
 
-	opacity: 0.2;
+  opacity: 0.2;
 }
 
 .tab.drag .inner {
-	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 
-	outline: none;
+  outline: none;
 
-	opacity: 0.5;
-	transform: scale(0.9);
-	backdrop-filter: blur(10px);
+  opacity: 0.5;
+  transform: scale(0.9);
+  backdrop-filter: blur(10px);
 }
 
 .tab .thumbnail {
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 20px;
-	left: 0;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 20px;
+  left: 0;
 
-	background-color: #f9f9fa;
-	background-size: cover;
-	background-position: top;
+  background-color: #f9f9fa;
+  background-size: cover;
+  background-position: top;
 }
 
 .tab .favicon {
-	width: 16px;
-	height: 16px;
+  width: 16px;
+  height: 16px;
 
-	position: absolute;
-	left: 0;
-	top: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
 
-	border-right: #ffffff 3px solid;
-	border-bottom: #ffffff 3px solid;
-	border-radius: 0 0 2px 0;
+  border-right: #ffffff 3px solid;
+  border-bottom: #ffffff 3px solid;
+  border-radius: 0 0 2px 0;
 
-	background-color: #ffffff;
-	background-size: contain;
+  background-color: #ffffff;
+  background-size: contain;
 
-	display: none;
+  display: none;
 }
 
 .tab .favicon.visible {
-	display: block;
+  display: block;
 }
 
 .tab .close {
-	width: 16px;
-	height: 16px;
+  width: 16px;
+  height: 16px;
 
-	position: absolute;
-	right: 0;
-	top: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
 
-	background-image: url(/icons/tab_close.svg);
-	background-repeat: no-repeat;
-	background-size: 10px;
-	background-position: center;
+  background-image: url(/icons/tab_close.svg);
+  background-repeat: no-repeat;
+  background-size: 10px;
+  background-position: center;
 }
 
 .tab .name {
-	height: 20px;
+  height: 20px;
 
-	position: absolute;
-	bottom: 0;
-	left: 2px;
-	right: 2px;
+  position: absolute;
+  bottom: 0;
+  left: 2px;
+  right: 2px;
 
-	font-size: 12px;
-	text-align: center;
-	line-height: 22px;
-	overflow: hidden;
-	white-space: nowrap;
+  font-size: 12px;
+  text-align: center;
+  line-height: 22px;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-
 .tab.small .inner {
-	_border-bottom-width: 20px;
-	_border-bottom-style: solid;
+  _border-bottom-width: 20px;
+  _border-bottom-style: solid;
 }
 
 .tab.small .thumbnail {
-	bottom: 0px;
+  bottom: 0px;
 }
 
 .tab.small .favicon {
-	width: 100%;
-	height: 100%;
+  width: 100%;
+  height: 100%;
 
-	border: none;
-	border-radius: 0;
+  border: none;
+  border-radius: 0;
 
-	background-size: cover;
+  background-size: cover;
 }
 
 .tab.small .name {
-	display: none;
+  display: none;
 }
 
 .tab.small .close {
-	display: none;
+  display: none;
 }

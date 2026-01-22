@@ -1,10 +1,10 @@
 /* Replacement for deprecated browser-style */
-.browser-style input[type="text"],
-.browser-style input[type="password"],
-.browser-style input[type="email"],
-.browser-style input[type="url"],
-.browser-style input[type="search"],
-.browser-style input[type="number"],
+.browser-style input[type='text'],
+.browser-style input[type='password'],
+.browser-style input[type='email'],
+.browser-style input[type='url'],
+.browser-style input[type='search'],
+.browser-style input[type='number'],
 .browser-style textarea {
   border: 1px solid rgba(12, 12, 13, 0.3);
   border-radius: 2px;
@@ -36,7 +36,7 @@
   color: #0c0c0d;
 }
 
-.browser-style input[type="radio"] {
+.browser-style input[type='radio'] {
   margin: 0 4px 0 0;
 }
 
@@ -50,12 +50,12 @@
 
 /* Dark theme support */
 @media (prefers-color-scheme: dark) {
-  .browser-style input[type="text"],
-  .browser-style input[type="password"],
-  .browser-style input[type="email"],
-  .browser-style input[type="url"],
-  .browser-style input[type="search"],
-  .browser-style input[type="number"],
+  .browser-style input[type='text'],
+  .browser-style input[type='password'],
+  .browser-style input[type='email'],
+  .browser-style input[type='url'],
+  .browser-style input[type='search'],
+  .browser-style input[type='number'],
   .browser-style textarea,
   .browser-style select {
     background: #2a2a2e;
