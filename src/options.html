@@ -1,165 +1,217 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<link rel="stylesheet" type="text/css" href="css/options.css">
-		<link rel="stylesheet" type="text/css" href="css/browser-style.css">
-		<script type="module" src="js/options/index.js"></script>
-	</head>
-	<body>
-		<section id="optionKeyboardShortcuts">
-			<h2>Keyboard Shortcuts</h2>
-			<p>
-				<em><a href="https://developer.mozilla.org/en-US/Add-ons/WebExtensions/manifest.json/commands#Key_combinations" target="_blank">The format for the shortcut option is detailed here.</a></em>
-			</p>
-			<p>
-				<em>Users can also update shortcuts via the "Manage Extension Shortcuts" option at about:addons in Firefox as seen <a href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Updating_shortcuts">in the example video</a>.</em>
-			</p>
-			<div class="keyboardShortcuts">
-				<form id="_execute_action" class="browser-style">
-					<label for="_execute_action">Toggle Panorama View</label>
-					<input type="text">
-					<button class="updateShortcut" class="browser-style">Update</button>
-					<button class="resetShortcut" class="browser-style">Reset</button>
-					<button class="enableShortcut" class="browser-style" hidden>Enable</button>
-				</form>
-			</div>
-			<div class="keyboardShortcuts">
-				<form id="activate-next-group" class="browser-style">
-					<label for="activate-next-group">Activate the next Tab Group</label>
-					<input type="text">
-					<button class="updateShortcut" class="browser-style">Update</button>
-					<button class="resetShortcut" class="browser-style">Reset</button>
-					<button class="disableShortcut" class="browser-style">Disable</button>
-					<button class="enableShortcut" class="browser-style" hidden>Enable</button>
-				</form>
-			</div>
-			<div class="keyboardShortcuts">
-				<form id="activate-previous-group" class="browser-style">
-					<label for="activate-previous-group">Activate the previous Tab Group</label>
-					<input type="text">
-					<button class="updateShortcut" class="browser-style">Update</button>
-					<button class="resetShortcut" class="browser-style">Reset</button>
-					<button class="disableShortcut" class="browser-style">Disable</button>
-					<button class="enableShortcut" class="browser-style" hidden>Enable</button>
-				</form>
-			</div>
-		</section>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="css/options.css" />
+    <link rel="stylesheet" type="text/css" href="css/browser-style.css" />
+    <script type="module" src="js/options/index.js"></script>
+  </head>
+  <body>
+    <section id="optionKeyboardShortcuts">
+      <h2>Keyboard Shortcuts</h2>
+      <p>
+        <em
+          ><a
+            href="https://developer.mozilla.org/en-US/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+            target="_blank"
+            >The format for the shortcut option is detailed here.</a
+          ></em
+        >
+      </p>
+      <p>
+        <em
+          >Users can also update shortcuts via the "Manage Extension Shortcuts"
+          option at about:addons in Firefox as seen
+          <a
+            href="https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Updating_shortcuts"
+            >in the example video</a
+          >.</em
+        >
+      </p>
+      <div class="keyboardShortcuts">
+        <form id="_execute_action" class="browser-style">
+          <label for="_execute_action">Toggle Panorama View</label>
+          <input type="text" />
+          <button class="updateShortcut" class="browser-style">Update</button>
+          <button class="resetShortcut" class="browser-style">Reset</button>
+          <button class="enableShortcut" class="browser-style" hidden>
+            Enable
+          </button>
+        </form>
+      </div>
+      <div class="keyboardShortcuts">
+        <form id="activate-next-group" class="browser-style">
+          <label for="activate-next-group">Activate the next Tab Group</label>
+          <input type="text" />
+          <button class="updateShortcut" class="browser-style">Update</button>
+          <button class="resetShortcut" class="browser-style">Reset</button>
+          <button class="disableShortcut" class="browser-style">Disable</button>
+          <button class="enableShortcut" class="browser-style" hidden>
+            Enable
+          </button>
+        </form>
+      </div>
+      <div class="keyboardShortcuts">
+        <form id="activate-previous-group" class="browser-style">
+          <label for="activate-previous-group"
+            >Activate the previous Tab Group</label
+          >
+          <input type="text" />
+          <button class="updateShortcut" class="browser-style">Update</button>
+          <button class="resetShortcut" class="browser-style">Reset</button>
+          <button class="disableShortcut" class="browser-style">Disable</button>
+          <button class="enableShortcut" class="browser-style" hidden>
+            Enable
+          </button>
+        </form>
+      </div>
+    </section>
 
-		<section>
-			<div id="optionsView">
-				<h2>View</h2>
-				<form class="browser-style" name="formView">
-					<div class="input-radio-image input-radio-image--extended">
-						<input type="radio" id="viewFreeform" name="view" value="freeform" />
-						<label for="viewFreeform">
-							<img src="/icons/options/view-freeform.svg" alt="" />
-							<span>Freeform (classic)</span>
-						</label>
-					</div>
-					<div class="input-radio-image input-radio-image--extended">
-						<input type="radio" id="viewPopup" name="view" value="popup" />
-						<label for="viewPopup">
-							<img src="/icons/options/view-popup.svg" alt="" />
-							<span>Popup</span>
-						</label>
-					</div>
-				</form>
-			</div>
-			<div id="optionsToolbar">
-				<h3>Toolbar</h3>
-				<h4>Position</h4>
-				<form class="browser-style" name="formToolbarPosition">
-					<div class="input-radio-image">
-						<input type="radio" id="toolbarPositionTop" name="toolbarPosition" value="top" />
-						<label for="toolbarPositionTop">
-							<img src="/icons/options/toolbar-position-top.png" alt="" />
-							<span>top</span>
-						</label>
-					</div>
-					<div class="input-radio-image">
-						<input type="radio" id="toolbarPositionRight" name="toolbarPosition" value="right" />
-						<label for="toolbarPositionRight">
-							<img src="/icons/options/toolbar-position-right.png" alt="" />
-							<span>right</span>
-						</label>
-					</div>
-					<div class="input-radio-image">
-						<input type="radio" id="toolbarPositionBottom" name="toolbarPosition" value="bottom" />
-						<label for="toolbarPositionBottom">
-							<img src="/icons/options/toolbar-position-bottom.png" alt="" />
-							<span>bottom</span>
-						</label>
-					</div>
-					<div class="input-radio-image">
-						<input type="radio" id="toolbarPositionLeft" name="toolbarPosition" value="left" />
-						<label for="toolbarPositionLeft">
-							<img src="/icons/options/toolbar-position-left.png" alt="" />
-							<span>left</span>
-						</label>
-					</div>
-				</form>
-			</section>
-		</section>
+    <section>
+      <div id="optionsView">
+        <h2>View</h2>
+        <form class="browser-style" name="formView">
+          <div class="input-radio-image input-radio-image--extended">
+            <input
+              type="radio"
+              id="viewFreeform"
+              name="view"
+              value="freeform"
+            />
+            <label for="viewFreeform">
+              <img src="/icons/options/view-freeform.svg" alt="" />
+              <span>Freeform (classic)</span>
+            </label>
+          </div>
+          <div class="input-radio-image input-radio-image--extended">
+            <input type="radio" id="viewPopup" name="view" value="popup" />
+            <label for="viewPopup">
+              <img src="/icons/options/view-popup.svg" alt="" />
+              <span>Popup</span>
+            </label>
+          </div>
+        </form>
+      </div>
+      <div id="optionsToolbar">
+        <h3>Toolbar</h3>
+        <h4>Position</h4>
+        <form class="browser-style" name="formToolbarPosition">
+          <div class="input-radio-image">
+            <input
+              type="radio"
+              id="toolbarPositionTop"
+              name="toolbarPosition"
+              value="top"
+            />
+            <label for="toolbarPositionTop">
+              <img src="/icons/options/toolbar-position-top.png" alt="" />
+              <span>top</span>
+            </label>
+          </div>
+          <div class="input-radio-image">
+            <input
+              type="radio"
+              id="toolbarPositionRight"
+              name="toolbarPosition"
+              value="right"
+            />
+            <label for="toolbarPositionRight">
+              <img src="/icons/options/toolbar-position-right.png" alt="" />
+              <span>right</span>
+            </label>
+          </div>
+          <div class="input-radio-image">
+            <input
+              type="radio"
+              id="toolbarPositionBottom"
+              name="toolbarPosition"
+              value="bottom"
+            />
+            <label for="toolbarPositionBottom">
+              <img src="/icons/options/toolbar-position-bottom.png" alt="" />
+              <span>bottom</span>
+            </label>
+          </div>
+          <div class="input-radio-image">
+            <input
+              type="radio"
+              id="toolbarPositionLeft"
+              name="toolbarPosition"
+              value="left"
+            />
+            <label for="toolbarPositionLeft">
+              <img src="/icons/options/toolbar-position-left.png" alt="" />
+              <span>left</span>
+            </label>
+          </div>
+        </form>
+      </div>
+    </section>
 
-		<section id="optionsTheme">
-			<h2>Theme</h2>
-			<form class="browser-style" name="formTheme">
-				<div class="input-radio-image">
-				  <input type="radio" id="themeAuto" name="theme" value="auto"/>
-				  <label for="themeAuto">
-						<img src="/icons/options/theme-auto.png" alt="" />
-						<span>Follow System</span>
-					</label>
-				</div>
-				<div class="input-radio-image">
-				  <input type="radio" id="themeLight" name="theme" value="light"/>
-				  <label for="themeLight">
-						<img src="/icons/options/theme-light.png" alt="" />
-						<span>Light</span>
-					</label>
-				</div>
-				<div class="input-radio-image">
-				  <input type="radio" id="themeDark" name="theme" value="dark"/>
-				  <label for="themeDark">
-						<img src="/icons/options/theme-dark.png" alt="" />
-						<span>Dark</span>
-					</label>
-				</div>
-			</form>
-		</section>
+    <section id="optionsTheme">
+      <h2>Theme</h2>
+      <form class="browser-style" name="formTheme">
+        <div class="input-radio-image">
+          <input type="radio" id="themeAuto" name="theme" value="auto" />
+          <label for="themeAuto">
+            <img src="/icons/options/theme-auto.png" alt="" />
+            <span>Follow System</span>
+          </label>
+        </div>
+        <div class="input-radio-image">
+          <input type="radio" id="themeLight" name="theme" value="light" />
+          <label for="themeLight">
+            <img src="/icons/options/theme-light.png" alt="" />
+            <span>Light</span>
+          </label>
+        </div>
+        <div class="input-radio-image">
+          <input type="radio" id="themeDark" name="theme" value="dark" />
+          <label for="themeDark">
+            <img src="/icons/options/theme-dark.png" alt="" />
+            <span>Dark</span>
+          </label>
+        </div>
+      </form>
+    </section>
 
-		<section id="optionsBackup">
-			<h2>Backups</h2>
-			<h3>Import</h3>
-			<p>
-				Imported backups will open in new windows and not overwrite anything.<br>
-				You can also import backups from the old "Tab Groups" add-on.
-			</p>
-			<div class="browser-style">
-				<input id="backupFileInput" name="backupFile" type="file" accept=".json">
-			</div>
-			<h3>Export</h3>
-			<p>
-				This section might be made obsolete once proper session management is possible in Firefox.
-			</p>
-			<div>
-				<button id="saveBackupButton" class="browser-style">Save backup</button>
-			</div>
-		</section>
-		<section id="optionsStatistics">
-			<h2>Statistics</h2>
-			<div>
-				<label for="numberOfTabs">Number of Tabs:</label>
-				<strong><span id="numberOfTabs"></span></strong>
-			</div>
-			<div>
-				<label for="thumbnailCacheSize">Thumbnail Cache Size:</label>
-				<strong><span id="thumbnailCacheSize"></span></strong>
-			</div>
-            <div>
-                <button id="resetAddon" class="browser-style">Reset PTG</button>
-            </div>
-		</section>
-	</body>
+    <section id="optionsBackup">
+      <h2>Backups</h2>
+      <h3>Import</h3>
+      <p>
+        Imported backups will open in new windows and not overwrite anything.<br />
+        You can also import backups from the old "Tab Groups" add-on.
+      </p>
+      <div class="browser-style">
+        <input
+          id="backupFileInput"
+          name="backupFile"
+          type="file"
+          accept=".json"
+        />
+      </div>
+      <h3>Export</h3>
+      <p>
+        This section might be made obsolete once proper session management is
+        possible in Firefox.
+      </p>
+      <div>
+        <button id="saveBackupButton" class="browser-style">Save backup</button>
+      </div>
+    </section>
+    <section id="optionsStatistics">
+      <h2>Statistics</h2>
+      <div>
+        <label for="numberOfTabs">Number of Tabs:</label>
+        <strong><span id="numberOfTabs"></span></strong>
+      </div>
+      <div>
+        <label for="thumbnailCacheSize">Thumbnail Cache Size:</label>
+        <strong><span id="thumbnailCacheSize"></span></strong>
+      </div>
+      <div>
+        <button id="resetAddon" class="browser-style">Reset PTG</button>
+      </div>
+    </section>
+  </body>
 </html>

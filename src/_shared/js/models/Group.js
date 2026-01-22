@@ -1,12 +1,13 @@
 export default class Group {
   constructor(View, group) {
-    return (async () => {
-      Object.assign(this, group);
-      this.View = View;
-      this.status = group.status || 'default';
+    Object.assign(this, group);
+    this.View = View;
+    this.status = group.status || 'default';
+  }
 
-      return this;
-    })();
+  static async create(View, group) {
+    const instance = new Group(View, group);
+    return instance;
   }
 
   async setActive() {
@@ -108,11 +109,12 @@ export default class Group {
 
   // TODO: How to resolve this duplicate?
   async getAll() {
-    const groups = (await browser.sessions.getWindowValue(this.View.windowId, 'groups'))
-      || [];
+    const groups =
+      (await browser.sessions.getWindowValue(this.View.windowId, 'groups')) ||
+      [];
 
     return Promise.all(
-      groups.map(async (group) => new Group(this.View, group)),
+      groups.map(async (group) => Group.create(this.View, group)),
     );
   }
 }

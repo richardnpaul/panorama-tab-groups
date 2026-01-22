@@ -43,7 +43,7 @@ export default class View {
     browser.tabs.onActivated.addListener(async (activeInfo) => {
       const tab = await browser.tabs.get(activeInfo.tabId);
       if (tab.windowId === this.windowId) {
-        this.lastActiveTab = await new Tab(tab);
+        this.lastActiveTab = await Tab.create(tab);
       }
     });
   }
@@ -54,7 +54,7 @@ export default class View {
     })) || [];
 
     return Promise.all(
-      tabs.map(async (tab) => new Tab(tab)),
+      tabs.map(async (tab) => Tab.create(tab)),
     );
   }
 
@@ -65,7 +65,7 @@ export default class View {
     })) || [];
 
     return Promise.all(
-      tabs.map(async (tab) => new Tab(tab)),
+      tabs.map(async (tab) => Tab.create(tab)),
     );
   }
 
@@ -76,7 +76,7 @@ export default class View {
     })) || [];
 
     return Promise.all(
-      tabs.map(async (tab) => new Tab(tab)),
+      tabs.map(async (tab) => Tab.create(tab)),
     );
   }
 
@@ -93,7 +93,7 @@ export default class View {
     });
 
     if (lastActiveTab !== null) {
-      return new Tab(lastActiveTab);
+      return Tab.create(lastActiveTab);
     }
 
     return null;
@@ -103,7 +103,7 @@ export default class View {
     const groups = (await browser.sessions.getWindowValue(this.windowId, 'groups')) || [];
 
     return Promise.all(
-      groups.map(async (group) => new Group(this, group)),
+      groups.map(async (group) => Group.create(this, group)),
     );
   }
 
@@ -118,7 +118,7 @@ export default class View {
     });
 
     if (Object.prototype.hasOwnProperty.call(groupData, 'id')) {
-      return new Group(this, groupData);
+      return Group.create(this, groupData);
     }
     return null;
   }
@@ -182,7 +182,7 @@ export default class View {
     );
 
     newGroup.status = 'new';
-    return new Group(this, newGroup);
+    return Group.create(this, newGroup);
   }
 
   static setTheme(theme) {

@@ -59,7 +59,12 @@ export function getPluralForm(pluralCount = 1, translatedString = '') {
     case 7:
       if (count % 10 === 1 && count % 100 !== 11) {
         return pluralForms[0];
-      } if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 > 20)) {
+      }
+      if (
+        count % 10 >= 2 &&
+        count % 10 <= 4 &&
+        (count % 100 < 10 || count % 100 > 20)
+      ) {
         return pluralForms[1];
       }
       return pluralForms[2];
@@ -69,7 +74,12 @@ export function getPluralForm(pluralCount = 1, translatedString = '') {
     case 9:
       if (count === 1) {
         return pluralForms[0];
-      } if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 > 20)) {
+      }
+      if (
+        count % 10 >= 2 &&
+        count % 10 <= 4 &&
+        (count % 100 < 10 || count % 100 > 20)
+      ) {
         return pluralForms[1];
       }
       return pluralForms[2];

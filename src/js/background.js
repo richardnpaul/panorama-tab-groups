@@ -13,7 +13,7 @@ window.viewRefreshOrdered = false;
  * Following code is based from this:
  * https://stackoverflow.com/questions/4467539/javascript-modulo-gives-a-negative-result-for-negative-numbers */
 function mod(x, n) {
-  return (((x % n) + n) % n);
+  return ((x % n) + n) % n;
 }
 
 async function addRefreshMenuItem() {
@@ -51,7 +51,10 @@ async function createMenuList() {
 
   // Get current window and its groups
   const currentWindow = await browser.windows.getCurrent();
-  const groups = await browser.sessions.getWindowValue(currentWindow.id, 'groups');
+  const groups = await browser.sessions.getWindowValue(
+    currentWindow.id,
+    'groups',
+  );
 
   // Check if groups is initialized before proceeding
   if (!groups || !Array.isArray(groups)) {
@@ -87,7 +90,9 @@ async function changeMenu(message) {
       browser.menus.remove(String(message.groupId));
       break;
     case 'updateMenuItem':
-      browser.menus.update(String(message.groupId), { title: `${message.groupId}: ${message.groupName}` });
+      browser.menus.update(String(message.groupId), {
+        title: `${message.groupId}: ${message.groupName}`,
+      });
       break;
     default:
       break;
@@ -102,7 +107,10 @@ async function setActionTitle(windowId, activeGroup = null) {
   const groups = await browser.sessions.getWindowValue(windowId, 'groups');
 
   if (activeGroup === null) {
-    activeGroup = await browser.sessions.getWindowValue(windowId, 'activeGroup');
+    activeGroup = await browser.sessions.getWindowValue(
+      windowId,
+      'activeGroup',
+    );
   }
 
   groups.forEach((group) => {
@@ -123,20 +131,22 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
   const hideTabIds = [];
   const showTabs = [];
 
-  await Promise.all(tabs.map(async (tab) => {
-    try {
-      const groupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+  await Promise.all(
+    tabs.map(async (tab) => {
+      try {
+        const groupId = await browser.sessions.getTabValue(tab.id, 'groupId');
 
-      if (groupId !== activeGroup) {
-        hideTabIds.push(tab.id);
-      } else {
-        showTabIds.push(tab.id);
-        showTabs.push(tab);
+        if (groupId !== activeGroup) {
+          hideTabIds.push(tab.id);
+        } else {
+          showTabIds.push(tab.id);
+          showTabs.push(tab);
+        }
+      } catch {
+        // The tab has probably been closed, this should be safe to ignore
       }
-    } catch {
-      // The tab has probably been closed, this should be safe to ignore
-    }
-  }));
+    }),
+  );
 
   if (noTabSelected) {
     showTabs.sort((tabA, tabB) => tabB.lastAccessed - tabA.lastAccessed);
@@ -159,7 +169,10 @@ async function moveTab(tabId, groupId) {
   const toIndex = -1;
   await browser.tabs.move(tabId, { index: toIndex });
 
-  const activeGroup = (await browser.sessions.getWindowValue(windowId, 'activeGroup'));
+  const activeGroup = await browser.sessions.getWindowValue(
+    windowId,
+    'activeGroup',
+  );
   await toggleVisibleTabs(activeGroup);
 }
 
@@ -184,11 +197,11 @@ async function menuClicked(info, tab) {
           }
         });
       } else {
-      // otherwise just use the tab where the menu was clicked from
-      // if you don't do multiselect, but just right click, the tab isn't actually highlighted
+        // otherwise just use the tab where the menu was clicked from
+        // if you don't do multiselect, but just right click, the tab isn't actually highlighted
         const activeTabId = (await browser.tabs.query({ active: true }))[0].id;
         if (activeTabId === tab.id) {
-          const visibleTabs = (await browser.tabs.query({ hidden: false }));
+          const visibleTabs = await browser.tabs.query({ hidden: false });
 
           // find position of active tab among visible tabs
           let tabIndex = 0;
@@ -221,7 +234,10 @@ async function changeActiveGroupBy(offset) {
   const windowId = (await browser.windows.getCurrent()).id;
   const groups = await browser.sessions.getWindowValue(windowId, 'groups');
 
-  let activeGroup = (await browser.sessions.getWindowValue(windowId, 'activeGroup'));
+  let activeGroup = await browser.sessions.getWindowValue(
+    windowId,
+    'activeGroup',
+  );
   const activeIndex = groups.findIndex((group) => group.id === activeGroup);
   const newIndex = activeIndex + offset;
 
@@ -247,9 +263,14 @@ async function triggerCommand(command) {
 
 /** Open the Panorama View tab, or return to the last open tab if Panorama View is currently open */
 async function toggleView() {
-  const extTabs = await browser.tabs.query({ url: browser.runtime.getURL('view.html'), currentWindow: true });
+  const extTabs = await browser.tabs.query({
+    url: browser.runtime.getURL('view.html'),
+    currentWindow: true,
+  });
   if (extTabs.length > 0) {
-    const currentTab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+    const currentTab = (
+      await browser.tabs.query({ active: true, currentWindow: true })
+    )[0];
     // switch to last accessed tab in window
     if (extTabs[0].id === currentTab.id) {
       const tabs = await browser.tabs.query({ currentWindow: true });
@@ -264,7 +285,8 @@ async function toggleView() {
     } else {
       await browser.tabs.update(extTabs[0].id, { active: true });
     }
-  } else { // if there is no Panorama View tab, make one
+  } else {
+    // if there is no Panorama View tab, make one
     window.backgroundState.openingView = true;
     await browser.tabs.create({ url: '/view.html', active: true });
   }
@@ -281,7 +303,10 @@ async function tabCreated(tab) {
     // If the tab does not have a group, set its group to the current group
     const tabGroupId = await browser.sessions.getTabValue(tab.id, 'groupId');
     if (tabGroupId === undefined) {
-      const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
+      const activeGroup = await browser.sessions.getWindowValue(
+        tab.windowId,
+        'activeGroup',
+      );
 
       await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
     }
@@ -293,12 +318,12 @@ async function tabCreated(tab) {
   }
 }
 
-async function tabAttached(tabId, attachInfo) { // eslint-disable-line no-unused-vars
+async function tabAttached(tabId) {
   const tab = await browser.tabs.get(tabId);
   await tabCreated(tab);
 }
 
-async function tabDetached(tabId, detachInfo) { // eslint-disable-line no-unused-vars
+async function tabDetached(tabId) {
   await browser.sessions.removeTabValue(tabId, 'groupId');
 }
 
@@ -316,11 +341,18 @@ async function tabActivated(activeInfo) {
   // Set the window's active group to the new active tab's group
   // If this is a newly-created tab, tabCreated() might not have set a
   // groupId yet, so retry until it does.
-  const activeGroup = await browser.sessions.getTabValue(activeInfo.tabId, 'groupId');
+  const activeGroup = await browser.sessions.getTabValue(
+    activeInfo.tabId,
+    'groupId',
+  );
 
   if (activeGroup !== -1) {
     // activated tab is not Panorama View tab
-    await browser.sessions.setWindowValue(tab.windowId, 'activeGroup', activeGroup);
+    await browser.sessions.setWindowValue(
+      tab.windowId,
+      'activeGroup',
+      activeGroup,
+    );
   }
 
   await toggleVisibleTabs(activeGroup);
@@ -328,7 +360,10 @@ async function tabActivated(activeInfo) {
 
 /** Get a new UID for a group */
 async function newGroupUid(windowId) {
-  const groupIndex = await browser.sessions.getWindowValue(windowId, 'groupIndex');
+  const groupIndex = await browser.sessions.getWindowValue(
+    windowId,
+    'groupIndex',
+  );
 
   const uid = groupIndex || 0;
   const newGroupIndex = uid + 1;
@@ -349,18 +384,27 @@ async function createGroupInWindow(browserWindow) {
 
   const groupId = await newGroupUid(browserWindow.id);
 
-  const groups = [{
-    id: groupId,
-    name: `${groupId}: ${browser.i18n.getMessage('defaultGroupName')}`,
-    containerId: 'firefox-default',
-    rect: {
-      x: 0, y: 0, w: 0.5, h: 0.5,
+  const groups = [
+    {
+      id: groupId,
+      name: `${groupId}: ${browser.i18n.getMessage('defaultGroupName')}`,
+      containerId: 'firefox-default',
+      rect: {
+        x: 0,
+        y: 0,
+        w: 0.5,
+        h: 0.5,
+      },
+      lastMoved: new Date().getTime(),
     },
-    lastMoved: (new Date()).getTime(),
-  }];
+  ];
 
   await browser.sessions.setWindowValue(browserWindow.id, 'groups', groups);
-  await browser.sessions.setWindowValue(browserWindow.id, 'activeGroup', groupId);
+  await browser.sessions.setWindowValue(
+    browserWindow.id,
+    'activeGroup',
+    groupId,
+  );
 }
 /** Checks that group is missing before creating new one in window
  * This makes sure existing/restored windows are not reinitialized.
@@ -368,13 +412,19 @@ async function createGroupInWindow(browserWindow) {
  * trigger the onCreated event but still have the existing group data.
  */
 async function createGroupInWindowIfMissing(browserWindow) {
-  const groups = await browser.sessions.getWindowValue(browserWindow.id, 'groups');
+  const groups = await browser.sessions.getWindowValue(
+    browserWindow.id,
+    'groups',
+  );
 
   if (!groups || !groups.length) {
     console.log(`No groups found for window ${browserWindow.id}!`);
     await createGroupInWindow(browserWindow);
   }
-  browser.action.setTitle({ title: 'Active Group: Unnamed group', windowId: browserWindow.id });
+  browser.action.setTitle({
+    title: 'Active Group: Unnamed group',
+    windowId: browserWindow.id,
+  });
   browser.action.setBadgeText({ text: '1', windowId: browserWindow.id });
   browser.action.setBadgeBackgroundColor({ color: '#666666' });
 }
@@ -382,9 +432,11 @@ async function createGroupInWindowIfMissing(browserWindow) {
 async function setupWindows() {
   const windows = await browser.windows.getAll({});
 
-  await Promise.all(windows.map(async (window) => {
-    await createGroupInWindowIfMissing(window);
-  }));
+  await Promise.all(
+    windows.map(async (window) => {
+      await createGroupInWindowIfMissing(window);
+    }),
+  );
 }
 
 /** Put any tabs that do not have a group into the active group */
@@ -394,35 +446,47 @@ async function salvageGrouplessTabs() {
   const tWindows = await browser.windows.getAll({});
 
   // Use Promise.all to ensure all async operations complete
-  await Promise.all(tWindows.map(async (window) => {
-    windows[window.id] = { groups: null };
-    windows[window.id].groups = await browser.sessions.getWindowValue(window.id, 'groups');
-  }));
+  await Promise.all(
+    tWindows.map(async (window) => {
+      windows[window.id] = { groups: null };
+      windows[window.id].groups = await browser.sessions.getWindowValue(
+        window.id,
+        'groups',
+      );
+    }),
+  );
 
   // check all tabs
   const tabs = await browser.tabs.query({});
 
-  await Promise.all(tabs.map(async (tab) => {
-    const groupId = await browser.sessions.getTabValue(tab.id, 'groupId');
+  await Promise.all(
+    tabs.map(async (tab) => {
+      const groupId = await browser.sessions.getTabValue(tab.id, 'groupId');
 
-    // Check if windows[tab.windowId] and its groups exist
-    if (!windows[tab.windowId] || !windows[tab.windowId].groups) {
-      console.log(`No groups found for window ${tab.windowId}, skipping tab ${tab.id}`);
-      return;
-    }
-
-    let groupExists = false;
-    windows[tab.windowId].groups.forEach((group) => {
-      if (group.id === groupId) {
-        groupExists = true;
+      // Check if windows[tab.windowId] and its groups exist
+      if (!windows[tab.windowId] || !windows[tab.windowId].groups) {
+        console.log(
+          `No groups found for window ${tab.windowId}, skipping tab ${tab.id}`,
+        );
+        return;
       }
-    });
 
-    if (!groupExists && groupId !== -1) {
-      const activeGroup = await browser.sessions.getWindowValue(tab.windowId, 'activeGroup');
-      await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
-    }
-  }));
+      let groupExists = false;
+      windows[tab.windowId].groups.forEach((group) => {
+        if (group.id === groupId) {
+          groupExists = true;
+        }
+      });
+
+      if (!groupExists && groupId !== -1) {
+        const activeGroup = await browser.sessions.getWindowValue(
+          tab.windowId,
+          'activeGroup',
+        );
+        await browser.sessions.setTabValue(tab.id, 'groupId', activeGroup);
+      }
+    }),
+  );
 }
 
 async function init() {
@@ -493,7 +557,7 @@ window.refreshView = async function refreshView() {
 };
 
 // TODO: Remove? Is this used?
-function handleMessage(message, sender) { // eslint-disable-line no-unused-vars
+function handleMessage(message) {
   if (message === 'activate-next-group') {
     triggerCommand('activate-next-group');
   } else if (message === 'activate-previous-group') {
@@ -508,13 +572,21 @@ function handleInternalMessage(message, sender, sendResponse) {
       window.backgroundState[message.key] = message.value;
       break;
     case 'refreshView':
-      refreshView();
+      window.refreshView();
       break;
     case 'checkViewRefresh':
       sendResponse({ viewRefreshOrdered: window.viewRefreshOrdered });
       break;
     case 'clearViewRefresh':
       window.viewRefreshOrdered = false;
+      break;
+    default:
+      console.error(
+        'Unknown internal message action:',
+        message.action,
+        message,
+      );
+      sendResponse({ error: `Unknown action: ${message.action}` });
       break;
   }
 }

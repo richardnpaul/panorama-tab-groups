@@ -185,18 +185,18 @@ export default class Frame {
     const tabNodes = Tabs.map((Tab) => {
       const isActive = Tab.id === window.PopupView.lastActiveTab.id;
       const node = getElementNodeFromString(`
-                <li data-tab="${Tab.id}" 
+                <li data-tab="${Tab.id}"
                     class="list__item list__item--tab ${
   isActive ? 'list__item--highlight' : ''
 }" data-nav-row>
                     <button class="list__link" title="${Tab.title}
 ${Tab.url}">
-                        <img class="tab__icon" 
-                             src="${Tab.favIconUrl}" 
+                        <img class="tab__icon"
+                             src="${Tab.favIconUrl}"
                              width="16" height="16" alt="" />
                         <span>${Tab.title}</span>
                     </button>
-                    <button class="list__close" 
+                    <button class="list__close"
                             title="${browser.i18n.getMessage('closeTab')}"
                             ${options.hideCloseButton ? 'hidden' : ''}></button>
                 </li>

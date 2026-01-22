@@ -15,14 +15,15 @@ export function showViewSpecificOptions(currentView) {
 }
 
 export async function saveOptionView() {
-  const currentView = document.querySelector('input[name="view"]:checked')
-    .value;
+  const currentView = document.querySelector(
+    'input[name="view"]:checked',
+  ).value;
   await browser.storage.sync.set({
     view: currentView,
   });
 
   await browser.runtime.sendMessage({
-    action: 'refreshView'
+    action: 'refreshView',
   });
 
   showViewSpecificOptions(currentView);

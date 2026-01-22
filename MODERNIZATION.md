@@ -2,7 +2,8 @@
 
 T### 7.### 8. CSS Modernization
 
-- **Added9. `src/css/browser-style.css` - Browser-style replacement (new file)
+- \*\*Added9. `src/css/browser-style.css` - Browser-style replacement (new file)
+
 10. `src/icons/options/theme-auto.png` - Auto theme icon (new file)
 
 ## Files Removed
@@ -13,7 +14,7 @@ T### 7.### 8. CSS Modernization
 
 - **System theme following**: Extension can automatically follow OS dark/light mode
 - **Real-time theme switching**: Responds to OS theme changes without reload
-- **Improved defaults**: Better out-of-box experience with system theme detectionser-style.css**: Custom CSS replacement for deprecated browser-style
+- **Improved defaults**: Better out-of-box experience with system theme detectionser-style.css\*\*: Custom CSS replacement for deprecated browser-style
 - **Dark theme support**: Added proper dark theme media queries
 - **Linked new CSS**: Updated options.html to include new browser-style.css
 
@@ -50,12 +51,13 @@ T### 7.### 8. CSS Modernization
 
 ### 3. Command Updates
 
-- **_execute_browser_action → _execute_action**: Updated keyboard shortcut command name
+- **\_execute_browser_action → \_execute_action**: Updated keyboard shortcut command name
 - Updated related form IDs and labels in options.html
 
 ### 4. Message Passing Implementation
 
 Added proper message handling system to replace direct background page access:
+
 - `setBackgroundState`: Set background state variables
 - `refreshView`: Trigger view refresh
 - `checkViewRefresh`: Check if view refresh is needed

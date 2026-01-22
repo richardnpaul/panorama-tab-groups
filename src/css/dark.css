@@ -1,90 +1,90 @@
-
 /* view */
 body.theme-dark {
-	background-color: #2a2a2e;
+  background-color: #2a2a2e;
 }
 
 .theme-dark #toolbar {
-	border-color: rgba(249, 249, 250, 0.2);
+  border-color: rgba(249, 249, 250, 0.2);
 }
 
 .theme-dark #toolbar .button:hover {
-	background-color: rgba(249, 249, 250, 0.2);
+  background-color: rgba(249, 249, 250, 0.2);
 }
 
 .theme-dark #toolbar .button:active {
-	background-color: rgba(249, 249, 250, 0.25);
+  background-color: rgba(249, 249, 250, 0.25);
 }
 
 .theme-dark #newGroup {
-	background-image: url(/icons/plus_light.svg);
+  background-image: url(/icons/plus_light.svg);
 }
 
 .theme-dark #settings {
-	background-image: url(/icons/preferences_light.svg);
+  background-image: url(/icons/preferences_light.svg);
 }
 
 .theme-dark #pinnedTabs {
-	border-color: rgba(249, 249, 250, 0.2);
+  border-color: rgba(249, 249, 250, 0.2);
 }
 
 /* groups */
 .theme-dark .group > .inner {
-	border-color: rgba(249, 249, 250, 0.2);
+  border-color: rgba(249, 249, 250, 0.2);
 
-	background-color: #0c0c0d;
+  background-color: #0c0c0d;
 }
 
 .theme-dark .group > .inner:before {
-	border: none;
+  border: none;
 }
 
 .theme-dark .group .header input {
-	color: #b1b1b3;
+  color: #b1b1b3;
 }
 
 .theme-dark .group .header input.edit {
-	color: #f9f9fa;
+  color: #f9f9fa;
 }
 
-.theme-dark .group .header .tab_count, .theme-dark .group .header .group_id {
-	background-color: rgba(249, 249, 250, 0.2);
+.theme-dark .group .header .tab_count,
+.theme-dark .group .header .group_id {
+  background-color: rgba(249, 249, 250, 0.2);
 
-	color: #b1b1b3;
+  color: #b1b1b3;
 }
 
 .theme-dark .group .header .close {
-	background-image: url(/icons/group_close_dark.svg);
+  background-image: url(/icons/group_close_dark.svg);
 }
 
 /* tabs */
 .theme-dark .tab .inner {
-	border-color: #38383d;
+  border-color: #38383d;
 
-	outline-color: #58585b;
+  outline-color: #58585b;
 
-	background-color: #38383d;
+  background-color: #38383d;
 }
 
 .theme-dark .tab.inactive .inner {
-	opacity: 0.6;
+  opacity: 0.6;
 }
 
 .theme-dark .newtab .inner {
-	border: rgba(249, 249, 250, 1) 2px dashed;
+  border: rgba(249, 249, 250, 1) 2px dashed;
 
-	background-image: url(/icons/plus_light.svg);
+  background-image: url(/icons/plus_light.svg);
 
-	opacity: 0.25;
+  opacity: 0.25;
 }
 
 .theme-dark .tab .favicon {
-	border-right-color: #38383d;
-	border-bottom-color: #38383d;
+  border-right-color: #38383d;
+  border-bottom-color: #38383d;
 
-	background-color: #38383d;
+  background-color: #38383d;
 }
 
 .theme-dark .tab .name {
-	color: #d7d7db;
+  color: #d7d7db;
 }

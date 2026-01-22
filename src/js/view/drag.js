@@ -1,6 +1,10 @@
 import { setGroupId, getGroupId } from './tabs.js';
 import {
-  groupNodes, makeGroupNode, resizeGroups, updateGroupFit, insertTab,
+  groupNodes,
+  makeGroupNode,
+  resizeGroups,
+  updateGroupFit,
+  insertTab,
 } from './groupNodes.js';
 import * as groups from './groups.js';
 import { newElement } from '../_share/utils.js';
@@ -82,7 +86,7 @@ export function tabDragOver(e) {
     dragIndicator.style.height = `${rect.height - 8}px`;
     dragIndicator.style.top = `${window.scrollY + rect.top}px`;
 
-    if (e.clientX < rect.left + (rect.width / 2)) {
+    if (e.clientX < rect.left + rect.width / 2) {
       dragIndicator.style.left = `${rect.left - 5}px`;
       dragDropBefore = true;
     } else {
