@@ -134,7 +134,20 @@ export class StateManager {
    * @returns {Promise<number>} Active group ID
    */
   async getActiveGroup(windowId) {
-    return browser.sessions.getWindowValue(windowId, 'activeGroup');
+    const activeGroup = await browser.sessions.getWindowValue(
+      windowId,
+      'activeGroup',
+    );
+
+    // Return undefined without fallback - caller should handle
+    // This allows callers to detect uninitialized windows
+    if (activeGroup === undefined || activeGroup === null) {
+      console.log(
+        `[StateManager] getActiveGroup: No activeGroup set for window ${windowId}`,
+      );
+    }
+
+    return activeGroup;
   }
 
   /**

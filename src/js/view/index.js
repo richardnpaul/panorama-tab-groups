@@ -290,6 +290,15 @@ async function tabCreated(tab) {
     const groupId = await getGroupId(tab.id);
 
     const group = groups.get(groupId);
+
+    // Skip if group doesn't exist (system group or deleted group)
+    if (!group) {
+      console.warn(
+        `[View] tabCreated: Skipping tab ${tab.id} - group ${groupId} not found in view`,
+      );
+      return;
+    }
+
     await insertTab(tab);
     updateGroupFit(group);
   }

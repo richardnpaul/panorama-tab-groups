@@ -88,17 +88,30 @@ async function canSafelyGroupTabs(enrichedTabs, windowId, DEBUG) {
       return t.url !== viewUrl && t.pendingUrl !== viewUrl;
     });
 
-    // If we're grouping ALL non-panorama tabs AND there's only 1, window might close
-    // This is a browser behavior where grouping the last tab can cause issues
+    // If we're grouping ALL non-panorama tabs, window might close
+    // This happens when grouping moves all regular tabs, leaving only panorama view
+    // Browser will close such windows automatically
     if (
-      enrichedTabs.length === nonPanoramaTabs.length &&
-      nonPanoramaTabs.length === 1
+      enrichedTabs.length >= 1 &&
+      enrichedTabs.length === nonPanoramaTabs.length
     ) {
-      if (DEBUG) {
-        console.warn(
-          `[Safety Check] Skipping grouping: would group only regular tab in window ${windowId}, which could cause window closure`,
-        );
-      }
+      console.log(
+        `[Safety Check] Skipping grouping: would group all ${enrichedTabs.length} regular tabs in window ${windowId}, which could cause window closure`,
+      );
+      console.log(
+        `[Safety Check] enrichedTabs: ${enrichedTabs.map((t) => t.tabId).join(', ')}`,
+      );
+      console.log(
+        `[Safety Check] nonPanoramaTabs: ${nonPanoramaTabs.map((t) => t.id).join(', ')}`,
+      );
+      return false;
+    }
+
+    // Additional safety: if no non-panorama tabs, don't attempt grouping
+    if (nonPanoramaTabs.length === 0) {
+      console.log(
+        `[Safety Check] No non-panorama tabs in window ${windowId}`,
+      );
       return false;
     }
 
@@ -379,6 +392,18 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
                   return group;
                 }
 
+                // Re-validate window still exists before attempting to create native group
+                // Window may have closed due to previous group migration
+                try {
+                  await browser.windows.get(window.id);
+                } catch (error) {
+                  console.warn(
+                    `[Migration] Window ${window.id} closed during migration, skipping group ${group.id}`,
+                  );
+                  console.warn('[Migration] Error:', error.message);
+                  return group; // Stop processing this group
+                }
+
                 // Create native browser group by grouping tabs
                 const groupId = await browser.tabs.group({
                   tabIds: groupTabs.map((t) => t.tabId),
@@ -398,8 +423,38 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
                       `[Migration] ❌ NATIVE GROUP WINDOW MISMATCH: Expected window ${window.id} but native group ${groupId} is in window ${createdGroup.windowId}`,
                     );
                     console.error(
-                      `[Migration] This indicates the browser moved tabs during grouping - possible window closure`,
+                      `[Migration] This indicates the browser closed window ${window.id} and moved tabs to window ${createdGroup.windowId}`,
                     );
+
+                    // Remove the incorrectly placed native group
+                    try {
+                      await browser.tabs.ungroup(
+                        groupTabs.map((t) => t.tabId),
+                      );
+                      console.log(
+                        `[Migration] Ungrouped tabs to prevent orphaned native group`,
+                      );
+                    } catch (ungroupError) {
+                      console.error(
+                        '[Migration] Failed to ungroup tabs:',
+                        ungroupError,
+                      );
+                    }
+
+                    // Try to remove from storage since window no longer exists
+                    try {
+                      await browser.sessions.removeWindowValue(
+                        window.id,
+                        'groups',
+                      );
+                      await browser.sessions.removeWindowValue(
+                        window.id,
+                        'activeGroup',
+                      );
+                    } catch (cleanupError) {
+                      // Ignore cleanup errors - window already gone
+                    }
+
                     // Don't store this native group ID since it's in the wrong window
                     return group;
                   }

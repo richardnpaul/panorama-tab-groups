@@ -96,8 +96,16 @@ function getFit(param) {
 }
 
 export function updateGroupFit(group) {
-  // Skip if group doesn't exist in groupNodes (e.g., system groups or removed groups)
-  if (!groupNodes[group.id] || groupNodes[group.id] === groupNodes.pinned) {
+  // Validate group parameter and groupNodes entry exist
+  // group can be null if:
+  // 1. Group was deleted between get and this call
+  // 2. Group is a system group (-2, -1) filtered out during init
+  // 3. Race condition during view initialization
+  if (
+    !group ||
+    !groupNodes[group.id] ||
+    groupNodes[group.id] === groupNodes.pinned
+  ) {
     return;
   }
 

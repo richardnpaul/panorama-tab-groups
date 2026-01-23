@@ -616,14 +616,31 @@ async function tabCreated(tab) {
   // If the tab does not have a group, set its group to the current group
   let tabGroupId = await stateManager.getTabGroup(tab.id);
   if (tabGroupId === undefined) {
-    const activeGroup = await stateManager.getActiveGroup(tab.windowId);
+    let activeGroup = await stateManager.getActiveGroup(tab.windowId);
+
+    // Handle race condition: window created but activeGroup not set yet
+    if (activeGroup === undefined || activeGroup === null) {
+      console.log(
+        `[TabCreated] activeGroup is ${activeGroup} for window ${tab.windowId}, using fallback`,
+      );
+
+      // Try to get lowest positive group ID from existing groups
+      const groups = await stateManager.getGroups(tab.windowId);
+      activeGroup = getLowestPositiveGroupId(groups);
+
+      // If still no valid group, default to 0
+      if (activeGroup === undefined) {
+        activeGroup = 0;
+      }
+
+      await stateManager.setActiveGroup(tab.windowId, activeGroup);
+    }
+
     await stateManager.setTabGroup(tab.id, activeGroup);
     tabGroupId = activeGroup;
-    if (DEBUG) {
-      console.log(
-        `[TabCreated] Tab ${tab.id} created in window ${tab.windowId}, assigned to group ${activeGroup}`,
-      );
-    }
+    console.log(
+      `[TabCreated] Tab ${tab.id} created in window ${tab.windowId}, assigned to group ${activeGroup}`,
+    );
   } else if (DEBUG) {
     console.log(
       `[TabCreated] Tab ${tab.id} created in window ${tab.windowId}, already has group ${tabGroupId}`,
