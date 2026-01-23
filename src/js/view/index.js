@@ -280,14 +280,24 @@ async function keyInput(e) {
   }
 }
 
-async function tabCreated(tab) {
+async function tabCreated(tab, retryCount = 0) {
   if (view.windowId === tab.windowId) {
     makeTabNode(tab);
     updateTabNode(tab);
     updateFavicon(tab);
 
     // Wait for background script to assign this tab to a group
-    const groupId = await getGroupId(tab.id);
+    let groupId = await getGroupId(tab.id);
+
+    // Race condition mitigation: If groupId is undefined, background script
+    // may not have assigned it yet. Retry up to 3 times with 50ms delays.
+    if (groupId === undefined && retryCount < 3) {
+      console.log(
+        `[View] tabCreated: Tab ${tab.id} has undefined groupId, retrying (attempt ${retryCount + 1}/3)...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      return tabCreated(tab, retryCount + 1);
+    }
 
     const group = groups.get(groupId);
 
@@ -299,6 +309,9 @@ async function tabCreated(tab) {
       return;
     }
 
+    console.log(
+      `[View] tabCreated: Adding tab ${tab.id} to group ${groupId} in view`,
+    );
     await insertTab(tab);
     updateGroupFit(group);
   }

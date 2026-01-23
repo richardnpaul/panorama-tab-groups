@@ -570,13 +570,21 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
       }
 
       console.log('Native tab group removed:', group);
-      // Handle cleanup if our session storage references this group
+      // Clear nativeGroupId from panorama group but keep the group itself
       try {
         const groups = await stateManager.getGroups(group.windowId);
         if (groups) {
-          const updatedGroups = groups.filter(
-            (g) => g.nativeGroupId !== group.id,
-          );
+          const updatedGroups = groups.map((g) => {
+            if (g.nativeGroupId === group.id) {
+              // Remove nativeGroupId property but keep the group
+              const { nativeGroupId, ...groupWithoutNativeId } = g;
+              console.log(
+                `Cleared nativeGroupId ${group.id} from panorama group ${g.id} (${g.name})`,
+              );
+              return groupWithoutNativeId;
+            }
+            return g;
+          });
           await stateManager.setGroups(group.windowId, updatedGroups);
         }
       } catch (error) {

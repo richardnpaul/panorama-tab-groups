@@ -700,6 +700,16 @@ async function tabCreated(tab) {
             );
           }
 
+          // Verify window still exists before creating native group
+          try {
+            await browser.windows.get(tab.windowId);
+          } catch (error) {
+            console.warn(
+              `[TabCreated] Window ${tab.windowId} was closed before creating native group for tab ${tab.id}`,
+            );
+            return;
+          }
+
           // Create native group by grouping the tabs
           const nativeGroupId = await browser.tabs.group({
             tabIds: groupTabs.map((t) => t.tabId),
@@ -964,6 +974,16 @@ async function tabActivated(activeInfo) {
                   `[TabActivated] Skipping native group creation: ${safetyCheck.reason}`,
                 );
               }
+              return;
+            }
+
+            // Verify window still exists before creating native group
+            try {
+              await browser.windows.get(tab.windowId);
+            } catch (error) {
+              console.warn(
+                `[TabActivated] Window ${tab.windowId} was closed before creating native group`,
+              );
               return;
             }
 
