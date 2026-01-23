@@ -197,6 +197,12 @@ async function keyInput(e) {
   if (e.key === 'ArrowRight') {
     const activeTabId = getActiveTabId();
     let groupId = await getGroupId(activeTabId);
+
+    // Skip navigation if current group is a system group (negative ID)
+    if (groupId < 0) {
+      return;
+    }
+
     let { childNodes } = groupNodes[groupId].content;
 
     let i;
@@ -232,6 +238,12 @@ async function keyInput(e) {
   } else if (e.key === 'ArrowLeft') {
     const activeTabId = getActiveTabId();
     let groupId = await getGroupId(activeTabId);
+
+    // Skip navigation if current group is a system group (negative ID)
+    if (groupId < 0) {
+      return;
+    }
+
     let { childNodes } = groupNodes[groupId].content;
 
     let i;

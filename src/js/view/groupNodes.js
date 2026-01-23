@@ -96,6 +96,11 @@ function getFit(param) {
 }
 
 export function updateGroupFit(group) {
+  // Skip if group doesn't exist in groupNodes (e.g., system groups or removed groups)
+  if (!groupNodes[group.id] || groupNodes[group.id] === groupNodes.pinned) {
+    return;
+  }
+
   const node = groupNodes[group.id];
   const { childNodes } = node.content;
 
@@ -541,8 +546,8 @@ export function makeGroupNode(group) {
       input.setSelectionRange(0, 0);
 
       name.innerHTML = '';
-      name.appendChild(document.createTextNode(this.value));
-      groups.rename(group.id, this.value);
+      name.appendChild(document.createTextNode(input.value));
+      groups.rename(group.id, input.value);
 
       header.addEventListener('mousedown', moveFunc, false);
 
@@ -687,7 +692,15 @@ export async function fillGroupNodes() {
 
 export async function initGroupNodes(groupsNode) {
   groups.forEach((group) => {
-    groupsNode.appendChild(makeGroupNode(group));
+    // Only create nodes for user groups (positive IDs)
+    // Skip system groups like -2 (ungrouped) and -1 (panorama view)
+    if (group.id >= 0) {
+      groupsNode.appendChild(makeGroupNode(group));
+    } else {
+      console.log(
+        `[View] Skipping system group ${group.id} (${group.name}) from UI`,
+      );
+    }
   });
 
   groupNodes.pinned = {
@@ -707,6 +720,15 @@ export async function insertTab(oldTab) {
     // refresh the tab data
     const tab = await browser.tabs.get(oldTab.id);
     const groupId = await getGroupId(tab.id);
+
+    // Skip tabs in system groups (shouldn't happen after filtering, but defensive check)
+    if (groupId < 0) {
+      console.warn(
+        `[View] insertTab: Skipping tab ${tab.id} in system group ${groupId}`,
+      );
+      modifyingGroupContent = false;
+      return;
+    }
 
     const tabNode = tabNodes[tab.id];
 

@@ -1,3 +1,9 @@
+// Import constants for filtering system groups
+import {
+  PANORAMA_VIEW_GROUP_ID,
+  UNGROUPED_GROUP_ID,
+} from '../background/constants.js';
+
 let windowId;
 let groups;
 
@@ -50,6 +56,16 @@ export function getName(id) {
 export async function init() {
   windowId = (await browser.windows.getCurrent()).id;
   groups = (await browser.sessions.getWindowValue(windowId, 'groups')) || [];
+
+  // Filter out system groups (Group -2 and -1) from view
+  // These are managed by background script and should not appear in UI
+  groups = groups.filter((group) => {
+    const isSystemGroup =
+      group.id === UNGROUPED_GROUP_ID ||
+      group.id === PANORAMA_VIEW_GROUP_ID ||
+      group.id < 0;
+    return !isSystemGroup;
+  });
 
   groups.forEach((group) => {
     group.tabCount = 0;

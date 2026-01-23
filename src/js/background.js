@@ -189,10 +189,26 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
     );
     if (activeGroup === undefined) {
       console.warn(
-        '[ToggleVisibleTabs] ⚠️ activeGroup is UNDEFINED - will cause unexpected behavior!',
+        '[ToggleVisibleTabs] ⚠️ activeGroup is UNDEFINED - aborting to prevent hiding all tabs!',
       );
     }
     console.log(`  Call stack:\n${stack}`);
+  }
+
+  // Early return prevents catastrophic tab hiding bug when activeGroup is undefined
+  if (activeGroup === undefined) {
+    return;
+  }
+
+  // Validate activeGroup is valid (positive integer or -1 for panorama view)
+  if (
+    activeGroup !== PANORAMA_VIEW_GROUP_ID &&
+    (activeGroup < 0 || !Number.isInteger(activeGroup))
+  ) {
+    console.error(
+      `[ToggleVisibleTabs] Invalid activeGroup: ${activeGroup} - must be -1 or positive integer`,
+    );
+    return;
   }
 
   // Show and hide the appropriate tabs
@@ -267,8 +283,12 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
     );
     if (showTabIds.length === 0 && hideTabIds.length > 0) {
       console.error(
-        `[ToggleVisibleTabs] ⚠️ ERROR: No tabs will be shown! All ${hideTabIds.length} tabs will be hidden!`,
+        `[ToggleVisibleTabs] ERROR: No tabs will be shown! All ${hideTabIds.length} tabs will be hidden!`,
       );
+      console.error(
+        `[ToggleVisibleTabs] activeGroup=${activeGroup} - This should never happen after validation`,
+      );
+      return; // Abort instead of hiding all tabs
     }
   }
 
@@ -566,6 +586,9 @@ async function tabCreated(tab) {
     window.backgroundState.openingView?.windowId === tab.windowId &&
     window.backgroundState.openingView?.creationTimestamp &&
     now - window.backgroundState.openingView.creationTimestamp < 100;
+  // Wait for initialization to complete before processing tab creation
+  await waitForInitialization();
+
   const isViewTabByUrl = tab.url === viewUrl || tab.pendingUrl === viewUrl;
 
   if (DEBUG) {
@@ -762,6 +785,9 @@ async function tabCreated(tab) {
 
 async function tabAttached(tabId, attachInfo) {
   // eslint-disable-line no-unused-vars
+  // Wait for initialization to complete
+  await waitForInitialization();
+
   const tab = await browser.tabs.get(tabId);
   await tabCreated(tab);
 }
@@ -776,6 +802,9 @@ async function tabDetached(tabId, detachInfo) {
  * is from another group (or is Panorama Tab Groups tab).
  */
 async function tabActivated(activeInfo) {
+  // Wait for initialization to complete before processing tab activation
+  await waitForInitialization();
+
   const startTime = Date.now();
   if (DEBUG) {
     console.log(
@@ -1070,6 +1099,9 @@ async function createGroupInWindow(browserWindow) {
  * trigger the onCreated event but still have the existing group data.
  */
 async function createGroupInWindowIfMissing(browserWindow) {
+  // Wait for initialization to complete before creating groups
+  await waitForInitialization();
+
   const groups = await stateManager.getGroups(browserWindow.id);
 
   if (!groups || !groups.length) {
