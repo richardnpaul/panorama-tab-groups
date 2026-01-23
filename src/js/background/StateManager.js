@@ -20,6 +20,12 @@
  * - windowStates (viewTabId per window)
  */
 
+import {
+  UNGROUPED_GROUP_ID,
+  UNGROUPED_GROUP_NAME,
+  isReservedGroupId,
+} from './constants.js';
+
 export class StateManager {
   constructor() {
     // Cache for reducing redundant storage reads
@@ -35,7 +41,57 @@ export class StateManager {
    * @returns {Promise<Array>} Array of group objects
    */
   async getGroups(windowId) {
-    return browser.sessions.getWindowValue(windowId, 'groups');
+    const DEBUG = true;
+    if (DEBUG) {
+      console.log(`[StateManager] getGroups called for window ${windowId}`);
+    }
+    const groups = await browser.sessions.getWindowValue(windowId, 'groups');
+    if (DEBUG) {
+      console.log(
+        `[StateManager] getGroups returning ${groups?.length || 0} groups for window ${windowId}`,
+      );
+    }
+    return groups;
+  }
+
+  /**
+   * Ensure group -2 (ungrouped) exists in the groups array
+   * This is a special system group that should always be present
+   * @param {Array} groups - Array of group objects
+   * @returns {Array} Groups array with group -2 guaranteed to exist
+   */
+  ensureUngroupedGroupExists(groups) {
+    if (!groups) {
+      groups = [];
+    }
+
+    // Check if ungrouped group already exists
+    const hasUngroupedGroup = groups.some((g) => g.id === UNGROUPED_GROUP_ID);
+
+    if (!hasUngroupedGroup) {
+      // Create the ungrouped group with system defaults
+      groups.push({
+        id: UNGROUPED_GROUP_ID,
+        name: UNGROUPED_GROUP_NAME,
+        containerId: 'browser-default',
+        nativeGroupId: null, // Never has native group
+        rect: { x: 0, y: 0, w: 0, h: 0 }, // No position in grid
+        lastMoved: new Date().getTime(),
+        isSystemGroup: true, // Mark as system-managed
+      });
+    } else {
+      // Enforce immutable properties on existing ungrouped group
+      const ungroupedIndex = groups.findIndex(
+        (g) => g.id === UNGROUPED_GROUP_ID,
+      );
+      if (ungroupedIndex !== -1) {
+        groups[ungroupedIndex].name = UNGROUPED_GROUP_NAME;
+        groups[ungroupedIndex].isSystemGroup = true;
+        groups[ungroupedIndex].nativeGroupId = null;
+      }
+    }
+
+    return groups;
   }
 
   /**
@@ -44,6 +100,30 @@ export class StateManager {
    * @param {Array} groups - Array of group objects
    */
   async setGroups(windowId, groups) {
+    const DEBUG = true;
+    if (DEBUG) {
+      // Log call stack to identify concurrent callers
+      const stack = new Error().stack
+        .split('\n')
+        .slice(2, 4)
+        .map((line) => line.trim())
+        .join(' -> ');
+      console.log(
+        `[StateManager] setGroups called for window ${windowId} with ${groups?.length || 0} groups`,
+      );
+      console.log(`  Caller: ${stack}`);
+
+      // Log groups with nativeGroupId for tracking
+      const withNative =
+        groups?.filter((g) => g.nativeGroupId != null).length || 0;
+      if (withNative > 0) {
+        console.log(`  ${withNative} groups have nativeGroupId`);
+      }
+    }
+
+    // Ensure group -2 always exists
+    groups = this.ensureUngroupedGroupExists(groups);
+
     await browser.sessions.setWindowValue(windowId, 'groups', groups);
     this.invalidateCache(`groups_${windowId}`);
   }

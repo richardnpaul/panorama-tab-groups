@@ -35,3 +35,22 @@ export function getColorForGroupId(groupId) {
   ];
   return colors[groupId % colors.length];
 }
+
+/**
+ * Get the lowest positive integer group ID from an array of groups
+ * Returns undefined if no positive ID groups exist
+ * @param {Array} groups - Array of group objects
+ * @returns {number|undefined} Lowest positive ID or undefined
+ */
+export function getLowestPositiveGroupId(groups) {
+  if (!groups || groups.length === 0) {
+    return undefined;
+  }
+
+  const positiveIds = groups
+    .map((g) => g.id)
+    .filter((id) => typeof id === 'number' && id >= 0)
+    .sort((a, b) => a - b);
+
+  return positiveIds.length > 0 ? positiveIds[0] : undefined;
+}

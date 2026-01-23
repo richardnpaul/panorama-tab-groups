@@ -9,6 +9,110 @@ import { stateManager } from './StateManager.js';
 import { getColorForGroupId } from './utils.js';
 
 /**
+ * Helper: Enrich tab with full context (panorama group, window, native group)
+ * @param {object} tab - Browser tab object
+ * @returns {Promise<object>} Enriched tab with full context
+ */
+async function enrichTab(tab) {
+  const panoramaGroupId = await stateManager.getTabGroup(tab.id);
+  return {
+    tabId: tab.id,
+    windowId: tab.windowId,
+    panoramaGroupId,
+    isPanoramaView: panoramaGroupId === -1,
+    nativeGroupId: tab.groupId !== -1 ? tab.groupId : null,
+    title: tab.title,
+  };
+}
+
+/**
+ * Helper: Validate tabs can be safely grouped together
+ * @param {Array<object>} enrichedTabs - Array of enriched tab objects
+ * @throws {Error} If validation fails
+ */
+function validateTabsForGrouping(enrichedTabs) {
+  if (!enrichedTabs || enrichedTabs.length === 0) {
+    throw new Error('No tabs to group');
+  }
+
+  // All tabs must be in same window
+  const windowIds = new Set(enrichedTabs.map((t) => t.windowId));
+  if (windowIds.size > 1) {
+    throw new Error(
+      `Cross-window grouping attempted: tabs from windows ${[...windowIds].join(', ')}`,
+    );
+  }
+
+  // All tabs must be in same panorama group
+  const groupIds = new Set(enrichedTabs.map((t) => t.panoramaGroupId));
+  if (groupIds.size > 1) {
+    throw new Error(
+      `Multiple panorama groups in single native group: ${[...groupIds].join(', ')}`,
+    );
+  }
+
+  // No panorama view tabs should be grouped
+  const hasPanoramaView = enrichedTabs.some((t) => t.isPanoramaView);
+  if (hasPanoramaView) {
+    throw new Error('Cannot group panorama view tabs');
+  }
+
+  return true;
+}
+
+/**
+ * Helper: Check if grouping tabs would leave window in invalid state
+ * Prevents window closure when grouping the only remaining tabs
+ * @param {Array<object>} enrichedTabs - Tabs to be grouped
+ * @param {number} windowId - Window ID
+ * @param {boolean} DEBUG - Debug logging flag
+ * @returns {Promise<boolean>} True if safe to group
+ */
+async function canSafelyGroupTabs(enrichedTabs, windowId, DEBUG) {
+  try {
+    // Check if window still exists
+    try {
+      await browser.windows.get(windowId);
+    } catch (error) {
+      if (DEBUG) {
+        console.warn(`Window ${windowId} no longer exists, skipping grouping`);
+      }
+      return false;
+    }
+
+    // Get all tabs in the window
+    const allWindowTabs = await browser.tabs.query({ windowId });
+    const nonPanoramaTabs = allWindowTabs.filter((t) => {
+      // Tab is non-panorama if it's not the view.html page
+      const viewUrl = browser.runtime.getURL('view.html');
+      return t.url !== viewUrl && t.pendingUrl !== viewUrl;
+    });
+
+    // If we're grouping ALL non-panorama tabs AND there's only 1, window might close
+    // This is a browser behavior where grouping the last tab can cause issues
+    if (
+      enrichedTabs.length === nonPanoramaTabs.length &&
+      nonPanoramaTabs.length === 1
+    ) {
+      if (DEBUG) {
+        console.warn(
+          `[Safety Check] Skipping grouping: would group only regular tab in window ${windowId}, which could cause window closure`,
+        );
+      }
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error(
+      `Error checking if tabs can be safely grouped in window ${windowId}:`,
+      error,
+    );
+    return false;
+  }
+}
+
+/**
  * Verify that native tab group IDs are correctly persisted in session storage
  * This runs after migration to ensure data integrity
  *
@@ -116,7 +220,12 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
       'hybridGroupsMigrationComplete',
     );
     if (migrationComplete.hybridGroupsMigrationComplete) {
-      console.log('Migration already completed, skipping...');
+      if (DEBUG) {
+        console.log('⚠️ Migration already complete flag is TRUE, skipping...');
+        console.log(
+          'This should only happen on subsequent extension loads, not after cleanup',
+        );
+      }
       return;
     }
 
@@ -125,6 +234,27 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
     await Promise.all(
       windows.map(async (window) => {
         const groups = await stateManager.getGroups(window.id);
+
+        if (DEBUG) {
+          console.log(
+            `[Migration] Retrieved groups for window ${window.id}:`,
+            groups?.map((g) => ({
+              id: g.id,
+              name: g.name,
+              hasNativeGroupId: g.nativeGroupId !== undefined,
+            })),
+          );
+          const activeGroup = await stateManager.getActiveGroup(window.id);
+          console.log(`[Migration] Current activeGroup: ${activeGroup}`);
+
+          // Log validation statistics
+          const withNativeId = groups.filter(
+            (g) => g.nativeGroupId != null,
+          ).length;
+          console.log(
+            `[Migration] ${groups.length} total groups, ${withNativeId} have nativeGroupId (will validate)`,
+          );
+        }
 
         if (!groups || !Array.isArray(groups) || groups.length === 0) {
           console.log(`No groups to migrate for window ${window.id}`);
@@ -139,36 +269,75 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
 
         const updatedGroups = await Promise.all(
           groups.map(async (group) => {
-            // Skip if already has a native group ID
+            // Validate existing nativeGroupId before skipping migration
             if (
               group.nativeGroupId !== undefined &&
               group.nativeGroupId !== null
             ) {
-              if (DEBUG) {
-                console.log(
-                  `Group ${group.id} already has native group ${group.nativeGroupId}`,
-                );
+              try {
+                // Verify the native group actually exists
+                await browser.tabGroups.get(group.nativeGroupId);
+                if (DEBUG) {
+                  console.log(
+                    `Group ${group.id} has valid native group ${group.nativeGroupId}, skipping`,
+                  );
+                }
+                return group; // Valid native group, skip migration
+              } catch (error) {
+                // Native group doesn't exist - stale reference from race condition or previous error
+                if (DEBUG) {
+                  console.warn(
+                    `Group ${group.id} has stale nativeGroupId ${group.nativeGroupId} (${error.message}), will recreate`,
+                  );
+                }
+                // Clear stale reference and fall through to migration logic below
+                delete group.nativeGroupId;
               }
-              return group;
             }
 
             try {
-              // Get all tabs for this group
+              if (DEBUG) {
+                console.log(
+                  `[Migration] Processing group ${group.id} (${group.name}) in window ${window.id}`,
+                );
+              }
+
+              // Get all tabs for this group and enrich with full context
               const tabs = await browser.tabs.query({ windowId: window.id });
 
-              const groupTabIds = await Promise.all(
-                tabs.map(async (tab) => {
-                  const tabGroupId = await stateManager.getTabGroup(tab.id);
-                  if (tabGroupId === group.id) {
-                    return tab.id;
-                  }
-                  return null;
-                }),
+              if (DEBUG) {
+                console.log(
+                  `[Migration] Query found ${tabs.length} tabs in window ${window.id}`,
+                );
+              }
+
+              // Enrich tabs with panorama group ID and other context
+              const enrichedTabs = await Promise.all(
+                tabs.map((tab) => enrichTab(tab)),
               );
 
-              const validTabIds = groupTabIds.filter((id) => id !== null);
+              // Filter for tabs belonging to this group (excluding panorama view)
+              const groupTabs = enrichedTabs.filter(
+                (t) => t.panoramaGroupId === group.id && !t.isPanoramaView,
+              );
 
-              if (validTabIds.length === 0) {
+              if (DEBUG && groupTabs.length > 0) {
+                console.log(
+                  `[Migration] Group ${group.id} has ${groupTabs.length} tabs:`,
+                  groupTabs.map((t) => t.tabId),
+                );
+                console.log(
+                  `[Migration] Tab details:`,
+                  groupTabs.map((t) => ({
+                    tabId: t.tabId,
+                    windowId: t.windowId,
+                    panoramaGroupId: t.panoramaGroupId,
+                    title: t.title,
+                  })),
+                );
+              }
+
+              if (groupTabs.length === 0) {
                 if (DEBUG) {
                   console.log(
                     `Group ${group.id} has no tabs, skipping native group creation`,
@@ -183,15 +352,69 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
               // Only create native groups for the active group
               // Inactive groups will get native groups created when they become active
               if (group.id === activeGroup) {
+                // Safety check: can we safely group these tabs?
+                const isSafeToGroup = await canSafelyGroupTabs(
+                  groupTabs,
+                  window.id,
+                  DEBUG,
+                );
+
+                if (!isSafeToGroup) {
+                  if (DEBUG) {
+                    console.warn(
+                      `[Migration] Skipping group ${group.id} - not safe to group (single tab scenario or window closed)`,
+                    );
+                  }
+                  return group;
+                }
+
+                // Validate tabs before grouping
+                try {
+                  validateTabsForGrouping(groupTabs);
+                } catch (error) {
+                  console.error(
+                    `[Migration] Validation failed for group ${group.id}:`,
+                    error.message,
+                  );
+                  return group;
+                }
+
                 // Create native browser group by grouping tabs
                 const groupId = await browser.tabs.group({
-                  tabIds: validTabIds,
+                  tabIds: groupTabs.map((t) => t.tabId),
                 });
 
                 if (DEBUG) {
                   console.log(
-                    `Created native group ${groupId} for active panorama group ${group.id} with ${validTabIds.length} tabs`,
+                    `Created native group ${groupId} for active panorama group ${group.id} with ${groupTabs.length} tabs`,
                   );
+                }
+
+                // Validate native group was created in correct window
+                try {
+                  const createdGroup = await browser.tabGroups.get(groupId);
+                  if (createdGroup.windowId !== window.id) {
+                    console.error(
+                      `[Migration] ❌ NATIVE GROUP WINDOW MISMATCH: Expected window ${window.id} but native group ${groupId} is in window ${createdGroup.windowId}`,
+                    );
+                    console.error(
+                      `[Migration] This indicates the browser moved tabs during grouping - possible window closure`,
+                    );
+                    // Don't store this native group ID since it's in the wrong window
+                    return group;
+                  }
+
+                  if (DEBUG) {
+                    console.log(
+                      `[Migration] ✓ Native group ${groupId} correctly created in window ${window.id}`,
+                    );
+                  }
+                } catch (e) {
+                  console.error(
+                    `[Migration] Failed to validate native group ${groupId}:`,
+                    e,
+                  );
+                  return group;
                 }
 
                 // Update the native group with title and color
@@ -229,7 +452,12 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
         // Save updated groups back to session storage
         await stateManager.setGroups(window.id, updatedGroups);
         if (DEBUG) {
-          console.log(`Migration complete for window ${window.id}`);
+          const migratedCount = updatedGroups.filter(
+            (g) => g.nativeGroupId != null,
+          ).length;
+          console.log(
+            `[Migration] Complete for window ${window.id}: ${migratedCount}/${updatedGroups.length} groups have native groups`,
+          );
         }
       }),
     );
@@ -247,6 +475,9 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
     // Don't mark as complete so it can retry on next startup
   }
 }
+
+// Flag to suppress event handlers during cleanup operations
+let isCleanupInProgress = false;
 
 /**
  * Setup native browser tab group event listeners for hybrid functionality
@@ -273,6 +504,16 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
 
     // When user removes group through browser UI
     browser.tabGroups.onRemoved.addListener(async (group) => {
+      // Ignore events during cleanup - we're intentionally removing native groups
+      if (isCleanupInProgress) {
+        if (DEBUG) {
+          console.log(
+            `Native tab group removed (ignored during cleanup): ${group.id}`,
+          );
+        }
+        return;
+      }
+
       console.log('Native tab group removed:', group);
       // Handle cleanup if our session storage references this group
       try {
@@ -327,12 +568,26 @@ export async function cleanupNativeGroups(DEBUG) {
     console.log('Starting native groups cleanup...');
   }
 
+  // Set flag to suppress event handlers during cleanup
+  isCleanupInProgress = true;
+
   try {
     const windows = await browser.windows.getAll({});
 
     await Promise.all(
       windows.map(async (window) => {
         const groups = await stateManager.getGroups(window.id);
+
+        if (DEBUG) {
+          console.log(
+            `[Cleanup] Retrieved ${groups?.length || 0} groups for window ${window.id}:`,
+            groups?.map((g) => ({
+              id: g.id,
+              name: g.name,
+              nativeGroupId: g.nativeGroupId,
+            })),
+          );
+        }
 
         if (!groups || !Array.isArray(groups)) {
           return;
@@ -387,8 +642,34 @@ export async function cleanupNativeGroups(DEBUG) {
         });
 
         await stateManager.setGroups(window.id, updatedGroups);
+
+        if (DEBUG) {
+          console.log(
+            `[Cleanup] Saved ${updatedGroups.length} updated groups for window ${window.id}:`,
+            updatedGroups.map((g) => ({ id: g.id, name: g.name })),
+          );
+
+          // Verify cleanup actually worked
+          const verification = await stateManager.getGroups(window.id);
+          const stillHasNativeIds = verification.filter(
+            (g) => g.nativeGroupId != null,
+          );
+          if (stillHasNativeIds.length > 0) {
+            console.warn(
+              `[Cleanup] ⚠️ Race condition detected! ${stillHasNativeIds.length} groups still have nativeGroupId:`,
+              stillHasNativeIds.map((g) => `Group ${g.id}: ${g.nativeGroupId}`),
+            );
+          } else {
+            console.log(
+              `[Cleanup] ✓ Verification passed: all nativeGroupIds removed`,
+            );
+          }
+        }
       }),
     );
+
+    // Reset migration flag so re-enabling native groups will trigger fresh migration
+    await browser.storage.local.set({ hybridGroupsMigrationComplete: false });
 
     if (DEBUG) {
       console.log('Native groups cleanup completed successfully!');
@@ -396,5 +677,11 @@ export async function cleanupNativeGroups(DEBUG) {
   } catch (error) {
     console.error('Native groups cleanup failed:', error);
     throw error; // Re-throw to allow error handling in caller
+  } finally {
+    // Always clear the flag, even if cleanup fails
+    isCleanupInProgress = false;
+    if (DEBUG) {
+      console.log('Cleanup flag cleared');
+    }
   }
 }

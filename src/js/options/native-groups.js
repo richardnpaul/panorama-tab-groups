@@ -41,7 +41,7 @@ function saveNativeGroupsOption() {
         newValue,
       );
 
-      // Trigger cleanup via message if disabling native groups
+      // Trigger cleanup or migration via direct message (storage.onChanged unreliable in MV3)
       if (!newValue) {
         console.log(
           '[Options] Sending cleanupNativeGroups message to background',
@@ -55,6 +55,20 @@ function saveNativeGroupsOption() {
           })
           .catch((error) => {
             console.error('[Options] Failed to send cleanup message:', error);
+          });
+      } else {
+        console.log(
+          '[Options] Sending migrateToHybridGroups message to background',
+        );
+        browser.runtime
+          .sendMessage({
+            action: 'migrateToHybridGroups',
+          })
+          .then((response) => {
+            console.log('[Options] Migration response:', response);
+          })
+          .catch((error) => {
+            console.error('[Options] Failed to send migration message:', error);
           });
       }
     })
@@ -75,9 +89,6 @@ function saveNativeGroupsOption() {
       feedback.style.display = 'none';
     }, 3000);
   }
-
-  // Note: The actual migration/cleanup is handled by background.js storage listener
-  // No need to send messages - storage change event will trigger it
 }
 
 /**

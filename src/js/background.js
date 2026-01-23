@@ -1,17 +1,108 @@
 import { loadOptions } from './_share/options.js';
 import { stateManager } from './background/StateManager.js';
-import { mod, getColorForGroupId } from './background/utils.js';
+import {
+  mod,
+  getColorForGroupId,
+  getLowestPositiveGroupId,
+} from './background/utils.js';
 import { createMenuList, handleMenuChange } from './background/menu-manager.js';
 import {
   migrateToHybridGroups,
   setupTabGroupListeners,
   cleanupNativeGroups,
 } from './background/native-groups.js';
+import {
+  PANORAMA_VIEW_GROUP_ID,
+  UNGROUPED_GROUP_ID,
+  UNGROUPED_GROUP_NAME,
+  INITIALIZATION_TIMEOUT_MS,
+  SHOW_LOADING_UI_AFTER_MS,
+  isReservedGroupId,
+  isValidUserGroupId,
+} from './background/constants.js';
 
 const manifest = browser.runtime.getManifest();
 
 // Debug flag - set to false for production
 const DEBUG = true;
+
+// Initialization state
+let initializationState = {
+  isInitializing: true,
+  startTime: null,
+  showingUI: false,
+  recoveredTabs: 0,
+  assignedToUngrouped: 0,
+};
+
+/**
+ * Helper: Enrich tab with full context for safe grouping operations
+ */
+async function enrichTabForGrouping(tab) {
+  const panoramaGroupId = await stateManager.getTabGroup(tab.id);
+  return {
+    tabId: tab.id,
+    windowId: tab.windowId,
+    panoramaGroupId,
+    isPanoramaView: panoramaGroupId === PANORAMA_VIEW_GROUP_ID,
+    isUngrouped: panoramaGroupId === UNGROUPED_GROUP_ID,
+    nativeGroupId: tab.groupId !== -1 ? tab.groupId : null,
+    title: tab.title,
+  };
+}
+
+/**
+ * Helper: Validate and check if tabs can be safely grouped
+ */
+async function validateAndCheckSafety(enrichedTabs, windowId, panoramaGroupId) {
+  if (enrichedTabs.length === 0) {
+    return { safe: false, reason: 'No tabs to group' };
+  }
+
+  // Check window exists
+  try {
+    await browser.windows.get(windowId);
+  } catch (error) {
+    return { safe: false, reason: `Window ${windowId} no longer exists` };
+  }
+
+  // Check for cross-window contamination
+  const windowIds = new Set(enrichedTabs.map((t) => t.windowId));
+  if (windowIds.size > 1) {
+    return {
+      safe: false,
+      reason: `Cross-window: tabs from windows ${[...windowIds].join(', ')}`,
+    };
+  }
+
+  // Check for mixed panorama groups
+  const groupIds = new Set(enrichedTabs.map((t) => t.panoramaGroupId));
+  if (groupIds.size > 1 || !groupIds.has(panoramaGroupId)) {
+    return {
+      safe: false,
+      reason: `Group mismatch: expected ${panoramaGroupId}, got ${[...groupIds].join(', ')}`,
+    };
+  }
+
+  // Check if grouping would leave window in bad state (single tab scenario)
+  const allWindowTabs = await browser.tabs.query({ windowId });
+  const viewUrl = browser.runtime.getURL('view.html');
+  const nonPanoramaTabs = allWindowTabs.filter(
+    (t) => t.url !== viewUrl && t.pendingUrl !== viewUrl,
+  );
+
+  if (
+    enrichedTabs.length === nonPanoramaTabs.length &&
+    nonPanoramaTabs.length === 1
+  ) {
+    return {
+      safe: false,
+      reason: 'Would group only tab in window (window closure risk)',
+    };
+  }
+
+  return { safe: true };
+}
 
 // API Feature Detection
 const hasTabHide = typeof browser.tabs.hide !== 'undefined'; // Firefox 61+ only
@@ -507,9 +598,13 @@ async function tabCreated(tab) {
     tabGroupId = activeGroup;
     if (DEBUG) {
       console.log(
-        `Tab ${tab.id} had no group, assigned to activeGroup ${activeGroup}`,
+        `[TabCreated] Tab ${tab.id} created in window ${tab.windowId}, assigned to group ${activeGroup}`,
       );
     }
+  } else if (DEBUG) {
+    console.log(
+      `[TabCreated] Tab ${tab.id} created in window ${tab.windowId}, already has group ${tabGroupId}`,
+    );
   }
 
   // Assign to native browser group (do this regardless of whether groupId was already set)
@@ -524,18 +619,51 @@ async function tabCreated(tab) {
 
       // If group doesn't have a native group yet, create one now
       if (currentGroup && !currentGroup.nativeGroupId) {
-        // Get all tabs in this group
+        // Get all tabs in this window and enrich with context
         const allTabs = await browser.tabs.query({ windowId: tab.windowId });
-        const tabGroupIds = await stateManager.getTabGroups(
-          allTabs.map((t) => t.id),
+        const enrichedTabs = await Promise.all(
+          allTabs.map((t) => enrichTabForGrouping(t)),
         );
-        const groupTabs = allTabs
-          .filter((t, index) => tabGroupIds[index] === tabGroupId)
-          .map((t) => t.id);
+
+        // Filter for tabs in this panorama group (excluding panorama view)
+        const groupTabs = enrichedTabs.filter(
+          (t) => t.panoramaGroupId === tabGroupId && !t.isPanoramaView,
+        );
+
+        if (DEBUG) {
+          console.log(
+            `[TabCreated] Found ${groupTabs.length} tabs for group ${tabGroupId} in window ${tab.windowId}`,
+          );
+        }
 
         if (groupTabs.length > 0) {
+          // Validate and check safety
+          const safetyCheck = await validateAndCheckSafety(
+            groupTabs,
+            tab.windowId,
+            tabGroupId,
+          );
+
+          if (!safetyCheck.safe) {
+            if (DEBUG) {
+              console.log(
+                `[TabCreated] Skipping native group creation: ${safetyCheck.reason}`,
+              );
+            }
+            return;
+          }
+
+          if (DEBUG) {
+            console.log(
+              `[TabCreated] Creating native group for tab ${tab.id} in window ${tab.windowId}, grouping ${groupTabs.length} tabs:`,
+              groupTabs.map((t) => t.tabId),
+            );
+          }
+
           // Create native group by grouping the tabs
-          const nativeGroupId = await browser.tabs.group({ tabIds: groupTabs });
+          const nativeGroupId = await browser.tabs.group({
+            tabIds: groupTabs.map((t) => t.tabId),
+          });
 
           // Update the native group with title and color
           await browser.tabGroups.update(nativeGroupId, {
@@ -543,13 +671,31 @@ async function tabCreated(tab) {
             color: getColorForGroupId(tabGroupId),
           });
 
+          // Validate the native group was created in the correct window
+          try {
+            const createdGroup = await browser.tabGroups.get(nativeGroupId);
+            if (createdGroup.windowId !== tab.windowId) {
+              console.error(
+                `[TabCreated] ❌ Window mismatch: created group ${nativeGroupId} in window ${createdGroup.windowId}, expected ${tab.windowId}`,
+              );
+              // Don't store this reference - it's in the wrong window
+              return;
+            }
+          } catch (error) {
+            console.error(
+              `[TabCreated] Failed to validate native group:`,
+              error,
+            );
+            return;
+          }
+
           // Store the native group ID
           currentGroup.nativeGroupId = nativeGroupId;
           await stateManager.setGroups(tab.windowId, groups);
 
           if (DEBUG) {
             console.log(
-              `Created native group ${nativeGroupId} for panorama group ${tabGroupId} with ${groupTabs.length} tabs (from tabCreated)`,
+              `[TabCreated] Created native group ${nativeGroupId} for panorama group ${tabGroupId} with ${groupTabs.length} tabs (from tabCreated)`,
             );
           }
 
@@ -614,12 +760,14 @@ async function tabCreated(tab) {
   }
 }
 
-async function tabAttached(tabId) {
+async function tabAttached(tabId, attachInfo) {
+  // eslint-disable-line no-unused-vars
   const tab = await browser.tabs.get(tabId);
   await tabCreated(tab);
 }
 
-async function tabDetached(tabId) {
+async function tabDetached(tabId, detachInfo) {
+  // eslint-disable-line no-unused-vars
   await browser.sessions.removeTabValue(tabId, 'groupId');
 }
 
@@ -732,19 +880,50 @@ async function tabActivated(activeInfo) {
       // If this group doesn't have a native group yet AND the tab isn't in one, create it
       if (currentGroup && !currentGroup.nativeGroupId && !existingNativeGroup) {
         try {
-          // Get all tabs in this group
+          if (DEBUG) {
+            console.log(
+              `[TabActivated] Creating native group for tab ${tab.id} in window ${tab.windowId}, activeGroup=${activeGroup}`,
+            );
+          }
+
+          // Get all tabs in this window and enrich with context
           const allTabs = await browser.tabs.query({ windowId: tab.windowId });
-          const tabGroupIds = await stateManager.getTabGroups(
-            allTabs.map((t) => t.id),
+          const enrichedTabs = await Promise.all(
+            allTabs.map((t) => enrichTabForGrouping(t)),
           );
-          const groupTabs = allTabs
-            .filter((t, index) => tabGroupIds[index] === activeGroup)
-            .map((t) => t.id);
+
+          // Filter for tabs in this panorama group (excluding panorama view)
+          const groupTabs = enrichedTabs.filter(
+            (t) => t.panoramaGroupId === activeGroup && !t.isPanoramaView,
+          );
+
+          if (DEBUG) {
+            console.log(
+              `[TabActivated] Found ${groupTabs.length} tabs in group ${activeGroup} for window ${tab.windowId}:`,
+              groupTabs.map((t) => t.tabId),
+            );
+          }
 
           if (groupTabs.length > 0) {
+            // Validate and check safety
+            const safetyCheck = await validateAndCheckSafety(
+              groupTabs,
+              tab.windowId,
+              activeGroup,
+            );
+
+            if (!safetyCheck.safe) {
+              if (DEBUG) {
+                console.log(
+                  `[TabActivated] Skipping native group creation: ${safetyCheck.reason}`,
+                );
+              }
+              return;
+            }
+
             // Create native group by grouping the tabs
             const nativeGroupId = await browser.tabs.group({
-              tabIds: groupTabs,
+              tabIds: groupTabs.map((t) => t.tabId),
             });
 
             // Update the native group with title and color
@@ -753,18 +932,45 @@ async function tabActivated(activeInfo) {
               color: getColorForGroupId(activeGroup),
             });
 
+            // Validate the native group was created in the correct window
+            try {
+              const createdGroup = await browser.tabGroups.get(nativeGroupId);
+              if (createdGroup.windowId !== tab.windowId) {
+                console.error(
+                  `[TabActivated] ❌ Window mismatch: created group ${nativeGroupId} in window ${createdGroup.windowId}, expected ${tab.windowId}`,
+                );
+                // Don't store this reference - it's in the wrong window
+                return;
+              }
+            } catch (error) {
+              console.error(
+                `[TabActivated] Failed to validate native group:`,
+                error,
+              );
+              return;
+            }
+
             // Store the native group ID
             currentGroup.nativeGroupId = nativeGroupId;
             await stateManager.setGroups(tab.windowId, groups);
 
             if (DEBUG) {
               console.log(
-                `Created native group ${nativeGroupId} for panorama group ${activeGroup} with ${groupTabs.length} tabs`,
+                `[TabActivated] Created native group ${nativeGroupId} for panorama group ${activeGroup} with ${groupTabs.length} tabs in window ${tab.windowId}`,
+              );
+            }
+          } else {
+            if (DEBUG) {
+              console.log(
+                `[TabActivated] No tabs found for group ${activeGroup} to create native group`,
               );
             }
           }
         } catch (error) {
-          console.warn('Could not create native tab group:', error);
+          console.warn(
+            `[TabActivated] Could not create native tab group in window ${tab.windowId}:`,
+            error,
+          );
         }
       } else if (
         currentGroup &&
@@ -847,8 +1053,16 @@ async function createGroupInWindow(browserWindow) {
     },
   ];
 
+  // setGroups will automatically ensure Group -2 exists via StateManager
   await stateManager.setGroups(browserWindow.id, groups);
-  await stateManager.setActiveGroup(browserWindow.id, groupId);
+
+  // Use getLowestPositiveGroupId to select the first user group as active
+  // (not Group -2 which is reserved for ungrouped tabs)
+  const lowestPositiveId = getLowestPositiveGroupId(groups);
+  const activeGroupId =
+    lowestPositiveId !== undefined ? lowestPositiveId : groupId;
+
+  await stateManager.setActiveGroup(browserWindow.id, activeGroupId);
 }
 /** Checks that group is missing before creating new one in window
  * This makes sure existing/restored windows are not reinitialized.
@@ -929,10 +1143,270 @@ async function salvageGrouplessTabs() {
  * This ensures existing users' groups get native tab group counterparts
  */
 
+/**
+ * Check if Firefox session history is available
+ * Session history can be disabled by user privacy settings
+ */
+async function isSessionHistoryAvailable() {
+  try {
+    // Try to access session history API
+    await browser.sessions.getRecentlyClosed({ maxResults: 1 });
+    return true;
+  } catch (error) {
+    console.warn(
+      '[Initialization] Session history not available:',
+      error.message,
+    );
+    return false;
+  }
+}
+
+/**
+ * Show loading UI during initialization
+ * Displays notification, badge, and sends message to panorama view
+ */
+async function showInitializationUI() {
+  if (initializationState.showingUI) {
+    return;
+  }
+
+  initializationState.showingUI = true;
+
+  // Show browser notification
+  browser.notifications.create('panorama-initializing', {
+    type: 'basic',
+    iconUrl: browser.runtime.getURL('icons/logo/logo-128.png'),
+    title: 'Panorama Tab Groups',
+    message: 'Restoring tab groups...',
+  });
+
+  // Set badge on extension icon
+  browser.action.setBadgeText({ text: '...' });
+  browser.action.setBadgeBackgroundColor({ color: '#FF9800' });
+
+  // Send message to panorama view if open
+  try {
+    await browser.runtime.sendMessage({
+      action: 'showInitializationLoading',
+    });
+  } catch (error) {
+    // Panorama view not open, that's okay
+  }
+
+  if (DEBUG) {
+    console.log('[Initialization] Loading UI displayed');
+  }
+}
+
+/**
+ * Hide loading UI after initialization completes
+ */
+async function hideInitializationUI() {
+  if (!initializationState.showingUI) {
+    return;
+  }
+
+  // Clear notification
+  browser.notifications.clear('panorama-initializing');
+
+  // Clear badge
+  browser.action.setBadgeText({ text: '' });
+
+  // Send message to panorama view if open
+  try {
+    await browser.runtime.sendMessage({
+      action: 'hideInitializationLoading',
+    });
+  } catch (error) {
+    // Panorama view not open, that's okay
+  }
+
+  initializationState.showingUI = false;
+
+  if (DEBUG) {
+    console.log('[Initialization] Loading UI hidden');
+  }
+}
+
+/**
+ * Attempt to recover tab's group from session history
+ * @param {object} tab - Browser tab object
+ * @returns {Promise<number|null>} Recovered group ID or null
+ */
+async function recoverGroupFromSessionHistory(tab) {
+  try {
+    // Try to get the tab's session value directly first
+    const storedGroupId = await stateManager.getTabGroup(tab.id);
+    if (
+      storedGroupId !== null &&
+      storedGroupId !== undefined &&
+      !isNaN(storedGroupId)
+    ) {
+      return storedGroupId;
+    }
+
+    // If no stored value, tab is newly created or session was lost
+    return null;
+  } catch (error) {
+    console.warn(
+      `[Initialization] Could not recover group for tab ${tab.id}:`,
+      error,
+    );
+    return null;
+  }
+}
+
+/**
+ * Initialize tab group assignments with session recovery
+ * Blocks tab operations until complete or timeout
+ */
+async function initializeTabGroupAssignments() {
+  initializationState.isInitializing = true;
+  initializationState.startTime = Date.now();
+  initializationState.recoveredTabs = 0;
+  initializationState.assignedToUngrouped = 0;
+
+  if (DEBUG) {
+    console.log(
+      '[Initialization] Starting tab group assignment recovery (max 10s)...',
+    );
+  }
+
+  // Set up timeout for UI feedback
+  const uiTimeout = setTimeout(() => {
+    if (initializationState.isInitializing) {
+      showInitializationUI();
+    }
+  }, SHOW_LOADING_UI_AFTER_MS);
+
+  // Set up maximum timeout to unblock operations
+  const maxTimeout = setTimeout(() => {
+    if (initializationState.isInitializing) {
+      console.warn(
+        '[Initialization] Timeout reached (10s), unblocking operations',
+      );
+      initializationState.isInitializing = false;
+    }
+  }, INITIALIZATION_TIMEOUT_MS);
+
+  try {
+    // Check if session history is available
+    const sessionAvailable = await isSessionHistoryAvailable();
+    if (!sessionAvailable) {
+      console.warn(
+        '[Initialization] Session history disabled, all tabs will be assigned to ungrouped',
+      );
+    }
+
+    // Get all windows and tabs
+    const windows = await browser.windows.getAll({});
+
+    for (const window of windows) {
+      const groups = await stateManager.getGroups(window.id);
+      if (!groups || groups.length === 0) {
+        // Window has no groups yet, will be initialized by createGroupInWindowIfMissing
+        continue;
+      }
+
+      // Ensure ungrouped group exists
+      await stateManager.setGroups(window.id, groups);
+
+      // Get all tabs in this window
+      const tabs = await browser.tabs.query({ windowId: window.id });
+
+      for (const tab of tabs) {
+        let groupId = null;
+
+        if (sessionAvailable) {
+          // Try to recover from session history
+          groupId = await recoverGroupFromSessionHistory(tab);
+        }
+
+        if (groupId !== null && groupId !== undefined && !isNaN(groupId)) {
+          // Successfully recovered
+          initializationState.recoveredTabs++;
+
+          // Verify the group still exists
+          const groupExists = groups.some((g) => g.id === groupId);
+          if (!groupExists && !isReservedGroupId(groupId)) {
+            // Group doesn't exist, assign to ungrouped
+            if (DEBUG) {
+              console.log(
+                `[Initialization] Tab ${tab.id} group ${groupId} no longer exists, assigning to ungrouped`,
+              );
+            }
+            groupId = UNGROUPED_GROUP_ID;
+            initializationState.assignedToUngrouped++;
+          }
+        } else {
+          // Could not recover, assign to ungrouped
+          groupId = UNGROUPED_GROUP_ID;
+          initializationState.assignedToUngrouped++;
+        }
+
+        // Store the assignment
+        await stateManager.setTabGroup(tab.id, groupId);
+      }
+
+      if (DEBUG) {
+        console.log(
+          `[Initialization] Window ${window.id}: processed ${tabs.length} tabs`,
+        );
+      }
+    }
+
+    const duration = Date.now() - initializationState.startTime;
+    console.log(
+      `[Initialization] Complete in ${duration}ms: ${initializationState.recoveredTabs} recovered, ${initializationState.assignedToUngrouped} assigned to ungrouped`,
+    );
+  } catch (error) {
+    console.error('[Initialization] Error during tab assignment:', error);
+  } finally {
+    // Clean up timeouts
+    clearTimeout(uiTimeout);
+    clearTimeout(maxTimeout);
+
+    // Hide UI if showing
+    if (initializationState.showingUI) {
+      await hideInitializationUI();
+    }
+
+    // Mark initialization as complete
+    initializationState.isInitializing = false;
+  }
+}
+
+/**
+ * Wait for initialization to complete (if in progress)
+ * Used by event handlers to ensure they don't run before initialization finishes
+ */
+async function waitForInitialization() {
+  if (!initializationState.isInitializing) {
+    return;
+  }
+
+  const startWait = Date.now();
+  const maxWait = INITIALIZATION_TIMEOUT_MS + 1000; // Extra 1 second buffer
+
+  while (
+    initializationState.isInitializing &&
+    Date.now() - startWait < maxWait
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+
+  if (initializationState.isInitializing) {
+    console.warn('[Initialization] waitForInitialization timed out');
+  }
+}
+
 async function init() {
   const options = await loadOptions();
 
   console.log('Initializing Panorama Tab View');
+
+  // PHASE 1: Initialize tab-group assignments with blocking
+  await initializeTabGroupAssignments();
 
   await setupWindows();
   await salvageGrouplessTabs();
@@ -1150,6 +1624,14 @@ async function deleteGroupWithCleanup({
       if (DEBUG) {
         console.log(`Updated storage: ${leftGroups.length} groups remaining`);
       }
+
+      // If this was the last group, create a new initial group
+      if (leftGroups.length === 0) {
+        if (DEBUG) {
+          console.log('Last group deleted, creating new initial group...');
+        }
+        await createGroupInWindow({ id: windowId });
+      }
     }
 
     // Step 4: Remove menu item
@@ -1173,7 +1655,8 @@ async function deleteGroupWithCleanup({
 }
 
 // TODO: Remove? Is this used?
-function handleMessage(message) {
+function handleMessage(message, sender) {
+  // eslint-disable-line no-unused-vars
   if (message === 'activate-next-group') {
     triggerCommand('activate-next-group');
   } else if (message === 'activate-previous-group') {
