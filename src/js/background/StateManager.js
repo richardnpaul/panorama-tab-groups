@@ -20,11 +20,7 @@
  * - windowStates (viewTabId per window)
  */
 
-import {
-  UNGROUPED_GROUP_ID,
-  UNGROUPED_GROUP_NAME,
-  isReservedGroupId,
-} from './constants.js';
+import { UNGROUPED_GROUP_ID, UNGROUPED_GROUP_NAME } from './constants.js';
 
 export class StateManager {
   constructor() {

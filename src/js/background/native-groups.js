@@ -109,9 +109,7 @@ async function canSafelyGroupTabs(enrichedTabs, windowId, DEBUG) {
 
     // Additional safety: if no non-panorama tabs, don't attempt grouping
     if (nonPanoramaTabs.length === 0) {
-      console.log(
-        `[Safety Check] No non-panorama tabs in window ${windowId}`,
-      );
+      console.log(`[Safety Check] No non-panorama tabs in window ${windowId}`);
       return false;
     }
 
@@ -210,6 +208,274 @@ export async function verifyNativeGroupPersistence(hasTabGroups, DEBUG) {
 }
 
 /**
+ * Migrate groups for a single window
+ * @param {number} windowId - Window ID to migrate
+ * @param {Object} stateMgr - State manager instance
+ * @param {boolean} DEBUG - Debug logging flag
+ */
+async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
+  const groups = await stateMgr.getGroups(windowId);
+
+  if (DEBUG) {
+    console.log(
+      `[Migration] Retrieved groups for window ${windowId}:`,
+      groups?.map((g) => ({
+        id: g.id,
+        name: g.name,
+        hasNativeGroupId: g.nativeGroupId !== undefined,
+      })),
+    );
+    const activeGroup = await stateMgr.getActiveGroup(windowId);
+    console.log(`[Migration] Current activeGroup: ${activeGroup}`);
+
+    // Log validation statistics
+    const withNativeId = groups.filter((g) => g.nativeGroupId != null).length;
+    console.log(
+      `[Migration] ${groups.length} total groups, ${withNativeId} have nativeGroupId (will validate)`,
+    );
+  }
+
+  if (!groups || !Array.isArray(groups) || groups.length === 0) {
+    console.log(`No groups to migrate for window ${windowId}`);
+    return;
+  }
+
+  if (DEBUG) {
+    console.log(`Migrating ${groups.length} groups for window ${windowId}`);
+  }
+
+  const updatedGroups = await Promise.all(
+    groups.map(async (group) => {
+      // Validate existing nativeGroupId before skipping migration
+      if (group.nativeGroupId !== undefined && group.nativeGroupId !== null) {
+        try {
+          // Verify the native group actually exists
+          await browser.tabGroups.get(group.nativeGroupId);
+          if (DEBUG) {
+            console.log(
+              `Group ${group.id} has valid native group ${group.nativeGroupId}, skipping`,
+            );
+          }
+          return group; // Valid native group, skip migration
+        } catch (error) {
+          // Native group doesn't exist - stale reference from race condition or previous error
+          if (DEBUG) {
+            console.warn(
+              `Group ${group.id} has stale nativeGroupId ${group.nativeGroupId} (${error.message}), will recreate`,
+            );
+          }
+          // Clear stale reference and fall through to migration logic below
+          delete group.nativeGroupId;
+        }
+      }
+
+      try {
+        if (DEBUG) {
+          console.log(
+            `[Migration] Processing group ${group.id} (${group.name}) in window ${windowId}`,
+          );
+        }
+
+        // Get all tabs for this group and enrich with full context
+        const tabs = await browser.tabs.query({ windowId });
+
+        if (DEBUG) {
+          console.log(
+            `[Migration] Query found ${tabs.length} tabs in window ${windowId}`,
+          );
+        }
+
+        // Enrich tabs with panorama group ID and other context
+        const enrichedTabs = await Promise.all(
+          tabs.map((tab) => enrichTab(tab)),
+        );
+
+        // Filter for tabs belonging to this group in this window (excluding panorama view)
+        const groupTabs = enrichedTabs.filter(
+          (t) =>
+            t.panoramaGroupId === group.id &&
+            t.windowId === windowId &&
+            !t.isPanoramaView,
+        );
+
+        if (DEBUG && groupTabs.length > 0) {
+          console.log(
+            `[Migration] Group ${group.id} has ${groupTabs.length} tabs:`,
+            groupTabs.map((t) => t.tabId),
+          );
+          console.log(
+            `[Migration] Tab details:`,
+            groupTabs.map((t) => ({
+              tabId: t.tabId,
+              windowId: t.windowId,
+              panoramaGroupId: t.panoramaGroupId,
+              title: t.title,
+            })),
+          );
+        }
+
+        if (groupTabs.length === 0) {
+          if (DEBUG) {
+            console.log(
+              `Group ${group.id} has no tabs, skipping native group creation`,
+            );
+          }
+          return group;
+        }
+
+        // Check if this is the active group
+        const activeGroup = await stateMgr.getActiveGroup(windowId);
+
+        // Only create native groups for the active group
+        // Inactive groups will get native groups created when they become active
+        if (group.id === activeGroup) {
+          // Safety check: can we safely group these tabs?
+          const isSafeToGroup = await canSafelyGroupTabs(
+            groupTabs,
+            windowId,
+            DEBUG,
+          );
+
+          if (!isSafeToGroup) {
+            if (DEBUG) {
+              console.warn(
+                `[Migration] Skipping group ${group.id} - not safe to group (single tab scenario or window closed)`,
+              );
+            }
+            return group;
+          }
+
+          // Validate tabs before grouping
+          try {
+            validateTabsForGrouping(groupTabs);
+          } catch (error) {
+            console.error(
+              `[Migration] Validation failed for group ${group.id}:`,
+              error.message,
+            );
+            return group;
+          }
+
+          // Re-validate window still exists before attempting to create native group
+          // Window may have closed due to previous group migration
+          try {
+            await browser.windows.get(windowId);
+          } catch (error) {
+            console.warn(
+              `[Migration] Window ${windowId} closed during migration, skipping group ${group.id}`,
+            );
+            console.warn('[Migration] Error:', error.message);
+            return group; // Stop processing this group
+          }
+
+          // Create native browser group by grouping tabs
+          const groupId = await browser.tabs.group({
+            tabIds: groupTabs.map((t) => t.tabId),
+          });
+
+          if (DEBUG) {
+            console.log(
+              `Created native group ${groupId} for active panorama group ${group.id} with ${groupTabs.length} tabs`,
+            );
+          }
+
+          // Validate native group was created in correct window
+          try {
+            const createdGroup = await browser.tabGroups.get(groupId);
+            if (createdGroup.windowId !== windowId) {
+              console.error(
+                `[Migration] ❌ NATIVE GROUP WINDOW MISMATCH: Expected window ${windowId} but native group ${groupId} is in window ${createdGroup.windowId}`,
+              );
+              console.error(
+                `[Migration] This indicates the browser closed window ${windowId} and moved tabs to window ${createdGroup.windowId}`,
+              );
+
+              // Remove the incorrectly placed native group
+              try {
+                await browser.tabs.ungroup(groupTabs.map((t) => t.tabId));
+                console.log(
+                  `[Migration] Ungrouped tabs to prevent orphaned native group`,
+                );
+              } catch (ungroupError) {
+                console.error(
+                  '[Migration] Failed to ungroup tabs:',
+                  ungroupError,
+                );
+              }
+
+              // Try to remove from storage since window no longer exists
+              try {
+                await browser.sessions.removeWindowValue(windowId, 'groups');
+                await browser.sessions.removeWindowValue(
+                  windowId,
+                  'activeGroup',
+                );
+              } catch (cleanupError) {
+                // Ignore cleanup errors - window already gone
+              }
+
+              // Don't store this native group ID since it's in the wrong window
+              return group;
+            }
+
+            if (DEBUG) {
+              console.log(
+                `[Migration] ✓ Native group ${groupId} correctly created in window ${windowId}`,
+              );
+            }
+          } catch (e) {
+            console.error(
+              `[Migration] Failed to validate native group ${groupId}:`,
+              e,
+            );
+            return group;
+          }
+
+          // Update the native group with title and color
+          await browser.tabGroups.update(groupId, {
+            title: group.name || `Group ${group.id}`,
+            color: getColorForGroupId(group.id),
+          });
+
+          // Update group with native ID reference
+          return {
+            ...group,
+            nativeGroupId: groupId,
+          };
+        }
+
+        // For inactive groups, just mark as migrated without native group
+        // The native group will be created when the group becomes active
+        if (DEBUG) {
+          console.log(
+            `Group ${group.id} is inactive, will create native group when activated`,
+          );
+        }
+        return group;
+      } catch (error) {
+        console.warn(
+          `Failed to create native group for group ${group.id}:`,
+          error,
+        );
+        // Keep the group without native ID if creation fails
+        return group;
+      }
+    }),
+  );
+
+  // Save updated groups back to session storage
+  await stateMgr.setGroups(windowId, updatedGroups);
+  if (DEBUG) {
+    const migratedCount = updatedGroups.filter(
+      (g) => g.nativeGroupId != null,
+    ).length;
+    console.log(
+      `[Migration] Complete for window ${windowId}: ${migratedCount}/${updatedGroups.length} groups have native groups`,
+    );
+  }
+}
+
+/**
  * Migrate existing groups to hybrid system with native tab groups
  * This ensures existing users' groups get native tab group counterparts
  *
@@ -245,275 +511,14 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
     const windows = await browser.windows.getAll({});
 
     await Promise.all(
-      windows.map(async (window) => {
-        const groups = await stateManager.getGroups(window.id);
-
+      windows.map(async (browserWindow, index) => {
         if (DEBUG) {
           console.log(
-            `[Migration] Retrieved groups for window ${window.id}:`,
-            groups?.map((g) => ({
-              id: g.id,
-              name: g.name,
-              hasNativeGroupId: g.nativeGroupId !== undefined,
-            })),
-          );
-          const activeGroup = await stateManager.getActiveGroup(window.id);
-          console.log(`[Migration] Current activeGroup: ${activeGroup}`);
-
-          // Log validation statistics
-          const withNativeId = groups.filter(
-            (g) => g.nativeGroupId != null,
-          ).length;
-          console.log(
-            `[Migration] ${groups.length} total groups, ${withNativeId} have nativeGroupId (will validate)`,
+            `[Migration] Processing window ${index + 1}/${windows.length} (ID: ${browserWindow.id})`,
           );
         }
 
-        if (!groups || !Array.isArray(groups) || groups.length === 0) {
-          console.log(`No groups to migrate for window ${window.id}`);
-          return;
-        }
-
-        if (DEBUG) {
-          console.log(
-            `Migrating ${groups.length} groups for window ${window.id}`,
-          );
-        }
-
-        const updatedGroups = await Promise.all(
-          groups.map(async (group) => {
-            // Validate existing nativeGroupId before skipping migration
-            if (
-              group.nativeGroupId !== undefined &&
-              group.nativeGroupId !== null
-            ) {
-              try {
-                // Verify the native group actually exists
-                await browser.tabGroups.get(group.nativeGroupId);
-                if (DEBUG) {
-                  console.log(
-                    `Group ${group.id} has valid native group ${group.nativeGroupId}, skipping`,
-                  );
-                }
-                return group; // Valid native group, skip migration
-              } catch (error) {
-                // Native group doesn't exist - stale reference from race condition or previous error
-                if (DEBUG) {
-                  console.warn(
-                    `Group ${group.id} has stale nativeGroupId ${group.nativeGroupId} (${error.message}), will recreate`,
-                  );
-                }
-                // Clear stale reference and fall through to migration logic below
-                delete group.nativeGroupId;
-              }
-            }
-
-            try {
-              if (DEBUG) {
-                console.log(
-                  `[Migration] Processing group ${group.id} (${group.name}) in window ${window.id}`,
-                );
-              }
-
-              // Get all tabs for this group and enrich with full context
-              const tabs = await browser.tabs.query({ windowId: window.id });
-
-              if (DEBUG) {
-                console.log(
-                  `[Migration] Query found ${tabs.length} tabs in window ${window.id}`,
-                );
-              }
-
-              // Enrich tabs with panorama group ID and other context
-              const enrichedTabs = await Promise.all(
-                tabs.map((tab) => enrichTab(tab)),
-              );
-
-              // Filter for tabs belonging to this group (excluding panorama view)
-              const groupTabs = enrichedTabs.filter(
-                (t) => t.panoramaGroupId === group.id && !t.isPanoramaView,
-              );
-
-              if (DEBUG && groupTabs.length > 0) {
-                console.log(
-                  `[Migration] Group ${group.id} has ${groupTabs.length} tabs:`,
-                  groupTabs.map((t) => t.tabId),
-                );
-                console.log(
-                  `[Migration] Tab details:`,
-                  groupTabs.map((t) => ({
-                    tabId: t.tabId,
-                    windowId: t.windowId,
-                    panoramaGroupId: t.panoramaGroupId,
-                    title: t.title,
-                  })),
-                );
-              }
-
-              if (groupTabs.length === 0) {
-                if (DEBUG) {
-                  console.log(
-                    `Group ${group.id} has no tabs, skipping native group creation`,
-                  );
-                }
-                return group;
-              }
-
-              // Check if this is the active group
-              const activeGroup = await stateManager.getActiveGroup(window.id);
-
-              // Only create native groups for the active group
-              // Inactive groups will get native groups created when they become active
-              if (group.id === activeGroup) {
-                // Safety check: can we safely group these tabs?
-                const isSafeToGroup = await canSafelyGroupTabs(
-                  groupTabs,
-                  window.id,
-                  DEBUG,
-                );
-
-                if (!isSafeToGroup) {
-                  if (DEBUG) {
-                    console.warn(
-                      `[Migration] Skipping group ${group.id} - not safe to group (single tab scenario or window closed)`,
-                    );
-                  }
-                  return group;
-                }
-
-                // Validate tabs before grouping
-                try {
-                  validateTabsForGrouping(groupTabs);
-                } catch (error) {
-                  console.error(
-                    `[Migration] Validation failed for group ${group.id}:`,
-                    error.message,
-                  );
-                  return group;
-                }
-
-                // Re-validate window still exists before attempting to create native group
-                // Window may have closed due to previous group migration
-                try {
-                  await browser.windows.get(window.id);
-                } catch (error) {
-                  console.warn(
-                    `[Migration] Window ${window.id} closed during migration, skipping group ${group.id}`,
-                  );
-                  console.warn('[Migration] Error:', error.message);
-                  return group; // Stop processing this group
-                }
-
-                // Create native browser group by grouping tabs
-                const groupId = await browser.tabs.group({
-                  tabIds: groupTabs.map((t) => t.tabId),
-                });
-
-                if (DEBUG) {
-                  console.log(
-                    `Created native group ${groupId} for active panorama group ${group.id} with ${groupTabs.length} tabs`,
-                  );
-                }
-
-                // Validate native group was created in correct window
-                try {
-                  const createdGroup = await browser.tabGroups.get(groupId);
-                  if (createdGroup.windowId !== window.id) {
-                    console.error(
-                      `[Migration] ❌ NATIVE GROUP WINDOW MISMATCH: Expected window ${window.id} but native group ${groupId} is in window ${createdGroup.windowId}`,
-                    );
-                    console.error(
-                      `[Migration] This indicates the browser closed window ${window.id} and moved tabs to window ${createdGroup.windowId}`,
-                    );
-
-                    // Remove the incorrectly placed native group
-                    try {
-                      await browser.tabs.ungroup(
-                        groupTabs.map((t) => t.tabId),
-                      );
-                      console.log(
-                        `[Migration] Ungrouped tabs to prevent orphaned native group`,
-                      );
-                    } catch (ungroupError) {
-                      console.error(
-                        '[Migration] Failed to ungroup tabs:',
-                        ungroupError,
-                      );
-                    }
-
-                    // Try to remove from storage since window no longer exists
-                    try {
-                      await browser.sessions.removeWindowValue(
-                        window.id,
-                        'groups',
-                      );
-                      await browser.sessions.removeWindowValue(
-                        window.id,
-                        'activeGroup',
-                      );
-                    } catch (cleanupError) {
-                      // Ignore cleanup errors - window already gone
-                    }
-
-                    // Don't store this native group ID since it's in the wrong window
-                    return group;
-                  }
-
-                  if (DEBUG) {
-                    console.log(
-                      `[Migration] ✓ Native group ${groupId} correctly created in window ${window.id}`,
-                    );
-                  }
-                } catch (e) {
-                  console.error(
-                    `[Migration] Failed to validate native group ${groupId}:`,
-                    e,
-                  );
-                  return group;
-                }
-
-                // Update the native group with title and color
-                await browser.tabGroups.update(groupId, {
-                  title: group.name || `Group ${group.id}`,
-                  color: getColorForGroupId(group.id),
-                });
-
-                // Update group with native ID reference
-                return {
-                  ...group,
-                  nativeGroupId: groupId,
-                };
-              }
-
-              // For inactive groups, just mark as migrated without native group
-              // The native group will be created when the group becomes active
-              if (DEBUG) {
-                console.log(
-                  `Group ${group.id} is inactive, will create native group when activated`,
-                );
-              }
-              return group;
-            } catch (error) {
-              console.warn(
-                `Failed to create native group for group ${group.id}:`,
-                error,
-              );
-              // Keep the group without native ID if creation fails
-              return group;
-            }
-          }),
-        );
-
-        // Save updated groups back to session storage
-        await stateManager.setGroups(window.id, updatedGroups);
-        if (DEBUG) {
-          const migratedCount = updatedGroups.filter(
-            (g) => g.nativeGroupId != null,
-          ).length;
-          console.log(
-            `[Migration] Complete for window ${window.id}: ${migratedCount}/${updatedGroups.length} groups have native groups`,
-          );
-        }
+        await migrateWindowGroups(browserWindow.id, stateManager, DEBUG);
       }),
     );
 

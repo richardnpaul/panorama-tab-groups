@@ -1,7 +1,6 @@
 import {
   UNGROUPED_GROUP_ID,
   UNGROUPED_GROUP_NAME,
-  isReservedGroupId,
 } from '../../../js/background/constants.js';
 
 export default class Group {

@@ -287,7 +287,7 @@ async function tabCreated(tab, retryCount = 0) {
     updateFavicon(tab);
 
     // Wait for background script to assign this tab to a group
-    let groupId = await getGroupId(tab.id);
+    const groupId = await getGroupId(tab.id);
 
     // Race condition mitigation: If groupId is undefined, background script
     // may not have assigned it yet. Retry up to 3 times with 50ms delays.
@@ -295,7 +295,9 @@ async function tabCreated(tab, retryCount = 0) {
       console.log(
         `[View] tabCreated: Tab ${tab.id} has undefined groupId, retrying (attempt ${retryCount + 1}/3)...`,
       );
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
       return tabCreated(tab, retryCount + 1);
     }
 
@@ -306,7 +308,7 @@ async function tabCreated(tab, retryCount = 0) {
       console.warn(
         `[View] tabCreated: Skipping tab ${tab.id} - group ${groupId} not found in view`,
       );
-      return;
+      return undefined;
     }
 
     console.log(
@@ -314,7 +316,9 @@ async function tabCreated(tab, retryCount = 0) {
     );
     await insertTab(tab);
     updateGroupFit(group);
+    return undefined;
   }
+  return undefined;
 }
 
 function tabRemoved(tabId, removeInfo) {

@@ -14,11 +14,9 @@ import {
 import {
   PANORAMA_VIEW_GROUP_ID,
   UNGROUPED_GROUP_ID,
-  UNGROUPED_GROUP_NAME,
   INITIALIZATION_TIMEOUT_MS,
   SHOW_LOADING_UI_AFTER_MS,
   isReservedGroupId,
-  isValidUserGroupId,
 } from './background/constants.js';
 
 const manifest = browser.runtime.getManifest();
@@ -27,13 +25,46 @@ const manifest = browser.runtime.getManifest();
 const DEBUG = true;
 
 // Initialization state
-let initializationState = {
+const initializationState = {
   isInitializing: true,
   startTime: null,
   showingUI: false,
   recoveredTabs: 0,
   assignedToUngrouped: 0,
 };
+
+/**
+ * Wait for initialization to complete (if in progress)
+ * Used by event handlers to ensure they don't run before initialization finishes
+ */
+async function waitForInitialization() {
+  if (!initializationState.isInitializing) {
+    return;
+  }
+
+  const startWait = Date.now();
+  const maxWait = INITIALIZATION_TIMEOUT_MS + 1000; // Extra 1 second buffer
+
+  await new Promise((resolve) => {
+    const check = () => {
+      if (!initializationState.isInitializing) {
+        resolve();
+        return;
+      }
+      if (Date.now() - startWait >= maxWait) {
+        resolve();
+        return;
+      }
+      setTimeout(check, 100);
+    };
+
+    check();
+  });
+
+  if (initializationState.isInitializing) {
+    console.warn('[Initialization] waitForInitialization timed out');
+  }
+}
 
 /**
  * Helper: Enrich tab with full context for safe grouping operations
@@ -810,8 +841,7 @@ async function tabCreated(tab) {
   }
 }
 
-async function tabAttached(tabId, attachInfo) {
-  // eslint-disable-line no-unused-vars
+async function tabAttached(tabId) {
   // Wait for initialization to complete
   await waitForInitialization();
 
@@ -819,8 +849,7 @@ async function tabAttached(tabId, attachInfo) {
   await tabCreated(tab);
 }
 
-async function tabDetached(tabId, detachInfo) {
-  // eslint-disable-line no-unused-vars
+async function tabDetached(tabId) {
   await browser.sessions.removeTabValue(tabId, 'groupId');
 }
 
@@ -1025,12 +1054,10 @@ async function tabActivated(activeInfo) {
                 `[TabActivated] Created native group ${nativeGroupId} for panorama group ${activeGroup} with ${groupTabs.length} tabs in window ${tab.windowId}`,
               );
             }
-          } else {
-            if (DEBUG) {
-              console.log(
-                `[TabActivated] No tabs found for group ${activeGroup} to create native group`,
-              );
-            }
+          } else if (DEBUG) {
+            console.log(
+              `[TabActivated] No tabs found for group ${activeGroup} to create native group`,
+            );
           }
         } catch (error) {
           console.warn(
@@ -1309,7 +1336,7 @@ async function recoverGroupFromSessionHistory(tab) {
     if (
       storedGroupId !== null &&
       storedGroupId !== undefined &&
-      !isNaN(storedGroupId)
+      !Number.isNaN(storedGroupId)
     ) {
       return storedGroupId;
     }
@@ -1370,59 +1397,90 @@ async function initializeTabGroupAssignments() {
     // Get all windows and tabs
     const windows = await browser.windows.getAll({});
 
-    for (const window of windows) {
-      const groups = await stateManager.getGroups(window.id);
-      if (!groups || groups.length === 0) {
-        // Window has no groups yet, will be initialized by createGroupInWindowIfMissing
-        continue;
-      }
-
-      // Ensure ungrouped group exists
-      await stateManager.setGroups(window.id, groups);
-
-      // Get all tabs in this window
-      const tabs = await browser.tabs.query({ windowId: window.id });
-
-      for (const tab of tabs) {
-        let groupId = null;
-
-        if (sessionAvailable) {
-          // Try to recover from session history
-          groupId = await recoverGroupFromSessionHistory(tab);
+    const windowResults = await Promise.all(
+      windows.map(async (browserWindow) => {
+        const groups = await stateManager.getGroups(browserWindow.id);
+        if (!groups || groups.length === 0) {
+          // Window has no groups yet, will be initialized by createGroupInWindowIfMissing
+          return null;
         }
 
-        if (groupId !== null && groupId !== undefined && !isNaN(groupId)) {
-          // Successfully recovered
-          initializationState.recoveredTabs++;
+        // Ensure ungrouped group exists
+        await stateManager.setGroups(browserWindow.id, groups);
 
-          // Verify the group still exists
-          const groupExists = groups.some((g) => g.id === groupId);
-          if (!groupExists && !isReservedGroupId(groupId)) {
-            // Group doesn't exist, assign to ungrouped
-            if (DEBUG) {
-              console.log(
-                `[Initialization] Tab ${tab.id} group ${groupId} no longer exists, assigning to ungrouped`,
-              );
+        // Get all tabs in this window
+        const tabs = await browser.tabs.query({ windowId: browserWindow.id });
+
+        const tabResults = await Promise.all(
+          tabs.map(async (tab) => {
+            let groupId = null;
+            let recovered = false;
+            let assignedToUngrouped = false;
+
+            if (sessionAvailable) {
+              // Try to recover from session history
+              groupId = await recoverGroupFromSessionHistory(tab);
             }
-            groupId = UNGROUPED_GROUP_ID;
-            initializationState.assignedToUngrouped++;
-          }
-        } else {
-          // Could not recover, assign to ungrouped
-          groupId = UNGROUPED_GROUP_ID;
-          initializationState.assignedToUngrouped++;
+
+            if (
+              groupId !== null &&
+              groupId !== undefined &&
+              !Number.isNaN(groupId)
+            ) {
+              // Successfully recovered
+              recovered = true;
+
+              // Verify the group still exists
+              const groupExists = groups.some((g) => g.id === groupId);
+              if (!groupExists && !isReservedGroupId(groupId)) {
+                // Group doesn't exist, assign to ungrouped
+                if (DEBUG) {
+                  console.log(
+                    `[Initialization] Tab ${tab.id} group ${groupId} no longer exists, assigning to ungrouped`,
+                  );
+                }
+                groupId = UNGROUPED_GROUP_ID;
+                assignedToUngrouped = true;
+              }
+            } else {
+              // Could not recover, assign to ungrouped
+              groupId = UNGROUPED_GROUP_ID;
+              assignedToUngrouped = true;
+            }
+
+            // Store the assignment
+            await stateManager.setTabGroup(tab.id, groupId);
+
+            return { recovered, assignedToUngrouped };
+          }),
+        );
+
+        const recoveredTabs = tabResults.filter((r) => r.recovered).length;
+        const assignedToUngrouped = tabResults.filter(
+          (r) => r.assignedToUngrouped,
+        ).length;
+
+        if (DEBUG) {
+          console.log(
+            `[Initialization] Window ${browserWindow.id}: processed ${tabs.length} tabs`,
+          );
         }
 
-        // Store the assignment
-        await stateManager.setTabGroup(tab.id, groupId);
-      }
+        return { recoveredTabs, assignedToUngrouped };
+      }),
+    );
 
-      if (DEBUG) {
-        console.log(
-          `[Initialization] Window ${window.id}: processed ${tabs.length} tabs`,
-        );
-      }
-    }
+    const summary = windowResults.filter(Boolean).reduce(
+      (accumulator, result) => {
+        accumulator.recoveredTabs += result.recoveredTabs;
+        accumulator.assignedToUngrouped += result.assignedToUngrouped;
+        return accumulator;
+      },
+      { recoveredTabs: 0, assignedToUngrouped: 0 },
+    );
+
+    initializationState.recoveredTabs = summary.recoveredTabs;
+    initializationState.assignedToUngrouped = summary.assignedToUngrouped;
 
     const duration = Date.now() - initializationState.startTime;
     console.log(
@@ -1442,30 +1500,6 @@ async function initializeTabGroupAssignments() {
 
     // Mark initialization as complete
     initializationState.isInitializing = false;
-  }
-}
-
-/**
- * Wait for initialization to complete (if in progress)
- * Used by event handlers to ensure they don't run before initialization finishes
- */
-async function waitForInitialization() {
-  if (!initializationState.isInitializing) {
-    return;
-  }
-
-  const startWait = Date.now();
-  const maxWait = INITIALIZATION_TIMEOUT_MS + 1000; // Extra 1 second buffer
-
-  while (
-    initializationState.isInitializing &&
-    Date.now() - startWait < maxWait
-  ) {
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-
-  if (initializationState.isInitializing) {
-    console.warn('[Initialization] waitForInitialization timed out');
   }
 }
 
@@ -1724,17 +1758,18 @@ async function deleteGroupWithCleanup({
 }
 
 // TODO: Remove? Is this used?
-function handleMessage(message, sender) {
-  // eslint-disable-line no-unused-vars
+function handleMessage(message) {
   if (message === 'activate-next-group') {
     triggerCommand('activate-next-group');
   } else if (message === 'activate-previous-group') {
     triggerCommand('activate-previous-group');
+  } else {
+    console.error('Unknown external message:', message);
   }
 }
 
 // Handle internal extension messages
-function handleInternalMessage(message, sender, sendResponse) {
+function handleInternalMessage(message, sendResponse) {
   switch (message.action) {
     case 'createMenuItem':
     case 'removeMenuItem':
