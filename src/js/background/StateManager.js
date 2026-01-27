@@ -37,6 +37,10 @@ export class StateManager {
    * @returns {Promise<Array>} Array of group objects
    */
   async getGroups(windowId) {
+    const cacheKey = `groups_${windowId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached !== undefined) return cached;
+
     const DEBUG = true;
     if (DEBUG) {
       console.debug(`[StateManager] getGroups called for window ${windowId}`);
@@ -47,46 +51,7 @@ export class StateManager {
         `[StateManager] getGroups returning ${groups?.length || 0} groups for window ${windowId}`,
       );
     }
-    return groups;
-  }
-
-  /**
-   * Ensure group -2 (ungrouped) exists in the groups array
-   * This is a special system group that should always be present
-   * @param {Array} groups - Array of group objects
-   * @returns {Array} Groups array with group -2 guaranteed to exist
-   */
-  ensureUngroupedGroupExists(groups) {
-    if (!groups) {
-      groups = [];
-    }
-
-    // Check if ungrouped group already exists
-    const hasUngroupedGroup = groups.some((g) => g.id === UNGROUPED_GROUP_ID);
-
-    if (!hasUngroupedGroup) {
-      // Create the ungrouped group with system defaults
-      groups.push({
-        id: UNGROUPED_GROUP_ID,
-        name: UNGROUPED_GROUP_NAME,
-        containerId: 'browser-default',
-        nativeGroupId: null, // Never has native group
-        rect: { x: 0, y: 0, w: 0, h: 0 }, // No position in grid
-        lastMoved: new Date().getTime(),
-        isSystemGroup: true, // Mark as system-managed
-      });
-    } else {
-      // Enforce immutable properties on existing ungrouped group
-      const ungroupedIndex = groups.findIndex(
-        (g) => g.id === UNGROUPED_GROUP_ID,
-      );
-      if (ungroupedIndex !== -1) {
-        groups[ungroupedIndex].name = UNGROUPED_GROUP_NAME;
-        groups[ungroupedIndex].isSystemGroup = true;
-        groups[ungroupedIndex].nativeGroupId = null;
-      }
-    }
-
+    this.setCache(cacheKey, groups);
     return groups;
   }
 
@@ -118,7 +83,32 @@ export class StateManager {
     }
 
     // Ensure group -2 always exists
-    groups = this.ensureUngroupedGroupExists(groups);
+    if (!groups) {
+      groups = [];
+    }
+
+    const hasUngroupedGroup = groups.some((g) => g.id === UNGROUPED_GROUP_ID);
+
+    if (!hasUngroupedGroup) {
+      groups.push({
+        id: UNGROUPED_GROUP_ID,
+        name: UNGROUPED_GROUP_NAME,
+        containerId: 'browser-default',
+        nativeGroupId: null, // Never has native group
+        rect: { x: 0, y: 0, w: 0, h: 0 }, // No position in grid
+        lastMoved: new Date().getTime(),
+        isSystemGroup: true, // Mark as system-managed
+      });
+    } else {
+      const ungroupedIndex = groups.findIndex(
+        (g) => g.id === UNGROUPED_GROUP_ID,
+      );
+      if (ungroupedIndex !== -1) {
+        groups[ungroupedIndex].name = UNGROUPED_GROUP_NAME;
+        groups[ungroupedIndex].isSystemGroup = true;
+        groups[ungroupedIndex].nativeGroupId = null;
+      }
+    }
 
     await browser.sessions.setWindowValue(windowId, 'groups', groups);
     this.invalidateCache(`groups_${windowId}`);
@@ -130,6 +120,10 @@ export class StateManager {
    * @returns {Promise<number>} Active group ID
    */
   async getActiveGroup(windowId) {
+    const cacheKey = `activeGroup_${windowId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached !== undefined) return cached;
+
     const activeGroup = await browser.sessions.getWindowValue(
       windowId,
       'activeGroup',
@@ -142,6 +136,8 @@ export class StateManager {
         `[StateManager] getActiveGroup: No activeGroup set for window ${windowId}`,
       );
     }
+
+    this.setCache(cacheKey, activeGroup);
 
     return activeGroup;
   }
@@ -175,7 +171,16 @@ export class StateManager {
    * @returns {Promise<number>} Group index
    */
   async getGroupIndex(windowId) {
-    return browser.sessions.getWindowValue(windowId, 'groupIndex');
+    const cacheKey = `groupIndex_${windowId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const groupIndex = await browser.sessions.getWindowValue(
+      windowId,
+      'groupIndex',
+    );
+    this.setCache(cacheKey, groupIndex);
+    return groupIndex;
   }
 
   /**
@@ -194,7 +199,13 @@ export class StateManager {
    * @returns {Promise<number>} Group ID the tab belongs to
    */
   async getTabGroup(tabId) {
-    return browser.sessions.getTabValue(tabId, 'groupId');
+    const cacheKey = `tabGroup_${tabId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const groupId = await browser.sessions.getTabValue(tabId, 'groupId');
+    this.setCache(cacheKey, groupId);
+    return groupId;
   }
 
   /**
@@ -213,9 +224,7 @@ export class StateManager {
    * @returns {Promise<Array<number>>} Array of group IDs
    */
   async getTabGroups(tabIds) {
-    return Promise.all(
-      tabIds.map((tabId) => browser.sessions.getTabValue(tabId, 'groupId')),
-    );
+    return Promise.all(tabIds.map((tabId) => this.getTabGroup(tabId)));
   }
 
   // ==================== Local Storage (Extension-Level) ====================
@@ -378,6 +387,7 @@ export class StateManager {
       const windowStates = {};
       for (const [windowId, state] of legacyStates) {
         windowStates[windowId] = state;
+        this.invalidateCache(`windowState_${windowId}`);
       }
       await browser.storage.local.set({ windowStates });
     }
