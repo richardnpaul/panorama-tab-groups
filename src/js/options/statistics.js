@@ -22,7 +22,7 @@ export default async function getStatistics() {
       }
     }),
   );
-  console.log(numActiveTabs);
+  console.debug(numActiveTabs);
 
   document.getElementById('thumbnailCacheSize').innerHTML = '';
   document

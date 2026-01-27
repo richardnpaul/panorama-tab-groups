@@ -153,7 +153,7 @@ if (hasTabHide && hasTabGroups) {
 
 // Log detected capabilities once on load
 if (DEBUG) {
-  console.log('Browser capabilities:', {
+  console.debug('Browser capabilities:', {
     tabHide: hasTabHide,
     tabGroups: hasTabGroups,
     mode: browserMode,
@@ -215,7 +215,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
   const toggleStartTime = Date.now();
   if (DEBUG) {
     const stack = new Error().stack.split('\n').slice(2, 5).join('\n');
-    console.log(
+    console.debug(
       `[ToggleVisibleTabs] START at ${toggleStartTime}: activeGroup=${activeGroup}, noTabSelected=${noTabSelected}`,
     );
     if (activeGroup === undefined) {
@@ -223,7 +223,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
         '[ToggleVisibleTabs] ⚠️ activeGroup is UNDEFINED - aborting to prevent hiding all tabs!',
       );
     }
-    console.log(`  Call stack:\n${stack}`);
+    console.debug(`  Call stack:\n${stack}`);
   }
 
   // Early return prevents catastrophic tab hiding bug when activeGroup is undefined
@@ -256,7 +256,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
         // Skip pinned tabs - they should always be visible
         if (tab.pinned) {
           if (DEBUG) {
-            console.log(`  Skipping pinned tab: ${tab.id} (${tab.title})`);
+            console.debug(`  Skipping pinned tab: ${tab.id} (${tab.title})`);
           }
           return;
         }
@@ -269,12 +269,12 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
             showTabIds.push(tab.id);
             showTabs.push(tab);
             if (DEBUG) {
-              console.log(`  Will show panorama view tab ${tab.id}`);
+              console.debug(`  Will show panorama view tab ${tab.id}`);
             }
           } else {
             hideTabIds.push(tab.id);
             if (DEBUG) {
-              console.log(`  Will hide panorama view tab ${tab.id}`);
+              console.debug(`  Will hide panorama view tab ${tab.id}`);
             }
           }
           return;
@@ -283,7 +283,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
         if (groupId !== activeGroup) {
           hideTabIds.push(tab.id);
           if (DEBUG) {
-            console.log(
+            console.debug(
               `  Will hide tab ${tab.id} (${tab.title}) - groupId ${groupId} !== activeGroup ${activeGroup}`,
             );
             if (activeGroup === undefined) {
@@ -296,7 +296,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
           showTabIds.push(tab.id);
           showTabs.push(tab);
           if (DEBUG) {
-            console.log(
+            console.debug(
               `  Will show tab ${tab.id} (${tab.title}) - groupId ${groupId} === activeGroup ${activeGroup}`,
             );
           }
@@ -309,7 +309,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
 
   if (DEBUG) {
     const elapsed = Date.now() - toggleStartTime;
-    console.log(
+    console.debug(
       `[ToggleVisibleTabs] Decision complete at +${elapsed}ms: ${hideTabIds.length} to hide, ${showTabIds.length} to show`,
     );
     if (showTabIds.length === 0 && hideTabIds.length > 0) {
@@ -355,14 +355,14 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
     if (hasTabHide) {
       if (DEBUG) {
         const elapsed = Date.now() - toggleStartTime;
-        console.log(
+        console.debug(
           `[ToggleVisibleTabs] About to hide ${hideTabIds.length} tabs at +${elapsed}ms`,
         );
       }
       await browser.tabs.hide(hideTabIds);
       if (DEBUG) {
         const elapsed = Date.now() - toggleStartTime;
-        console.log(`[ToggleVisibleTabs] Hide complete at +${elapsed}ms`);
+        console.debug(`[ToggleVisibleTabs] Hide complete at +${elapsed}ms`);
       }
     }
   }
@@ -373,14 +373,14 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
     if (hasTabHide) {
       if (DEBUG) {
         const elapsed = Date.now() - toggleStartTime;
-        console.log(
+        console.debug(
           `[ToggleVisibleTabs] About to show ${showTabIds.length} tabs at +${elapsed}ms`,
         );
       }
       await browser.tabs.show(showTabIds);
       if (DEBUG) {
         const elapsed = Date.now() - toggleStartTime;
-        console.log(`[ToggleVisibleTabs] Show complete at +${elapsed}ms`);
+        console.debug(`[ToggleVisibleTabs] Show complete at +${elapsed}ms`);
       }
     }
 
@@ -407,7 +407,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
 
   if (DEBUG) {
     const elapsed = Date.now() - toggleStartTime;
-    console.log(`[ToggleVisibleTabs] COMPLETE at +${elapsed}ms`);
+    console.debug(`[ToggleVisibleTabs] COMPLETE at +${elapsed}ms`);
   }
 }
 
@@ -623,7 +623,7 @@ async function tabCreated(tab) {
   const isViewTabByUrl = tab.url === viewUrl || tab.pendingUrl === viewUrl;
 
   if (DEBUG) {
-    console.log(
+    console.debug(
       `tabCreated: tab ${tab.id}, url="${tab.url}", pendingUrl="${tab.pendingUrl}", viewUrl="${viewUrl}", isViewTabById=${isViewTabById}, isViewTabByWindow=${isViewTabByWindow}, isViewTabByUrl=${isViewTabByUrl}`,
     );
   }
@@ -638,7 +638,7 @@ async function tabCreated(tab) {
     // Assign special group ID for panorama view tab
     await stateManager.setTabGroup(tab.id, -1);
     if (DEBUG) {
-      console.log(`Created panorama view tab ${tab.id}, assigned groupId -1`);
+      console.debug(`Created panorama view tab ${tab.id}, assigned groupId -1`);
     }
     return;
   }
@@ -651,7 +651,7 @@ async function tabCreated(tab) {
 
     // Handle race condition: window created but activeGroup not set yet
     if (activeGroup === undefined || activeGroup === null) {
-      console.log(
+      console.debug(
         `[TabCreated] activeGroup is ${activeGroup} for window ${tab.windowId}, using fallback`,
       );
 
@@ -669,11 +669,11 @@ async function tabCreated(tab) {
 
     await stateManager.setTabGroup(tab.id, activeGroup);
     tabGroupId = activeGroup;
-    console.log(
+    console.debug(
       `[TabCreated] Tab ${tab.id} created in window ${tab.windowId}, assigned to group ${activeGroup}`,
     );
   } else if (DEBUG) {
-    console.log(
+    console.debug(
       `[TabCreated] Tab ${tab.id} created in window ${tab.windowId}, already has group ${tabGroupId}`,
     );
   }
@@ -702,7 +702,7 @@ async function tabCreated(tab) {
         );
 
         if (DEBUG) {
-          console.log(
+          console.debug(
             `[TabCreated] Found ${groupTabs.length} tabs for group ${tabGroupId} in window ${tab.windowId}`,
           );
         }
@@ -717,7 +717,7 @@ async function tabCreated(tab) {
 
           if (!safetyCheck.safe) {
             if (DEBUG) {
-              console.log(
+              console.debug(
                 `[TabCreated] Skipping native group creation: ${safetyCheck.reason}`,
               );
             }
@@ -725,7 +725,7 @@ async function tabCreated(tab) {
           }
 
           if (DEBUG) {
-            console.log(
+            console.debug(
               `[TabCreated] Creating native group for tab ${tab.id} in window ${tab.windowId}, grouping ${groupTabs.length} tabs:`,
               groupTabs.map((t) => t.tabId),
             );
@@ -775,7 +775,7 @@ async function tabCreated(tab) {
           await stateManager.setGroups(tab.windowId, groups);
 
           if (DEBUG) {
-            console.log(
+            console.debug(
               `[TabCreated] Created native group ${nativeGroupId} for panorama group ${tabGroupId} with ${groupTabs.length} tabs (from tabCreated)`,
             );
           }
@@ -783,7 +783,7 @@ async function tabCreated(tab) {
           // Update visibility to hide panorama view tab since we now have an active tab in a group
           if (tab.active || tabGroupId === activeGroup) {
             if (DEBUG) {
-              console.log(
+              console.debug(
                 `Updating visibility for newly created native group (tab.active=${tab.active}, tabGroupId=${tabGroupId}, activeGroup=${activeGroup})`,
               );
             }
@@ -802,7 +802,7 @@ async function tabCreated(tab) {
           groupId: currentGroup.nativeGroupId,
         });
         if (DEBUG) {
-          console.log(
+          console.debug(
             `Assigned tab ${tab.id} to native group ${currentGroup.nativeGroupId} (panorama group ${tabGroupId})`,
           );
         }
@@ -810,7 +810,7 @@ async function tabCreated(tab) {
         // Update visibility to hide panorama view tab since we now have an active tab in this group
         if (tab.active) {
           if (DEBUG) {
-            console.log(
+            console.debug(
               `Updating visibility for existing native group (tab.active=${tab.active}, tabGroupId=${tabGroupId})`,
             );
           }
@@ -818,7 +818,7 @@ async function tabCreated(tab) {
           visibilityUpdated = true;
         }
       } else if (DEBUG) {
-        console.log(
+        console.debug(
           `Skipped native group assignment for tab ${tab.id}: group inactive (will be grouped when activated)`,
         );
       }
@@ -833,7 +833,7 @@ async function tabCreated(tab) {
   // Only call if visibility wasn't already updated in the native groups block
   if (tab.active && tabGroupId !== -1 && !visibilityUpdated) {
     if (DEBUG) {
-      console.log(
+      console.debug(
         `[TabCreated] Updating visibility for active tab ${tab.id} in group ${tabGroupId}`,
       );
     }
@@ -863,7 +863,7 @@ async function tabActivated(activeInfo) {
 
   const startTime = Date.now();
   if (DEBUG) {
-    console.log(
+    console.debug(
       `[TabActivated] START at ${startTime}: tabId=${activeInfo.tabId}`,
     );
   }
@@ -881,14 +881,14 @@ async function tabActivated(activeInfo) {
 
   if (DEBUG) {
     const elapsed = Date.now() - startTime;
-    console.log(
+    console.debug(
       `[TabActivated] Active group determined at +${elapsed}ms: activeGroup=${activeGroup}`,
     );
     if (activeGroup === undefined) {
       console.warn(
         '[TabActivated] ⚠️ activeGroup is UNDEFINED - race condition detected!',
       );
-      console.log(
+      console.debug(
         '[TabActivated] Skipping - tabCreated will handle visibility when group is assigned',
       );
     }
@@ -903,14 +903,14 @@ async function tabActivated(activeInfo) {
   if (activeGroup !== -1) {
     // activated tab is not Panorama View tab
     if (DEBUG) {
-      console.log(
+      console.debug(
         `[TabActivated] Entering activeGroup !== -1 block (activeGroup=${activeGroup})`,
       );
     }
     try {
       await stateManager.setActiveGroup(tab.windowId, activeGroup);
       if (DEBUG) {
-        console.log('[TabActivated] setActiveGroup completed');
+        console.debug('[TabActivated] setActiveGroup completed');
       }
     } catch (error) {
       console.error(
@@ -918,7 +918,7 @@ async function tabActivated(activeInfo) {
         error,
       );
       if (DEBUG) {
-        console.log(
+        console.debug(
           '[TabActivated] Continuing despite setActiveGroup error...',
         );
       }
@@ -927,18 +927,18 @@ async function tabActivated(activeInfo) {
     // Create native tab group if needed (for groups created in panorama view)
     const useNativeGroups = await shouldUseNativeGroups();
     if (DEBUG) {
-      console.log(
+      console.debug(
         `[TabActivated] shouldUseNativeGroups returned: ${useNativeGroups}`,
       );
     }
     if (useNativeGroups) {
       if (DEBUG) {
-        console.log('[TabActivated] Entering useNativeGroups block');
+        console.debug('[TabActivated] Entering useNativeGroups block');
       }
       const groups = await stateManager.getGroups(tab.windowId);
       const currentGroup = groups?.find((g) => g.id === activeGroup);
       if (DEBUG) {
-        console.log(
+        console.debug(
           `[TabActivated] Found currentGroup: ${currentGroup?.name || 'none'}, querying tabGroups...`,
         );
       }
@@ -948,7 +948,7 @@ async function tabActivated(activeInfo) {
         windowId: tab.windowId,
       });
       if (DEBUG) {
-        console.log(
+        console.debug(
           `[TabActivated] tabGroups.query returned ${currentTabGroups.length} groups`,
         );
       }
@@ -966,7 +966,7 @@ async function tabActivated(activeInfo) {
       if (currentGroup && !currentGroup.nativeGroupId && !existingNativeGroup) {
         try {
           if (DEBUG) {
-            console.log(
+            console.debug(
               `[TabActivated] Creating native group for tab ${tab.id} in window ${tab.windowId}, activeGroup=${activeGroup}`,
             );
           }
@@ -983,7 +983,7 @@ async function tabActivated(activeInfo) {
           );
 
           if (DEBUG) {
-            console.log(
+            console.debug(
               `[TabActivated] Found ${groupTabs.length} tabs in group ${activeGroup} for window ${tab.windowId}:`,
               groupTabs.map((t) => t.tabId),
             );
@@ -999,7 +999,7 @@ async function tabActivated(activeInfo) {
 
             if (!safetyCheck.safe) {
               if (DEBUG) {
-                console.log(
+                console.debug(
                   `[TabActivated] Skipping native group creation: ${safetyCheck.reason}`,
                 );
               }
@@ -1050,12 +1050,12 @@ async function tabActivated(activeInfo) {
             await stateManager.setGroups(tab.windowId, groups);
 
             if (DEBUG) {
-              console.log(
+              console.debug(
                 `[TabActivated] Created native group ${nativeGroupId} for panorama group ${activeGroup} with ${groupTabs.length} tabs in window ${tab.windowId}`,
               );
             }
           } else if (DEBUG) {
-            console.log(
+            console.debug(
               `[TabActivated] No tabs found for group ${activeGroup} to create native group`,
             );
           }
@@ -1074,23 +1074,23 @@ async function tabActivated(activeInfo) {
         currentGroup.nativeGroupId = existingNativeGroup.nativeGroupId;
         await stateManager.setGroups(tab.windowId, groups);
         if (DEBUG) {
-          console.log(
+          console.debug(
             `Linked existing native group ${existingNativeGroup.nativeGroupId} to panorama group ${activeGroup}`,
           );
         }
       }
     } else if (DEBUG) {
-      console.log('[TabActivated] Skipped useNativeGroups block (disabled)');
+      console.debug('[TabActivated] Skipped useNativeGroups block (disabled)');
     }
   } else if (DEBUG) {
-    console.log(
+    console.debug(
       '[TabActivated] Skipped activeGroup !== -1 block (panorama view tab)',
     );
   }
 
   if (DEBUG) {
     const elapsed = Date.now() - startTime;
-    console.log(
+    console.debug(
       `[TabActivated] About to call toggleVisibleTabs at +${elapsed}ms with activeGroup=${activeGroup}`,
     );
   }
@@ -1099,7 +1099,7 @@ async function tabActivated(activeInfo) {
 
   if (DEBUG) {
     const elapsed = Date.now() - startTime;
-    console.log(`[TabActivated] COMPLETE at +${elapsed}ms`);
+    console.debug(`[TabActivated] COMPLETE at +${elapsed}ms`);
   }
 }
 
@@ -1120,7 +1120,7 @@ async function newGroupUid(windowId) {
  * that do not yet have a group */
 async function createGroupInWindow(browserWindow) {
   if (window.backgroundState.openingBackup) {
-    console.log('Skipping creation of groups since we are opening backup');
+    console.debug('Skipping creation of groups since we are opening backup');
     return;
   }
 
@@ -1169,7 +1169,7 @@ async function createGroupInWindowIfMissing(browserWindow) {
   const groups = await stateManager.getGroups(browserWindow.id);
 
   if (!groups || !groups.length) {
-    console.log(`No groups found for window ${browserWindow.id}!`);
+    console.debug(`No groups found for window ${browserWindow.id}!`);
     await createGroupInWindow(browserWindow);
   }
   browser.action.setTitle({
@@ -1213,7 +1213,7 @@ async function salvageGrouplessTabs() {
 
       // Check if windows[tab.windowId] and its groups exist
       if (!windows[tab.windowId] || !windows[tab.windowId].groups) {
-        console.log(
+        console.debug(
           `No groups found for window ${tab.windowId}, skipping tab ${tab.id}`,
         );
         return;
@@ -1290,7 +1290,7 @@ async function showInitializationUI() {
   }
 
   if (DEBUG) {
-    console.log('[Initialization] Loading UI displayed');
+    console.debug('[Initialization] Loading UI displayed');
   }
 }
 
@@ -1320,7 +1320,7 @@ async function hideInitializationUI() {
   initializationState.showingUI = false;
 
   if (DEBUG) {
-    console.log('[Initialization] Loading UI hidden');
+    console.debug('[Initialization] Loading UI hidden');
   }
 }
 
@@ -1363,7 +1363,7 @@ async function initializeTabGroupAssignments() {
   initializationState.assignedToUngrouped = 0;
 
   if (DEBUG) {
-    console.log(
+    console.debug(
       '[Initialization] Starting tab group assignment recovery (max 10s)...',
     );
   }
@@ -1435,7 +1435,7 @@ async function initializeTabGroupAssignments() {
               if (!groupExists && !isReservedGroupId(groupId)) {
                 // Group doesn't exist, assign to ungrouped
                 if (DEBUG) {
-                  console.log(
+                  console.debug(
                     `[Initialization] Tab ${tab.id} group ${groupId} no longer exists, assigning to ungrouped`,
                   );
                 }
@@ -1461,7 +1461,7 @@ async function initializeTabGroupAssignments() {
         ).length;
 
         if (DEBUG) {
-          console.log(
+          console.debug(
             `[Initialization] Window ${browserWindow.id}: processed ${tabs.length} tabs`,
           );
         }
@@ -1483,7 +1483,7 @@ async function initializeTabGroupAssignments() {
     initializationState.assignedToUngrouped = summary.assignedToUngrouped;
 
     const duration = Date.now() - initializationState.startTime;
-    console.log(
+    console.debug(
       `[Initialization] Complete in ${duration}ms: ${initializationState.recoveredTabs} recovered, ${initializationState.assignedToUngrouped} assigned to ungrouped`,
     );
   } catch (error) {
@@ -1506,7 +1506,7 @@ async function initializeTabGroupAssignments() {
 async function init() {
   const options = await loadOptions();
 
-  console.log('Initializing Panorama Tab View');
+  console.debug('Initializing Panorama Tab View');
 
   // PHASE 1: Initialize tab-group assignments with blocking
   await initializeTabGroupAssignments();
@@ -1521,7 +1521,7 @@ async function init() {
   await createMenuList();
 
   if (DEBUG) {
-    console.log('Finished setup');
+    console.debug('Finished setup');
   }
 
   const disablePopupView = options.view !== 'popup';
@@ -1548,7 +1548,7 @@ async function init() {
       clearTimeout(window.backgroundState.openingView.timeout);
       window.backgroundState.openingView = null;
       if (DEBUG) {
-        console.log('View tab removed during creation, cleared state');
+        console.debug('View tab removed during creation, cleared state');
       }
     }
 
@@ -1563,7 +1563,7 @@ async function init() {
   browser.windows.onRemoved.addListener((windowId) => {
     window.windowStates.delete(windowId);
     if (DEBUG) {
-      console.log(`Cleaned up state for closed window ${windowId}`);
+      console.debug(`Cleaned up state for closed window ${windowId}`);
     }
   });
 
@@ -1576,7 +1576,7 @@ init();
 window.refreshView = async function refreshView() {
   const options = await loadOptions();
 
-  console.log('Refresh Panorama Tab View');
+  console.debug('Refresh Panorama Tab View');
   window.viewRefreshOrdered = true;
 
   browser.action.onClicked.removeListener(toggleView);
@@ -1612,7 +1612,7 @@ window.refreshView = async function refreshView() {
   // Listen for useNativeGroups option changes
   browser.storage.onChanged.addListener(async (changes, areaName) => {
     if (DEBUG) {
-      console.log(
+      console.debug(
         '[Storage] onChanged fired - areaName:',
         areaName,
         'changes:',
@@ -1624,7 +1624,7 @@ window.refreshView = async function refreshView() {
       const { oldValue, newValue } = changes.useNativeGroups;
 
       if (DEBUG) {
-        console.log(
+        console.debug(
           `[Storage] useNativeGroups changed: ${oldValue} -> ${newValue}`,
         );
       }
@@ -1632,12 +1632,14 @@ window.refreshView = async function refreshView() {
       // If native groups are being disabled, cleanup
       if (oldValue === true && newValue === false) {
         if (DEBUG) {
-          console.log('[Storage] Native groups disabled, starting cleanup...');
+          console.debug(
+            '[Storage] Native groups disabled, starting cleanup...',
+          );
         }
         try {
           await cleanupNativeGroups(DEBUG);
           if (DEBUG) {
-            console.log('[Storage] Cleanup completed successfully');
+            console.debug('[Storage] Cleanup completed successfully');
           }
         } catch (error) {
           console.error('[Storage] Cleanup failed:', error);
@@ -1665,7 +1667,7 @@ async function deleteGroupWithCleanup({
   tabIds,
 }) {
   if (DEBUG) {
-    console.log(
+    console.debug(
       `Deleting group ${groupId} with ${tabIds?.length || 0} tabs, nativeGroupId: ${nativeGroupId}`,
     );
   }
@@ -1683,7 +1685,7 @@ async function deleteGroupWithCleanup({
         if (tabsToUngroup.length > 0) {
           await browser.tabs.ungroup(tabsToUngroup);
           if (DEBUG) {
-            console.log(
+            console.debug(
               `Ungrouped ${tabsToUngroup.length} tabs from native group ${nativeGroupId}`,
             );
           }
@@ -1691,7 +1693,7 @@ async function deleteGroupWithCleanup({
       } catch (error) {
         // Native group may already be removed or tabs already ungrouped - this is OK
         if (DEBUG) {
-          console.log(
+          console.debug(
             `Could not ungroup tabs (group may already be removed): ${error.message}`,
           );
         }
@@ -1707,14 +1709,14 @@ async function deleteGroupWithCleanup({
           } catch (error) {
             // Tab may already be closed - this is OK
             if (DEBUG) {
-              console.log(`Could not remove tab ${id}: ${error.message}`);
+              console.debug(`Could not remove tab ${id}: ${error.message}`);
             }
           }
         }),
       );
 
       if (DEBUG) {
-        console.log(`Removed ${tabIds.length} tabs from group ${groupId}`);
+        console.debug(`Removed ${tabIds.length} tabs from group ${groupId}`);
       }
     }
 
@@ -1725,13 +1727,13 @@ async function deleteGroupWithCleanup({
       await stateManager.setGroups(windowId, leftGroups);
 
       if (DEBUG) {
-        console.log(`Updated storage: ${leftGroups.length} groups remaining`);
+        console.debug(`Updated storage: ${leftGroups.length} groups remaining`);
       }
 
       // If this was the last group, create a new initial group
       if (leftGroups.length === 0) {
         if (DEBUG) {
-          console.log('Last group deleted, creating new initial group...');
+          console.debug('Last group deleted, creating new initial group...');
         }
         await createGroupInWindow({ id: windowId });
       }
@@ -1741,12 +1743,12 @@ async function deleteGroupWithCleanup({
     try {
       await browser.menus.remove(String(groupId));
       if (DEBUG) {
-        console.log(`Removed menu item for group ${groupId}`);
+        console.debug(`Removed menu item for group ${groupId}`);
       }
     } catch (error) {
       // Menu item may not exist - this is OK
       if (DEBUG) {
-        console.log(`Could not remove menu item: ${error.message}`);
+        console.debug(`Could not remove menu item: ${error.message}`);
       }
     }
 
@@ -1769,7 +1771,7 @@ function handleMessage(message) {
 }
 
 // Handle internal extension messages
-function handleInternalMessage(message, sendResponse) {
+function handleInternalMessage(message, sender, sendResponse) {
   switch (message.action) {
     case 'createMenuItem':
     case 'removeMenuItem':
@@ -1790,7 +1792,7 @@ function handleInternalMessage(message, sendResponse) {
     case 'cleanupNativeGroups':
       // Handle cleanup when native groups option is disabled
       if (DEBUG) {
-        console.log('[Message] cleanupNativeGroups action received');
+        console.debug('[Message] cleanupNativeGroups action received');
       }
       cleanupNativeGroups(DEBUG)
         .then(() => {

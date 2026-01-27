@@ -56,7 +56,9 @@ function convertBackup(tgData) {
         groupId = JSON.parse(tab.extData['tabview-tab']).groupID;
       } else {
         // No associated groupId, where should it go???
-        console.log(`Skipping tab with missing groupId: ${tab.entries[0].url}`);
+        console.debug(
+          `Skipping tab with missing groupId: ${tab.entries[0].url}`,
+        );
         return;
       }
       data.windows[index].tabs.push({
@@ -96,7 +98,7 @@ async function openBackup(data) {
       const groups = [];
 
       if (wi.groups.length === 0) {
-        console.log('no groups in backup, trying to retrieve them from tabs');
+        console.debug('no groups in backup, trying to retrieve them from tabs');
         const newGroupIds = getGroupIdsFromTabs(wi);
 
         // TODO: eval rect by minimum size and fit it optimally on screen
@@ -169,7 +171,7 @@ async function openBackup(data) {
               pinned: ti.pinned,
             })
             .catch((err) => {
-              console.log(err);
+              console.debug(err);
             });
 
           if (tab) {
@@ -239,7 +241,7 @@ export function loadBackup(input) {
         return;
       }
 
-      // console.log(JSON.stringify(data, null, 4));
+      // console.debug(JSON.stringify(data, null, 4));
       openBackup(data);
     };
 

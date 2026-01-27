@@ -28,7 +28,7 @@ function saveNativeGroupsOption() {
   const checkbox = document.getElementById('useNativeGroups');
   const newValue = checkbox.checked;
 
-  console.log('[Options] saveNativeGroupsOption called, newValue:', newValue);
+  console.debug('[Options] saveNativeGroupsOption called, newValue:', newValue);
 
   // Save to storage
   browser.storage.sync
@@ -36,14 +36,14 @@ function saveNativeGroupsOption() {
       useNativeGroups: newValue,
     })
     .then(() => {
-      console.log(
+      console.debug(
         '[Options] storage.sync.set completed for useNativeGroups:',
         newValue,
       );
 
       // Trigger cleanup or migration via direct message (storage.onChanged unreliable in MV3)
       if (!newValue) {
-        console.log(
+        console.debug(
           '[Options] Sending cleanupNativeGroups message to background',
         );
         browser.runtime
@@ -51,13 +51,13 @@ function saveNativeGroupsOption() {
             action: 'cleanupNativeGroups',
           })
           .then((response) => {
-            console.log('[Options] Cleanup response:', response);
+            console.debug('[Options] Cleanup response:', response);
           })
           .catch((error) => {
             console.error('[Options] Failed to send cleanup message:', error);
           });
       } else {
-        console.log(
+        console.debug(
           '[Options] Sending migrateToHybridGroups message to background',
         );
         browser.runtime
@@ -65,7 +65,7 @@ function saveNativeGroupsOption() {
             action: 'migrateToHybridGroups',
           })
           .then((response) => {
-            console.log('[Options] Migration response:', response);
+            console.debug('[Options] Migration response:', response);
           })
           .catch((error) => {
             console.error('[Options] Failed to send migration message:', error);

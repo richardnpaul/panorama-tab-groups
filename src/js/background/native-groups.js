@@ -95,13 +95,13 @@ async function canSafelyGroupTabs(enrichedTabs, windowId, DEBUG) {
       enrichedTabs.length >= 1 &&
       enrichedTabs.length === nonPanoramaTabs.length
     ) {
-      console.log(
+      console.debug(
         `[Safety Check] Skipping grouping: would group all ${enrichedTabs.length} regular tabs in window ${windowId}, which could cause window closure`,
       );
-      console.log(
+      console.debug(
         `[Safety Check] enrichedTabs: ${enrichedTabs.map((t) => t.tabId).join(', ')}`,
       );
-      console.log(
+      console.debug(
         `[Safety Check] nonPanoramaTabs: ${nonPanoramaTabs.map((t) => t.id).join(', ')}`,
       );
       return false;
@@ -109,7 +109,9 @@ async function canSafelyGroupTabs(enrichedTabs, windowId, DEBUG) {
 
     // Additional safety: if no non-panorama tabs, don't attempt grouping
     if (nonPanoramaTabs.length === 0) {
-      console.log(`[Safety Check] No non-panorama tabs in window ${windowId}`);
+      console.debug(
+        `[Safety Check] No non-panorama tabs in window ${windowId}`,
+      );
       return false;
     }
 
@@ -137,7 +139,7 @@ export async function verifyNativeGroupPersistence(hasTabGroups, DEBUG) {
 
   try {
     if (DEBUG) {
-      console.log('Verifying native group persistence...');
+      console.debug('Verifying native group persistence...');
     }
 
     const windows = await browser.windows.getAll({});
@@ -165,7 +167,7 @@ export async function verifyNativeGroupPersistence(hasTabGroups, DEBUG) {
                 group.nativeGroupId,
               );
               if (DEBUG) {
-                console.log(
+                console.debug(
                   `✓ Verified native group ${group.nativeGroupId} for panorama group ${group.id}`,
                 );
               }
@@ -190,7 +192,7 @@ export async function verifyNativeGroupPersistence(hasTabGroups, DEBUG) {
                 return g;
               });
               await stateManager.setGroups(window.id, updatedGroups);
-              console.log(
+              console.debug(
                 `Cleaned up broken native group reference for group ${group.id}`,
               );
             }
@@ -200,7 +202,7 @@ export async function verifyNativeGroupPersistence(hasTabGroups, DEBUG) {
     );
 
     if (DEBUG) {
-      console.log('Native group persistence verification complete');
+      console.debug('Native group persistence verification complete');
     }
   } catch (error) {
     console.error('Failed to verify native group persistence:', error);
@@ -217,7 +219,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
   const groups = await stateMgr.getGroups(windowId);
 
   if (DEBUG) {
-    console.log(
+    console.debug(
       `[Migration] Retrieved groups for window ${windowId}:`,
       groups?.map((g) => ({
         id: g.id,
@@ -226,22 +228,22 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
       })),
     );
     const activeGroup = await stateMgr.getActiveGroup(windowId);
-    console.log(`[Migration] Current activeGroup: ${activeGroup}`);
+    console.debug(`[Migration] Current activeGroup: ${activeGroup}`);
 
     // Log validation statistics
     const withNativeId = groups.filter((g) => g.nativeGroupId != null).length;
-    console.log(
+    console.debug(
       `[Migration] ${groups.length} total groups, ${withNativeId} have nativeGroupId (will validate)`,
     );
   }
 
   if (!groups || !Array.isArray(groups) || groups.length === 0) {
-    console.log(`No groups to migrate for window ${windowId}`);
+    console.debug(`No groups to migrate for window ${windowId}`);
     return;
   }
 
   if (DEBUG) {
-    console.log(`Migrating ${groups.length} groups for window ${windowId}`);
+    console.debug(`Migrating ${groups.length} groups for window ${windowId}`);
   }
 
   const updatedGroups = await Promise.all(
@@ -252,7 +254,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
           // Verify the native group actually exists
           await browser.tabGroups.get(group.nativeGroupId);
           if (DEBUG) {
-            console.log(
+            console.debug(
               `Group ${group.id} has valid native group ${group.nativeGroupId}, skipping`,
             );
           }
@@ -271,7 +273,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
 
       try {
         if (DEBUG) {
-          console.log(
+          console.debug(
             `[Migration] Processing group ${group.id} (${group.name}) in window ${windowId}`,
           );
         }
@@ -280,7 +282,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
         const tabs = await browser.tabs.query({ windowId });
 
         if (DEBUG) {
-          console.log(
+          console.debug(
             `[Migration] Query found ${tabs.length} tabs in window ${windowId}`,
           );
         }
@@ -299,11 +301,11 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
         );
 
         if (DEBUG && groupTabs.length > 0) {
-          console.log(
+          console.debug(
             `[Migration] Group ${group.id} has ${groupTabs.length} tabs:`,
             groupTabs.map((t) => t.tabId),
           );
-          console.log(
+          console.debug(
             `[Migration] Tab details:`,
             groupTabs.map((t) => ({
               tabId: t.tabId,
@@ -316,7 +318,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
 
         if (groupTabs.length === 0) {
           if (DEBUG) {
-            console.log(
+            console.debug(
               `Group ${group.id} has no tabs, skipping native group creation`,
             );
           }
@@ -374,7 +376,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
           });
 
           if (DEBUG) {
-            console.log(
+            console.debug(
               `Created native group ${groupId} for active panorama group ${group.id} with ${groupTabs.length} tabs`,
             );
           }
@@ -393,7 +395,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
               // Remove the incorrectly placed native group
               try {
                 await browser.tabs.ungroup(groupTabs.map((t) => t.tabId));
-                console.log(
+                console.debug(
                   `[Migration] Ungrouped tabs to prevent orphaned native group`,
                 );
               } catch (ungroupError) {
@@ -419,7 +421,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
             }
 
             if (DEBUG) {
-              console.log(
+              console.debug(
                 `[Migration] ✓ Native group ${groupId} correctly created in window ${windowId}`,
               );
             }
@@ -447,7 +449,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
         // For inactive groups, just mark as migrated without native group
         // The native group will be created when the group becomes active
         if (DEBUG) {
-          console.log(
+          console.debug(
             `Group ${group.id} is inactive, will create native group when activated`,
           );
         }
@@ -469,7 +471,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
     const migratedCount = updatedGroups.filter(
       (g) => g.nativeGroupId != null,
     ).length;
-    console.log(
+    console.debug(
       `[Migration] Complete for window ${windowId}: ${migratedCount}/${updatedGroups.length} groups have native groups`,
     );
   }
@@ -485,13 +487,13 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
 export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
   // Skip migration if browser doesn't support tabGroups API
   if (!hasTabGroups) {
-    console.log('Browser does not support tabGroups API, skipping migration');
+    console.debug('Browser does not support tabGroups API, skipping migration');
     return;
   }
 
   try {
     if (DEBUG) {
-      console.log('Starting migration to hybrid tab groups...');
+      console.debug('Starting migration to hybrid tab groups...');
     }
 
     // Check if migration has already been done
@@ -500,8 +502,10 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
     );
     if (migrationComplete.hybridGroupsMigrationComplete) {
       if (DEBUG) {
-        console.log('⚠️ Migration already complete flag is TRUE, skipping...');
-        console.log(
+        console.debug(
+          '⚠️ Migration already complete flag is TRUE, skipping...',
+        );
+        console.debug(
           'This should only happen on subsequent extension loads, not after cleanup',
         );
       }
@@ -513,7 +517,7 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
     await Promise.all(
       windows.map(async (browserWindow, index) => {
         if (DEBUG) {
-          console.log(
+          console.debug(
             `[Migration] Processing window ${index + 1}/${windows.length} (ID: ${browserWindow.id})`,
           );
         }
@@ -525,7 +529,7 @@ export async function migrateToHybridGroups(hasTabGroups, DEBUG) {
     // Mark migration as complete
     await browser.storage.local.set({ hybridGroupsMigrationComplete: true });
     if (DEBUG) {
-      console.log('Hybrid groups migration completed successfully!');
+      console.debug('Hybrid groups migration completed successfully!');
     }
 
     // Verify persistence after migration
@@ -549,7 +553,7 @@ let isCleanupInProgress = false;
 export function setupTabGroupListeners(hasTabGroups, DEBUG) {
   // Only setup listeners if tabGroups API is available
   if (!hasTabGroups) {
-    console.log(
+    console.debug(
       'Browser does not support tabGroups API, skipping listener setup',
     );
     return;
@@ -558,7 +562,7 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
   try {
     // When user creates group through browser UI
     browser.tabGroups.onCreated.addListener(async (group) => {
-      console.log('Native tab group created:', group);
+      console.debug('Native tab group created:', group);
       // We could potentially sync this with our session storage if needed
     });
 
@@ -567,14 +571,14 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
       // Ignore events during cleanup - we're intentionally removing native groups
       if (isCleanupInProgress) {
         if (DEBUG) {
-          console.log(
+          console.debug(
             `Native tab group removed (ignored during cleanup): ${group.id}`,
           );
         }
         return;
       }
 
-      console.log('Native tab group removed:', group);
+      console.debug('Native tab group removed:', group);
       // Clear nativeGroupId from panorama group but keep the group itself
       try {
         const groups = await stateManager.getGroups(group.windowId);
@@ -583,7 +587,7 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
             if (g.nativeGroupId === group.id) {
               // Remove nativeGroupId property but keep the group
               const { nativeGroupId, ...groupWithoutNativeId } = g;
-              console.log(
+              console.debug(
                 `Cleared nativeGroupId ${group.id} from panorama group ${g.id} (${g.name})`,
               );
               return groupWithoutNativeId;
@@ -599,7 +603,7 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
 
     // When user updates group through browser UI (name, color, etc.)
     browser.tabGroups.onUpdated.addListener(async (group) => {
-      console.log('Native tab group updated:', group);
+      console.debug('Native tab group updated:', group);
       // Sync name changes back to our session storage
       try {
         const groups = await stateManager.getGroups(group.windowId);
@@ -618,7 +622,7 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
     });
 
     if (DEBUG) {
-      console.log('Native tab group listeners setup successfully');
+      console.debug('Native tab group listeners setup successfully');
     }
   } catch (error) {
     console.warn('Native tabGroups API not available:', error);
@@ -633,7 +637,7 @@ export function setupTabGroupListeners(hasTabGroups, DEBUG) {
  */
 export async function cleanupNativeGroups(DEBUG) {
   if (DEBUG) {
-    console.log('Starting native groups cleanup...');
+    console.debug('Starting native groups cleanup...');
   }
 
   // Set flag to suppress event handlers during cleanup
@@ -647,7 +651,7 @@ export async function cleanupNativeGroups(DEBUG) {
         const groups = await stateManager.getGroups(window.id);
 
         if (DEBUG) {
-          console.log(
+          console.debug(
             `[Cleanup] Retrieved ${groups?.length || 0} groups for window ${window.id}:`,
             groups?.map((g) => ({
               id: g.id,
@@ -662,7 +666,7 @@ export async function cleanupNativeGroups(DEBUG) {
         }
 
         if (DEBUG) {
-          console.log(`Cleaning up native groups for window ${window.id}`);
+          console.debug(`Cleaning up native groups for window ${window.id}`);
         }
 
         // Get ALL tabs in this window that are in any native group
@@ -678,12 +682,12 @@ export async function cleanupNativeGroups(DEBUG) {
             await browser.tabs.ungroup(tabIds);
 
             if (DEBUG) {
-              console.log(
+              console.debug(
                 `Ungrouped ${tabIds.length} tabs from native groups in window ${window.id}`,
               );
             }
           } else if (DEBUG) {
-            console.log(
+            console.debug(
               `No tabs in native groups found for window ${window.id}`,
             );
           }
@@ -698,7 +702,7 @@ export async function cleanupNativeGroups(DEBUG) {
             group.nativeGroupId !== null
           ) {
             if (DEBUG) {
-              console.log(
+              console.debug(
                 `Clearing nativeGroupId ${group.nativeGroupId} from panorama group ${group.id}`,
               );
             }
@@ -712,7 +716,7 @@ export async function cleanupNativeGroups(DEBUG) {
         await stateManager.setGroups(window.id, updatedGroups);
 
         if (DEBUG) {
-          console.log(
+          console.debug(
             `[Cleanup] Saved ${updatedGroups.length} updated groups for window ${window.id}:`,
             updatedGroups.map((g) => ({ id: g.id, name: g.name })),
           );
@@ -728,7 +732,7 @@ export async function cleanupNativeGroups(DEBUG) {
               stillHasNativeIds.map((g) => `Group ${g.id}: ${g.nativeGroupId}`),
             );
           } else {
-            console.log(
+            console.debug(
               `[Cleanup] ✓ Verification passed: all nativeGroupIds removed`,
             );
           }
@@ -740,7 +744,7 @@ export async function cleanupNativeGroups(DEBUG) {
     await browser.storage.local.set({ hybridGroupsMigrationComplete: false });
 
     if (DEBUG) {
-      console.log('Native groups cleanup completed successfully!');
+      console.debug('Native groups cleanup completed successfully!');
     }
   } catch (error) {
     console.error('Native groups cleanup failed:', error);
@@ -749,7 +753,7 @@ export async function cleanupNativeGroups(DEBUG) {
     // Always clear the flag, even if cleanup fails
     isCleanupInProgress = false;
     if (DEBUG) {
-      console.log('Cleanup flag cleared');
+      console.debug('Cleanup flag cleared');
     }
   }
 }

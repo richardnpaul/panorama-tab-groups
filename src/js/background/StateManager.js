@@ -39,11 +39,11 @@ export class StateManager {
   async getGroups(windowId) {
     const DEBUG = true;
     if (DEBUG) {
-      console.log(`[StateManager] getGroups called for window ${windowId}`);
+      console.debug(`[StateManager] getGroups called for window ${windowId}`);
     }
     const groups = await browser.sessions.getWindowValue(windowId, 'groups');
     if (DEBUG) {
-      console.log(
+      console.debug(
         `[StateManager] getGroups returning ${groups?.length || 0} groups for window ${windowId}`,
       );
     }
@@ -104,16 +104,16 @@ export class StateManager {
         .slice(2, 4)
         .map((line) => line.trim())
         .join(' -> ');
-      console.log(
+      console.debug(
         `[StateManager] setGroups called for window ${windowId} with ${groups?.length || 0} groups`,
       );
-      console.log(`  Caller: ${stack}`);
+      console.debug(`  Caller: ${stack}`);
 
       // Log groups with nativeGroupId for tracking
       const withNative =
         groups?.filter((g) => g.nativeGroupId != null).length || 0;
       if (withNative > 0) {
-        console.log(`  ${withNative} groups have nativeGroupId`);
+        console.debug(`  ${withNative} groups have nativeGroupId`);
       }
     }
 
@@ -138,7 +138,7 @@ export class StateManager {
     // Return undefined without fallback - caller should handle
     // This allows callers to detect uninitialized windows
     if (activeGroup === undefined || activeGroup === null) {
-      console.log(
+      console.debug(
         `[StateManager] getActiveGroup: No activeGroup set for window ${windowId}`,
       );
     }
@@ -152,14 +152,14 @@ export class StateManager {
    * @param {number} groupId - The group ID to set as active
    */
   async setActiveGroup(windowId, groupId) {
-    console.log(
+    console.debug(
       `[StateManager] setActiveGroup called: windowId=${windowId}, groupId=${groupId}`,
     );
     try {
       await browser.sessions.setWindowValue(windowId, 'activeGroup', groupId);
-      console.log('[StateManager] setWindowValue completed successfully');
+      console.debug('[StateManager] setWindowValue completed successfully');
       this.invalidateCache(`activeGroup_${windowId}`);
-      console.log('[StateManager] setActiveGroup complete');
+      console.debug('[StateManager] setActiveGroup complete');
     } catch (error) {
       console.error(
         `[StateManager] ERROR in setWindowValue(${windowId}, 'activeGroup', ${groupId}):`,

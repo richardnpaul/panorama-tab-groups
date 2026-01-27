@@ -292,7 +292,7 @@ async function tabCreated(tab, retryCount = 0) {
     // Race condition mitigation: If groupId is undefined, background script
     // may not have assigned it yet. Retry up to 3 times with 50ms delays.
     if (groupId === undefined && retryCount < 3) {
-      console.log(
+      console.debug(
         `[View] tabCreated: Tab ${tab.id} has undefined groupId, retrying (attempt ${retryCount + 1}/3)...`,
       );
       await new Promise((resolve) => {
@@ -311,7 +311,7 @@ async function tabCreated(tab, retryCount = 0) {
       return undefined;
     }
 
-    console.log(
+    console.debug(
       `[View] tabCreated: Adding tab ${tab.id} to group ${groupId} in view`,
     );
     await insertTab(tab);
@@ -353,7 +353,7 @@ async function tabAttached(tabId, attachInfo) {
 
 function tabDetached(tabId, detachInfo) {
   if (view.windowId === detachInfo.oldWindowId) {
-    console.log('delete node', tabId);
+    console.debug('delete node', tabId);
     deleteTabNode(tabId); // something really weird is happening here...
     groups.forEach((group) => {
       updateGroupFit(group);

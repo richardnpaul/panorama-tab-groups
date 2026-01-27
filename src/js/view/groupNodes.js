@@ -20,7 +20,7 @@ export async function closeGroup(content, group) {
   const tabCount = childNodes.length - 1;
 
   if (tabCount > 0) {
-    console.log(tabCount);
+    console.debug(tabCount);
     const confirmationText = getPluralForm(
       tabCount,
       browser.i18n.getMessage('closeGroupWarning', [tabCount]),
@@ -705,7 +705,7 @@ export async function initGroupNodes(groupsNode) {
     if (group.id >= 0) {
       groupsNode.appendChild(makeGroupNode(group));
     } else {
-      console.log(
+      console.debug(
         `[View] Skipping system group ${group.id} (${group.name}) from UI`,
       );
     }
