@@ -1,3 +1,8 @@
+import {
+  UNGROUPED_GROUP_ID,
+  UNGROUPED_GROUP_NAME,
+} from '../../../js/background/constants.js';
+
 export default class Group {
   constructor(View, group) {
     // Initialize synchronously
@@ -93,6 +98,23 @@ export default class Group {
     );
 
     return this;
+  }
+
+  /**
+   * Check if this is a system-managed group that cannot be edited
+   */
+  isSystemGroup() {
+    return this.id === UNGROUPED_GROUP_ID || this.isSystemGroup === true;
+  }
+
+  /**
+   * Get the display name, enforcing immutability for system groups
+   */
+  getDisplayName() {
+    if (this.id === UNGROUPED_GROUP_ID) {
+      return UNGROUPED_GROUP_NAME;
+    }
+    return this.name;
   }
 
   async moveToIndex(targetIndex) {

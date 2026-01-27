@@ -87,7 +87,6 @@ document.getElementById('run-migration').addEventListener('click', async () => {
 document
   .getElementById('reset-migration')
   .addEventListener('click', async () => {
-    // eslint-disable-next-line no-alert
     if (
       !window.confirm(
         'Reset migration flag? This will allow migration to run again.',

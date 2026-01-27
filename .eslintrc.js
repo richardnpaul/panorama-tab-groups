@@ -11,7 +11,7 @@ module.exports = {
     sourceType: 'module',
   },
   rules: {
-    'no-console': 'warn',
+    'no-console': 'off',
     'no-param-reassign': 'off',
     'no-alert': 'off',
     'import/no-cycle': 'off',

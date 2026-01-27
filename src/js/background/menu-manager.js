@@ -52,7 +52,7 @@ export async function createMenuList() {
 
     // Check if groups is initialized before proceeding
     if (!groups || !Array.isArray(groups)) {
-      console.log('Groups not yet initialized, skipping menu creation');
+      console.debug('Groups not yet initialized, skipping menu creation');
       return;
     }
 

@@ -20,6 +20,8 @@
  * - windowStates (viewTabId per window)
  */
 
+import { UNGROUPED_GROUP_ID, UNGROUPED_GROUP_NAME } from './constants.js';
+
 export class StateManager {
   constructor() {
     // Cache for reducing redundant storage reads
@@ -35,7 +37,22 @@ export class StateManager {
    * @returns {Promise<Array>} Array of group objects
    */
   async getGroups(windowId) {
-    return browser.sessions.getWindowValue(windowId, 'groups');
+    const cacheKey = `groups_${windowId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const DEBUG = true;
+    if (DEBUG) {
+      console.debug(`[StateManager] getGroups called for window ${windowId}`);
+    }
+    const groups = await browser.sessions.getWindowValue(windowId, 'groups');
+    if (DEBUG) {
+      console.debug(
+        `[StateManager] getGroups returning ${groups?.length || 0} groups for window ${windowId}`,
+      );
+    }
+    this.setCache(cacheKey, groups);
+    return groups;
   }
 
   /**
@@ -44,6 +61,55 @@ export class StateManager {
    * @param {Array} groups - Array of group objects
    */
   async setGroups(windowId, groups) {
+    const DEBUG = true;
+    if (DEBUG) {
+      // Log call stack to identify concurrent callers
+      const stack = new Error().stack
+        .split('\n')
+        .slice(2, 4)
+        .map((line) => line.trim())
+        .join(' -> ');
+      console.debug(
+        `[StateManager] setGroups called for window ${windowId} with ${groups?.length || 0} groups`,
+      );
+      console.debug(`  Caller: ${stack}`);
+
+      // Log groups with nativeGroupId for tracking
+      const withNative =
+        groups?.filter((g) => g.nativeGroupId != null).length || 0;
+      if (withNative > 0) {
+        console.debug(`  ${withNative} groups have nativeGroupId`);
+      }
+    }
+
+    // Ensure group -2 always exists
+    if (!groups) {
+      groups = [];
+    }
+
+    const hasUngroupedGroup = groups.some((g) => g.id === UNGROUPED_GROUP_ID);
+
+    if (!hasUngroupedGroup) {
+      groups.push({
+        id: UNGROUPED_GROUP_ID,
+        name: UNGROUPED_GROUP_NAME,
+        containerId: 'browser-default',
+        nativeGroupId: null, // Never has native group
+        rect: { x: 0, y: 0, w: 0, h: 0 }, // No position in grid
+        lastMoved: new Date().getTime(),
+        isSystemGroup: true, // Mark as system-managed
+      });
+    } else {
+      const ungroupedIndex = groups.findIndex(
+        (g) => g.id === UNGROUPED_GROUP_ID,
+      );
+      if (ungroupedIndex !== -1) {
+        groups[ungroupedIndex].name = UNGROUPED_GROUP_NAME;
+        groups[ungroupedIndex].isSystemGroup = true;
+        groups[ungroupedIndex].nativeGroupId = null;
+      }
+    }
+
     await browser.sessions.setWindowValue(windowId, 'groups', groups);
     this.invalidateCache(`groups_${windowId}`);
   }
@@ -54,7 +120,26 @@ export class StateManager {
    * @returns {Promise<number>} Active group ID
    */
   async getActiveGroup(windowId) {
-    return browser.sessions.getWindowValue(windowId, 'activeGroup');
+    const cacheKey = `activeGroup_${windowId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const activeGroup = await browser.sessions.getWindowValue(
+      windowId,
+      'activeGroup',
+    );
+
+    // Return undefined without fallback - caller should handle
+    // This allows callers to detect uninitialized windows
+    if (activeGroup === undefined || activeGroup === null) {
+      console.debug(
+        `[StateManager] getActiveGroup: No activeGroup set for window ${windowId}`,
+      );
+    }
+
+    this.setCache(cacheKey, activeGroup);
+
+    return activeGroup;
   }
 
   /**
@@ -63,14 +148,14 @@ export class StateManager {
    * @param {number} groupId - The group ID to set as active
    */
   async setActiveGroup(windowId, groupId) {
-    console.log(
+    console.debug(
       `[StateManager] setActiveGroup called: windowId=${windowId}, groupId=${groupId}`,
     );
     try {
       await browser.sessions.setWindowValue(windowId, 'activeGroup', groupId);
-      console.log('[StateManager] setWindowValue completed successfully');
+      console.debug('[StateManager] setWindowValue completed successfully');
       this.invalidateCache(`activeGroup_${windowId}`);
-      console.log('[StateManager] setActiveGroup complete');
+      console.debug('[StateManager] setActiveGroup complete');
     } catch (error) {
       console.error(
         `[StateManager] ERROR in setWindowValue(${windowId}, 'activeGroup', ${groupId}):`,
@@ -86,7 +171,16 @@ export class StateManager {
    * @returns {Promise<number>} Group index
    */
   async getGroupIndex(windowId) {
-    return browser.sessions.getWindowValue(windowId, 'groupIndex');
+    const cacheKey = `groupIndex_${windowId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const groupIndex = await browser.sessions.getWindowValue(
+      windowId,
+      'groupIndex',
+    );
+    this.setCache(cacheKey, groupIndex);
+    return groupIndex;
   }
 
   /**
@@ -105,7 +199,13 @@ export class StateManager {
    * @returns {Promise<number>} Group ID the tab belongs to
    */
   async getTabGroup(tabId) {
-    return browser.sessions.getTabValue(tabId, 'groupId');
+    const cacheKey = `tabGroup_${tabId}`;
+    const cached = this.getFromCache(cacheKey);
+    if (cached !== undefined) return cached;
+
+    const groupId = await browser.sessions.getTabValue(tabId, 'groupId');
+    this.setCache(cacheKey, groupId);
+    return groupId;
   }
 
   /**
@@ -124,9 +224,7 @@ export class StateManager {
    * @returns {Promise<Array<number>>} Array of group IDs
    */
   async getTabGroups(tabIds) {
-    return Promise.all(
-      tabIds.map((tabId) => browser.sessions.getTabValue(tabId, 'groupId')),
-    );
+    return Promise.all(tabIds.map((tabId) => this.getTabGroup(tabId)));
   }
 
   // ==================== Local Storage (Extension-Level) ====================
@@ -289,6 +387,7 @@ export class StateManager {
       const windowStates = {};
       for (const [windowId, state] of legacyStates) {
         windowStates[windowId] = state;
+        this.invalidateCache(`windowState_${windowId}`);
       }
       await browser.storage.local.set({ windowStates });
     }

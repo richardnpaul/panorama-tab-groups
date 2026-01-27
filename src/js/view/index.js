@@ -197,6 +197,12 @@ async function keyInput(e) {
   if (e.key === 'ArrowRight') {
     const activeTabId = getActiveTabId();
     let groupId = await getGroupId(activeTabId);
+
+    // Skip navigation if current group is a system group (negative ID)
+    if (groupId < 0) {
+      return;
+    }
+
     let { childNodes } = groupNodes[groupId].content;
 
     let i;
@@ -232,6 +238,12 @@ async function keyInput(e) {
   } else if (e.key === 'ArrowLeft') {
     const activeTabId = getActiveTabId();
     let groupId = await getGroupId(activeTabId);
+
+    // Skip navigation if current group is a system group (negative ID)
+    if (groupId < 0) {
+      return;
+    }
+
     let { childNodes } = groupNodes[groupId].content;
 
     let i;
@@ -268,7 +280,7 @@ async function keyInput(e) {
   }
 }
 
-async function tabCreated(tab) {
+async function tabCreated(tab, retryCount = 0) {
   if (view.windowId === tab.windowId) {
     makeTabNode(tab);
     updateTabNode(tab);
@@ -277,10 +289,36 @@ async function tabCreated(tab) {
     // Wait for background script to assign this tab to a group
     const groupId = await getGroupId(tab.id);
 
+    // Race condition mitigation: If groupId is undefined, background script
+    // may not have assigned it yet. Retry up to 3 times with 50ms delays.
+    if (groupId === undefined && retryCount < 3) {
+      console.debug(
+        `[View] tabCreated: Tab ${tab.id} has undefined groupId, retrying (attempt ${retryCount + 1}/3)...`,
+      );
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+      return tabCreated(tab, retryCount + 1);
+    }
+
     const group = groups.get(groupId);
+
+    // Skip if group doesn't exist (system group or deleted group)
+    if (!group) {
+      console.warn(
+        `[View] tabCreated: Skipping tab ${tab.id} - group ${groupId} not found in view`,
+      );
+      return undefined;
+    }
+
+    console.debug(
+      `[View] tabCreated: Adding tab ${tab.id} to group ${groupId} in view`,
+    );
     await insertTab(tab);
     updateGroupFit(group);
+    return undefined;
   }
+  return undefined;
 }
 
 function tabRemoved(tabId, removeInfo) {
@@ -315,7 +353,7 @@ async function tabAttached(tabId, attachInfo) {
 
 function tabDetached(tabId, detachInfo) {
   if (view.windowId === detachInfo.oldWindowId) {
-    console.log('delete node', tabId);
+    console.debug('delete node', tabId);
     deleteTabNode(tabId); // something really weird is happening here...
     groups.forEach((group) => {
       updateGroupFit(group);
