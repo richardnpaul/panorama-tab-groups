@@ -1,0 +1,34 @@
+{
+  "name": "panorama-tab-groups",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteUser": "vscode",
+  "runArgs": ["--shm-size=1g"],
+  "mounts": [
+    "source=panorama-node-modules,target=/workspaces/panorama-tab-groups/node_modules,type=volume",
+    "source=panorama-playwright-browsers,target=/home/vscode/.cache/ms-playwright,type=volume",
+    "source=panorama-npm-cache,target=/home/vscode/.npm,type=volume"
+  ],
+  "remoteEnv": {
+    "DISPLAY": ":1"
+  },
+  "forwardPorts": [6080],
+  "portsAttributes": {
+    "6080": {
+      "label": "noVNC Desktop",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "sudo chown -R vscode:vscode /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache/ms-playwright /home/vscode/.npm && npm ci && npx playwright install firefox chromium",
+  "postStartCommand": "bash .devcontainer/start-desktop.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-playwright.playwright",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
