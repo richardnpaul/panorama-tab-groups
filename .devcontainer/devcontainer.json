@@ -11,12 +11,17 @@
     "source=panorama-npm-cache,target=/home/vscode/.npm,type=volume"
   ],
   "remoteEnv": {
-    "DISPLAY": ":1"
+    "DISPLAY": ":1",
+    "PLAYWRIGHT_FIREFOX_HEADED": "0"
   },
-  "forwardPorts": [6080],
+  "forwardPorts": [6080, 5901],
   "portsAttributes": {
     "6080": {
-      "label": "noVNC Desktop",
+      "label": "noVNC Desktop (browser)",
+      "onAutoForward": "notify"
+    },
+    "5901": {
+      "label": "VNC Desktop (native viewer)",
       "onAutoForward": "notify"
     }
   },
