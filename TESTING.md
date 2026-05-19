@@ -169,6 +169,46 @@ web-ext run -s src --firefox=/path/to/firefox-nightly
 
 ## Automated Testing
 
+### Automated Testing (Playwright)
+
+We use Playwright for end-to-end automated testing in both Chromium and Firefox. Firefox is the primary browser for extension behavior, and the repository includes a custom fixture in `playwright.config.js` to handle temporary addon install, UUID discovery, and `moz-extension://` navigation.
+
+```bash
+# Run all end-to-end tests
+npm run test:e2e
+
+# Run only Firefox extension tests
+npx playwright test --project=firefox
+
+# Run only Chromium extension tests
+npx playwright test --project=chromium
+```
+
+**Local execution mode:**
+
+- Local Playwright runs default to headless mode.
+- To opt into a headed Firefox run in the dev container, start the desktop session and run `PLAYWRIGHT_FIREFOX_HEADED=1 npx playwright test --project=firefox`.
+- `PLAYWRIGHT_HEADED=1` enables headed mode for all projects.
+
+**What is tested:**
+
+- **Extension bootstrap**: Verifies the extension loads and resolves a non-null runtime ID/UUID before navigation.
+- **Popup View**: Verifies the popup opens and reaches its ready UI state.
+- **Options Page**: Verifies the options page initializes its settings UI.
+- **Firefox multi-page navigation**: Verifies Firefox can open a second extension page without regressing the custom `moz-extension://` proxy path.
+
+**Chromium compatibility notes:**
+
+- **`src/manifest.json`**: Uses `background.service_worker` for MV3 compatibility.
+- **Polyfill**: `src/js/polyfill.js` maps `browser` to `chrome` and mocks the Firefox-specific `sessions` API with storage-backed fallbacks when needed.
+
+**Firefox troubleshooting:**
+
+- **`Executable doesn't exist ... ms-playwright/firefox-*`**: Run `npx playwright install firefox chromium`.
+- **`Extension ID for firefox was not resolved`**: Check the temporary addon install logs and confirm `browser_specific_settings.gecko.id` in `src/manifest.json` still matches the test fixture.
+- **`moz-extension://null/...` navigation**: This indicates UUID resolution failed before page navigation; inspect the Playwright report and `prefs.js` UUID registration.
+- **Headed launch fails due to `DISPLAY`/`WAYLAND_DISPLAY`**: Use the dev container desktop or rerun without `PLAYWRIGHT_FIREFOX_HEADED=1`.
+
 ### Lint Everything
 
 ```bash

@@ -35,10 +35,10 @@
   "tabCount": {
     "message": "$1 καρτέλα|$1 καρτέλες"
   },
-  "searchForTab.placeholder": {
+  "searchForTab_placeholder": {
     "message": "Αναζήτηση καρτέλας..."
   },
-  "searchForTab.noResults": {
+  "searchForTab_noResults": {
     "message": "Δε βρέθηκαν καρτέλες"
   },
   "goBackToGroups": {

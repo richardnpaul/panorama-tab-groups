@@ -1,3 +1,4 @@
+import '../polyfill.js';
 import { loadOptions } from '../_share/options.js';
 import addTranslations from './translations.js';
 import {

@@ -1,12 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "Panorama Tab Groups",
-  "description": "Tab Groups with Panorama View",
+  "name": "Tab Groups Viewer",
+  "description": "Tab Groups Viewer for Firefox",
   "version": "0.8.12",
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
-      "id": "panorama-tab-groups@example.com"
+      "id": "tab-groups-viewer@example.com",
+      "data_collection_permissions": {
+        "required": ["none"],
+        "optional": []
+      }
     }
   },
   "icons": {
@@ -22,7 +26,7 @@
       "suggested_key": {
         "default": "Ctrl+Shift+F"
       },
-      "description": "Toggle Panorama View"
+      "description": "Toggle Tab Groups Viewer"
     },
     "activate-next-group": {
       "suggested_key": {
@@ -40,6 +44,7 @@
 
   "background": {
     "scripts": ["js/background.js"],
+    "service_worker": "js/background.js",
     "type": "module"
   },
 
@@ -72,5 +77,6 @@
     "sessions",
     "downloads",
     "menus"
-  ]
+  ],
+  "optional_permissions": []
 }

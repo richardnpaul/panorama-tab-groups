@@ -131,9 +131,8 @@ async function renderGroupListItem(Group) {
   const isActive = Group.id === window.PopupView.lastActiveTab.groupId;
   const node = getElementNodeFromString(`
         <li id="group-${Group.id}"
-            class="list__item ${
-  isActive ? 'list__item--highlight' : ''
-}" data-nav-row>
+            class="list__item ${isActive ? 'list__item--highlight' : ''
+    }" data-nav-row>
             <div class="list__drag"></div>
             <div class="list__close-wrapper">
                 <button class="list__link">
@@ -141,15 +140,15 @@ async function renderGroupListItem(Group) {
                 </button>
                 <button class="list__close"
                         title="${browser.i18n.getMessage(
-    'closeGroup',
-  )}"></button>
+      'closeGroup',
+    )}"></button>
             </div>
             <button class="list__link list__link--extend">
                 <span>
                     ${getPluralForm(
-    tabCount,
-    browser.i18n.getMessage('tabCount', [tabCount]),
-  )}
+      tabCount,
+      browser.i18n.getMessage('tabCount', [tabCount]),
+    )}
                 </span>
             </button>
         </li>
@@ -223,7 +222,7 @@ async function renderHeader() {
         <div class="form-field form-field--search">
             <input class="form-field__input" type="search" name="query"
                    placeholder="${browser.i18n.getMessage(
-    'searchForTab.placeholder',
+    'searchForTab_placeholder',
   )}" />
         </div>
     `);
@@ -234,7 +233,7 @@ async function renderHeader() {
   }));
   const noResultNode = getElementNodeFromString(`
       <h2 class="list-title">${browser.i18n.getMessage(
-    'searchForTab.noResults',
+    'searchForTab_noResults',
   )}</h2>
   `);
   let lastSearchInput = '';
@@ -249,7 +248,7 @@ async function renderHeader() {
         const resultGroups = groupsToSearch.filter((group) => {
           group.tabs = group.tabs.filter((tab) => (
             new RegExp(searchQuery, 'gi').test(tab.title)
-              || new RegExp(searchQuery, 'gi').test(tab.url)
+            || new RegExp(searchQuery, 'gi').test(tab.url)
           ));
 
           return group.tabs.length > 0;

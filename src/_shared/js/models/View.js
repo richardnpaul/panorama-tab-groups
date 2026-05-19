@@ -185,7 +185,7 @@ export default class View {
     return Group.create(this, newGroup);
   }
 
-  static setTheme(theme) {
+  setTheme(theme) {
     updateViewSetting('theme', theme);
 
     // Listen for system theme changes when auto theme is selected

@@ -29,10 +29,10 @@
   "tabCount": {
     "message": "$1 Tab|$1 Tabs"
   },
-  "searchForTab.placeholder": {
+  "searchForTab_placeholder": {
     "message": "Suche nach einem Tab..."
   },
-  "searchForTab.noResults": {
+  "searchForTab_noResults": {
     "message": "Keine Tabs gefunden"
   },
   "goBackToGroups": {

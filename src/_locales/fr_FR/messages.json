@@ -35,10 +35,10 @@
   "tabCount": {
     "message": "$1 onglet|$1 onglets"
   },
-  "searchForTab.placeholder": {
+  "searchForTab_placeholder": {
     "message": "Rechercher un onglet..."
   },
-  "searchForTab.noResults": {
+  "searchForTab_noResults": {
     "message": "Aucun onglet trouvé"
   },
   "goBackToGroups": {
