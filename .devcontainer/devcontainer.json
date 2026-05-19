@@ -4,7 +4,7 @@
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "vscode",
-  "runArgs": ["--shm-size=1g"],
+  "runArgs": ["--shm-size=1g", "--security-opt", "seccomp=unconfined"],
   "mounts": [
     "source=panorama-node-modules,target=/workspaces/panorama-tab-groups/node_modules,type=volume",
     "source=panorama-playwright-browsers,target=/home/vscode/.cache/ms-playwright,type=volume",
