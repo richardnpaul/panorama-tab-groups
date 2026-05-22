@@ -28,11 +28,28 @@ async function startLocalServer() {
     '.svg': 'image/svg+xml',
   };
 
+  const rootDir = fs.realpathSync(path.join(process.cwd(), 'src'));
+
   localServer = http.createServer((req, res) => {
-    let filePath = path.join(process.cwd(), 'src', req.url.split('?')[0]);
-    if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-      filePath = path.join(filePath, 'index.html');
+    let filePath = path.join(rootDir, req.url.split('?')[0]);
+
+    try {
+      filePath = fs.realpathSync(filePath);
+      if (fs.statSync(filePath).isDirectory()) {
+        filePath = fs.realpathSync(path.join(filePath, 'index.html'));
+      }
+    } catch (err) {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
+      return;
     }
+
+    if (!filePath.startsWith(rootDir)) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Forbidden');
+      return;
+    }
+
     fs.readFile(filePath, (err, data) => {
       if (err) {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
