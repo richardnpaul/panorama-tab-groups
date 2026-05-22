@@ -35,9 +35,6 @@ async function startLocalServer() {
 
     try {
       filePath = fs.realpathSync(filePath);
-      if (fs.statSync(filePath).isDirectory()) {
-        filePath = fs.realpathSync(path.join(filePath, 'index.html'));
-      }
     } catch (err) {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
       res.end('Not Found');
@@ -48,6 +45,22 @@ async function startLocalServer() {
       res.writeHead(403, { 'Content-Type': 'text/plain' });
       res.end('Forbidden');
       return;
+    }
+
+    if (fs.statSync(filePath).isDirectory()) {
+      filePath = path.join(filePath, 'index.html');
+      try {
+        filePath = fs.realpathSync(filePath);
+      } catch (err) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not Found');
+        return;
+      }
+      if (!filePath.startsWith(rootDir)) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
     }
 
     fs.readFile(filePath, (err, data) => {
