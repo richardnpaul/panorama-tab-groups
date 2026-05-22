@@ -243,7 +243,7 @@ function assertHeadedDisplayAvailable(browserName, headless) {
 
   throw new Error(
     `Headed ${browserName} Playwright runs require DISPLAY or WAYLAND_DISPLAY. ` +
-      'Use the dev container desktop or run headless by omitting PLAYWRIGHT_HEADED/PLAYWRIGHT_FIREFOX_HEADED.',
+    'Use the dev container desktop or run headless by omitting PLAYWRIGHT_HEADED/PLAYWRIGHT_FIREFOX_HEADED.',
   );
 }
 
@@ -259,7 +259,7 @@ function ensureExtensionId(browserName, id) {
   if (!id) {
     throw new Error(
       `Extension ID for ${browserName} was not resolved. ` +
-        'Check the Playwright browser install, extension bootstrap logs, and prefs.js UUID registration.',
+      'Check the Playwright browser install, extension bootstrap logs, and prefs.js UUID registration.',
     );
   }
 
@@ -337,7 +337,7 @@ export const test = base.extend({
         await import('playwright-webextext/dist/firefox_remote.js');
       const rdpPort = await findFreeTcpPort();
 
-      context = await firefox.launchPersistentContext(userDataDir, {
+      console.log("[DEBUG] launching context"); context = await firefox.launchPersistentContext(userDataDir, {
         headless,
         env: {
           ...process.env,
@@ -358,13 +358,13 @@ export const test = base.extend({
 
       // Connect via RDP (retrying until Firefox's server is ready), install the
       // addon, then disconnect so Firefox exits debugger-attached mode.
-      const rdpClient = await connectWithMaxRetries({ port: rdpPort });
-      await rdpClient.installTemporaryAddon(pathToExtension);
-      rdpClient.disconnect();
+      console.log("[DEBUG] connecting to RDP"); const rdpClient = await connectWithMaxRetries({ port: rdpPort });
+      console.log("[DEBUG] installing addon"); await rdpClient.installTemporaryAddon(pathToExtension);
+      console.log("[DEBUG] disconnected RDP"); rdpClient.disconnect();
 
       // Wait for Firefox to register the extension and assign it a UUID.
       const prefsPath = path.join(userDataDir, 'prefs.js');
-      const uuid = await readFirefoxUuidFromPrefs(
+      console.log("[DEBUG] reading UUID"); const uuid = await readFirefoxUuidFromPrefs(
         prefsPath,
         EXTENSION_ID,
         15000,
@@ -486,7 +486,7 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-      timeout: 180000,
+      timeout: 10000,
     },
   ],
 });

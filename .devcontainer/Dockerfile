@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-22.04
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
 
 # Install Xfce desktop, TigerVNC, noVNC/websockify, and X11 utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 20
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
