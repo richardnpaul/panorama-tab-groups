@@ -24,15 +24,13 @@ export default async function getStatistics() {
   );
   console.debug(numActiveTabs);
 
-  document.getElementById('thumbnailCacheSize').innerHTML = '';
   document
     .getElementById('thumbnailCacheSize')
-    .appendChild(document.createTextNode(formatByteSize(totalSize)));
+    .replaceChildren(document.createTextNode(formatByteSize(totalSize)));
 
-  document.getElementById('numberOfTabs').innerHTML = '';
   document
     .getElementById('numberOfTabs')
-    .appendChild(
+    .replaceChildren(
       document.createTextNode(
         `${tabs.length} (${browser.i18n.getMessage(
           'optionsStatisticsNumberOfTabsActive',

@@ -2,7 +2,7 @@ import { getElementNodeFromString } from '../../_shared/js/utilities/node.js';
 
 function updateContent(contentNode, content) {
   // Reset
-  contentNode.innerHTML = '';
+  contentNode.textContent = '';
 
   // Set
   if (typeof content === 'string') {
@@ -146,7 +146,7 @@ export default class Frame {
     }
   }
 
-  static setContentLoadingStart() {
+  setContentLoadingStart() {
     document.body.classList.add('content-loading');
   }
 
@@ -179,16 +179,15 @@ export default class Frame {
     updateContent(this.footer, content);
   }
 
-  static getRenderedTabList(Tabs, options) {
+  getRenderedTabList(Tabs, options) {
     options = { hideCloseButton: false, ...options };
 
     const tabNodes = Tabs.map((Tab) => {
       const isActive = Tab.id === window.PopupView.lastActiveTab.id;
       const node = getElementNodeFromString(`
                 <li data-tab="${Tab.id}"
-                    class="list__item list__item--tab ${
-  isActive ? 'list__item--highlight' : ''
-}" data-nav-row>
+                    class="list__item list__item--tab ${isActive ? 'list__item--highlight' : ''
+        }" data-nav-row>
                     <button class="list__link" title="${Tab.title}
 ${Tab.url}">
                         <img class="tab__icon"

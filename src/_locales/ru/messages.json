@@ -35,10 +35,10 @@
   "tabCount": {
     "message": "$1 вкладка|$1 вкладки|$1 вкладок"
   },
-  "searchForTab.placeholder": {
+  "searchForTab_placeholder": {
     "message": "Поиск вкладки..."
   },
-  "searchForTab.noResults": {
+  "searchForTab_noResults": {
     "message": "Вкладка не найдена"
   },
   "goBackToGroups": {

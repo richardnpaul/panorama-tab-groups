@@ -4,19 +4,41 @@
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "vscode",
-  "runArgs": ["--shm-size=1g"],
+  "runArgs": ["--shm-size=1g", "--security-opt", "seccomp=unconfined"],
   "mounts": [
-    "source=panorama-node-modules,target=/workspaces/panorama-tab-groups/node_modules,type=volume",
-    "source=panorama-playwright-browsers,target=/home/vscode/.cache/ms-playwright,type=volume",
-    "source=panorama-npm-cache,target=/home/vscode/.npm,type=volume"
+    {
+      "source": "panorama-node-modules",
+      "target": "/workspaces/panorama-tab-groups/node_modules",
+      "type": "volume"
+    },
+    {
+      "source": "panorama-playwright-browsers",
+      "target": "/home/vscode/.cache/ms-playwright",
+      "type": "volume"
+    },
+    {
+      "source": "panorama-npm-cache",
+      "target": "/home/vscode/.npm",
+      "type": "volume"
+    },
+    {
+      "source": "user-home-data",
+      "target": "/home/vscode",
+      "type": "volume"
+    }
   ],
   "remoteEnv": {
-    "DISPLAY": ":1"
+    "DISPLAY": ":1",
+    "PLAYWRIGHT_FIREFOX_HEADED": "0"
   },
-  "forwardPorts": [6080],
+  "forwardPorts": [6080, 5901],
   "portsAttributes": {
     "6080": {
-      "label": "noVNC Desktop",
+      "label": "noVNC Desktop (browser)",
+      "onAutoForward": "notify"
+    },
+    "5901": {
+      "label": "VNC Desktop (native viewer)",
       "onAutoForward": "notify"
     }
   },

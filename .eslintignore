@@ -5,3 +5,9 @@ node_modules
 src/js/depends/dragscroll.js
 src/popup-view/*
 src/_shared/js/models/View.js
+test-user-data*
+playwright-report
+playwright-demo-extension/test-user-data*
+playwright-demo-extension/playwright-report
+test-firefox-diagnostic.js
+test-simple-firefox.js

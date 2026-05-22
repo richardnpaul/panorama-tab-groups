@@ -1,2 +1,6 @@
 src/web-ext-artifacts
 node_modules/
+test-user-data-*/
+extension.xpi
+playwright-report/
+test-results/

@@ -112,8 +112,7 @@ export function updateGroupFit(group) {
   const node = groupNodes[group.id];
   const { childNodes } = node.content;
 
-  node.tabCount.innerHTML = '';
-  node.tabCount.appendChild(document.createTextNode(childNodes.length - 1));
+  node.tabCount.replaceChildren(document.createTextNode(childNodes.length - 1));
 
   // fit
   const rect = node.content.getBoundingClientRect();
@@ -553,8 +552,7 @@ export function makeGroupNode(group) {
       header.classList.remove('edit');
       input.setSelectionRange(0, 0);
 
-      name.innerHTML = '';
-      name.appendChild(document.createTextNode(input.value));
+      name.replaceChildren(document.createTextNode(input.value));
       groups.rename(group.id, input.value);
 
       header.addEventListener('mousedown', moveFunc, false);

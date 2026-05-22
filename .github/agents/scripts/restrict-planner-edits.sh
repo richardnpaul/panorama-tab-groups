@@ -6,6 +6,8 @@
 # Exits non-zero to block the tool call; zero to allow.
 # Passes through silently on Windows (no bash) or when tool context is unreadable.
 
+set -o errexit
+set -o nounset
 set -o pipefail
 
 # Read tool call context from stdin (may be empty if not provided)

@@ -100,8 +100,7 @@ export function updateTabNode(tab) {
   const node = tabNodes[tab.id];
 
   if (node) {
-    node.name.innerHTML = '';
-    node.name.appendChild(document.createTextNode(tab.title));
+    node.name.replaceChildren(document.createTextNode(tab.title));
 
     node.inner.title = tab.title;
 

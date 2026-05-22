@@ -25,7 +25,7 @@ async function checkMigrationStatus() {
 
 async function loadGroups() {
   const container = document.getElementById('groups-container');
-  container.innerHTML = '';
+  container.textContent = '';
 
   try {
     const currentWindow = await browser.windows.getCurrent();
@@ -47,10 +47,14 @@ async function loadGroups() {
         ? `✓ Migrated (Native ID: ${group.nativeGroupId})`
         : '✗ Not Migrated';
 
-      groupDiv.innerHTML = `
-        <strong>Group ${group.id}:</strong> ${group.name}<br>
-        <small>Status: ${status}</small>
-      `;
+      const strong = document.createElement('strong');
+      strong.textContent = `Group ${group.id}:`;
+      groupDiv.appendChild(strong);
+      groupDiv.appendChild(document.createTextNode(` ${group.name}`));
+      groupDiv.appendChild(document.createElement('br'));
+      const small = document.createElement('small');
+      small.textContent = `Status: ${status}`;
+      groupDiv.appendChild(small);
 
       container.appendChild(groupDiv);
     });
