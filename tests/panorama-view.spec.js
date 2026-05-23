@@ -31,16 +31,28 @@ test.describe('Panorama View E2E', () => {
     // Wait for the view to initialize the group
     await popupPage.waitForSelector('.group', { timeout: 10000 });
 
-    // NOW open a couple of tabs to populate the view.
-    await page.goto('data:text/html,<h1>Tab 1</h1>');
-    await page.evaluate(() => {
-      document.title = 'Tab 1';
+    // The default 'page' created by Playwright can have issues with browser.sessions.setTabValue.
+    // Close it and create fresh tabs for our test content.
+    await page.close();
+
+    // Use Playwright route on context to serve standard HTTP pages with guaranteed titles
+    const tab1 = await popupPage.context().newPage();
+    await popupPage.context().route('http://test.local/tab1', (route) => {
+      route.fulfill({
+        contentType: 'text/html',
+        body: '<html><head><title>Tab 1</title></head><body><h1>Tab 1</h1></body></html>',
+      });
     });
-    const tab2 = await page.context().newPage();
-    await tab2.goto('data:text/html,<h1>Tab 2</h1>');
-    await tab2.evaluate(() => {
-      document.title = 'Tab 2';
+    await tab1.goto('http://test.local/tab1');
+
+    const tab2 = await popupPage.context().newPage();
+    await popupPage.context().route('http://test.local/tab2', (route) => {
+      route.fulfill({
+        contentType: 'text/html',
+        body: '<html><head><title>Tab 2</title></head><body><h1>Tab 2</h1></body></html>',
+      });
     });
+    await tab2.goto('http://test.local/tab2');
 
     // Switch back to popupPage so tests can interact with it
     await popupPage.bringToFront();
@@ -53,18 +65,17 @@ test.describe('Panorama View E2E', () => {
         (await window.browser.sessions.getWindowValue(w.id, 'groups')) || [];
       const positiveGroup = groups.find((g) => g.id >= 0);
       if (positiveGroup) {
+        const tabsToAssign = tabs.filter(
+          (t) => !(t.url && t.url.includes(window.browser.runtime.id)),
+        );
         await Promise.all(
-          tabs
-            .filter(
-              (t) => !(t.url && t.url.includes(window.browser.runtime.id)),
-            )
-            .map((t) =>
-              window.browser.sessions.setTabValue(
-                t.id,
-                'groupId',
-                positiveGroup.id,
-              ),
+          tabsToAssign.map((t) =>
+            window.browser.sessions.setTabValue(
+              t.id,
+              'groupId',
+              positiveGroup.id,
             ),
+          ),
         );
       }
     });
@@ -98,14 +109,6 @@ test.describe('Panorama View E2E', () => {
     await popupPage.waitForTimeout(500);
 
     // It should highlight or make 'Tab 1' active
-    // DEBUG
-    const tabsText = await popupPage.locator('.tab .name').allTextContents();
-    console.log('[DEBUG] All tab texts in view:', tabsText);
-    const selectedTabText = await popupPage
-      .locator('.tab.selected .name')
-      .allTextContents();
-    console.log('[DEBUG] Selected tab texts:', selectedTabText);
-
     // Active tabs usually have a specific class. According to tabNodes.js, it sets 'active' class on the tab node.
     const activeTab = popupPage.locator('.tab.selected .name');
     await expect(activeTab).toContainText('Tab 1');

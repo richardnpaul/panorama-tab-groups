@@ -178,7 +178,9 @@ function createFirefoxPageProxy(initialPage) {
                     onUpdated: { addListener: () => {} },
                     onCreated: { addListener: () => {} },
                     onRemoved: { addListener: () => {} },
-                    onMoved: { addListener: () => {} }
+                    onMoved: { addListener: () => {} },
+                    onAttached: { addListener: () => {} },
+                    onDetached: { addListener: () => {} }
                   },
                   sessions: {
                     getWindowValue: async (windowId, key) => {
