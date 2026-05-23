@@ -1,3 +1,4 @@
+import '../polyfill.js';
 import { getGroupId } from './tabs.js';
 import {
   tabMoved,
@@ -198,8 +199,8 @@ async function keyInput(e) {
     const activeTabId = getActiveTabId();
     let groupId = await getGroupId(activeTabId);
 
-    // Skip navigation if current group is a system group (negative ID)
-    if (groupId < 0) {
+    // Skip navigation if current group is a system group or undefined
+    if (groupId === undefined || groupId < 0) {
       return;
     }
 
@@ -229,9 +230,16 @@ async function keyInput(e) {
         groupId = Object.keys(groupNodes)[index + 1];
       }
       childNodes = groupNodes[groupId].content.childNodes;
-      newTabId = Number(childNodes[0].getAttribute('tabId'));
-    } else {
+      if (childNodes.length > 0 && childNodes[0].hasAttribute('tabId')) {
+        newTabId = Number(childNodes[0].getAttribute('tabId'));
+      } else {
+        // Skip empty group
+        return;
+      }
+    } else if (childNodes[i + 1] && childNodes[i + 1].hasAttribute('tabId')) {
       newTabId = Number(childNodes[i + 1].getAttribute('tabId'));
+    } else {
+      return;
     }
 
     setActiveTabNodeById(newTabId);
@@ -239,8 +247,8 @@ async function keyInput(e) {
     const activeTabId = getActiveTabId();
     let groupId = await getGroupId(activeTabId);
 
-    // Skip navigation if current group is a system group (negative ID)
-    if (groupId < 0) {
+    // Skip navigation if current group is a system group or undefined
+    if (groupId === undefined || groupId < 0) {
       return;
     }
 
@@ -269,9 +277,18 @@ async function keyInput(e) {
       }
       childNodes = groupNodes[groupId].content.childNodes;
       const childNodesSize = Object.keys(childNodes).length - 2;
-      newTabId = Number(childNodes[childNodesSize].getAttribute('tabId'));
-    } else {
+      if (
+        childNodes[childNodesSize] &&
+        childNodes[childNodesSize].hasAttribute('tabId')
+      ) {
+        newTabId = Number(childNodes[childNodesSize].getAttribute('tabId'));
+      } else {
+        return;
+      }
+    } else if (childNodes[i - 1] && childNodes[i - 1].hasAttribute('tabId')) {
       newTabId = Number(childNodes[i - 1].getAttribute('tabId'));
+    } else {
+      return;
     }
 
     setActiveTabNodeById(newTabId);
@@ -496,14 +513,19 @@ async function initView() {
   // Listen for tabs being added/removed/switched/etc. and update appropriately
   browser.tabs.onCreated.addListener(tabCreated);
   browser.tabs.onRemoved.addListener(tabRemoved);
-  browser.tabs.onUpdated.addListener(tabUpdated, {
-    // This page doesn't care about tabs in other windows
-    windowId: view.windowId,
-    // We don't want to listen for every property because that includes
-    // the hidden state changing which generates a ton of events
-    // every time the active group changes
-    properties: ['discarded', 'favIconUrl', 'pinned', 'title', 'status'],
-  });
+  try {
+    browser.tabs.onUpdated.addListener(tabUpdated, {
+      // This page doesn't care about tabs in other windows
+      windowId: view.windowId,
+      // We don't want to listen for every property because that includes
+      // the hidden state changing which generates a ton of events
+      // every time the active group changes
+      properties: ['discarded', 'favIconUrl', 'pinned', 'title', 'status'],
+    });
+  } catch (e) {
+    // Chromium throws an error since it does not support filters for this event
+    browser.tabs.onUpdated.addListener(tabUpdated);
+  }
   browser.tabs.onMoved.addListener(tabMoved);
   browser.tabs.onAttached.addListener(tabAttached);
   browser.tabs.onDetached.addListener(tabDetached);
