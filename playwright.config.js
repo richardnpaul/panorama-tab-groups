@@ -119,6 +119,7 @@ function createFirefoxPageProxy(initialPage) {
                   runtime: {
                     getURL: (p) => 'moz-extension://' + extId + '/' + p,
                     getManifest: () => ({ version: '0.9.0' }),
+                    sendMessage: async () => ({ success: true }),
                     openOptionsPage: () => {
                       window.location.href = 'http://127.0.0.1:' + port + '/options.html';
                     }
@@ -157,18 +158,27 @@ function createFirefoxPageProxy(initialPage) {
                         }
                       },
                       clear: async () => localStorage.clear()
-                    }
+                    },
+                    onChanged: { addListener: () => {} }
                   },
                   windows: {
                     getCurrent: async () => ({ id: 1 })
                   },
                   tabs: {
+                    getCurrent: async () => ({ id: 100 }),
                     query: async () => [
                       { id: 101, windowId: 1, pinned: false, lastAccessed: Date.now() - 10000, active: true, title: 'Tab 1', url: 'https://example.com' },
                       { id: 102, windowId: 1, pinned: false, lastAccessed: Date.now() - 20000, active: false, title: 'Tab 2', url: 'https://google.com' }
                     ],
                     get: async (tabId) => ({ id: tabId, windowId: 1 }),
-                    onActivated: { addListener: () => {} }
+                    update: async () => {},
+                    create: async () => {},
+                    remove: async () => {},
+                    onActivated: { addListener: () => {} },
+                    onUpdated: { addListener: () => {} },
+                    onCreated: { addListener: () => {} },
+                    onRemoved: { addListener: () => {} },
+                    onMoved: { addListener: () => {} }
                   },
                   sessions: {
                     getWindowValue: async (windowId, key) => {

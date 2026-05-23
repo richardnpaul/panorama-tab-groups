@@ -753,11 +753,17 @@ export async function insertTab(oldTab) {
       const lowerIndexes = tabIndexes.filter((idx) => idx < tab.index);
 
       if (higherIndexes.length === 0) {
-        groupNodes[groupId].newtab.insertAdjacentElement(
-          'beforebegin',
-          tabNode.tab,
-        );
+        if (groupNodes[groupId]) {
+          groupNodes[groupId].newtab.insertAdjacentElement(
+            'beforebegin',
+            tabNode.tab,
+          );
+        }
       } else {
+        if (!groupNodes[groupId]) {
+          setTimeout(() => fillGroupNodes(), 100);
+          return;
+        }
         const childNodes = Array.from(groupNodes[groupId].content.childNodes);
         const sortedIndexes = higherIndexes.sort((a, b) => a - b);
         sortedIndexes.forEach((idx) => {
