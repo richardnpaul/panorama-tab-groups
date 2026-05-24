@@ -1,4 +1,4 @@
-import { formatByteSize } from '../_share/utils.js';
+import { formatByteSize } from '../share/utils.js';
 
 export default async function getStatistics() {
   const tabs = await browser.tabs.query({});

@@ -7,7 +7,7 @@ import {
   insertTab,
 } from './groupNodes.js';
 import * as groups from './groups.js';
-import { newElement } from '../_share/utils.js';
+import { newElement } from '../share/utils.js';
 
 let dragTab = null;
 let dragOverTab = null;

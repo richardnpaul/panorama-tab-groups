@@ -43,7 +43,7 @@ body > * {
   margin-left: -16px;
   animation: rotate360deg 1.5s linear infinite;
   background: var(--button-ghost-icon-color);
-  mask-image: url(../../_shared/icons/Preferences.svg);
+  mask-image: url(../../shared/icons/Preferences.svg);
   mask-position: center center;
   mask-repeat: no-repeat;
   mask-size: 32px;
@@ -229,7 +229,7 @@ footer .button-ghost::before {
 }
 
 .list__drag::after {
-  mask-image: url(../../_shared/icons/Menu.svg);
+  mask-image: url(../../shared/icons/Menu.svg);
 }
 
 .list__close {
@@ -241,7 +241,7 @@ footer .button-ghost::before {
 }
 
 .list__close::after {
-  mask-image: url(../../_shared/icons/Close.svg);
+  mask-image: url(../../shared/icons/Close.svg);
 }
 
 .list__item:hover .list__drag {
@@ -269,7 +269,7 @@ footer .button-ghost::before {
   height: 16px;
   width: 16px;
   background: var(--button-ghost-icon-color);
-  mask: url(../../_shared/icons/Arrowhead_Right.svg) center center no-repeat;
+  mask: url(../../shared/icons/Arrowhead_Right.svg) center center no-repeat;
   mask-size: 16px;
 }
 
@@ -324,7 +324,7 @@ footer .button-ghost::before {
   height: 16px;
   width: 16px;
   background: var(--button-ghost-icon-color);
-  mask: url(../../_shared/icons/Edit.svg) center center no-repeat;
+  mask: url(../../shared/icons/Edit.svg) center center no-repeat;
   mask-size: 16px;
 }
 

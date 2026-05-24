@@ -1,5 +1,5 @@
 import './polyfill.js';
-import { loadOptions } from './_share/options.js';
+import { loadOptions } from './share/options.js';
 import { stateManager } from './background/StateManager.js';
 import {
   mod,

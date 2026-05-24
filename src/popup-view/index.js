@@ -1,5 +1,5 @@
 import '../js/polyfill.js';
-import View from '../_shared/js/models/View.js';
+import View from '../shared/js/models/View.js';
 import GroupsFrame from './js/GroupsFrame.js';
 
 /*

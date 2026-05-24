@@ -1,4 +1,4 @@
-import { currentOptions } from '../_share/options.js';
+import { currentOptions } from '../share/options.js';
 
 function convertBackup(tgData) {
   const data = {

@@ -1,7 +1,7 @@
 import Frame from './Frame.js';
 import GroupDetailFrame from './GroupDetailFrame.js';
-import { getElementNodeFromString } from '../../_shared/js/utilities/node.js';
-import { getPluralForm } from '../../js/_share/utils.js';
+import { getElementNodeFromString } from '../../shared/js/utilities/node.js';
+import { getPluralForm } from '../../js/share/utils.js';
 
 function handleGroupDragStart(event) {
   event.target.previousSibling.style.display = 'none';

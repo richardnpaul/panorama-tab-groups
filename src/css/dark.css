@@ -23,6 +23,14 @@ body.theme-dark {
   background-image: url(/icons/preferences_light.svg);
 }
 
+.theme-dark #freeform {
+  background-image: url(/icons/icon_light.svg);
+}
+
+.theme-dark #tiling {
+  background-image: url(/icons/grid_light.svg);
+}
+
 .theme-dark #pinnedTabs {
   border-color: rgba(249, 249, 250, 0.2);
 }

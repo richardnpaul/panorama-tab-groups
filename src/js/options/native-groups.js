@@ -3,7 +3,7 @@
  * Manages the toggle for using native browser tab groups
  */
 
-import { loadOptions } from '../_share/options.js';
+import { loadOptions } from '../share/options.js';
 
 // Detect browser capabilities
 const hasTabGroupsAPI =
