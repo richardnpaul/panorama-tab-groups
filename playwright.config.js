@@ -523,7 +523,9 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }]],
   timeout: 45000,
   use: {
-    trace: 'on-first-retry',
+    trace: 'on',
+    screenshot: 'on',
+    video: 'on',
   },
   projects: [
     {
