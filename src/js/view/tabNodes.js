@@ -7,7 +7,7 @@ import {
   tabDrop,
   tabDragEnd,
 } from './drag.js';
-import { newElement } from '../_share/utils.js';
+import { newElement } from '../share/utils.js';
 
 export const tabNodes = {};
 let activeTabId = -1; // tabid of active tab in view

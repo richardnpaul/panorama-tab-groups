@@ -1,6 +1,6 @@
 import Frame from './Frame.js';
 import GroupsFrame from './GroupsFrame.js';
-import { getElementNodeFromString } from '../../_shared/js/utilities/node.js';
+import { getElementNodeFromString } from '../../shared/js/utilities/node.js';
 
 async function saveGroupName(formNode, inputNode) {
   const newGroupName = inputNode.value;

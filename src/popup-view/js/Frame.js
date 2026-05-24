@@ -1,4 +1,4 @@
-import { getElementNodeFromString } from '../../_shared/js/utilities/node.js';
+import { getElementNodeFromString } from '../../shared/js/utilities/node.js';
 
 function updateContent(contentNode, content) {
   // Reset

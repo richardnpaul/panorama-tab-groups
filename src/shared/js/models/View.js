@@ -1,11 +1,13 @@
-import { loadOptions } from '../../../js/_share/options.js';
+import { loadOptions } from '../../../js/share/options.js';
 import Group from './Group.js';
 import Tab from './Tab.js';
 
 function getEffectiveTheme(themePreference) {
   if (themePreference === 'auto') {
     // Detect system theme preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   }
   return themePreference;
 }
@@ -13,7 +15,9 @@ function getEffectiveTheme(themePreference) {
 function updateViewSetting(prefix, value) {
   const effectiveValue = prefix === 'theme' ? getEffectiveTheme(value) : value;
   const { classList } = document.getElementsByTagName('body')[0];
-  const classesToRemove = Array.from(classList).filter((classObject) => classObject.startsWith(`${prefix}-`));
+  const classesToRemove = Array.from(classList).filter((classObject) =>
+    classObject.startsWith(`${prefix}-`),
+  );
   classesToRemove.forEach((classObject) => {
     classList.remove(classObject);
   });
@@ -49,35 +53,32 @@ export default class View {
   }
 
   async getAllTabs() {
-    const tabs = (await browser.tabs.query({
-      windowId: this.windowId,
-    })) || [];
+    const tabs =
+      (await browser.tabs.query({
+        windowId: this.windowId,
+      })) || [];
 
-    return Promise.all(
-      tabs.map(async (tab) => Tab.create(tab)),
-    );
+    return Promise.all(tabs.map(async (tab) => Tab.create(tab)));
   }
 
   async getTabs() {
-    const tabs = (await browser.tabs.query({
-      windowId: this.windowId,
-      pinned: false,
-    })) || [];
+    const tabs =
+      (await browser.tabs.query({
+        windowId: this.windowId,
+        pinned: false,
+      })) || [];
 
-    return Promise.all(
-      tabs.map(async (tab) => Tab.create(tab)),
-    );
+    return Promise.all(tabs.map(async (tab) => Tab.create(tab)));
   }
 
   async getPinnedTabs() {
-    const tabs = (await browser.tabs.query({
-      windowId: this.windowId,
-      pinned: true,
-    })) || [];
+    const tabs =
+      (await browser.tabs.query({
+        windowId: this.windowId,
+        pinned: true,
+      })) || [];
 
-    return Promise.all(
-      tabs.map(async (tab) => Tab.create(tab)),
-    );
+    return Promise.all(tabs.map(async (tab) => Tab.create(tab)));
   }
 
   async getLastActiveTab() {
@@ -100,15 +101,15 @@ export default class View {
   }
 
   async getGroups() {
-    const groups = (await browser.sessions.getWindowValue(this.windowId, 'groups')) || [];
+    const groups =
+      (await browser.sessions.getWindowValue(this.windowId, 'groups')) || [];
 
-    return Promise.all(
-      groups.map(async (group) => Group.create(this, group)),
-    );
+    return Promise.all(groups.map(async (group) => Group.create(this, group)));
   }
 
   async getGroupById(groupId) {
-    const groups = (await browser.sessions.getWindowValue(this.windowId, 'groups')) || [];
+    const groups =
+      (await browser.sessions.getWindowValue(this.windowId, 'groups')) || [];
     let groupData = {};
 
     groups.forEach((group) => {
@@ -190,7 +191,9 @@ export default class View {
 
     // Listen for system theme changes when auto theme is selected
     if (theme === 'auto') {
-      const systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      const systemThemeMedia = window.matchMedia(
+        '(prefers-color-scheme: dark)',
+      );
       const handleSystemThemeChange = () => {
         updateViewSetting('theme', 'auto');
       };
