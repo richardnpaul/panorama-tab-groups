@@ -39,6 +39,12 @@
         "default": "Alt+Shift+W"
       },
       "description": "Switch to the previous Tab Group"
+    },
+    "manage-extension": {
+      "suggested_key": {
+        "default": "Alt+Shift+M"
+      },
+      "description": "Manage Extension Settings"
     }
   },
 
@@ -66,7 +72,8 @@
   },
 
   "options_ui": {
-    "page": "options.html"
+    "page": "options.html",
+    "open_in_tab": true
   },
 
   "permissions": [

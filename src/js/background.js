@@ -531,6 +531,8 @@ async function triggerCommand(command) {
     await changeActiveGroupBy(1);
   } else if (command === 'activate-previous-group') {
     await changeActiveGroupBy(-1);
+  } else if (command === 'manage-extension') {
+    browser.runtime.openOptionsPage();
   }
 }
 

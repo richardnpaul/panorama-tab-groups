@@ -16,6 +16,9 @@ export const defaultOptions = (() => {
       'activate-previous-group': {
         disabled: false,
       },
+      'manage-extension': {
+        disabled: false,
+      },
     },
   };
 
