@@ -41,16 +41,30 @@ Load and follow these skills before writing any code:
 - Read the plan file from `docs/plans/`
 - Review all affected files before writing any code
 - Identify the exact changes required per step
+  u
 
 ### 2. Implement Step by Step
 
-- Work through plan phases in order
-- After each phase, run:
-  ```bash
-  npm run format
-  npm run lint
-  ```
-- Fix all lint errors before proceeding to the next phase
+- Work through plan phases in order following outside in London Style TDD
+  - Outer loop
+    - Write minimal playwright tests for each step and test that they fail as expected
+      - Inner loop
+        - Write minimal unit test
+        - Write minimal code to get the test to pass
+        - Run all tests and make sure they pass
+        - Break the code to ensure that the tests fail
+        - Revert the code to the state where the tests pass
+        - Run all tests and make sure they pass
+        - Refactor the code
+        - Run all tests and make sure they pass
+        - Repeat the inner loop until the implementation phase is complete to get the playwright and unit tests to pass
+    - Test playwright tests pass
+    - Break the code and test that the playwright tests fail
+    - Revert the code to the state where the playwright tests pass
+    - Run all tests and make sure they pass
+    - Refactor the code
+    - Run all tests and make sure they pass
+    - Repeat the outer loop until the implementation phase is complete
 
 ### 3. Lint-Failure Protocol
 
