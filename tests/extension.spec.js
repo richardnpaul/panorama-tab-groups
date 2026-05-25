@@ -134,3 +134,26 @@ test('firefox can open a second extension page after popup navigation', async ({
   );
   await waitForOptionsPageReady(optionsPage);
 });
+
+test('chromium service worker initializes without errors', async ({
+  browserName,
+  context,
+}) => {
+  if (browserName !== 'chromium') {
+    test.skip();
+    return;
+  }
+
+  // Wait for the service worker to be available
+  let [worker] = context.serviceWorkers();
+  if (!worker) {
+    worker = await context.waitForEvent('serviceworker');
+  }
+
+  expect(worker).toBeTruthy();
+
+  // Evaluate state inside the service worker
+  const isAlive = await worker.evaluate(() => !!globalThis.chrome);
+
+  expect(isAlive).toBe(true);
+});

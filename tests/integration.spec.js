@@ -58,7 +58,10 @@ test.describe('Background Listeners & Visibility Toggle', () => {
 
       // Poll until groupId is set (tabCreated finishes)
       let groupId;
+      let checks = 0;
+      console.log('Active tab found:', activeTab.id, activeTab.url);
       for (let i = 0; i < 20; i += 1) {
+        checks = i;
         // eslint-disable-next-line no-await-in-loop
         groupId = await window.browser.sessions.getTabValue(
           activeTab.id,
@@ -71,9 +74,10 @@ test.describe('Background Listeners & Visibility Toggle', () => {
         });
       }
 
-      return { tabId: activeTab.id, groupId };
+      return { tabId: activeTab.id, groupId, url: activeTab.url, checks };
     });
 
+    console.log('Tab group info:', newTabGroupInfo);
     expect(newTabGroupInfo).not.toBeNull();
     // The new tab should be assigned to the active group
     // If activeGroup was initially undefined or null, the background script assigns it to 0 or lowest positive.
