@@ -174,24 +174,28 @@ async function shouldUseNativeGroups() {
   return options.useNativeGroups !== false; // Default to true if not set
 }
 
-window.backgroundState = {
-  openingView: null, // Changed: stores { tabId, timeout, windowId } or null
+const backgroundState = {
+  openingView: null,
   openingBackup: false,
 };
+const windowStatesMap = new Map();
+let viewRefreshOrdered = false;
+
+/* REPLACED */
 
 // Per-window state tracking for multi-window support
-window.windowStates = new Map(); // windowId -> { viewTabId }
+/* REPLACED */ // windowId -> { viewTabId }
 
 function getWindowState(windowId) {
-  if (!window.windowStates.has(windowId)) {
-    window.windowStates.set(windowId, {
+  if (!windowStatesMap.has(windowId)) {
+    windowStatesMap.set(windowId, {
       viewTabId: null,
     });
   }
-  return window.windowStates.get(windowId);
+  return windowStatesMap.get(windowId);
 }
 
-window.viewRefreshOrdered = false;
+/* REPLACED */
 
 /** Set extension icon tooltip and numGroups to icon * */
 async function setActionTitle(windowId, activeGroup = null) {
@@ -569,8 +573,8 @@ async function toggleView() {
   } else {
     // if there is no Panorama View tab, make one
     // Clear any existing timeout if we're re-creating
-    if (window.backgroundState.openingView) {
-      clearTimeout(window.backgroundState.openingView.timeout);
+    if (backgroundState.openingView) {
+      clearTimeout(backgroundState.openingView.timeout);
     }
 
     // Set up tracking state BEFORE creating tab to catch synchronous tabCreated events
@@ -579,10 +583,10 @@ async function toggleView() {
       if (DEBUG) {
         console.warn('View tab creation timed out, clearing state');
       }
-      window.backgroundState.openingView = null;
+      backgroundState.openingView = null;
     }, 5000);
 
-    window.backgroundState.openingView = {
+    backgroundState.openingView = {
       tabId: null, // Will be set after creation
       timeout,
       windowId,
@@ -593,11 +597,8 @@ async function toggleView() {
     const tab = await browser.tabs.create({ url: '/view.html', active: true });
 
     // Update state with actual tab ID (if state hasn't been cleared by tabCreated)
-    if (
-      window.backgroundState.openingView?.creationTimestamp ===
-      creationTimestamp
-    ) {
-      window.backgroundState.openingView.tabId = tab.id;
+    if (backgroundState.openingView?.creationTimestamp === creationTimestamp) {
+      backgroundState.openingView.tabId = tab.id;
     }
 
     // Track in per-window state
@@ -607,7 +608,7 @@ async function toggleView() {
 
 /** Callback function which will be called whenever a tab is opened */
 async function tabCreated(tab) {
-  if (window.backgroundState.openingBackup) {
+  if (backgroundState.openingBackup) {
     return;
   }
 
@@ -615,11 +616,11 @@ async function tabCreated(tab) {
   // Use multiple checks: tabId match, window match + recent creation, or URL match
   const viewUrl = browser.runtime.getURL('view.html');
   const now = Date.now();
-  const isViewTabById = window.backgroundState.openingView?.tabId === tab.id;
+  const isViewTabById = backgroundState.openingView?.tabId === tab.id;
   const isViewTabByWindow =
-    window.backgroundState.openingView?.windowId === tab.windowId &&
-    window.backgroundState.openingView?.creationTimestamp &&
-    now - window.backgroundState.openingView.creationTimestamp < 100;
+    backgroundState.openingView?.windowId === tab.windowId &&
+    backgroundState.openingView?.creationTimestamp &&
+    now - backgroundState.openingView.creationTimestamp < 100;
   // Wait for initialization to complete before processing tab creation
   await waitForInitialization();
 
@@ -633,9 +634,9 @@ async function tabCreated(tab) {
 
   if (isViewTabById || isViewTabByWindow || isViewTabByUrl) {
     // Clear the timeout and state
-    if (window.backgroundState.openingView) {
-      clearTimeout(window.backgroundState.openingView.timeout);
-      window.backgroundState.openingView = null;
+    if (backgroundState.openingView) {
+      clearTimeout(backgroundState.openingView.timeout);
+      backgroundState.openingView = null;
     }
 
     // Assign special group ID for panorama view tab
@@ -1122,7 +1123,7 @@ async function newGroupUid(windowId) {
  * This handles new windows and, during installation, existing windows
  * that do not yet have a group */
 async function createGroupInWindow(browserWindow) {
-  if (window.backgroundState.openingBackup) {
+  if (backgroundState.openingBackup) {
     console.debug('Skipping creation of groups since we are opening backup');
     return;
   }
@@ -1535,6 +1536,11 @@ async function init() {
     });
 
     browser.action.onClicked.addListener(toggleView);
+  } else {
+    // Enable popup
+    browser.action.setPopup({
+      popup: 'popup-view/index.html',
+    });
   }
 
   browser.commands.onCommand.addListener(triggerCommand);
@@ -1547,9 +1553,9 @@ async function init() {
   // Add tab removal listener to cleanup openingView state
   browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
     // Clear openingView state if the view tab is removed before completion
-    if (window.backgroundState.openingView?.tabId === tabId) {
-      clearTimeout(window.backgroundState.openingView.timeout);
-      window.backgroundState.openingView = null;
+    if (backgroundState.openingView?.tabId === tabId) {
+      clearTimeout(backgroundState.openingView.timeout);
+      backgroundState.openingView = null;
       if (DEBUG) {
         console.debug('View tab removed during creation, cleared state');
       }
@@ -1564,7 +1570,7 @@ async function init() {
 
   // Add window removal listener to cleanup per-window state
   browser.windows.onRemoved.addListener((windowId) => {
-    window.windowStates.delete(windowId);
+    windowStatesMap.delete(windowId);
     if (DEBUG) {
       console.debug(`Cleaned up state for closed window ${windowId}`);
     }
@@ -1574,13 +1580,13 @@ async function init() {
   setupTabGroupListeners(hasTabGroups, DEBUG);
 }
 
-init();
+init().catch((e) => console.error('INIT ERROR:', e.message, e.stack));
 
-window.refreshView = async function refreshView() {
+async function refreshView() {
   const options = await loadOptions();
 
   console.debug('Refresh Panorama Tab View');
-  window.viewRefreshOrdered = true;
+  viewRefreshOrdered = true;
 
   browser.action.onClicked.removeListener(toggleView);
   browser.commands.onCommand.removeListener(triggerCommand);
@@ -1650,7 +1656,7 @@ window.refreshView = async function refreshView() {
       }
     }
   });
-};
+}
 
 /**
  * Delete a group with complete cleanup including native tab groups
@@ -1807,16 +1813,16 @@ function handleInternalMessage(message, sender, sendResponse) {
         });
       return true; // Keep message channel open for async response
     case 'setBackgroundState':
-      window.backgroundState[message.key] = message.value;
+      backgroundState[message.key] = message.value;
       break;
     case 'refreshView':
-      window.refreshView();
+      refreshView();
       break;
     case 'checkViewRefresh':
-      sendResponse({ viewRefreshOrdered: window.viewRefreshOrdered });
+      sendResponse({ viewRefreshOrdered });
       break;
     case 'clearViewRefresh':
-      window.viewRefreshOrdered = false;
+      viewRefreshOrdered = false;
       break;
     case 'migrateToHybridGroups':
       // Manual trigger for migration

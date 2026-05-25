@@ -46,6 +46,12 @@ export async function createMenuList() {
   try {
     await browser.menus.removeAll();
 
+    browser.menus.create({
+      id: 'send-tab',
+      title: browser.i18n.getMessage('sendTabToGroup') || 'Send Tab to Group',
+      contexts: ['tab'],
+    });
+
     // Get current window and its groups
     const currentWindow = await browser.windows.getCurrent();
     const groups = await stateManager.getGroups(currentWindow.id);
