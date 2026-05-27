@@ -28,8 +28,10 @@ test.describe('Background Listeners & Visibility Toggle', () => {
     );
     await extPage.goto(popupUrl);
 
-    // Wait for groups to initialize
-    await extPage.waitForSelector('.group', { timeout: 5000 }).catch(() => {});
+    // Wait for groups to initialize in the popup (removes content-loading class)
+    await expect(extPage.locator('body')).not.toHaveClass(/content-loading/, {
+      timeout: 5000,
+    });
 
     // Now go back to options to use as our API bridge
     await extPage.goto(optionsUrl);
