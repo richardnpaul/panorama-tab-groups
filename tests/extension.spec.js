@@ -157,3 +157,27 @@ test('chromium service worker initializes without errors', async ({
 
   expect(isAlive).toBe(true);
 });
+
+test('native browser groups option disabled in chromium', async ({
+  browserName,
+  context,
+  extensionId,
+  extensionProtocol,
+}) => {
+  // We only run this regression test for chromium, since firefox's behavior
+  // depends on the actual API availability which is complex to mock fully.
+  test.skip(browserName !== 'chromium', 'Chromium regression coverage only');
+
+  const page = await context.newPage();
+  await gotoExtensionPage(page, extensionProtocol, extensionId, 'options.html');
+  await waitForOptionsPageReady(page);
+
+  const nativeGroupsCheckbox = page.locator('#useNativeGroups');
+  await expect(nativeGroupsCheckbox).toBeEnabled();
+  await expect(nativeGroupsCheckbox).toBeChecked();
+
+  // Verify the error text is visible
+  const warningText = page.locator('#nativeGroupsWarning');
+  await expect(warningText).toHaveClass(/error-text/);
+  await expect(warningText).toContainText('not supported');
+});

@@ -120,9 +120,11 @@ export default async function initNativeGroupsOption() {
     case 'collapse-only':
       // Chrome/Edge - has tabGroups but no tabHide
       checkbox.disabled = false;
+      checkbox.checked = true;
       warningText.textContent =
-        'Native groups will be used for collapsing only. Tab hiding is not supported in this browser.';
-      warningText.className = 'warning-text';
+        'Native tab groups are not supported in this browser version (requires Tab Hiding API).';
+      warningText.className = 'error-text';
+      container.style.opacity = '0.5';
       break;
 
     case 'legacy':
