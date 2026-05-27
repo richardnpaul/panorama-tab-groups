@@ -28,11 +28,11 @@ body.theme-dark {
 }
 
 .theme-dark #freeform {
-  background-image: url(/icons/icon_light.svg);
+  background-image: url(../icons/icon_light.svg);
 }
 
 .theme-dark #tiling {
-  background-image: url(/icons/grid_light.svg);
+  background-image: url(../icons/grid_light.svg);
 }
 
 .theme-dark #pinnedTabs {
