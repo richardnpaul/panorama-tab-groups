@@ -1,4 +1,4 @@
-# Testing the Modernized Panorama Tab Groups Extension
+# Testing the Modernized Tab Groups Tab Groups Extension
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@
 ### Option A: Automatic Detection
 
 ```bash
-cd /home/richard/dev/third-party-code/panorama-tab-groups
+cd /home/richard/dev/third-party-code/Tab Groups-tab-groups
 npm run start
 ```
 
@@ -70,14 +70,14 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 2. **Popup View**: Click the extension icon to see popup
 3. **Tab Groups**: Create and manage tab groups
 4. **Keyboard Shortcuts**:
-   - `Ctrl+Shift+F`: Toggle Panorama View
+   - `Ctrl+Shift+F`: Toggle Tab Groups View
    - `Alt+W`: Next group
    - `Alt+Shift+W`: Previous group
 
-### Panorama View
+### Tab Groups View
 
 1. Click extension icon or use `Ctrl+Shift+F`
-2. Should open panorama view showing all tab groups
+2. Should open Tab Groups view showing all tab groups
 3. Test drag and drop functionality
 4. Test creating new groups
 5. Test moving tabs between groups
@@ -85,7 +85,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 ### Options Page
 
 1. Go to `about:addons`
-2. Find "Panorama Tab Groups"
+2. Find "Tab Groups Tab Groups"
 3. Click "Options"
 4. Test all settings:
    - View mode (Freeform vs Popup)

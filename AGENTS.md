@@ -72,6 +72,7 @@ Agents use HTML comment tokens to communicate completion status. The coordinator
 2. Always run `npm run format` then `npm run lint` before finishing any implementation pass
 3. Every new feature must have at least one new Playwright E2E test case
 4. Plans in `docs/plans/` serve as the authoritative record of design decisions
+5. Always write tests to debug unexpected behaviour rather than writing adhoc scripts
 
 ## Plans as ADRs
 

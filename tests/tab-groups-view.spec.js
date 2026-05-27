@@ -4,11 +4,11 @@ function getExtensionPageUrl(extensionProtocol, extensionId, pagePath) {
   return `${extensionProtocol}://${extensionId}/${pagePath}`;
 }
 
-test.describe('Panorama View E2E', () => {
+test.describe('Tab Groups View E2E', () => {
   let popupPage;
 
   test.beforeEach(async ({ page, extensionId, extensionProtocol }) => {
-    // Open the panorama view tab first so we can create a group
+    // Open the Tab Groups view tab first so we can create a group
     popupPage = await page.context().newPage();
     popupPage.on('console', (msg) =>
       console.log('[Browser Console]', msg.type(), msg.text()),

@@ -66,7 +66,7 @@
     "message": "Enable"
   },
   "optionKeyboardShortcutsToggle": {
-    "message": "Toggle Panorama View"
+    "message": "Toggle Tab Groups View"
   },
   "optionKeyboardShortcutsNextGroup": {
     "message": "Activate the next Tab Group"
