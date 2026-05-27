@@ -89,8 +89,5 @@ test.describe('Background Listeners & Visibility Toggle', () => {
         ? initializedState.activeGroup
         : newTabGroupInfo.groupId;
     expect(newTabGroupInfo.groupId).toBe(expectedGroup);
-
-    await newWebPage.close();
-    await extPage.close();
   });
 });
