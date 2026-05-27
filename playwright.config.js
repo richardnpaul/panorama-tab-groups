@@ -110,11 +110,24 @@ function createFirefoxPageProxy(initialPage) {
 
           console.log(`[PROXY GOTO] Mapping ${url} -> ${localUrl}`);
 
+          const messagesJson = fs.readFileSync(
+            path.join(process.cwd(), 'src', '_locales', 'en', 'messages.json'),
+            'utf8',
+          );
+
           await activePage.addInitScript({
             content: `
               (function() {
                 const extId = '${extensionId}';
                 const port = ${localServerPort};
+                const rawMessages = ${messagesJson};
+                const msgs = {};
+                for (const key in rawMessages) {
+                  msgs[key] = rawMessages[key].message;
+                }
+                msgs['tabCount'] = (placeholders) => (placeholders && placeholders[0] === 1) ? '1 Tab' : (placeholders ? placeholders[0] + ' Tabs' : 'Tabs');
+                msgs['closeGroupWarning'] = (placeholders) => 'Are you sure you want to close this group?';
+
                 window.browser = {
                   runtime: {
                     getURL: (p) => 'moz-extension://' + extId + '/' + p,
@@ -199,18 +212,6 @@ function createFirefoxPageProxy(initialPage) {
                   },
                   i18n: {
                     getMessage: (key, placeholders) => {
-                      const msgs = {
-                        defaultGroupName: 'Group',
-                        newGroupButton: 'New Group',
-                        closeGroup: 'Close Group',
-                        closeGroupWarning: 'Are you sure you want to close this group?',
-                        tabCount: (placeholders && placeholders[0] === 1) ? '1 Tab' : (placeholders ? placeholders[0] + ' Tabs' : 'Tabs'),
-                        searchForTab_placeholder: 'Search for a tab...',
-                        searchForTab_noResults: 'No tabs found',
-                        settingsButton: 'Settings',
-                        optionKeyboardShortcuts: 'Keyboard Shortcuts',
-                        optionsTheme: 'Theme',
-                      };
                       const val = msgs[key] || key;
                       if (typeof val === 'function') return val(placeholders);
                       return val;
