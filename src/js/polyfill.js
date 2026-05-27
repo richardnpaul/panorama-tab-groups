@@ -1,5 +1,14 @@
 if (typeof browser === 'undefined') {
   globalThis.browser = chrome;
+
+  // Polyfill menus API for Chromium
+  if (
+    globalThis.browser &&
+    !globalThis.browser.menus &&
+    globalThis.browser.contextMenus
+  ) {
+    globalThis.browser.menus = globalThis.browser.contextMenus;
+  }
 }
 
 // Polyfill for Chromium which uses contextMenus instead of menus

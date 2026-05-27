@@ -43,9 +43,13 @@ body > * {
   margin-left: -16px;
   animation: rotate360deg 1.5s linear infinite;
   background: var(--button-ghost-icon-color);
+  -webkit-mask-image: url(../../shared/icons/Preferences.svg);
   mask-image: url(../../shared/icons/Preferences.svg);
+  -webkit-mask-position: center center;
   mask-position: center center;
+  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-size: 32px;
   mask-size: 32px;
 }
 
@@ -125,6 +129,7 @@ footer .button-ghost:focus {
 }
 
 footer .button-ghost::before {
+  -webkit-mask-position: 13px 50%;
   mask-position: 13px 50%;
 }
 
@@ -215,8 +220,11 @@ footer .button-ghost::before {
   height: 16px;
   width: 16px;
   background: var(--button-ghost-icon-color);
+  -webkit-mask-position: center center;
   mask-position: center center;
+  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-size: 16px;
   mask-size: 16px;
 }
 
@@ -229,6 +237,7 @@ footer .button-ghost::before {
 }
 
 .list__drag::after {
+  -webkit-mask-image: url(../../shared/icons/Menu.svg);
   mask-image: url(../../shared/icons/Menu.svg);
 }
 
@@ -241,6 +250,7 @@ footer .button-ghost::before {
 }
 
 .list__close::after {
+  -webkit-mask-image: url(../../shared/icons/Close.svg);
   mask-image: url(../../shared/icons/Close.svg);
 }
 
@@ -269,7 +279,9 @@ footer .button-ghost::before {
   height: 16px;
   width: 16px;
   background: var(--button-ghost-icon-color);
+  -webkit-mask: url(../../shared/icons/Arrowhead_Right.svg) center center no-repeat;
   mask: url(../../shared/icons/Arrowhead_Right.svg) center center no-repeat;
+  -webkit-mask-size: 16px;
   mask-size: 16px;
 }
 
@@ -324,7 +336,9 @@ footer .button-ghost::before {
   height: 16px;
   width: 16px;
   background: var(--button-ghost-icon-color);
+  -webkit-mask: url(../../shared/icons/Edit.svg) center center no-repeat;
   mask: url(../../shared/icons/Edit.svg) center center no-repeat;
+  -webkit-mask-size: 16px;
   mask-size: 16px;
 }
 

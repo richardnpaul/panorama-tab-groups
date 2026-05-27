@@ -181,3 +181,41 @@ test('native browser groups option disabled in chromium', async ({
   await expect(warningText).toHaveClass(/error-text/);
   await expect(warningText).toContainText('not supported');
 });
+
+test.describe('Regression Tests', () => {
+  test('background service worker initializes without crashing', async ({
+    context,
+    extensionId,
+    extensionProtocol,
+  }) => {
+    // Navigate to an extension page to ensure we have extension privileges
+    const extPage = await context.newPage();
+    const optionsUrl = getExtensionPageUrl(
+      extensionProtocol,
+      extensionId,
+      'options.html',
+    );
+    await extPage.goto(optionsUrl);
+
+    // Send a message to the background script to verify it's alive and hasn't crashed
+    // If the background script crashed during initialization (e.g., ReferenceError: window is not defined),
+    // this message will fail with "Could not establish connection. Receiving end does not exist."
+    const backgroundResponse = await extPage.evaluate(async () => {
+      try {
+        const response = await browser.runtime.sendMessage({
+          action: 'checkViewRefresh',
+        });
+        return { success: true, response };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    expect(
+      backgroundResponse.success,
+      `Background script crashed or is unresponsive. Error: ${backgroundResponse.error}`,
+    ).toBe(true);
+
+    await extPage.close();
+  });
+});

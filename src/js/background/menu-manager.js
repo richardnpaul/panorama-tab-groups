@@ -14,23 +14,23 @@ import { stateManager } from './StateManager.js';
 export async function addRefreshMenuItem() {
   // Safely remove existing menu items (ignore errors if they don't exist)
   try {
-    await browser.menus.remove('refresh-groups');
+    await browser.contextMenus.remove('refresh-groups');
   } catch (error) {
     // Ignore error if menu item doesn't exist
   }
   try {
-    await browser.menus.remove('refresh-spacer');
+    await browser.contextMenus.remove('refresh-spacer');
   } catch (error) {
     // Ignore error if menu item doesn't exist
   }
 
-  browser.menus.create({
+  browser.contextMenus.create({
     id: 'refresh-spacer',
     type: 'separator',
     parentId: 'send-tab',
     contexts: ['tab'],
   });
-  browser.menus.create({
+  browser.contextMenus.create({
     id: 'refresh-groups',
     title: browser.i18n.getMessage('refreshGroups'),
     parentId: 'send-tab',
@@ -44,7 +44,7 @@ export async function addRefreshMenuItem() {
  */
 export async function createMenuList() {
   try {
-    await browser.menus.removeAll();
+    await browser.contextMenus.removeAll();
 
     browser.menus.create({
       id: 'send-tab',
@@ -63,7 +63,7 @@ export async function createMenuList() {
     }
 
     groups.forEach((group) => {
-      browser.menus.create({
+      browser.contextMenus.create({
         id: String(group.id),
         title: `${group.id}: ${group.name}`,
         parentId: 'send-tab',
@@ -86,7 +86,7 @@ export async function createMenuList() {
 export async function handleMenuChange(message) {
   switch (message.action) {
     case 'createMenuItem':
-      browser.menus.create({
+      browser.contextMenus.create({
         id: String(message.groupId),
         title: `${message.groupId}: ${message.groupName}`,
         parentId: 'send-tab',
@@ -96,7 +96,7 @@ export async function handleMenuChange(message) {
       break;
     case 'removeMenuItem':
       try {
-        await browser.menus.remove(String(message.groupId));
+        await browser.contextMenus.remove(String(message.groupId));
       } catch (error) {
         // Menu item may not exist - log warning but don't throw
         console.warn(
@@ -106,7 +106,7 @@ export async function handleMenuChange(message) {
       }
       break;
     case 'updateMenuItem':
-      browser.menus.update(String(message.groupId), {
+      browser.contextMenus.update(String(message.groupId), {
         title: `${message.groupId}: ${message.groupName}`,
       });
       break;
