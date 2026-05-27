@@ -168,6 +168,7 @@ test('native browser groups option disabled in chromium', async ({
   // depends on the actual API availability which is complex to mock fully.
   test.skip(browserName !== 'chromium', 'Chromium regression coverage only');
 
+  const page = await context.newPage();
   await gotoExtensionPage(page, extensionProtocol, extensionId, 'options.html');
   await waitForOptionsPageReady(page);
 
