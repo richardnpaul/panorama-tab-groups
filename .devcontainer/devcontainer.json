@@ -42,7 +42,7 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "sudo chown -R vscode:vscode /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache/ms-playwright /home/vscode/.npm && npm ci && npx playwright install firefox chromium",
+  "postCreateCommand": "sudo mkdir -p /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache /home/vscode/.npm && sudo chown -R vscode:vscode /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache /home/vscode/.npm && npm ci && npx playwright install firefox chromium",
   "postStartCommand": "bash .devcontainer/start-desktop.sh",
   "customizations": {
     "vscode": {
