@@ -294,6 +294,16 @@ async function keyInput(e) {
     setActiveTabNodeById(newTabId);
   } else if (e.key === 'Enter') {
     browser.tabs.update(getActiveTabId(), { active: true });
+    if (window.location.pathname.includes('view.html')) {
+      try {
+        const viewTab = await browser.tabs.getCurrent();
+        if (viewTab) {
+          await browser.tabs.remove(viewTab.id);
+        }
+      } catch (err) {
+        // Ignore
+      }
+    }
   }
 }
 
@@ -534,6 +544,8 @@ async function initView() {
   view.groupsNode.addEventListener('drop', outsideDrop, false);
   view.groupsNode.addEventListener('dblclick', doubleClick, false);
   view.groupsNode.addEventListener('click', singleClick, false);
+
+  document.body.classList.add('view-ready');
 }
 
 function replaceClass(prefix, value) {

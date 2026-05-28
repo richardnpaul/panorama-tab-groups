@@ -28,30 +28,59 @@ async function gotoExtensionPage(
 
 test.describe('User Journeys', () => {
   test('Journey: Basic navigation to Tab Groups view', async ({
-    context,
+    page,
     extensionId,
     extensionProtocol,
   }) => {
-    const page = await context.newPage();
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
 
-    // Verify the Tab Groups view UI has loaded
-    await expect(page.locator('#newGroup')).toBeVisible({ timeout: 10000 });
+    // Wait for the view to fully initialize
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Create a group using the UI to ensure at least one .group element exists
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+    }
+
+    // Wait for at least one group to render so screenshots capture the full UI
+    await expect(page.locator('.group').first()).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('Journey: Basic add tab to group works', async ({
     context,
+    page,
     extensionId,
     extensionProtocol,
+    browserName,
   }) => {
-    const page = await context.newPage();
+    // Firefox Playwright tests run the extension page via a local HTTP proxy that mocks window.browser
+    // This means the view cannot communicate with the real background script, making E2E tab creation testing impossible.
+    test.skip(
+      browserName === 'firefox',
+      'Firefox HTTP proxy does not support background script E2E testing',
+    );
+
+    page.on('console', (msg) => console.log('[Page Console 1]', msg.text()));
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
 
-    // Wait for the view to initialize
-    await expect(page.locator('#newGroup')).toBeVisible({ timeout: 10000 });
+    // Wait for the view to fully initialize
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Wait for the view to fully initialize
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
 
     // Create a group using the UI to ensure at least one .group element exists
-    await page.click('#newGroup');
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+    }
 
     // Wait for the view to initialize the group
     const groupElement = page.locator('.group').first();
@@ -62,25 +91,33 @@ test.describe('User Journeys', () => {
 
     // 2. User clicks the "Add Tab" button.
     const newTabButton = groupElement.locator('.newtab').first();
-    await newTabButton.click({ force: true });
+    await newTabButton.evaluate((node) => node.click());
 
     // Wait for the extension to create the new tab and process it in background
-    await page.waitForTimeout(2000);
+    await new Promise((r) => {
+      setTimeout(r, 2000);
+    });
 
     // 3. User navigates to the extensions Tab Groups view again
-    await page.bringToFront();
-    await page.reload();
-    await expect(page.locator('.group').first()).toBeVisible({
+    const newPage = await context.newPage();
+    newPage.on('console', (msg) => console.log('[Page Console]', msg.text()));
+    await gotoExtensionPage(
+      newPage,
+      extensionProtocol,
+      extensionId,
+      'view.html',
+    );
+    await expect(newPage.locator('.group').first()).toBeVisible({
       timeout: 10000,
     });
 
     // Verify a new tab was added to the group
     // Wait for at least one tab to render to avoid race condition where count() returns 0 immediately after reload
-    await expect(page.locator('.group').first().locator('.tab').first())
-      .toBeVisible({ timeout: 5000 })
-      .catch(() => {});
+    await expect(
+      newPage.locator('.group').first().locator('.tab').first(),
+    ).toBeVisible({ timeout: 5000 });
 
-    const finalTabsCount = await page
+    const finalTabsCount = await newPage
       .locator('.group')
       .first()
       .locator('.tab')

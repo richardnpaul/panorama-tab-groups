@@ -7,6 +7,7 @@ function getExtensionPageUrl(extensionProtocol, extensionId, pagePath) {
 test.describe('Background Listeners & Visibility Toggle', () => {
   test('tabCreated assigns new tabs to the active group', async ({
     context,
+    page,
     extensionId,
     extensionProtocol,
     browserName,
@@ -25,7 +26,7 @@ test.describe('Background Listeners & Visibility Toggle', () => {
     context.on('serviceworker', (worker) => {
       worker.on('console', (msg) => console.log('SW:', msg.text()));
     });
-    const extPage = await context.newPage();
+    const extPage = page;
     const optionsUrl = getExtensionPageUrl(
       extensionProtocol,
       extensionId,
@@ -61,7 +62,10 @@ test.describe('Background Listeners & Visibility Toggle', () => {
 
     // Open a new web page (simulating user opening a new tab)
     const newWebPage = await context.newPage();
-    await newWebPage.goto('data:text/html,<h1>New Tab</h1>');
+    await newWebPage.goto(
+      'data:text/html,<body style="background: white;"><h1>New Tab</h1></body>',
+    );
+    await expect(newWebPage.locator('h1')).toBeVisible();
 
     // Query the extension to find this new tab and wait for its group ID to be assigned
     const newTabGroupInfo = await extPage.evaluate(async () => {

@@ -186,6 +186,7 @@ export default class View {
     return Group.create(this, newGroup);
   }
 
+  // eslint-disable-next-line class-methods-use-this
   setTheme(theme) {
     updateViewSetting('theme', theme);
 

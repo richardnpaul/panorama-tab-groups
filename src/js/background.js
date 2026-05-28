@@ -1570,6 +1570,30 @@ browser.tabs.onAttached.addListener(tabAttached);
 browser.tabs.onDetached.addListener(tabDetached);
 browser.tabs.onActivated.addListener(tabActivated);
 
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.url) {
+    const viewUrl = browser.runtime.getURL('view.html');
+    if (changeInfo.url === viewUrl || tab.url === viewUrl) {
+      await stateManager.setTabGroup(tabId, -1);
+      const useNativeGroups = await shouldUseNativeGroups();
+      if (useNativeGroups) {
+        try {
+          await browser.tabs.ungroup([tabId]);
+        } catch (e) {
+          // Ignore
+        }
+      }
+      const windowState = getWindowState(tab.windowId);
+      windowState.viewTabId = tabId;
+      if (DEBUG) {
+        console.debug(
+          `Tab ${tabId} updated to panorama view, assigned groupId -1`,
+        );
+      }
+    }
+  }
+});
+
 // Add native tabGroups event listeners for hybrid functionality
 setupTabGroupListeners(hasTabGroups, DEBUG);
 

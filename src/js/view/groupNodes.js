@@ -499,6 +499,17 @@ export function makeGroupNode(group) {
       event.stopPropagation();
       await groups.setActive(group.id);
       await browser.tabs.create({ active: true });
+
+      if (window.location.pathname.includes('view.html')) {
+        try {
+          const viewTab = await browser.tabs.getCurrent();
+          if (viewTab) {
+            await browser.tabs.remove(viewTab.id);
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
     },
     false,
   );

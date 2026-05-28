@@ -45,6 +45,17 @@ export function makeTabNode(tab) {
       event.stopPropagation();
 
       await browser.tabs.update(tab.id, { active: true });
+
+      if (window.location.pathname.includes('view.html')) {
+        try {
+          const viewTab = await browser.tabs.getCurrent();
+          if (viewTab) {
+            await browser.tabs.remove(viewTab.id);
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
     },
     false,
   );
@@ -126,7 +137,7 @@ export function updateTabNode(tab) {
  */
 export async function setActiveTabNode(tabId) {
   let lastActive = -1;
-  let lastAccessed = 0;
+  let lastAccessed = -1;
 
   await forEachTabSync((tab) => {
     // Can race if deleteTabNode is called at the same time (e.g. every time
@@ -142,8 +153,10 @@ export async function setActiveTabNode(tabId) {
     }
   });
 
-  tabNodes[lastActive].tab.classList.add('selected');
-  activeTabId = lastActive;
+  if (lastActive !== -1 && tabNodes[lastActive]) {
+    tabNodes[lastActive].tab.classList.add('selected');
+    activeTabId = lastActive;
+  }
 }
 
 // Remove selected from all other thumbnails, add to tab with id given

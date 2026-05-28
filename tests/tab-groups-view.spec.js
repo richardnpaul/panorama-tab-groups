@@ -26,7 +26,9 @@ test.describe('Tab Groups View E2E', () => {
 
     // Create a group using the UI to ensure at least one .group element exists
     await popupPage.waitForSelector('#newGroup');
-    await popupPage.click('#newGroup');
+    if ((await popupPage.locator('.group').count()) === 0) {
+      await popupPage.click('#newGroup');
+    }
 
     // Wait for the view to initialize the group
     await popupPage.waitForSelector('.group', { timeout: 10000 });
