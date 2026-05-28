@@ -24,18 +24,34 @@ export async function addRefreshMenuItem() {
     // Ignore error if menu item doesn't exist
   }
 
-  browser.contextMenus.create({
-    id: 'refresh-spacer',
-    type: 'separator',
-    parentId: 'send-tab',
-    contexts: ['tab'],
-  });
-  browser.contextMenus.create({
-    id: 'refresh-groups',
-    title: browser.i18n.getMessage('refreshGroups'),
-    parentId: 'send-tab',
-    contexts: ['tab'],
-  });
+  try {
+    browser.contextMenus.create({
+      id: 'refresh-spacer',
+      type: 'separator',
+      parentId: 'send-tab',
+      contexts: ['tab'],
+    });
+    browser.contextMenus.create({
+      id: 'refresh-groups',
+      title: browser.i18n.getMessage('refreshGroups'),
+      parentId: 'send-tab',
+      contexts: ['tab'],
+    });
+  } catch (e) {
+    // Chromium does not support 'tab' context
+    browser.contextMenus.create({
+      id: 'refresh-spacer',
+      type: 'separator',
+      parentId: 'send-tab',
+      contexts: ['all'],
+    });
+    browser.contextMenus.create({
+      id: 'refresh-groups',
+      title: browser.i18n.getMessage('refreshGroups'),
+      parentId: 'send-tab',
+      contexts: ['all'],
+    });
+  }
 }
 
 /**
@@ -63,12 +79,22 @@ export async function createMenuList() {
     }
 
     groups.forEach((group) => {
-      browser.contextMenus.create({
-        id: String(group.id),
-        title: `${group.id}: ${group.name}`,
-        parentId: 'send-tab',
-        contexts: ['tab'],
-      });
+      try {
+        browser.contextMenus.create({
+          id: String(group.id),
+          title: `${group.id}: ${group.name}`,
+          parentId: 'send-tab',
+          contexts: ['tab'],
+        });
+      } catch (e) {
+        // Chromium does not support 'tab' context, fallback to 'all' or ignore
+        browser.contextMenus.create({
+          id: String(group.id),
+          title: `${group.id}: ${group.name}`,
+          parentId: 'send-tab',
+          contexts: ['all'],
+        });
+      }
     });
     await addRefreshMenuItem();
   } catch (error) {

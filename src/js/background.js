@@ -207,9 +207,23 @@ async function setActionTitle(windowId, activeGroup = null) {
       name = group.name;
     }
   });
-  browser.action.setTitle({ title: `Active Group: ${name}`, windowId });
-  browser.action.setBadgeText({ text: String(groups.length), windowId });
-  browser.action.setBadgeBackgroundColor({ color: '#666666' });
+  try {
+    await browser.action.setTitle({ title: `Active Group: ${name}`, windowId });
+    await browser.action.setBadgeText({
+      text: String(groups.length),
+      windowId,
+    });
+    await browser.action.setBadgeBackgroundColor({ color: '#666666' });
+  } catch (error) {
+    // Chromium does not support windowId for action API, fallback to global
+    try {
+      await browser.action.setTitle({ title: `Active Group: ${name}` });
+      await browser.action.setBadgeText({ text: String(groups.length) });
+      await browser.action.setBadgeBackgroundColor({ color: '#666666' });
+    } catch (fallbackError) {
+      console.warn('Failed to set action title/badge:', fallbackError);
+    }
+  }
 }
 
 async function toggleVisibleTabs(activeGroup, noTabSelected) {
@@ -1172,12 +1186,25 @@ async function createGroupInWindowIfMissing(browserWindow) {
     console.debug(`No groups found for window ${browserWindow.id}!`);
     await createGroupInWindow(browserWindow);
   }
-  browser.action.setTitle({
-    title: 'Active Group: Unnamed group',
-    windowId: browserWindow.id,
-  });
-  browser.action.setBadgeText({ text: '1', windowId: browserWindow.id });
-  browser.action.setBadgeBackgroundColor({ color: '#666666' });
+  try {
+    await browser.action.setTitle({
+      title: 'Active Group: None',
+      windowId: browserWindow.id,
+    });
+    await browser.action.setBadgeText({
+      text: '1',
+      windowId: browserWindow.id,
+    });
+    await browser.action.setBadgeBackgroundColor({ color: '#666666' });
+  } catch (error) {
+    try {
+      await browser.action.setTitle({ title: 'Active Group: None' });
+      await browser.action.setBadgeText({ text: '1' });
+      await browser.action.setBadgeBackgroundColor({ color: '#666666' });
+    } catch (fallbackError) {
+      console.warn('Failed to set action title/badge:', fallbackError);
+    }
+  }
 }
 /** Make sure each window has a group */
 async function setupWindows() {

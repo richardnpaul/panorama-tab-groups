@@ -349,6 +349,7 @@ export const test = base.extend({
     let context;
 
     if (browserName === 'chromium') {
+      fs.rmSync(userDataDir, { recursive: true, force: true });
       fs.mkdirSync(userDataDir, { recursive: true });
       // Use the full Chromium binary (not chrome-headless-shell) so that
       // MV3 extension service workers are registered. The headless shell

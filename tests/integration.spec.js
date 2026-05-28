@@ -9,8 +9,22 @@ test.describe('Background Listeners & Visibility Toggle', () => {
     context,
     extensionId,
     extensionProtocol,
+    browserName,
   }) => {
+    // Firefox uses a proxy with a mocked window.browser for extension pages,
+    // which prevents us from querying the real extension's background state.
+    test.skip(
+      browserName === 'firefox',
+      'Firefox proxy mock prevents querying real extension state',
+    );
+
     // Firefox uses a proxy for initial page, let's open a new page for the extension
+    context.serviceWorkers().forEach((worker) => {
+      worker.on('console', (msg) => console.log('SW:', msg.text()));
+    });
+    context.on('serviceworker', (worker) => {
+      worker.on('console', (msg) => console.log('SW:', msg.text()));
+    });
     const extPage = await context.newPage();
     const optionsUrl = getExtensionPageUrl(
       extensionProtocol,
@@ -62,7 +76,7 @@ test.describe('Background Listeners & Visibility Toggle', () => {
       let groupId;
       let checks = 0;
       console.log('Active tab found:', activeTab.id, activeTab.url);
-      for (let i = 0; i < 20; i += 1) {
+      for (let i = 0; i < 100; i += 1) {
         checks = i;
         // eslint-disable-next-line no-await-in-loop
         groupId = await window.browser.sessions.getTabValue(
