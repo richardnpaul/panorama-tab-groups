@@ -177,7 +177,7 @@ test('native browser groups option disabled in chromium', async ({
 
   // Verify the error text is visible
   const warningText = page.locator('#nativeGroupsWarning');
-  await expect(warningText).toHaveClass(/error-text/);
+  await expect(warningText).toHaveClass(/warning-text/);
   await expect(warningText).toContainText('not supported');
 });
 
