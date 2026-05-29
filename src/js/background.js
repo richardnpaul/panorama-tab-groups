@@ -1571,9 +1571,14 @@ browser.tabs.onDetached.addListener(tabDetached);
 browser.tabs.onActivated.addListener(tabActivated);
 
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.url) {
-    const viewUrl = browser.runtime.getURL('view.html');
-    if (changeInfo.url === viewUrl || tab.url === viewUrl) {
+  const viewUrl = browser.runtime.getURL('view.html');
+  if (
+    changeInfo.url === viewUrl ||
+    tab.url === viewUrl ||
+    tab.pendingUrl === viewUrl
+  ) {
+    const currentGroupId = await stateManager.getTabGroup(tabId);
+    if (currentGroupId !== -1) {
       await stateManager.setTabGroup(tabId, -1);
       const useNativeGroups = await shouldUseNativeGroups();
       if (useNativeGroups) {
