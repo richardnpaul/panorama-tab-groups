@@ -4,7 +4,11 @@
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "vscode",
-  "runArgs": ["--shm-size=1g", "--security-opt", "seccomp=unconfined"],
+  "runArgs": [
+    "--shm-size=1g",
+    "--security-opt",
+    "seccomp=unconfined"
+  ],
   "mounts": [
     {
       "source": "panorama-node-modules",
@@ -31,7 +35,10 @@
     "DISPLAY": ":1",
     "PLAYWRIGHT_FIREFOX_HEADED": "0"
   },
-  "forwardPorts": [6080, 5901],
+  "forwardPorts": [
+    6080,
+    5901
+  ],
   "portsAttributes": {
     "6080": {
       "label": "noVNC Desktop (browser)",
@@ -42,8 +49,8 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "sudo mkdir -p /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache /home/vscode/.npm && sudo chown -R vscode:vscode /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache /home/vscode/.npm && npm ci && npx playwright install firefox chromium",
-  "postStartCommand": "bash .devcontainer/start-desktop.sh",
+  "postCreateCommand": "./.devcontainer/post-cmd.sh",
+  "postStartCommand": "./.devcontainer/post-cmd.sh && ./.devcontainer/start-desktop.sh",
   "customizations": {
     "vscode": {
       "extensions": [
