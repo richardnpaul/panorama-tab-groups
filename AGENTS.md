@@ -69,7 +69,7 @@ Agents use HTML comment tokens to communicate completion status. The coordinator
 ## Coding Workflow
 
 1. Always use StateManager — never call `browser.storage` or `browser.sessions` directly
-2. Always run `npm run format`, `npm run lint`, and relevant tests (unit and E2E) before finishing any implementation pass. The unit and E2E tests can be narrowed rather than running the whole suite unless the changes involved might have broader reach.
+2. Always run `npm run format`, `npm run lint`, and relevant tests (unit and E2E) before finishing any implementation pass. The unit and E2E tests can be narrowed rather than running the whole suite unless the changes involved might have broader reach. You must run `npm run test:coverage` to ensure unit test coverage is maintained or improved, ideally aiming for 100% coverage on touched code using Jest mocks for external interfaces.
 3. Every new feature must have at least one new Playwright E2E test case
 4. Plans in `docs/plans/` serve as the authoritative record of design decisions
 5. Always write tests to debug unexpected behaviour rather than writing adhoc scripts

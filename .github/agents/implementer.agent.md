@@ -68,12 +68,11 @@ Load and follow these skills before writing any code:
 
 ### 3. Lint and Test Protocol
 
-Before handing off to the reviewer, you MUST ensure that linting, unit tests, and E2E tests pass for your changes:
-
-1. **Linting**: Run `npm run lint`. Fix any errors.
-2. **Unit Tests**: Run `npm run test` (or a narrowed subset if applicable, e.g., `npm run test -- tests/<specific_test>.js`).
-3. **E2E Tests**: Run `npm run test:e2e` (or a narrowed subset if applicable, e.g., `npm run test:e2e tests/<specific_spec>.js -g "Test Name"`).
-   - Only run the full test suite if your changes have a broad impact on the codebase. Otherwise, run targeted tests to save time and reduce flakiness.
+1.  Always run `npm run format` and `npm run lint` before handing off.
+2.  Always run `npm run test:unit` and `npm run test:coverage` to verify core logic and maintain code coverage.
+3.  Ensure unit test coverage is maintained or improved (aim for 100% on touched code using Jest mocks for external interfaces).
+4.  Run E2E tests: `npx playwright test`. You may narrow the test scope if your changes are isolated.
+5.  If any check fails, do **not** hand off. Fix the issue first.
 
 **If any checks fail:**
 
