@@ -617,7 +617,7 @@ async function toggleView() {
 }
 
 /** Callback function which will be called whenever a tab is opened */
-async function tabCreated(tab) {
+export async function tabCreated(tab) {
   if (backgroundState.openingBackup) {
     return;
   }
@@ -855,15 +855,19 @@ async function tabCreated(tab) {
   }
 }
 
-async function tabAttached(tabId) {
+export async function tabAttached(tabId, attachInfo) {
   // Wait for initialization to complete
   await waitForInitialization();
+
+  // Forcibly assign the tab to the active group of the new window
+  const activeGroup = await stateManager.getActiveGroup(attachInfo.newWindowId);
+  await stateManager.setTabGroup(tabId, activeGroup);
 
   const tab = await browser.tabs.get(tabId);
   await tabCreated(tab);
 }
 
-async function tabDetached(tabId) {
+export async function tabDetached(tabId) {
   await browser.sessions.removeTabValue(tabId, 'groupId');
 }
 

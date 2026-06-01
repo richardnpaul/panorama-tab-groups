@@ -332,6 +332,15 @@ async function tabCreated(tab, retryCount = 0) {
 
     // Skip if group doesn't exist (system group or deleted group)
     if (!group) {
+      if (retryCount < 20) {
+        console.debug(
+          `[View] tabCreated: Group ${groupId} not found for tab ${tab.id}, retrying (attempt ${retryCount + 1}/20)...`,
+        );
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        return tabCreated(tab, retryCount + 1);
+      }
       console.warn(
         `[View] tabCreated: Skipping tab ${tab.id} - group ${groupId} not found in view`,
       );

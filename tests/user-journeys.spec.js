@@ -42,6 +42,7 @@ test.describe('User Journeys', () => {
     // Create a group using the UI to ensure at least one .group element exists
     if ((await page.locator('.group').count()) === 0) {
       await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
     }
 
     // Wait for at least one group to render so screenshots capture the full UI
@@ -72,6 +73,7 @@ test.describe('User Journeys', () => {
     // Create a group using the UI to ensure at least one .group element exists
     if ((await page.locator('.group').count()) === 0) {
       await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
     }
 
     // Wait for the view to initialize the group
@@ -189,6 +191,7 @@ test.describe('User Journeys', () => {
 
     if ((await page.locator('.group').count()) === 0) {
       await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
     }
 
     const groupElement = page.locator('.group').first();
@@ -300,6 +303,7 @@ test.describe('User Journeys', () => {
 
     if ((await page.locator('.group').count()) === 0) {
       await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
     }
 
     // 2. User creates a new tab group named "Group A" in Window A.
@@ -343,6 +347,9 @@ test.describe('User Journeys', () => {
     // 4. Window B does not show "Group A". It displays its own isolated state (default group).
     if ((await newPage.locator('.group').count()) === 0) {
       await newPage.click('#newGroup');
+      await expect(newPage.locator('.group')).toHaveCount(1, {
+        timeout: 10000,
+      });
     }
     const groupElementB = newPage.locator('.group').first();
     await expect(groupElementB).toBeVisible({ timeout: 10000 });
@@ -351,7 +358,12 @@ test.describe('User Journeys', () => {
     );
 
     // 5. User creates a new tab group "Group B" in Window B.
+    const initialGroupCountNewGroupB = await newPage.locator('.group').count();
     await newPage.click('#newGroup');
+    await expect(newPage.locator('.group')).toHaveCount(
+      initialGroupCountNewGroupB + 1,
+      { timeout: 10000 },
+    );
     const newGroupB = newPage.locator('.group').last();
     const headerB = newGroupB.locator('.header').first();
     await headerB.dblclick();
@@ -381,6 +393,7 @@ test.describe('User Journeys', () => {
 
     if ((await page.locator('.group').count()) === 0) {
       await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
     }
     const groupElementA = page.locator('.group').first();
     const headerA = groupElementA.locator('.header').first();
@@ -424,6 +437,9 @@ test.describe('User Journeys', () => {
 
     if ((await newPage.locator('.group').count()) === 0) {
       await newPage.click('#newGroup');
+      await expect(newPage.locator('.group')).toHaveCount(1, {
+        timeout: 10000,
+      });
     }
     const groupElementB = newPage.locator('.group').first();
     const headerB = groupElementB.locator('.header').first();
@@ -471,5 +487,338 @@ test.describe('User Journeys', () => {
         'Skipping native session restore verification in Chromium due to Playwright limitations.',
       );
     }
+  });
+
+  test('Journey: Move tab between existing groups', async ({
+    page,
+    extensionId,
+    extensionProtocol,
+  }) => {
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
+    }
+
+    const groupA = page.locator('.group').first();
+    const headerA = groupA.locator('.header').first();
+    await headerA.dblclick();
+    await headerA.locator('input').fill('Group A');
+    await headerA.locator('input').press('Enter');
+    await expect(headerA.locator('.name')).toHaveText('Group A', {
+      timeout: 5000,
+    });
+
+    const idA = await groupA.locator('.content').getAttribute('groupId');
+    await page.evaluate(async (id) => {
+      const win = await browser.windows.getCurrent();
+      await browser.sessions.setWindowValue(win.id, 'activeGroup', id);
+      const tab = await browser.tabs.create({ active: false });
+      await browser.sessions.setTabValue(tab.id, 'groupId', id);
+    }, idA);
+    await page.reload();
+    await expect(page.locator('body.view-ready')).toBeVisible();
+    const viewPage = page;
+
+    // Create Group B
+    const initialGroupCountGroupB = await viewPage.locator('.group').count();
+    await viewPage.click('#newGroup');
+    await expect(viewPage.locator('.group')).toHaveCount(
+      initialGroupCountGroupB + 1,
+      { timeout: 10000 },
+    );
+    const groupB = viewPage.locator('.group').last();
+    const headerB = groupB.locator('.header').first();
+    await headerB.dblclick();
+    await headerB.locator('input').fill('Group B');
+    await headerB.locator('input').press('Enter');
+    await expect(headerB.locator('.name')).toHaveText('Group B', {
+      timeout: 5000,
+    });
+
+    const idB = await groupB.locator('.content').getAttribute('groupId');
+    await page.evaluate(async (id) => {
+      const win = await browser.windows.getCurrent();
+      await browser.sessions.setWindowValue(win.id, 'activeGroup', id);
+      const tab1 = await browser.tabs.create({ active: false });
+      const tab2 = await browser.tabs.create({ active: false });
+      await browser.sessions.setTabValue(tab1.id, 'groupId', id);
+      await browser.sessions.setTabValue(tab2.id, 'groupId', id);
+    }, idB);
+    await page.reload();
+    await expect(page.locator('body.view-ready')).toBeVisible();
+
+    const groupALatest = viewPage
+      .locator('.group')
+      .filter({ hasText: 'Group A' })
+      .first();
+    const groupBLatest = viewPage
+      .locator('.group')
+      .filter({ hasText: 'Group B' })
+      .first();
+
+    await expect(groupALatest.locator('.tab')).toHaveCount(1, {
+      timeout: 10000,
+    });
+    await expect(groupBLatest.locator('.tab')).toHaveCount(2, {
+      timeout: 10000,
+    });
+
+    // Use page.evaluate for reliable HTML5 drag and drop
+    const groupIdA = await groupALatest
+      .locator('.content')
+      .getAttribute('groupId');
+    const groupIdB = await groupBLatest
+      .locator('.content')
+      .getAttribute('groupId');
+
+    await viewPage.evaluate(
+      ({ a, b }) => {
+        const dataTransfer = new DataTransfer();
+        const source = document.querySelector(`.content[groupid="${a}"] .tab`);
+        const target = document.querySelector(`.content[groupid="${b}"]`);
+
+        source.dispatchEvent(new DragEvent('dragstart', { dataTransfer }));
+        target.dispatchEvent(new DragEvent('drop', { dataTransfer }));
+        source.dispatchEvent(new DragEvent('dragend', { dataTransfer }));
+      },
+      { a: groupIdA, b: groupIdB },
+    );
+
+    // Wait for the UI to update. Group A should have 0 tabs, Group B should have 3 tabs.
+    await expect(groupALatest.locator('.tab')).toHaveCount(0, {
+      timeout: 10000,
+    });
+    await expect(groupBLatest.locator('.tab')).toHaveCount(3, {
+      timeout: 10000,
+    });
+  });
+
+  test('Journey: Drag tab outside to create a new group', async ({
+    page,
+    extensionId,
+    extensionProtocol,
+  }) => {
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
+    }
+
+    const groupA = page.locator('.group').first();
+    const idA = await groupA.locator('.content').getAttribute('groupId');
+    await page.evaluate(async (id) => {
+      const win = await browser.windows.getCurrent();
+      await browser.sessions.setWindowValue(win.id, 'activeGroup', id);
+      const tab = await browser.tabs.create({ active: false });
+      await browser.sessions.setTabValue(tab.id, 'groupId', id);
+    }, idA);
+    await page.reload();
+    await expect(page.locator('body.view-ready')).toBeVisible();
+    const viewPage = page;
+
+    const groupALatest = viewPage.locator('.group').first();
+    await expect(groupALatest.locator('.tab')).toHaveCount(1, {
+      timeout: 10000,
+    });
+
+    const initialGroupCount = await viewPage.locator('.group').count();
+    const groupIdA = await groupALatest
+      .locator('.content')
+      .getAttribute('groupId');
+
+    // Drag to empty space in #groups
+    await viewPage.evaluate(
+      ({ a }) => {
+        const dataTransfer = new DataTransfer();
+        const source = document.querySelector(`.content[groupid="${a}"] .tab`);
+        const target = document.querySelector('#groups');
+
+        source.dispatchEvent(
+          new DragEvent('dragstart', { dataTransfer, clientX: 0, clientY: 0 }),
+        );
+        target.dispatchEvent(
+          new DragEvent('drop', { dataTransfer, clientX: 200, clientY: 200 }),
+        );
+        source.dispatchEvent(new DragEvent('dragend', { dataTransfer }));
+      },
+      { a: groupIdA },
+    );
+
+    // A new group should be created
+    await expect(viewPage.locator('.group')).toHaveCount(
+      initialGroupCount + 1,
+      { timeout: 10000 },
+    );
+
+    const newGroup = viewPage.locator('.group').last();
+    await expect(newGroup.locator('.tab')).toHaveCount(1);
+    await expect(groupALatest.locator('.tab')).toHaveCount(0);
+  });
+
+  test('Journey: Move tab between OS windows', async ({
+    context,
+    page,
+    extensionId,
+    extensionProtocol,
+    browserName,
+  }) => {
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
+    }
+
+    const groupA = page.locator('.group').first();
+    const headerA = groupA.locator('.header').first();
+    await headerA.dblclick();
+    await headerA.locator('input').fill('Group A');
+    await headerA.locator('input').press('Enter');
+    await expect(headerA.locator('.name')).toHaveText('Group A', {
+      timeout: 5000,
+    });
+
+    const idA = await groupA.locator('.content').getAttribute('groupId');
+    await page.evaluate(async (id) => {
+      const win = await browser.windows.getCurrent();
+      await browser.sessions.setWindowValue(win.id, 'activeGroup', id);
+      const tab = await browser.tabs.create({ active: false });
+      await browser.sessions.setTabValue(tab.id, 'groupId', id);
+    }, idA);
+    await page.reload();
+    await expect(page.locator('body.view-ready')).toBeVisible();
+    const viewPageA = page;
+
+    const tabElement = viewPageA
+      .locator('.group')
+      .first()
+      .locator('.tab')
+      .first();
+    const tabIdStr = await tabElement.getAttribute('tabId');
+    const tabId = parseInt(tabIdStr, 10);
+
+    // Open Window B
+    let viewPageB;
+    let windowBId;
+    if (browserName === 'chromium') {
+      const pagePromise = context.waitForEvent('page');
+      const worker = context.serviceWorkers()[0];
+      windowBId = await worker.evaluate(
+        async (url) => {
+          const win = await chrome.windows.create({ url });
+          return win.id;
+        },
+        getExtensionPageUrl(extensionProtocol, extensionId, 'view.html'),
+      );
+      viewPageB = await pagePromise;
+    } else {
+      viewPageB = await context.newPage();
+      windowBId = 4; // Distinct mock window ID
+      await gotoExtensionPage(
+        viewPageB,
+        extensionProtocol,
+        extensionId,
+        `view.html?windowId=${windowBId}`,
+      );
+    }
+    await expect(viewPageB.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if (browserName === 'chromium') {
+      const worker = context.serviceWorkers()[0];
+      await worker.evaluate(
+        async ({ tId, winId }) => {
+          await chrome.tabs.move(tId, { windowId: winId, index: -1 });
+        },
+        { tId: tabId, winId: windowBId },
+      );
+    } else {
+      console.log(
+        'Skipping native tab move verification in Firefox mock due to single-window limitation.',
+      );
+      return;
+    }
+
+    // Verify it disappeared from A and appeared in B
+    const groupALatest = viewPageA
+      .locator('.group')
+      .filter({ hasText: 'Group A' })
+      .first();
+    await expect(groupALatest.locator('.tab')).toHaveCount(0, {
+      timeout: 10000,
+    });
+
+    const groupB = viewPageB.locator('.group').first();
+    await expect(groupB.locator('.tab')).toHaveCount(1, { timeout: 10000 });
+  });
+
+  test('Journey: Toggle off native tab groups (Firefox only)', async ({
+    page,
+    extensionId,
+    extensionProtocol,
+    browserName,
+  }) => {
+    if (browserName !== 'firefox') {
+      test.skip();
+      return;
+    }
+
+    // Disable native groups via options page
+    await gotoExtensionPage(
+      page,
+      extensionProtocol,
+      extensionId,
+      'options.html',
+    );
+    const nativeCheckbox = page.locator('#useNativeGroups');
+    if (await nativeCheckbox.isChecked()) {
+      await nativeCheckbox.uncheck();
+    }
+
+    // Go to view
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
+    }
+    const newGroup = page.locator('.group').last();
+    const idNew = await newGroup.locator('.content').getAttribute('groupId');
+    await page.evaluate(async (id) => {
+      const win = await browser.windows.getCurrent();
+      await browser.sessions.setWindowValue(win.id, 'activeGroup', id);
+      const tab = await browser.tabs.create({ active: false });
+      await browser.sessions.setTabValue(tab.id, 'groupId', id);
+    }, idNew);
+    await page.reload();
+    await expect(page.locator('body.view-ready')).toBeVisible();
+    const viewPage = page;
+
+    // Evaluate via Playwright's page to check tabGroups
+    const tabGroupsCount = await viewPage.evaluate(async () => {
+      if (typeof browser.tabGroups?.query === 'function') {
+        const groups = await browser.tabGroups.query({});
+        return groups.length;
+      }
+      return 0;
+    });
+
+    expect(tabGroupsCount).toBe(0);
   });
 });
