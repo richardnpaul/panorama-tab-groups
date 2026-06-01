@@ -317,13 +317,13 @@ async function tabCreated(tab, retryCount = 0) {
     const groupId = await getGroupId(tab.id);
 
     // Race condition mitigation: If groupId is undefined, background script
-    // may not have assigned it yet. Retry up to 3 times with 50ms delays.
-    if (groupId === undefined && retryCount < 3) {
+    // may not have assigned it yet. Retry up to 20 times with 100ms delays.
+    if (groupId === undefined && retryCount < 20) {
       console.debug(
-        `[View] tabCreated: Tab ${tab.id} has undefined groupId, retrying (attempt ${retryCount + 1}/3)...`,
+        `[View] tabCreated: Tab ${tab.id} has undefined groupId, retrying (attempt ${retryCount + 1}/20)...`,
       );
       await new Promise((resolve) => {
-        setTimeout(resolve, 50);
+        setTimeout(resolve, 100);
       });
       return tabCreated(tab, retryCount + 1);
     }
