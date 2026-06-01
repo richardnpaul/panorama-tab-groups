@@ -32,7 +32,6 @@ test.describe('User Journeys', () => {
     extensionId,
     extensionProtocol,
   }) => {
-    const page = await context.newPage();
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
 
     // Wait for the view to fully initialize
