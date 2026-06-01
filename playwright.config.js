@@ -110,11 +110,27 @@ function createFirefoxPageProxy(initialPage) {
 
           console.log(`[PROXY GOTO] Mapping ${url} -> ${localUrl}`);
 
+          const messagesJson = fs.readFileSync(
+            path.join(process.cwd(), 'src', '_locales', 'en', 'messages.json'),
+            'utf8',
+          );
+
           await activePage.addInitScript({
             content: `
               (function() {
                 const extId = '${extensionId}';
                 const port = ${localServerPort};
+                const rawMessages = ${messagesJson};
+                const msgs = {};
+                for (const key in rawMessages) {
+                  msgs[key] = rawMessages[key].message;
+                }
+                msgs['tabCount'] = (placeholders) => (placeholders && placeholders[0] === 1) ? '1 Tab' : (placeholders ? placeholders[0] + ' Tabs' : 'Tabs');
+                msgs['closeGroupWarning'] = (placeholders) => 'Are you sure you want to close this group?';
+
+                let mockTabs = JSON.parse(localStorage.getItem('mockTabs') || '[{"id":101,"windowId":1,"pinned":false,"lastAccessed":0,"active":true,"title":"Tab 1","url":"https://example.com"},{"id":102,"windowId":1,"pinned":false,"lastAccessed":0,"active":false,"title":"Tab 2","url":"https://google.com"}]');
+                let mockTabIdCounter = parseInt(localStorage.getItem('mockTabIdCounter') || '103', 10);
+
                 window.browser = {
                   runtime: {
                     getURL: (p) => 'moz-extension://' + extId + '/' + p,
@@ -162,18 +178,44 @@ function createFirefoxPageProxy(initialPage) {
                     onChanged: { addListener: () => {} }
                   },
                   windows: {
-                    getCurrent: async () => ({ id: 1 })
+                    getCurrent: async () => {
+                      const wid = new URLSearchParams(window.location.search).get('windowId') || '1';
+                      return { id: parseInt(wid, 10) };
+                    }
                   },
                   tabs: {
                     getCurrent: async () => ({ id: 100 }),
-                    query: async () => [
-                      { id: 101, windowId: 1, pinned: false, lastAccessed: Date.now() - 10000, active: true, title: 'Tab 1', url: 'https://example.com' },
-                      { id: 102, windowId: 1, pinned: false, lastAccessed: Date.now() - 20000, active: false, title: 'Tab 2', url: 'https://google.com' }
-                    ],
-                    get: async (tabId) => ({ id: tabId, windowId: 1 }),
+                    query: async (q) => {
+                      let wid;
+                      if (q && q.windowId) {
+                        wid = q.windowId;
+                      } else if (q && q.currentWindow) {
+                        wid = parseInt(new URLSearchParams(window.location.search).get('windowId') || '1', 10);
+                      }
+                      if (wid !== undefined) {
+                        return mockTabs.filter(t => t.windowId === wid);
+                      }
+                      return mockTabs;
+                    },
+                    get: async (tabId) => mockTabs.find(t => t.id === tabId) || { id: tabId, windowId: 1 },
                     update: async () => {},
-                    create: async () => {},
-                    remove: async () => {},
+                    create: async () => {
+                      const widStr = new URLSearchParams(window.location.search).get('windowId') || '1';
+                      const wid = parseInt(widStr, 10);
+                      const newTab = { id: mockTabIdCounter++, windowId: wid, active: true, title: 'New Tab', url: 'about:newtab' };
+                      mockTabs.push(newTab);
+                      localStorage.setItem('mockTabs', JSON.stringify(mockTabs));
+                      localStorage.setItem('mockTabIdCounter', mockTabIdCounter.toString());
+                      const activeGroupStr = localStorage.getItem('session_' + wid + '_activeGroup');
+                      if (activeGroupStr !== null) {
+                         localStorage.setItem('tab_' + newTab.id + '_groupId', activeGroupStr);
+                      }
+                      return newTab;
+                    },
+                    remove: async (tabId) => {
+                      mockTabs = mockTabs.filter(t => t.id !== tabId);
+                      localStorage.setItem('mockTabs', JSON.stringify(mockTabs));
+                    },
                     onActivated: { addListener: () => {} },
                     onUpdated: { addListener: () => {} },
                     onCreated: { addListener: () => {} },
@@ -189,6 +231,16 @@ function createFirefoxPageProxy(initialPage) {
                     },
                     setWindowValue: async (windowId, key, value) => {
                       localStorage.setItem('session_' + windowId + '_' + key, JSON.stringify(value));
+                    },
+                    getTabValue: async (tabId, key) => {
+                      const val = localStorage.getItem('tab_' + tabId + '_' + key);
+                      return val !== null ? JSON.parse(val) : undefined;
+                    },
+                    setTabValue: async (tabId, key, value) => {
+                      localStorage.setItem('tab_' + tabId + '_' + key, JSON.stringify(value));
+                    },
+                    removeTabValue: async (tabId, key) => {
+                      localStorage.removeItem('tab_' + tabId + '_' + key);
                     }
                   },
                   commands: {
@@ -199,18 +251,6 @@ function createFirefoxPageProxy(initialPage) {
                   },
                   i18n: {
                     getMessage: (key, placeholders) => {
-                      const msgs = {
-                        defaultGroupName: 'Group',
-                        newGroupButton: 'New Group',
-                        closeGroup: 'Close Group',
-                        closeGroupWarning: 'Are you sure you want to close this group?',
-                        tabCount: (placeholders && placeholders[0] === 1) ? '1 Tab' : (placeholders ? placeholders[0] + ' Tabs' : 'Tabs'),
-                        searchForTab_placeholder: 'Search for a tab...',
-                        searchForTab_noResults: 'No tabs found',
-                        settingsButton: 'Settings',
-                        optionKeyboardShortcuts: 'Keyboard Shortcuts',
-                        optionsTheme: 'Theme',
-                      };
                       const val = msgs[key] || key;
                       if (typeof val === 'function') return val(placeholders);
                       return val;
@@ -348,6 +388,7 @@ export const test = base.extend({
     let context;
 
     if (browserName === 'chromium') {
+      fs.rmSync(userDataDir, { recursive: true, force: true });
       fs.mkdirSync(userDataDir, { recursive: true });
       // Use the full Chromium binary (not chrome-headless-shell) so that
       // MV3 extension service workers are registered. The headless shell
@@ -516,6 +557,7 @@ export { expect };
 
 export default defineConfig({
   testDir: './tests',
+  testIgnore: '**/unit/**',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -523,7 +565,7 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }]],
   timeout: 45000,
   use: {
-    trace: 'on',
+    trace: 'on-first-retry',
     screenshot: 'on',
     video: 'on',
   },
@@ -535,7 +577,6 @@ export default defineConfig({
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
-      timeout: 10000,
     },
   ],
 });

@@ -93,13 +93,7 @@ test('popup page loads', async ({ page, extensionId, extensionProtocol }) => {
   console.log('[TEST LOG] popup page loads test: complete');
 });
 
-test('options page loads', async ({
-  context,
-  extensionId,
-  extensionProtocol,
-}) => {
-  const page = await context.newPage();
-
+test('options page loads', async ({ page, extensionId, extensionProtocol }) => {
   await gotoExtensionPage(page, extensionProtocol, extensionId, 'options.html');
   await waitForOptionsPageReady(page);
   await expect(page.locator('#optionsTheme h2')).toHaveText(/Theme/i);
@@ -138,11 +132,17 @@ test('firefox can open a second extension page after popup navigation', async ({
 test('chromium service worker initializes without errors', async ({
   browserName,
   context,
+  page,
 }) => {
   if (browserName !== 'chromium') {
     test.skip();
     return;
   }
+
+  // Set the page to a descriptive text so the screenshot isn't just a blank white screen
+  await page.goto(
+    'data:text/html,<body style="background: white; padding: 2rem; font-family: sans-serif;"><h1>Service Worker Test</h1><p>Checking service worker initialization state...</p></body>',
+  );
 
   // Wait for the service worker to be available
   let [worker] = context.serviceWorkers();
@@ -156,4 +156,62 @@ test('chromium service worker initializes without errors', async ({
   const isAlive = await worker.evaluate(() => !!globalThis.chrome);
 
   expect(isAlive).toBe(true);
+});
+
+test('native browser groups option disabled in chromium', async ({
+  browserName,
+  page,
+  extensionId,
+  extensionProtocol,
+}) => {
+  // We only run this regression test for chromium, since firefox's behavior
+  // depends on the actual API availability which is complex to mock fully.
+  test.skip(browserName !== 'chromium', 'Chromium regression coverage only');
+
+  await gotoExtensionPage(page, extensionProtocol, extensionId, 'options.html');
+  await waitForOptionsPageReady(page);
+
+  const nativeGroupsCheckbox = page.locator('#useNativeGroups');
+  await expect(nativeGroupsCheckbox).toBeEnabled();
+  await expect(nativeGroupsCheckbox).toBeChecked();
+
+  // Verify the error text is visible
+  const warningText = page.locator('#nativeGroupsWarning');
+  await expect(warningText).toHaveClass(/warning-text/);
+  await expect(warningText).toContainText('not supported');
+});
+
+test.describe('Regression Tests', () => {
+  test('background service worker initializes without crashing', async ({
+    page,
+    extensionId,
+    extensionProtocol,
+  }) => {
+    // Navigate to an extension page to ensure we have extension privileges
+    const optionsUrl = getExtensionPageUrl(
+      extensionProtocol,
+      extensionId,
+      'options.html',
+    );
+    await page.goto(optionsUrl);
+
+    // Send a message to the background script to verify it's alive and hasn't crashed
+    // If the background script crashed during initialization (e.g., ReferenceError: window is not defined),
+    // this message will fail with "Could not establish connection. Receiving end does not exist."
+    const backgroundResponse = await page.evaluate(async () => {
+      try {
+        const response = await browser.runtime.sendMessage({
+          action: 'checkViewRefresh',
+        });
+        return { success: true, response };
+      } catch (error) {
+        return { success: false, error: error.message };
+      }
+    });
+
+    expect(
+      backgroundResponse.success,
+      `Background script crashed or is unresponsive. Error: ${backgroundResponse.error}`,
+    ).toBe(true);
+  });
 });

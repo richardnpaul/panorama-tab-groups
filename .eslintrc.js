@@ -31,4 +31,12 @@ module.exports = {
   globals: {
     browser: 'readonly',
   },
+  overrides: [
+    {
+      files: ['tests/unit/**/*.js'],
+      env: {
+        jest: true,
+      },
+    },
+  ],
 };

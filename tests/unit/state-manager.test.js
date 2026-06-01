@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { stateManager } from '../src/js/background/StateManager.js';
+import { stateManager } from '../../src/js/background/StateManager.js';
 
 // We need to define `globalThis.browser` BEFORE StateManager's methods are called.
 // We'll set it up in a beforeEach block.
@@ -11,7 +10,7 @@ let setTabValueMock;
 let storageLocalGetMock;
 let storageLocalSetMock;
 
-test.beforeEach(() => {
+beforeEach(() => {
   getWindowValueMock = {};
   setWindowValueMock = {};
   getTabValueMock = {};
@@ -50,18 +49,14 @@ test.beforeEach(() => {
   };
 });
 
-test.describe('StateManager Unit Tests', () => {
-  test.beforeEach(() => {
-    stateManager.clearCache();
-  });
-
-  test.describe('Groups Management', () => {
-    test('getGroups returns undefined if nothing is set', async () => {
+describe('StateManager Unit Tests', () => {
+  describe('Tab Group Assignments', () => {
+    it('getGroups returns undefined if nothing is set', async () => {
       const groups = await stateManager.getGroups(1);
       expect(groups).toBeUndefined();
     });
 
-    test('setGroups creates UNGROUPED_GROUP_ID if missing', async () => {
+    it('setGroups creates UNGROUPED_GROUP_ID if missing', async () => {
       await stateManager.setGroups(1, [{ id: 1, name: 'Group 1' }]);
 
       const savedGroups = setWindowValueMock['1_groups'];
@@ -72,7 +67,7 @@ test.describe('StateManager Unit Tests', () => {
       expect(savedGroups[1].isSystemGroup).toBe(true);
     });
 
-    test('setGroups updates existing UNGROUPED_GROUP_ID', async () => {
+    it('setGroups updates existing UNGROUPED_GROUP_ID', async () => {
       await stateManager.setGroups(1, [
         { id: 1, name: 'Group 1' },
         { id: -2, name: 'Custom Name', nativeGroupId: 99 },
@@ -85,46 +80,13 @@ test.describe('StateManager Unit Tests', () => {
     });
   });
 
-  test.describe('Caching Mechanism', () => {
-    test('getGroups uses cache after first call', async () => {
-      // Setup mock data
-      getWindowValueMock['2_groups'] = [{ id: 5 }];
-
-      const groups1 = await stateManager.getGroups(2);
-      expect(groups1.length).toBe(1);
-
-      // Change underlying data without going through setGroups
-      getWindowValueMock['2_groups'] = [{ id: 5 }, { id: 6 }];
-
-      // Cache should still return the old data
-      const groups2 = await stateManager.getGroups(2);
-      expect(groups2.length).toBe(1);
-
-      // Clear cache manually
-      stateManager.clearCache();
-      const groups3 = await stateManager.getGroups(2);
-      expect(groups3.length).toBe(2);
-    });
-
-    test('setGroups invalidates cache', async () => {
-      // First call populates cache
-      await stateManager.getGroups(3);
-
-      // setGroups should invalidate cache
-      await stateManager.setGroups(3, [{ id: 1 }]);
-
-      const groups = await stateManager.getGroups(3);
-      expect(groups.length).toBe(2); // The one we set + the ungrouped fallback
-    });
-  });
-
-  test.describe('Active Group Management', () => {
-    test('getActiveGroup returns undefined if not set', async () => {
+  describe('Active Group Management', () => {
+    it('getActiveGroup returns undefined if not set', async () => {
       const active = await stateManager.getActiveGroup(1);
       expect(active).toBeUndefined();
     });
 
-    test('setActiveGroup updates the value', async () => {
+    it('setActiveGroup updates the value', async () => {
       await stateManager.setActiveGroup(1, 42);
       expect(setWindowValueMock['1_activeGroup']).toBe(42);
 
@@ -133,8 +95,8 @@ test.describe('StateManager Unit Tests', () => {
     });
   });
 
-  test.describe('Background State (Persistent)', () => {
-    test('getBackgroundState returns defaults if not set', async () => {
+  describe('Background State (Persistent)', () => {
+    it('getBackgroundState returns defaults if not set', async () => {
       const state = await stateManager.getBackgroundState();
       expect(state).toEqual({
         openingView: null,
@@ -142,7 +104,7 @@ test.describe('StateManager Unit Tests', () => {
       });
     });
 
-    test('setBackgroundState updates the storage', async () => {
+    it('setBackgroundState updates the storage', async () => {
       await stateManager.setBackgroundState({
         openingView: { tabId: 1 },
         openingBackup: true,

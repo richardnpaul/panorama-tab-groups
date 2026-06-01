@@ -1,5 +1,14 @@
 if (typeof browser === 'undefined') {
   globalThis.browser = chrome;
+
+  // Polyfill menus API for Chromium
+  if (
+    globalThis.browser &&
+    !globalThis.browser.menus &&
+    globalThis.browser.contextMenus
+  ) {
+    globalThis.browser.menus = globalThis.browser.contextMenus;
+  }
 }
 
 // Polyfill for Chromium which uses contextMenus instead of menus
@@ -11,7 +20,7 @@ if (
   globalThis.browser.menus = new Proxy(globalThis.browser.contextMenus, {
     get(target, prop) {
       if (prop === 'create') {
-        return function (createProperties, callback) {
+        return function createPolyfill(createProperties, callback) {
           if (createProperties && createProperties.contexts) {
             createProperties.contexts = createProperties.contexts.map((c) =>
               c === 'tab' ? 'all' : c,
@@ -21,7 +30,7 @@ if (
         };
       }
       if (prop === 'update') {
-        return function (id, updateProperties, callback) {
+        return function updatePolyfill(id, updateProperties, callback) {
           if (updateProperties && updateProperties.contexts) {
             updateProperties.contexts = updateProperties.contexts.map((c) =>
               c === 'tab' ? 'all' : c,

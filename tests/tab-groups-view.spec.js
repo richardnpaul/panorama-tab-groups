@@ -4,11 +4,11 @@ function getExtensionPageUrl(extensionProtocol, extensionId, pagePath) {
   return `${extensionProtocol}://${extensionId}/${pagePath}`;
 }
 
-test.describe('Panorama View E2E', () => {
+test.describe('Tab Groups View E2E', () => {
   let popupPage;
 
   test.beforeEach(async ({ page, extensionId, extensionProtocol }) => {
-    // Open the panorama view tab first so we can create a group
+    // Open the Tab Groups view tab first so we can create a group
     popupPage = await page.context().newPage();
     popupPage.on('console', (msg) =>
       console.log('[Browser Console]', msg.type(), msg.text()),
@@ -26,7 +26,9 @@ test.describe('Panorama View E2E', () => {
 
     // Create a group using the UI to ensure at least one .group element exists
     await popupPage.waitForSelector('#newGroup');
-    await popupPage.click('#newGroup');
+    if ((await popupPage.locator('.group').count()) === 0) {
+      await popupPage.click('#newGroup');
+    }
 
     // Wait for the view to initialize the group
     await popupPage.waitForSelector('.group', { timeout: 10000 });

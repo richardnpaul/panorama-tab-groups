@@ -175,27 +175,23 @@ async function shouldUseNativeGroups() {
 }
 
 const backgroundState = {
-  openingView: null,
+  openingView: null, // Changed: stores { tabId, timeout, windowId } or null
   openingBackup: false,
 };
-const windowStatesMap = new Map();
-let viewRefreshOrdered = false;
-
-/* REPLACED */
 
 // Per-window state tracking for multi-window support
-/* REPLACED */ // windowId -> { viewTabId }
+const windowStates = new Map(); // windowId -> { viewTabId }
 
 function getWindowState(windowId) {
-  if (!windowStatesMap.has(windowId)) {
-    windowStatesMap.set(windowId, {
+  if (!windowStates.has(windowId)) {
+    windowStates.set(windowId, {
       viewTabId: null,
     });
   }
-  return windowStatesMap.get(windowId);
+  return windowStates.get(windowId);
 }
 
-/* REPLACED */
+let viewRefreshOrdered = false;
 
 /** Set extension icon tooltip and numGroups to icon * */
 async function setActionTitle(windowId, activeGroup = null) {
@@ -211,9 +207,23 @@ async function setActionTitle(windowId, activeGroup = null) {
       name = group.name;
     }
   });
-  browser.action.setTitle({ title: `Active Group: ${name}`, windowId });
-  browser.action.setBadgeText({ text: String(groups.length), windowId });
-  browser.action.setBadgeBackgroundColor({ color: '#666666' });
+  try {
+    await browser.action.setTitle({ title: `Active Group: ${name}`, windowId });
+    await browser.action.setBadgeText({
+      text: String(groups.length),
+      windowId,
+    });
+    await browser.action.setBadgeBackgroundColor({ color: '#666666' });
+  } catch (error) {
+    // Chromium does not support windowId for action API, fallback to global
+    try {
+      await browser.action.setTitle({ title: `Active Group: ${name}` });
+      await browser.action.setBadgeText({ text: String(groups.length) });
+      await browser.action.setBadgeBackgroundColor({ color: '#666666' });
+    } catch (fallbackError) {
+      console.warn('Failed to set action title/badge:', fallbackError);
+    }
+  }
 }
 
 async function toggleVisibleTabs(activeGroup, noTabSelected) {
@@ -459,7 +469,7 @@ async function moveTab(tabId, groupId) {
 async function menuClicked(info, tab) {
   switch (info.menuItemId) {
     case 'refresh-groups': {
-      browser.menus.removeAll();
+      browser.contextMenus.removeAll();
       createMenuList();
       break;
     }
@@ -507,7 +517,7 @@ async function menuClicked(info, tab) {
   }
 }
 
-browser.menus.onClicked.addListener(menuClicked);
+browser.contextMenus.onClicked.addListener(menuClicked);
 
 /** Shift current active group by offset */
 async function changeActiveGroupBy(offset) {
@@ -607,7 +617,7 @@ async function toggleView() {
 }
 
 /** Callback function which will be called whenever a tab is opened */
-async function tabCreated(tab) {
+export async function tabCreated(tab) {
   if (backgroundState.openingBackup) {
     return;
   }
@@ -845,15 +855,19 @@ async function tabCreated(tab) {
   }
 }
 
-async function tabAttached(tabId) {
+export async function tabAttached(tabId, attachInfo) {
   // Wait for initialization to complete
   await waitForInitialization();
+
+  // Forcibly assign the tab to the active group of the new window
+  const activeGroup = await stateManager.getActiveGroup(attachInfo.newWindowId);
+  await stateManager.setTabGroup(tabId, activeGroup);
 
   const tab = await browser.tabs.get(tabId);
   await tabCreated(tab);
 }
 
-async function tabDetached(tabId) {
+export async function tabDetached(tabId) {
   await browser.sessions.removeTabValue(tabId, 'groupId');
 }
 
@@ -1176,12 +1190,25 @@ async function createGroupInWindowIfMissing(browserWindow) {
     console.debug(`No groups found for window ${browserWindow.id}!`);
     await createGroupInWindow(browserWindow);
   }
-  browser.action.setTitle({
-    title: 'Active Group: Unnamed group',
-    windowId: browserWindow.id,
-  });
-  browser.action.setBadgeText({ text: '1', windowId: browserWindow.id });
-  browser.action.setBadgeBackgroundColor({ color: '#666666' });
+  try {
+    await browser.action.setTitle({
+      title: 'Active Group: None',
+      windowId: browserWindow.id,
+    });
+    await browser.action.setBadgeText({
+      text: '1',
+      windowId: browserWindow.id,
+    });
+    await browser.action.setBadgeBackgroundColor({ color: '#666666' });
+  } catch (error) {
+    try {
+      await browser.action.setTitle({ title: 'Active Group: None' });
+      await browser.action.setBadgeText({ text: '1' });
+      await browser.action.setBadgeBackgroundColor({ color: '#666666' });
+    } catch (fallbackError) {
+      console.warn('Failed to set action title/badge:', fallbackError);
+    }
+  }
 }
 /** Make sure each window has a group */
 async function setupWindows() {
@@ -1528,59 +1555,84 @@ async function init() {
     console.debug('Finished setup');
   }
 
+  // Set popup dynamically based on options
   const disablePopupView = options.view !== 'popup';
   if (disablePopupView) {
-    // Disable popup
-    browser.action.setPopup({
-      popup: '',
-    });
-
-    browser.action.onClicked.addListener(toggleView);
+    browser.action.setPopup({ popup: '' });
   } else {
-    // Enable popup
-    browser.action.setPopup({
-      popup: 'popup-view/index.html',
-    });
+    browser.action.setPopup({ popup: 'popup-view/index.html' });
   }
-
-  browser.commands.onCommand.addListener(triggerCommand);
-  browser.windows.onCreated.addListener(createGroupInWindowIfMissing);
-  browser.tabs.onCreated.addListener(tabCreated);
-  browser.tabs.onAttached.addListener(tabAttached);
-  browser.tabs.onDetached.addListener(tabDetached);
-  browser.tabs.onActivated.addListener(tabActivated);
-
-  // Add tab removal listener to cleanup openingView state
-  browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
-    // Clear openingView state if the view tab is removed before completion
-    if (backgroundState.openingView?.tabId === tabId) {
-      clearTimeout(backgroundState.openingView.timeout);
-      backgroundState.openingView = null;
-      if (DEBUG) {
-        console.debug('View tab removed during creation, cleared state');
-      }
-    }
-
-    // Clear per-window viewTabId tracking
-    const windowState = getWindowState(removeInfo.windowId);
-    if (windowState.viewTabId === tabId) {
-      windowState.viewTabId = null;
-    }
-  });
-
-  // Add window removal listener to cleanup per-window state
-  browser.windows.onRemoved.addListener((windowId) => {
-    windowStatesMap.delete(windowId);
-    if (DEBUG) {
-      console.debug(`Cleaned up state for closed window ${windowId}`);
-    }
-  });
-
-  // Add native tabGroups event listeners for hybrid functionality
-  setupTabGroupListeners(hasTabGroups, DEBUG);
 }
 
-init().catch((e) => console.error('INIT ERROR:', e.message, e.stack));
+// Register all event listeners synchronously at the top level
+// This is critical for Manifest V3 service workers to wake up on events
+browser.action.onClicked.addListener(toggleView);
+browser.commands.onCommand.addListener(triggerCommand);
+browser.windows.onCreated.addListener(createGroupInWindowIfMissing);
+browser.tabs.onCreated.addListener(tabCreated);
+browser.tabs.onAttached.addListener(tabAttached);
+browser.tabs.onDetached.addListener(tabDetached);
+browser.tabs.onActivated.addListener(tabActivated);
+
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  const viewUrl = browser.runtime.getURL('view.html');
+  if (
+    changeInfo.url === viewUrl ||
+    tab.url === viewUrl ||
+    tab.pendingUrl === viewUrl
+  ) {
+    const currentGroupId = await stateManager.getTabGroup(tabId);
+    if (currentGroupId !== -1) {
+      await stateManager.setTabGroup(tabId, -1);
+      const useNativeGroups = await shouldUseNativeGroups();
+      if (useNativeGroups) {
+        try {
+          await browser.tabs.ungroup([tabId]);
+        } catch (e) {
+          // Ignore
+        }
+      }
+      const windowState = getWindowState(tab.windowId);
+      windowState.viewTabId = tabId;
+      if (DEBUG) {
+        console.debug(
+          `Tab ${tabId} updated to panorama view, assigned groupId -1`,
+        );
+      }
+    }
+  }
+});
+
+// Add native tabGroups event listeners for hybrid functionality
+setupTabGroupListeners(hasTabGroups, DEBUG);
+
+// Add tab removal listener to cleanup openingView state
+browser.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+  // Clear openingView state if the view tab is removed before completion
+  if (backgroundState.openingView?.tabId === tabId) {
+    clearTimeout(backgroundState.openingView.timeout);
+    backgroundState.openingView = null;
+    if (DEBUG) {
+      console.debug('View tab removed during creation, cleared state');
+    }
+  }
+
+  // Clear per-window viewTabId tracking
+  const windowState = getWindowState(removeInfo.windowId);
+  if (windowState.viewTabId === tabId) {
+    windowState.viewTabId = null;
+  }
+});
+
+// Add window removal listener to cleanup per-window state
+browser.windows.onRemoved.addListener((windowId) => {
+  windowStates.delete(windowId);
+  if (DEBUG) {
+    console.debug(`Cleaned up state for closed window ${windowId}`);
+  }
+});
+
+init();
 
 async function refreshView() {
   const options = await loadOptions();
@@ -1588,75 +1640,56 @@ async function refreshView() {
   console.debug('Refresh Panorama Tab View');
   viewRefreshOrdered = true;
 
-  browser.action.onClicked.removeListener(toggleView);
-  browser.commands.onCommand.removeListener(triggerCommand);
-  browser.windows.onCreated.removeListener(createGroupInWindowIfMissing);
-  browser.tabs.onCreated.removeListener(tabCreated);
-  browser.tabs.onAttached.removeListener(tabAttached);
-  browser.tabs.onDetached.removeListener(tabDetached);
-  browser.tabs.onActivated.removeListener(tabActivated);
-
   const disablePopupView = options.view !== 'popup';
   if (disablePopupView) {
     // Disable popup
     browser.action.setPopup({
       popup: '',
     });
-
-    browser.action.onClicked.addListener(toggleView);
   } else {
     // Re-enable popup
     browser.action.setPopup({
       popup: 'popup-view/index.html',
     });
   }
+}
 
-  browser.commands.onCommand.addListener(triggerCommand);
-  browser.windows.onCreated.addListener(createGroupInWindowIfMissing);
-  browser.tabs.onCreated.addListener(tabCreated);
-  browser.tabs.onAttached.addListener(tabAttached);
-  browser.tabs.onDetached.addListener(tabDetached);
-  browser.tabs.onActivated.addListener(tabActivated);
+// Listen for useNativeGroups option changes
+browser.storage.onChanged.addListener(async (changes, areaName) => {
+  if (DEBUG) {
+    console.debug(
+      '[Storage] onChanged fired - areaName:',
+      areaName,
+      'changes:',
+      changes,
+    );
+  }
 
-  // Listen for useNativeGroups option changes
-  browser.storage.onChanged.addListener(async (changes, areaName) => {
+  if (areaName === 'sync' && changes.useNativeGroups) {
+    const { oldValue, newValue } = changes.useNativeGroups;
+
     if (DEBUG) {
       console.debug(
-        '[Storage] onChanged fired - areaName:',
-        areaName,
-        'changes:',
-        changes,
+        `[Storage] useNativeGroups changed: ${oldValue} -> ${newValue}`,
       );
     }
 
-    if (areaName === 'sync' && changes.useNativeGroups) {
-      const { oldValue, newValue } = changes.useNativeGroups;
-
+    // If native groups are being disabled, cleanup
+    if (oldValue === true && newValue === false) {
       if (DEBUG) {
-        console.debug(
-          `[Storage] useNativeGroups changed: ${oldValue} -> ${newValue}`,
-        );
+        console.debug('[Storage] Native groups disabled, starting cleanup...');
       }
-
-      // If native groups are being disabled, cleanup
-      if (oldValue === true && newValue === false) {
+      try {
+        await cleanupNativeGroups(DEBUG);
         if (DEBUG) {
-          console.debug(
-            '[Storage] Native groups disabled, starting cleanup...',
-          );
+          console.debug('[Storage] Cleanup completed successfully');
         }
-        try {
-          await cleanupNativeGroups(DEBUG);
-          if (DEBUG) {
-            console.debug('[Storage] Cleanup completed successfully');
-          }
-        } catch (error) {
-          console.error('[Storage] Cleanup failed:', error);
-        }
+      } catch (error) {
+        console.error('[Storage] Cleanup failed:', error);
       }
     }
-  });
-}
+  }
+});
 
 /**
  * Delete a group with complete cleanup including native tab groups
@@ -1750,7 +1783,7 @@ async function deleteGroupWithCleanup({
 
     // Step 4: Remove menu item
     try {
-      await browser.menus.remove(String(groupId));
+      await browser.contextMenus.remove(String(groupId));
       if (DEBUG) {
         console.debug(`Removed menu item for group ${groupId}`);
       }

@@ -8,12 +8,13 @@ test.describe('Options Navigation E2E', () => {
   let viewPage;
 
   test.beforeEach(async ({ page, extensionId, extensionProtocol }) => {
-    viewPage = await page.context().newPage();
+    viewPage = page;
     const viewUrl = getExtensionPageUrl(
       extensionProtocol,
       extensionId,
       'view.html',
     );
+    viewPage.on('console', (msg) => console.log('[Page Console]', msg.text()));
     await viewPage.goto(viewUrl);
   });
 
@@ -21,6 +22,21 @@ test.describe('Options Navigation E2E', () => {
     // Check that the settings button exists in the toolbar
     const manageButton = viewPage.locator('#settings');
     await expect(manageButton).toBeVisible();
+
+    // Wait for the view to fully initialize and attach event listeners
+    await expect(viewPage.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Create a group using the UI to ensure at least one .group element exists
+    if ((await viewPage.locator('.group').count()) === 0) {
+      await viewPage.click('#newGroup');
+    }
+
+    // Wait for at least one group to render so screenshots capture the full UI
+    await expect(viewPage.locator('.group').first()).toBeVisible({
+      timeout: 10000,
+    });
 
     // In Playwright's Firefox setup, the extension is served via HTTP proxy,
     // so browser.runtime.openOptionsPage() might not open a real tab we can wait for.

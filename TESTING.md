@@ -1,4 +1,4 @@
-# Testing the Modernized Panorama Tab Groups Extension
+# Testing the Modernized Tab Groups Tab Groups Extension
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@
 ### Option A: Automatic Detection
 
 ```bash
-cd /home/richard/dev/third-party-code/panorama-tab-groups
+cd /home/richard/dev/third-party-code/Tab Groups-tab-groups
 npm run start
 ```
 
@@ -70,14 +70,14 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 2. **Popup View**: Click the extension icon to see popup
 3. **Tab Groups**: Create and manage tab groups
 4. **Keyboard Shortcuts**:
-   - `Ctrl+Shift+F`: Toggle Panorama View
+   - `Ctrl+Shift+F`: Toggle Tab Groups View
    - `Alt+W`: Next group
    - `Alt+Shift+W`: Previous group
 
-### Panorama View
+### Tab Groups View
 
 1. Click extension icon or use `Ctrl+Shift+F`
-2. Should open panorama view showing all tab groups
+2. Should open Tab Groups view showing all tab groups
 3. Test drag and drop functionality
 4. Test creating new groups
 5. Test moving tabs between groups
@@ -85,7 +85,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 ### Options Page
 
 1. Go to `about:addons`
-2. Find "Panorama Tab Groups"
+2. Find "Tab Groups Tab Groups"
 3. Click "Options"
 4. Test all settings:
    - View mode (Freeform vs Popup)
@@ -121,6 +121,41 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 - Use `console.log()` statements in `js/background.js` for debugging
 
 ## Common Issues and Solutions
+
+### WSLg / Linux Host Connection Error (ECONNRESET)
+
+If you are running `npm run start` from a WSL host (or some Linux hosts) and you see an `ECONNRESET` error where `web-ext` cannot connect to Firefox:
+
+**Cause:**
+
+1. Node 17+ resolving `localhost` to IPv6 (`::1`) while Firefox listens on IPv4 (`127.0.0.1`).
+2. Security sandboxing (AppArmor/Snap/Flatpak) blocking Firefox from reading `web-ext`'s temporary profile in `/tmp`.
+3. Shell script wrappers (e.g. `/usr/bin/firefox-devedition`) spawning the browser and exiting immediately, breaking `web-ext`'s process tracking.
+4. WSLg network bridging dropping the WebSocket connection.
+
+**Solutions:**
+
+1. **(Recommended) Use the DevContainer Desktop:**
+   Bypass the host networking entirely by using the container's built-in VNC desktop.
+   - The desktop starts automatically via `devcontainer.json`.
+   - Ensure port `6080` is forwarded in your IDE and open `http://localhost:6080/vnc.html`.
+   - Open a terminal in the VNC desktop and run:
+     ```bash
+     npm run start -- --firefox-binary=~/.cache/ms-playwright/firefox-*/firefox/firefox
+     ```
+
+   **If IDE Port Forwarding Fails (Antigravity IDE / CodeSpaces):**
+   If `localhost:6080` returns a 404 or fails to connect, you can easily bypass the IDE's port forwarding system using a secure web tunnel:
+   1. Open a terminal in the container and run: `npx -y localtunnel --port 6080`
+   2. It will output a public URL (e.g., `https://tasty-owls-glow.loca.lt`).
+   3. Open that URL in your browser and append `/vnc.html` to the end (e.g., `https://tasty-owls-glow.loca.lt/vnc.html`).
+   4. Click "Click to Continue" on the security screen, and the desktop will load perfectly.
+
+2. **Force IPv4 & Custom Profile on Host:**
+   ```bash
+   mkdir -p ~/.web-ext-profile
+   NODE_OPTIONS="--dns-result-order=ipv4first" npm run start -- --firefox-binary=/absolute/path/to/real/firefox-binary --firefox-profile=~/.web-ext-profile --keep-profile-changes
+   ```
 
 ### Extension Won't Load
 

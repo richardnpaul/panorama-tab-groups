@@ -120,9 +120,11 @@ export default async function initNativeGroupsOption() {
     case 'collapse-only':
       // Chrome/Edge - has tabGroups but no tabHide
       checkbox.disabled = false;
+      checkbox.checked = true;
       warningText.textContent =
-        'Native groups will be used for collapsing only. Tab hiding is not supported in this browser.';
+        'Native tab groups are not supported in this browser version (requires Tab Hiding API).';
       warningText.className = 'warning-text';
+      container.style.opacity = '0.5';
       break;
 
     case 'legacy':
@@ -131,7 +133,7 @@ export default async function initNativeGroupsOption() {
       checkbox.checked = false;
       warningText.textContent =
         'Native tab groups are not supported in this browser version. Please update to Firefox 139+ or use Chrome 89+.';
-      warningText.className = 'error-text';
+      warningText.className = 'warning-text';
       container.style.opacity = '0.5';
       break;
 
@@ -142,7 +144,7 @@ export default async function initNativeGroupsOption() {
       checkbox.checked = false;
       warningText.textContent =
         'Your browser does not support the required APIs for tab groups.';
-      warningText.className = 'error-text';
+      warningText.className = 'warning-text';
       container.style.opacity = '0.5';
       break;
   }
