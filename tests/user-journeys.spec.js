@@ -55,15 +55,7 @@ test.describe('User Journeys', () => {
     page,
     extensionId,
     extensionProtocol,
-    browserName,
   }) => {
-    // Firefox Playwright tests run the extension page via a local HTTP proxy that mocks window.browser
-    // This means the view cannot communicate with the real background script, making E2E tab creation testing impossible.
-    test.skip(
-      browserName === 'firefox',
-      'Firefox HTTP proxy does not support background script E2E testing',
-    );
-
     page.on('console', (msg) => console.log('[Page Console 1]', msg.text()));
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
 
@@ -130,13 +122,7 @@ test.describe('User Journeys', () => {
     page,
     extensionId,
     extensionProtocol,
-    browserName,
   }) => {
-    test.skip(
-      browserName === 'firefox',
-      'Firefox HTTP proxy does not support background script E2E testing',
-    );
-
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
     await expect(page.locator('body.view-ready')).toBeVisible({
       timeout: 10000,
@@ -145,6 +131,9 @@ test.describe('User Journeys', () => {
     // Ensure we start with at least one group
     if ((await page.locator('.group').count()) === 0) {
       await page.click('#newGroup');
+      await expect(page.locator('.group').first()).toBeVisible({
+        timeout: 10000,
+      });
     }
     const initialGroupCount = await page.locator('.group').count();
 
@@ -192,13 +181,7 @@ test.describe('User Journeys', () => {
     page,
     extensionId,
     extensionProtocol,
-    browserName,
   }) => {
-    test.skip(
-      browserName === 'firefox',
-      'Firefox HTTP proxy does not support background script E2E testing',
-    );
-
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
     await expect(page.locator('body.view-ready')).toBeVisible({
       timeout: 10000,
@@ -252,13 +235,7 @@ test.describe('User Journeys', () => {
     page,
     extensionId,
     extensionProtocol,
-    browserName,
   }) => {
-    test.skip(
-      browserName === 'firefox',
-      'Firefox HTTP proxy does not support background script E2E testing',
-    );
-
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
     await expect(page.locator('body.view-ready')).toBeVisible({
       timeout: 10000,

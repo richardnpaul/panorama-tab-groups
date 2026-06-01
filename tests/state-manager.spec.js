@@ -51,10 +51,6 @@ test.beforeEach(() => {
 });
 
 test.describe('StateManager Unit Tests', () => {
-  test.beforeEach(() => {
-    stateManager.clearCache();
-  });
-
   test.describe('Groups Management', () => {
     test('getGroups returns undefined if nothing is set', async () => {
       const groups = await stateManager.getGroups(1);
@@ -82,39 +78,6 @@ test.describe('StateManager Unit Tests', () => {
       expect(savedGroups.length).toBe(2);
       expect(savedGroups[1].name).toBe('Ungrouped Tabs'); // Should be overridden
       expect(savedGroups[1].nativeGroupId).toBeNull(); // Should be overridden
-    });
-  });
-
-  test.describe('Caching Mechanism', () => {
-    test('getGroups uses cache after first call', async () => {
-      // Setup mock data
-      getWindowValueMock['2_groups'] = [{ id: 5 }];
-
-      const groups1 = await stateManager.getGroups(2);
-      expect(groups1.length).toBe(1);
-
-      // Change underlying data without going through setGroups
-      getWindowValueMock['2_groups'] = [{ id: 5 }, { id: 6 }];
-
-      // Cache should still return the old data
-      const groups2 = await stateManager.getGroups(2);
-      expect(groups2.length).toBe(1);
-
-      // Clear cache manually
-      stateManager.clearCache();
-      const groups3 = await stateManager.getGroups(2);
-      expect(groups3.length).toBe(2);
-    });
-
-    test('setGroups invalidates cache', async () => {
-      // First call populates cache
-      await stateManager.getGroups(3);
-
-      // setGroups should invalidate cache
-      await stateManager.setGroups(3, [{ id: 1 }]);
-
-      const groups = await stateManager.getGroups(3);
-      expect(groups.length).toBe(2); // The one we set + the ungrouped fallback
     });
   });
 

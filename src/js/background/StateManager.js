@@ -22,13 +22,9 @@
 
 import { UNGROUPED_GROUP_ID, UNGROUPED_GROUP_NAME } from './constants.js';
 
-export class StateManager {
-  constructor() {
-    // Cache for reducing redundant storage reads
-    this.cache = new Map();
-    this.cacheTimeout = 100; // ms
-  }
+/* eslint-disable class-methods-use-this */
 
+export class StateManager {
   // ==================== Session Storage (Per-Window/Tab) ====================
 
   /**
@@ -37,10 +33,6 @@ export class StateManager {
    * @returns {Promise<Array>} Array of group objects
    */
   async getGroups(windowId) {
-    const cacheKey = `groups_${windowId}`;
-    const cached = this.getFromCache(cacheKey);
-    if (cached !== undefined) return cached;
-
     const DEBUG = true;
     if (DEBUG) {
       console.debug(`[StateManager] getGroups called for window ${windowId}`);
@@ -51,7 +43,6 @@ export class StateManager {
         `[StateManager] getGroups returning ${groups?.length || 0} groups for window ${windowId}`,
       );
     }
-    this.setCache(cacheKey, groups);
     return groups;
   }
 
@@ -111,7 +102,6 @@ export class StateManager {
     }
 
     await browser.sessions.setWindowValue(windowId, 'groups', groups);
-    this.invalidateCache(`groups_${windowId}`);
   }
 
   /**
@@ -120,10 +110,6 @@ export class StateManager {
    * @returns {Promise<number>} Active group ID
    */
   async getActiveGroup(windowId) {
-    const cacheKey = `activeGroup_${windowId}`;
-    const cached = this.getFromCache(cacheKey);
-    if (cached !== undefined) return cached;
-
     const activeGroup = await browser.sessions.getWindowValue(
       windowId,
       'activeGroup',
@@ -136,8 +122,6 @@ export class StateManager {
         `[StateManager] getActiveGroup: No activeGroup set for window ${windowId}`,
       );
     }
-
-    this.setCache(cacheKey, activeGroup);
 
     return activeGroup;
   }
@@ -154,7 +138,6 @@ export class StateManager {
     try {
       await browser.sessions.setWindowValue(windowId, 'activeGroup', groupId);
       console.debug('[StateManager] setWindowValue completed successfully');
-      this.invalidateCache(`activeGroup_${windowId}`);
       console.debug('[StateManager] setActiveGroup complete');
     } catch (error) {
       console.error(
@@ -171,15 +154,10 @@ export class StateManager {
    * @returns {Promise<number>} Group index
    */
   async getGroupIndex(windowId) {
-    const cacheKey = `groupIndex_${windowId}`;
-    const cached = this.getFromCache(cacheKey);
-    if (cached !== undefined) return cached;
-
     const groupIndex = await browser.sessions.getWindowValue(
       windowId,
       'groupIndex',
     );
-    this.setCache(cacheKey, groupIndex);
     return groupIndex;
   }
 
@@ -190,7 +168,6 @@ export class StateManager {
    */
   async setGroupIndex(windowId, index) {
     await browser.sessions.setWindowValue(windowId, 'groupIndex', index);
-    this.invalidateCache(`groupIndex_${windowId}`);
   }
 
   /**
@@ -199,12 +176,7 @@ export class StateManager {
    * @returns {Promise<number>} Group ID the tab belongs to
    */
   async getTabGroup(tabId) {
-    const cacheKey = `tabGroup_${tabId}`;
-    const cached = this.getFromCache(cacheKey);
-    if (cached !== undefined) return cached;
-
     const groupId = await browser.sessions.getTabValue(tabId, 'groupId');
-    this.setCache(cacheKey, groupId);
     return groupId;
   }
 
@@ -215,7 +187,6 @@ export class StateManager {
    */
   async setTabGroup(tabId, groupId) {
     await browser.sessions.setTabValue(tabId, 'groupId', parseInt(groupId, 10));
-    this.invalidateCache(`tabGroup_${tabId}`);
   }
 
   /**
@@ -234,17 +205,12 @@ export class StateManager {
    * @returns {Promise<Object>} Background state object
    */
   async getBackgroundState() {
-    const cacheKey = 'backgroundState';
-    const cached = this.getFromCache(cacheKey);
-    if (cached !== undefined) return cached;
-
     const result = await browser.storage.local.get('backgroundState');
     const state = result.backgroundState || {
       openingView: null,
       openingBackup: false,
     };
 
-    this.setCache(cacheKey, state);
     return state;
   }
 
@@ -254,7 +220,6 @@ export class StateManager {
    */
   async setBackgroundState(state) {
     await browser.storage.local.set({ backgroundState: state });
-    this.invalidateCache('backgroundState');
   }
 
   /**
@@ -273,15 +238,10 @@ export class StateManager {
    * @returns {Promise<Object>} Window state object
    */
   async getWindowState(windowId) {
-    const cacheKey = `windowState_${windowId}`;
-    const cached = this.getFromCache(cacheKey);
-    if (cached !== undefined) return cached;
-
     const result = await browser.storage.local.get('windowStates');
     const windowStates = result.windowStates || {};
     const state = windowStates[windowId] || { viewTabId: null };
 
-    this.setCache(cacheKey, state);
     return state;
   }
 
@@ -295,7 +255,6 @@ export class StateManager {
     const windowStates = result.windowStates || {};
     windowStates[windowId] = state;
     await browser.storage.local.set({ windowStates });
-    this.invalidateCache(`windowState_${windowId}`);
   }
 
   /**
@@ -307,7 +266,6 @@ export class StateManager {
     const windowStates = result.windowStates || {};
     delete windowStates[windowId];
     await browser.storage.local.set({ windowStates });
-    this.invalidateCache(`windowState_${windowId}`);
   }
 
   // ==================== Batch Operations ====================
@@ -338,34 +296,6 @@ export class StateManager {
     ]);
   }
 
-  // ==================== Cache Management ====================
-
-  getFromCache(key) {
-    const cached = this.cache.get(key);
-    if (cached && Date.now() - cached.timestamp < this.cacheTimeout) {
-      return cached.value;
-    }
-    return undefined;
-  }
-
-  setCache(key, value) {
-    this.cache.set(key, {
-      value,
-      timestamp: Date.now(),
-    });
-  }
-
-  invalidateCache(key) {
-    this.cache.delete(key);
-  }
-
-  /**
-   * Clear all cached values
-   */
-  clearCache() {
-    this.cache.clear();
-  }
-
   // ==================== Migration Helpers ====================
 
   /**
@@ -387,7 +317,6 @@ export class StateManager {
       const windowStates = {};
       for (const [windowId, state] of legacyStates) {
         windowStates[windowId] = state;
-        this.invalidateCache(`windowState_${windowId}`);
       }
       await browser.storage.local.set({ windowStates });
     }
