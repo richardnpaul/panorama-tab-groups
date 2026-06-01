@@ -31,8 +31,8 @@ Load and follow these skills before writing any code:
 
 - Implement code changes following the plan in `docs/plans/<feature>.md`
 - Apply project conventions from `#skill:js-codebase-patterns` precisely
-- Run format and lint after every editing pass
-- Never trigger the reviewer handoff with lint failures
+- Run format, lint, and relevant tests (unit and E2E) after every editing pass
+- Never trigger the reviewer handoff with lint or test failures
 
 ## Implementation Process
 
@@ -66,20 +66,27 @@ Load and follow these skills before writing any code:
     - Run all tests and make sure they pass
     - Repeat the outer loop until the implementation phase is complete
 
-### 3. Lint-Failure Protocol
+### 3. Lint and Test Protocol
 
-**If lint fails:**
+Before handing off to the reviewer, you MUST ensure that linting, unit tests, and E2E tests pass for your changes:
 
-1. Read the lint output carefully
-2. Fix every reported error
-3. Run `npm run lint` again
+1. **Linting**: Run `npm run lint`. Fix any errors.
+2. **Unit Tests**: Run `npm run test` (or a narrowed subset if applicable, e.g., `npm run test -- tests/<specific_test>.js`).
+3. **E2E Tests**: Run `npm run test:e2e` (or a narrowed subset if applicable, e.g., `npm run test:e2e tests/<specific_spec>.js -g "Test Name"`).
+   - Only run the full test suite if your changes have a broad impact on the codebase. Otherwise, run targeted tests to save time and reduce flakiness.
+
+**If any checks fail:**
+
+1. Read the output carefully
+2. Fix the reported errors
+3. Run the failing check again
 4. If still failing after two full passes — report the blocking error and **stop**
 
-**Never trigger the reviewer handoff until `npm run lint` exits 0.**
+**Never trigger the reviewer handoff until `npm run lint` and relevant tests exit 0.**
 
 ### 4. Completion Signal
 
-When `npm run lint` exits 0, emit exactly this on a single line:
+When `npm run lint` and tests pass, emit exactly this on a single line:
 
 ```
 <!-- IMPL_COMPLETE: LINT_PASS -->
@@ -125,4 +132,4 @@ const activeGroupId = await stateManager.getActiveGroup(windowId);
 - Missing `.js` extension on imports
 - Missing JSDoc on exported functions
 - TypeScript syntax (this is a JS-only project)
-- Triggering reviewer handoff before `npm run lint` exits 0
+- Triggering reviewer handoff before `npm run lint` and relevant tests exit 0
