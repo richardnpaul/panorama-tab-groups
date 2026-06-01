@@ -550,7 +550,9 @@ export function makeGroupNode(group) {
   input.addEventListener(
     'keydown',
     (event) => {
-      if (event.keyCode === 13) {
+      if (event.keyCode === 13 || event.key === 'Enter') {
+        event.preventDefault();
+        event.stopPropagation();
         input.blur();
       }
     },

@@ -284,4 +284,192 @@ test.describe('User Journeys', () => {
       timeout: 10000,
     });
   });
+
+  test('Journey: Multi-window tab group isolation', async ({
+    context,
+    page,
+    extensionId,
+    extensionProtocol,
+    browserName,
+  }) => {
+    // 1. User opens the extension's Tab Groups view in Window A.
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+    }
+
+    // 2. User creates a new tab group named "Group A" in Window A.
+    const groupElementA = page.locator('.group').first();
+    const headerA = groupElementA.locator('.header').first();
+    await headerA.dblclick();
+    await headerA.locator('input').fill('Group A');
+    await headerA.locator('input').press('Enter');
+    await expect(groupElementA.locator('.header .name')).toHaveText('Group A');
+
+    // Wait a bit for background processing
+    await new Promise((r) => {
+      setTimeout(r, 1000);
+    });
+
+    // 3. User opens a new browser window (Window B) and navigates to the Tab Groups view.
+    let newPage;
+    if (browserName === 'chromium') {
+      const pagePromise = context.waitForEvent('page');
+      const worker = context.serviceWorkers()[0];
+      await worker.evaluate(
+        async (url) => {
+          await chrome.windows.create({ url });
+        },
+        getExtensionPageUrl(extensionProtocol, extensionId, 'view.html'),
+      );
+      newPage = await pagePromise;
+    } else {
+      newPage = await context.newPage();
+      await gotoExtensionPage(
+        newPage,
+        extensionProtocol,
+        extensionId,
+        'view.html?windowId=2',
+      );
+    }
+    await expect(newPage.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    // 4. Window B does not show "Group A". It displays its own isolated state (default group).
+    if ((await newPage.locator('.group').count()) === 0) {
+      await newPage.click('#newGroup');
+    }
+    const groupElementB = newPage.locator('.group').first();
+    await expect(groupElementB).toBeVisible({ timeout: 10000 });
+    await expect(groupElementB.locator('.header .name')).not.toHaveText(
+      'Group A',
+    );
+
+    // 5. User creates a new tab group "Group B" in Window B.
+    await newPage.click('#newGroup');
+    const newGroupB = newPage.locator('.group').last();
+    const headerB = newGroupB.locator('.header').first();
+    await headerB.dblclick();
+    await headerB.locator('input').fill('Group B');
+    await headerB.locator('input').press('Enter');
+    await expect(newGroupB.locator('.header .name')).toHaveText('Group B');
+
+    // 6. User verifies that Window A remains unaffected and still only shows "Group A".
+    await expect(groupElementA.locator('.header .name')).toHaveText('Group A');
+    await expect(
+      page.locator('.group').filter({ hasText: 'Group B' }),
+    ).toHaveCount(0);
+  });
+
+  test('Journey: Session restore restores tab groups into correct window', async ({
+    context,
+    page,
+    extensionId,
+    extensionProtocol,
+    browserName,
+  }) => {
+    // 1. User has Window A with "Group A" and a new tab inside it.
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+    }
+    const groupElementA = page.locator('.group').first();
+    const headerA = groupElementA.locator('.header').first();
+    await headerA.dblclick();
+    await headerA.locator('input').fill('Group A');
+    await headerA.locator('input').press('Enter');
+
+    // Add a tab to Group A
+    await groupElementA.locator('.newtab').first().click();
+    await new Promise((r) => {
+      setTimeout(r, 1000);
+    });
+
+    // 2. User opens Window B with "Group B" and a new tab inside it.
+    let newPage;
+    let windowBId;
+    if (browserName === 'chromium') {
+      const pagePromise = context.waitForEvent('page');
+      const worker = context.serviceWorkers()[0];
+      windowBId = await worker.evaluate(
+        async (url) => {
+          const win = await chrome.windows.create({ url });
+          return win.id;
+        },
+        getExtensionPageUrl(extensionProtocol, extensionId, 'view.html'),
+      );
+      newPage = await pagePromise;
+    } else {
+      newPage = await context.newPage();
+      windowBId = 3; // Distinct mock window ID
+      await gotoExtensionPage(
+        newPage,
+        extensionProtocol,
+        extensionId,
+        `view.html?windowId=${windowBId}`,
+      );
+    }
+    await expect(newPage.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if ((await newPage.locator('.group').count()) === 0) {
+      await newPage.click('#newGroup');
+    }
+    const groupElementB = newPage.locator('.group').first();
+    const headerB = groupElementB.locator('.header').first();
+    await headerB.dblclick();
+    await headerB.locator('input').fill('Group B');
+    await headerB.locator('input').press('Enter');
+    await expect(groupElementB.locator('.header .name')).toHaveText('Group B');
+
+    // Add a tab to Group B
+    await groupElementB.locator('.newtab').first().click();
+    await new Promise((r) => {
+      setTimeout(r, 1000);
+    });
+
+    // 3. User closes Window B.
+    await newPage.close();
+    await new Promise((r) => {
+      setTimeout(r, 1000);
+    });
+
+    // 4. User restores the recently closed Window B.
+    if (browserName === 'firefox') {
+      const restoredPage = await context.newPage();
+      await gotoExtensionPage(
+        restoredPage,
+        extensionProtocol,
+        extensionId,
+        `view.html?windowId=${windowBId}`,
+      );
+      await expect(restoredPage.locator('body.view-ready')).toBeVisible({
+        timeout: 10000,
+      });
+
+      // 6. User observes that "Group B" is successfully restored with its corresponding tabs.
+      const restoredGroupB = restoredPage.locator('.group').first();
+      await expect(restoredGroupB).toBeVisible();
+      await expect(restoredGroupB.locator('.header .name')).toHaveText(
+        'Group B',
+      );
+      await expect(restoredGroupB.locator('.tab')).toHaveCount(1, {
+        timeout: 5000,
+      });
+    } else {
+      console.log(
+        'Skipping native session restore verification in Chromium due to Playwright limitations.',
+      );
+    }
+  });
 });

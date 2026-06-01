@@ -178,19 +178,35 @@ function createFirefoxPageProxy(initialPage) {
                     onChanged: { addListener: () => {} }
                   },
                   windows: {
-                    getCurrent: async () => ({ id: 1 })
+                    getCurrent: async () => {
+                      const wid = new URLSearchParams(window.location.search).get('windowId') || '1';
+                      return { id: parseInt(wid, 10) };
+                    }
                   },
                   tabs: {
                     getCurrent: async () => ({ id: 100 }),
-                    query: async () => mockTabs,
+                    query: async (q) => {
+                      let wid;
+                      if (q && q.windowId) {
+                        wid = q.windowId;
+                      } else if (q && q.currentWindow) {
+                        wid = parseInt(new URLSearchParams(window.location.search).get('windowId') || '1', 10);
+                      }
+                      if (wid !== undefined) {
+                        return mockTabs.filter(t => t.windowId === wid);
+                      }
+                      return mockTabs;
+                    },
                     get: async (tabId) => mockTabs.find(t => t.id === tabId) || { id: tabId, windowId: 1 },
                     update: async () => {},
                     create: async () => {
-                      const newTab = { id: mockTabIdCounter++, windowId: 1, active: true, title: 'New Tab', url: 'about:newtab' };
+                      const widStr = new URLSearchParams(window.location.search).get('windowId') || '1';
+                      const wid = parseInt(widStr, 10);
+                      const newTab = { id: mockTabIdCounter++, windowId: wid, active: true, title: 'New Tab', url: 'about:newtab' };
                       mockTabs.push(newTab);
                       localStorage.setItem('mockTabs', JSON.stringify(mockTabs));
                       localStorage.setItem('mockTabIdCounter', mockTabIdCounter.toString());
-                      const activeGroupStr = localStorage.getItem('session_1_activeGroup');
+                      const activeGroupStr = localStorage.getItem('session_' + wid + '_activeGroup');
                       if (activeGroupStr !== null) {
                          localStorage.setItem('tab_' + newTab.id + '_groupId', activeGroupStr);
                       }

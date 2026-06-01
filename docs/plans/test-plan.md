@@ -42,6 +42,32 @@
    - The new tab group (Grp1) contains one tab.
    - The original tab group (Grp0) still contains one tab.
 
+### Open tab group
+
+(Pending definition)
+
+### Multi-window tab group isolation
+
+- Test: `Journey: Multi-window tab group isolation`
+
+1. User opens the extension's Tab Groups view in Window A.
+2. User creates a new tab group named "Group A" in Window A.
+3. User opens a new browser window (Window B) and navigates to the Tab Groups view.
+4. Window B does not show "Group A". It displays its own isolated state (default group).
+5. User creates a new tab group "Group B" in Window B.
+6. User verifies that Window A remains unaffected and still only shows "Group A".
+
+### Session restore restores tab groups into correct window
+
+- Test: `Journey: Session restore restores tab groups into correct window`
+
+1. User has Window A with "Group A" and a new tab inside it.
+2. User opens Window B with "Group B" and a new tab inside it.
+3. User closes Window B.
+4. User restores the recently closed Window B.
+5. User navigates to the Tab Groups view in the restored Window B.
+6. User observes that "Group B" is successfully restored with its corresponding tabs.
+
 ### Test relabelling a tab group
 
 - Test: `Journey: Test relabelling a tab group`
@@ -69,4 +95,7 @@
    - The native browser tab group is closed/removed.
    - The original tab group remains unaffected in the UI.
 
-### Open tab group
+### Create tabs in new window
+
+1. User creates a new window
+2.
