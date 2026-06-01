@@ -4,11 +4,7 @@
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "vscode",
-  "runArgs": [
-    "--shm-size=1g",
-    "--security-opt",
-    "seccomp=unconfined"
-  ],
+  "runArgs": ["--shm-size=1g", "--security-opt", "seccomp=unconfined"],
   "mounts": [
     {
       "source": "panorama-node-modules",
@@ -35,10 +31,7 @@
     "DISPLAY": ":1",
     "PLAYWRIGHT_FIREFOX_HEADED": "0"
   },
-  "forwardPorts": [
-    6080,
-    5901
-  ],
+  "forwardPorts": [6080, 5901],
   "portsAttributes": {
     "6080": {
       "label": "noVNC Desktop (browser)",
