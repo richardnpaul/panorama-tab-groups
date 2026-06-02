@@ -25,8 +25,7 @@
   "jest": {
     "testEnvironment": "node",
     "collectCoverageFrom": [
-      "src/js/background/**/*.js",
-      "src/js/background.js"
+      "src/js/**/*.js"
     ]
   },
   "repository": {
