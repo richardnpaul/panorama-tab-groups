@@ -1,4 +1,4 @@
-import { test, expect } from '../playwright.config.js';
+import { test, expect } from '../../playwright.config.js';
 
 function getExtensionPageUrl(extensionProtocol, extensionId, pagePath) {
   return `${extensionProtocol}://${extensionId}/${pagePath}`;

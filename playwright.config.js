@@ -556,8 +556,7 @@ export const test = base.extend({
 export { expect };
 
 export default defineConfig({
-  testDir: './tests',
-  testIgnore: '**/unit/**',
+  testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
