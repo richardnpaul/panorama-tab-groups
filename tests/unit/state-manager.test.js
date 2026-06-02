@@ -67,6 +67,14 @@ describe('StateManager Unit Tests', () => {
       expect(savedGroups[1].isSystemGroup).toBe(true);
     });
 
+    it('setGroups handles undefined groups gracefully', async () => {
+      await stateManager.setGroups(1, undefined);
+      const savedGroups = setWindowValueMock['1_groups'];
+      expect(savedGroups).toBeDefined();
+      expect(savedGroups.length).toBe(1);
+      expect(savedGroups[0].id).toBe(-2);
+    });
+
     it('setGroups updates existing UNGROUPED_GROUP_ID', async () => {
       await stateManager.setGroups(1, [
         { id: 1, name: 'Group 1' },
@@ -93,6 +101,42 @@ describe('StateManager Unit Tests', () => {
       const active = await stateManager.getActiveGroup(1);
       expect(active).toBe(42);
     });
+
+    it('setActiveGroup throws error on failure', async () => {
+      const originalSet = globalThis.browser.sessions.setWindowValue;
+      globalThis.browser.sessions.setWindowValue = async () => {
+        throw new Error('Test error');
+      };
+      await expect(stateManager.setActiveGroup(1, 42)).rejects.toThrow(
+        'Test error',
+      );
+      globalThis.browser.sessions.setWindowValue = originalSet;
+    });
+  });
+
+  describe('Group Index Management', () => {
+    it('getGroupIndex and setGroupIndex work correctly', async () => {
+      await stateManager.setGroupIndex(1, 5);
+      expect(setWindowValueMock['1_groupIndex']).toBe(5);
+      const index = await stateManager.getGroupIndex(1);
+      expect(index).toBe(5);
+    });
+  });
+
+  describe('Tab Group ID Management', () => {
+    it('getTabGroup and setTabGroup work correctly', async () => {
+      await stateManager.setTabGroup(100, '5');
+      expect(setTabValueMock['100_groupId']).toBe(5); // Should parseInt
+      const groupId = await stateManager.getTabGroup(100);
+      expect(groupId).toBe(5);
+    });
+
+    it('getTabGroups returns multiple group IDs', async () => {
+      await stateManager.setTabGroup(101, 1);
+      await stateManager.setTabGroup(102, 2);
+      const groups = await stateManager.getTabGroups([101, 102]);
+      expect(groups).toEqual([1, 2]);
+    });
   });
 
   describe('Background State (Persistent)', () => {
@@ -114,6 +158,76 @@ describe('StateManager Unit Tests', () => {
 
       const state = await stateManager.getBackgroundState();
       expect(state.openingBackup).toBe(true);
+    });
+
+    it('updateBackgroundState merges state correctly', async () => {
+      await stateManager.setBackgroundState({
+        openingBackup: true,
+        otherVal: 1,
+      });
+      await stateManager.updateBackgroundState({
+        openingBackup: false,
+        newVal: 2,
+      });
+      const state = await stateManager.getBackgroundState();
+      expect(state).toEqual({ openingBackup: false, otherVal: 1, newVal: 2 });
+    });
+  });
+
+  describe('Window States', () => {
+    it('getWindowState returns default if not set', async () => {
+      const state = await stateManager.getWindowState(1);
+      expect(state).toEqual({ viewTabId: null });
+    });
+
+    it('setWindowState and getWindowState work', async () => {
+      await stateManager.setWindowState(1, { viewTabId: 100 });
+      const state = await stateManager.getWindowState(1);
+      expect(state).toEqual({ viewTabId: 100 });
+    });
+
+    it('removeWindowState removes the state', async () => {
+      await stateManager.setWindowState(1, { viewTabId: 100 });
+      await stateManager.removeWindowState(1);
+      const state = await stateManager.getWindowState(1);
+      expect(state).toEqual({ viewTabId: null });
+    });
+  });
+
+  describe('Batch Operations', () => {
+    it('getWindowGroupState and setWindowGroupState work', async () => {
+      await stateManager.setWindowGroupState(1, [{ id: 1 }], 1);
+      const state = await stateManager.getWindowGroupState(1);
+      expect(state.groups.length).toBe(2); // UNGROUPED_GROUP_ID added
+      expect(state.activeGroup).toBe(1);
+    });
+  });
+
+  describe('Migration Helpers', () => {
+    it('migrateBackgroundState saves state', async () => {
+      await stateManager.migrateBackgroundState({ migrated: true });
+      const state = await stateManager.getBackgroundState();
+      expect(state.migrated).toBe(true);
+    });
+    it('migrateBackgroundState does nothing if null', async () => {
+      await stateManager.setBackgroundState({});
+      await stateManager.migrateBackgroundState(null);
+      const state = await stateManager.getBackgroundState();
+      expect(state.migrated).toBeUndefined();
+    });
+
+    it('migrateWindowStates saves legacy map', async () => {
+      const map = new Map();
+      map.set(1, { legacy: true });
+      await stateManager.migrateWindowStates(map);
+      const state = await stateManager.getWindowState(1);
+      expect(state.legacy).toBe(true);
+    });
+    it('migrateWindowStates does nothing if map empty', async () => {
+      await stateManager.setWindowState(1, { initial: true });
+      await stateManager.migrateWindowStates(new Map());
+      const state = await stateManager.getWindowState(1);
+      expect(state.legacy).toBeUndefined();
     });
   });
 });
