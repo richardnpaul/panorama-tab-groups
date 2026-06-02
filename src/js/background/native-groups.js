@@ -30,7 +30,7 @@ async function enrichTab(tab) {
  * @param {Array<object>} enrichedTabs - Array of enriched tab objects
  * @throws {Error} If validation fails
  */
-function validateTabsForGrouping(enrichedTabs) {
+export function validateTabsForGrouping(enrichedTabs) {
   if (!enrichedTabs || enrichedTabs.length === 0) {
     throw new Error('No tabs to group');
   }
