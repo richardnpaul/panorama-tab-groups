@@ -821,4 +821,95 @@ test.describe('User Journeys', () => {
 
     expect(tabGroupsCount).toBe(0);
   });
+
+  test('Journey: Toggle off native tab groups (Firefox only) create tabs and toggle back on', async ({
+    page,
+    extensionId,
+    extensionProtocol,
+    browserName,
+  }) => {
+    if (browserName !== 'firefox') {
+      test.skip();
+      return;
+    }
+
+    // 1. Disable native groups via options page
+    await gotoExtensionPage(
+      page,
+      extensionProtocol,
+      extensionId,
+      'options.html',
+    );
+    const nativeCheckbox = page.locator('#useNativeGroups');
+    if (await nativeCheckbox.isChecked()) {
+      await nativeCheckbox.uncheck();
+    }
+
+    // 2. Go to view and create a group + tab
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    if ((await page.locator('.group').count()) === 0) {
+      await page.click('#newGroup');
+      await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
+    }
+    const newGroup = page.locator('.group').last();
+    const idNew = await newGroup.locator('.content').getAttribute('groupId');
+    await page.evaluate(async (id) => {
+      const win = await browser.windows.getCurrent();
+      await browser.sessions.setWindowValue(win.id, 'activeGroup', id);
+      const tab = await browser.tabs.create({ active: false });
+      await browser.sessions.setTabValue(tab.id, 'groupId', id);
+    }, idNew);
+    await page.reload();
+    await expect(page.locator('body.view-ready')).toBeVisible();
+
+    // Verify 0 native tab groups exist
+    const tabGroupsCount1 = await page.evaluate(async () => {
+      if (typeof browser.tabGroups?.query === 'function') {
+        const groups = await browser.tabGroups.query({});
+        return groups.length;
+      }
+      return 0;
+    });
+    expect(tabGroupsCount1).toBe(0);
+
+    // 3. Re-enable native groups via options page
+    await gotoExtensionPage(
+      page,
+      extensionProtocol,
+      extensionId,
+      'options.html',
+    );
+    if (await nativeCheckbox.isDisabled()) {
+      console.log(
+        'Skipping toggle back to native groups because checkbox is disabled in this Firefox version.',
+      );
+      return;
+    }
+    await nativeCheckbox.check();
+
+    // 4. Go to view and trigger sync (or reload)
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Wait for migration/sync to happen
+    await new Promise((r) => {
+      setTimeout(r, 2000);
+    });
+
+    // Verify native tab groups were created
+    const tabGroupsCount2 = await page.evaluate(async () => {
+      if (typeof browser.tabGroups?.query === 'function') {
+        const groups = await browser.tabGroups.query({});
+        return groups.length;
+      }
+      return 0;
+    });
+    expect(tabGroupsCount2).toBeGreaterThan(0);
+  });
 });
