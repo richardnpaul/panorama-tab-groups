@@ -70,7 +70,7 @@ Load and follow these skills before writing any code:
 
 1.  Always run `npm run format` and `npm run lint` before handing off.
 2.  Always run `npm run test:unit` and `npm run test:coverage` to verify core logic and maintain code coverage.
-3.  Ensure unit test coverage is maintained or improved (aim for 100% on touched code using Jest mocks for external interfaces).
+3.  Ensure unit test coverage is maintained or improved (aim for 100% on touched code using Vitest mocks for external interfaces).
 4.  Run E2E tests: `npx playwright test`. You may narrow the test scope if your changes are isolated.
 5.  If any check fails, do **not** hand off. Fix the issue first.
 

@@ -5,14 +5,14 @@ import {
 } from '../../../src/js/background/constants.js';
 
 beforeEach(async () => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   globalThis.browser = {
     windows: {
-      getCurrent: jest.fn().mockResolvedValue({ id: 1 }),
+      getCurrent: vi.fn().mockResolvedValue({ id: 1 }),
     },
     sessions: {
-      getWindowValue: jest.fn().mockImplementation((winId, key) => {
+      getWindowValue: vi.fn().mockImplementation((winId, key) => {
         if (key === 'groups') {
           return [
             { id: 1, name: 'Group 1' },
@@ -26,8 +26,8 @@ beforeEach(async () => {
         if (key === 'activeGroup') return 1;
         return undefined;
       }),
-      setWindowValue: jest.fn().mockResolvedValue(),
-      getTabValue: jest.fn().mockImplementation((tabId, key) => {
+      setWindowValue: vi.fn().mockResolvedValue(),
+      getTabValue: vi.fn().mockImplementation((tabId, key) => {
         if (key === 'groupId') {
           return tabId === 101 ? 1 : 2;
         }
@@ -35,13 +35,13 @@ beforeEach(async () => {
       }),
     },
     i18n: {
-      getMessage: jest.fn(() => 'Group '),
+      getMessage: vi.fn(() => 'Group '),
     },
     runtime: {
-      sendMessage: jest.fn().mockResolvedValue({ success: true }),
+      sendMessage: vi.fn().mockResolvedValue({ success: true }),
     },
     tabs: {
-      query: jest.fn().mockResolvedValue([{ id: 101 }, { id: 102 }]),
+      query: vi.fn().mockResolvedValue([{ id: 101 }, { id: 102 }]),
     },
   };
 
@@ -134,7 +134,7 @@ describe('view/groups.js', () => {
         success: false,
         error: 'Failed',
       });
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
 
       await groups.remove(1);
 
@@ -150,7 +150,7 @@ describe('view/groups.js', () => {
 
     it('handles empty response on deleteGroup failure', async () => {
       globalThis.browser.runtime.sendMessage.mockResolvedValueOnce(null);
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
 
       await groups.remove(1);
 
@@ -227,7 +227,7 @@ describe('view/groups.js', () => {
 
   describe('forEach', () => {
     it('iterates over all groups', () => {
-      const cb = jest.fn();
+      const cb = vi.fn();
       groups.forEach(cb);
       expect(cb).toHaveBeenCalledTimes(2);
       expect(cb).toHaveBeenCalledWith(expect.objectContaining({ id: 1 }));

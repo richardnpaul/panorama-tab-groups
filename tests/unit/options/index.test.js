@@ -1,8 +1,6 @@
-/* eslint-disable global-require */
-
-jest.mock('../../../src/js/polyfill.js', () => ({}));
-jest.mock('../../../src/js/share/options.js', () => ({
-  loadOptions: jest.fn().mockResolvedValue({
+vi.mock('../../../src/js/polyfill.js', () => ({}));
+vi.mock('../../../src/js/share/options.js', () => ({
+  loadOptions: vi.fn().mockResolvedValue({
     shortcut: {
       'test-shortcut': { disabled: true },
     },
@@ -12,53 +10,57 @@ jest.mock('../../../src/js/share/options.js', () => ({
   }),
 }));
 
-jest.mock('../../../src/js/options/translations.js', () => jest.fn());
-jest.mock('../../../src/js/options/shortcuts.js', () => ({
+vi.mock('../../../src/js/options/translations.js', () => ({
+  default: vi.fn(),
+}));
+vi.mock('../../../src/js/options/shortcuts.js', () => ({
   shortcuts: Promise.resolve([
     { name: 'test-shortcut', shortcut: 'Ctrl+A' },
     { shortcut: 'no-name' },
   ]),
-  updateShortcut: jest.fn(),
-  resetShortcut: jest.fn(),
-  disableShortcut: jest.fn(),
-  disableShortcutForm: jest.fn(),
-  enableShortcut: jest.fn(),
+  updateShortcut: vi.fn(),
+  resetShortcut: vi.fn(),
+  disableShortcut: vi.fn(),
+  disableShortcutForm: vi.fn(),
+  enableShortcut: vi.fn(),
 }));
-jest.mock('../../../src/js/options/view.js', () => ({
-  saveOptionView: jest.fn(),
-  showViewSpecificOptions: jest.fn(),
+vi.mock('../../../src/js/options/view.js', () => ({
+  saveOptionView: vi.fn(),
+  showViewSpecificOptions: vi.fn(),
 }));
-jest.mock('../../../src/js/options/theme.js', () => jest.fn());
-jest.mock('../../../src/js/options/toolbar.js', () => jest.fn());
-jest.mock('../../../src/js/options/backup.js', () => ({
-  loadBackup: jest.fn(),
-  saveBackup: jest.fn(),
+vi.mock('../../../src/js/options/theme.js', () => ({ default: vi.fn() }));
+vi.mock('../../../src/js/options/toolbar.js', () => ({ default: vi.fn() }));
+vi.mock('../../../src/js/options/backup.js', () => ({
+  loadBackup: vi.fn(),
+  saveBackup: vi.fn(),
 }));
-jest.mock('../../../src/js/options/statistics.js', () => jest.fn());
-jest.mock('../../../src/js/options/reset.js', () => jest.fn());
-jest.mock('../../../src/js/options/native-groups.js', () =>
-  jest.fn().mockResolvedValue(),
-);
+vi.mock('../../../src/js/options/statistics.js', () => ({
+  default: vi.fn(),
+}));
+vi.mock('../../../src/js/options/reset.js', () => ({ default: vi.fn() }));
+vi.mock('../../../src/js/options/native-groups.js', () => ({
+  default: vi.fn().mockResolvedValue(),
+}));
 
 describe('options/index.js', () => {
   let mockElements;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockElements = {
       '#test-shortcut': {
-        querySelector: jest.fn((selector) => {
+        querySelector: vi.fn((selector) => {
           if (selector === 'input') return { value: '' };
-          return { addEventListener: jest.fn() }; // return mock buttons
+          return { addEventListener: vi.fn() }; // return mock buttons
         }),
       },
-      'form[name="formView"]': { addEventListener: jest.fn() },
-      'form[name="formTheme"]': { addEventListener: jest.fn() },
-      'form[name="formToolbarPosition"]': { addEventListener: jest.fn() },
-      '#backupFileInput': { addEventListener: jest.fn() },
-      '#saveBackupButton': { addEventListener: jest.fn() },
-      '#resetAddon': { addEventListener: jest.fn() },
+      'form[name="formView"]': { addEventListener: vi.fn() },
+      'form[name="formTheme"]': { addEventListener: vi.fn() },
+      'form[name="formToolbarPosition"]': { addEventListener: vi.fn() },
+      '#backupFileInput': { addEventListener: vi.fn() },
+      '#saveBackupButton': { addEventListener: vi.fn() },
+      '#resetAddon': { addEventListener: vi.fn() },
     };
 
     const inputElements = {};
@@ -86,9 +88,9 @@ describe('options/index.js', () => {
     };
 
     global.document = {
-      querySelector: jest.fn((sel) => getMockElement(sel)),
-      getElementById: jest.fn((id) => getMockElement(`#${id}`)),
-      addEventListener: jest.fn((event, cb) => {
+      querySelector: vi.fn((sel) => getMockElement(sel)),
+      getElementById: vi.fn((id) => getMockElement(`#${id}`)),
+      addEventListener: vi.fn((event, cb) => {
         if (event === 'DOMContentLoaded') {
           global.document.DOMContentLoadedCb = cb;
         }
@@ -97,24 +99,19 @@ describe('options/index.js', () => {
   });
 
   it('initializes options view', async () => {
-    let loadOptions;
-    let addTranslations;
-    let getStatistics;
-    let initNativeGroupsOption;
-    let disableShortcutForm;
-    let showViewSpecificOptions;
-
-    jest.isolateModules(() => {
-      require('../../../src/js/options/index.js');
-      loadOptions = require('../../../src/js/share/options.js').loadOptions;
-      addTranslations = require('../../../src/js/options/translations.js');
-      getStatistics = require('../../../src/js/options/statistics.js');
-      initNativeGroupsOption = require('../../../src/js/options/native-groups.js');
-      disableShortcutForm =
-        require('../../../src/js/options/shortcuts.js').disableShortcutForm;
-      showViewSpecificOptions =
-        require('../../../src/js/options/view.js').showViewSpecificOptions;
-    });
+    vi.resetModules();
+    await import('../../../src/js/options/index.js');
+    const { loadOptions } = await import('../../../src/js/share/options.js');
+    const { default: addTranslations } =
+      await import('../../../src/js/options/translations.js');
+    const { default: getStatistics } =
+      await import('../../../src/js/options/statistics.js');
+    const { default: initNativeGroupsOption } =
+      await import('../../../src/js/options/native-groups.js');
+    const { disableShortcutForm } =
+      await import('../../../src/js/options/shortcuts.js');
+    const { showViewSpecificOptions } =
+      await import('../../../src/js/options/view.js');
 
     if (global.document.DOMContentLoadedCb) {
       global.document.DOMContentLoadedCb();
@@ -148,19 +145,18 @@ describe('options/index.js', () => {
   });
 
   it('falls back to auto theme if the stored theme is invalid', async () => {
-    let loadOptions2;
-    jest.isolateModules(() => {
-      loadOptions2 = require('../../../src/js/share/options.js').loadOptions;
-      loadOptions2.mockResolvedValueOnce({
-        shortcut: {
-          'test-shortcut': { disabled: false },
-        },
-        view: 'panorama',
-        theme: 'invalid-theme',
-        toolbarPosition: 'top',
-      });
-      require('../../../src/js/options/index.js');
+    vi.resetModules();
+    const { loadOptions: loadOptions2 } =
+      await import('../../../src/js/share/options.js');
+    loadOptions2.mockResolvedValueOnce({
+      shortcut: {
+        'test-shortcut': { disabled: false },
+      },
+      view: 'panorama',
+      theme: 'invalid-theme',
+      toolbarPosition: 'top',
     });
+    await import('../../../src/js/options/index.js');
 
     if (global.document.DOMContentLoadedCb) {
       global.document.DOMContentLoadedCb();
@@ -176,18 +172,19 @@ describe('options/index.js', () => {
   it('handles missing DOM elements gracefully', async () => {
     mockElements = {
       '#test-shortcut': {
-        querySelector: jest.fn().mockReturnValue(null),
+        querySelector: vi.fn().mockReturnValue(null),
       },
-      'form[name="formView"]': { addEventListener: jest.fn() },
-      'form[name="formTheme"]': { addEventListener: jest.fn() },
-      'form[name="formToolbarPosition"]': { addEventListener: jest.fn() },
-      '#backupFileInput': { addEventListener: jest.fn() },
-      '#saveBackupButton': { addEventListener: jest.fn() },
-      '#resetAddon': { addEventListener: jest.fn() },
+      'form[name="formView"]': { addEventListener: vi.fn() },
+      'form[name="formTheme"]': { addEventListener: vi.fn() },
+      'form[name="formToolbarPosition"]': { addEventListener: vi.fn() },
+      '#backupFileInput': { addEventListener: vi.fn() },
+      '#saveBackupButton': { addEventListener: vi.fn() },
+      '#resetAddon': { addEventListener: vi.fn() },
     };
 
-    const loadOptionsMock =
-      require('../../../src/js/share/options.js').loadOptions;
+    vi.resetModules();
+    const { loadOptions: loadOptionsMock } =
+      await import('../../../src/js/share/options.js');
     loadOptionsMock.mockResolvedValueOnce({
       shortcut: {},
       view: 'panorama',
@@ -196,7 +193,7 @@ describe('options/index.js', () => {
     });
 
     const origDocumentQuerySelector = global.document.querySelector;
-    global.document.querySelector = jest.fn((sel) => {
+    global.document.querySelector = vi.fn((sel) => {
       if (sel === 'input[name="theme"][value="auto"]') {
         return null;
       }
@@ -208,9 +205,7 @@ describe('options/index.js', () => {
       return null;
     });
 
-    jest.isolateModules(() => {
-      require('../../../src/js/options/index.js');
-    });
+    await import('../../../src/js/options/index.js');
 
     if (global.document.DOMContentLoadedCb) {
       global.document.DOMContentLoadedCb();

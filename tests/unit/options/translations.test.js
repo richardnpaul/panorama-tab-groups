@@ -2,11 +2,11 @@ import addTranslations from '../../../src/js/options/translations.js';
 
 describe('options/translations.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     global.browser = {
       i18n: {
-        getMessage: jest.fn((key) => `translated-${key}`),
+        getMessage: vi.fn((key) => `translated-${key}`),
       },
     };
 
@@ -16,8 +16,8 @@ describe('options/translations.js', () => {
     });
 
     global.document = {
-      querySelector: jest.fn().mockReturnValue(createElement()),
-      querySelectorAll: jest
+      querySelector: vi.fn().mockReturnValue(createElement()),
+      querySelectorAll: vi
         .fn()
         .mockReturnValue([createElement(), createElement()]),
     };

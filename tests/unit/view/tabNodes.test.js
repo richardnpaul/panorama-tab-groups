@@ -15,76 +15,76 @@ import {
 import * as tabs from '../../../src/js/view/tabs.js';
 
 // Mock the drag handlers
-jest.mock('../../../src/js/view/drag.js', () => ({
-  tabDragStart: jest.fn(),
-  tabDragEnter: jest.fn(),
-  tabDragOver: jest.fn(),
-  tabDragLeave: jest.fn(),
-  tabDrop: jest.fn(),
-  tabDragEnd: jest.fn(),
+vi.mock('../../../src/js/view/drag.js', () => ({
+  tabDragStart: vi.fn(),
+  tabDragEnter: vi.fn(),
+  tabDragOver: vi.fn(),
+  tabDragLeave: vi.fn(),
+  tabDrop: vi.fn(),
+  tabDragEnd: vi.fn(),
 }));
 
 // Mock browser APIs
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 
   // Clear the tabNodes object
   Object.keys(tabNodes).forEach((key) => delete tabNodes[key]);
 
   globalThis.browser = {
     tabs: {
-      update: jest.fn().mockResolvedValue(),
-      remove: jest.fn().mockResolvedValue(),
-      getCurrent: jest.fn().mockResolvedValue({ id: 999 }),
-      query: jest.fn().mockResolvedValue([]),
+      update: vi.fn().mockResolvedValue(),
+      remove: vi.fn().mockResolvedValue(),
+      getCurrent: vi.fn().mockResolvedValue({ id: 999 }),
+      query: vi.fn().mockResolvedValue([]),
     },
     sessions: {
-      getTabValue: jest.fn().mockResolvedValue(null),
-      setTabValue: jest.fn().mockResolvedValue(),
+      getTabValue: vi.fn().mockResolvedValue(null),
+      setTabValue: vi.fn().mockResolvedValue(),
     },
     i18n: {
-      getMessage: jest.fn(() => 'Close'),
+      getMessage: vi.fn(() => 'Close'),
     },
   };
 
   // Mock global document if not using jsdom or just to be safe
   if (typeof document === 'undefined') {
     global.document = {
-      createElement: jest.fn().mockImplementation(() => {
+      createElement: vi.fn().mockImplementation(() => {
         const classes = new Set();
         const listeners = {};
         return {
-          parentNode: { removeChild: jest.fn() },
+          parentNode: { removeChild: vi.fn() },
           classList: {
-            add: jest.fn((c) => classes.add(c)),
-            remove: jest.fn((c) => classes.delete(c)),
-            contains: jest.fn((c) => classes.has(c)),
+            add: vi.fn((c) => classes.add(c)),
+            remove: vi.fn((c) => classes.delete(c)),
+            contains: vi.fn((c) => classes.has(c)),
           },
           style: {},
-          addEventListener: jest.fn((event, handler) => {
+          addEventListener: vi.fn((event, handler) => {
             listeners[event] = listeners[event] || [];
             listeners[event].push(handler);
           }),
-          appendChild: jest.fn(),
-          removeChild: jest.fn(),
-          replaceChildren: jest.fn(),
-          setAttribute: jest.fn(),
-          dispatchEvent: jest.fn((event) => {
+          appendChild: vi.fn(),
+          removeChild: vi.fn(),
+          replaceChildren: vi.fn(),
+          setAttribute: vi.fn(),
+          dispatchEvent: vi.fn((event) => {
             if (listeners[event.type]) {
               listeners[event.type].forEach((h) => h(event));
             }
           }),
         };
       }),
-      createTextNode: jest.fn().mockReturnValue({}),
+      createTextNode: vi.fn().mockReturnValue({}),
     };
     global.window = {
       location: { pathname: '/view.html' },
     };
     global.MouseEvent = function MouseEvent(type) {
       this.type = type;
-      this.preventDefault = jest.fn();
-      this.stopPropagation = jest.fn();
+      this.preventDefault = vi.fn();
+      this.stopPropagation = vi.fn();
     };
   }
 
@@ -135,7 +135,7 @@ describe('view/tabNodes.js', () => {
 
       // Simulate click
       const event = new MouseEvent('click');
-      event.stopPropagation = jest.fn();
+      event.stopPropagation = vi.fn();
 
       // In JSDOM, dispatching event might be async if there's an async listener
       tabElement.dispatchEvent(event);
@@ -154,7 +154,7 @@ describe('view/tabNodes.js', () => {
       const closeBtn = tabNodes[101].close;
 
       const event = new MouseEvent('click');
-      event.stopPropagation = jest.fn();
+      event.stopPropagation = vi.fn();
       closeBtn.dispatchEvent(event);
 
       expect(event.stopPropagation).toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe('view/tabNodes.js', () => {
       // Mouse event for mousedown
       const mousedownEvent = {
         type: 'mousedown',
-        stopPropagation: jest.fn(),
+        stopPropagation: vi.fn(),
       };
       tabElement.dispatchEvent(mousedownEvent);
       expect(mousedownEvent.stopPropagation).toHaveBeenCalled();
@@ -212,8 +212,8 @@ describe('view/tabNodes.js', () => {
       const auxclickEvent1 = {
         type: 'auxclick',
         button: 0,
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
       };
       tabElement.dispatchEvent(auxclickEvent1);
       expect(browser.tabs.remove).not.toHaveBeenCalled();
@@ -222,8 +222,8 @@ describe('view/tabNodes.js', () => {
       const auxclickEvent2 = {
         type: 'auxclick',
         button: 1,
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
       };
       tabElement.dispatchEvent(auxclickEvent2);
       expect(browser.tabs.remove).toHaveBeenCalledWith(101);
@@ -281,7 +281,7 @@ describe('view/tabNodes.js', () => {
       makeTabNode({ id: 102, lastAccessed: 2000 });
       makeTabNode({ id: 103, lastAccessed: 500 });
 
-      jest.spyOn(tabs, 'forEachTabSync').mockImplementation(async (cb) => {
+      vi.spyOn(tabs, 'forEachTabSync').mockImplementation(async (cb) => {
         cb(sampleTab);
         cb({ id: 102, lastAccessed: 2000 });
         cb({ id: 103, lastAccessed: 500 });
@@ -299,7 +299,7 @@ describe('view/tabNodes.js', () => {
       makeTabNode(sampleTab);
       setActiveTabNodeById(101);
 
-      jest.spyOn(tabs, 'forEachTabSync').mockImplementationOnce(async (cb) => {
+      vi.spyOn(tabs, 'forEachTabSync').mockImplementationOnce(async (cb) => {
         cb(sampleTab);
         cb({ id: 999, lastAccessed: 500 });
       });
@@ -307,7 +307,7 @@ describe('view/tabNodes.js', () => {
       expect(getActiveTabId()).toBe(101);
 
       // 2. lastActive is -1
-      jest.spyOn(tabs, 'forEachTabSync').mockImplementationOnce(async (cb) => {
+      vi.spyOn(tabs, 'forEachTabSync').mockImplementationOnce(async (cb) => {
         cb(sampleTab);
       });
       await setActiveTabNode(101);
@@ -467,13 +467,13 @@ describe('view/tabNodes.js', () => {
         },
       ];
 
-      jest.spyOn(tabs, 'forEachTab').mockImplementation(async (cb) => {
+      vi.spyOn(tabs, 'forEachTab').mockImplementation(async (cb) => {
         for (const tab of mockTabs) {
           // eslint-disable-next-line no-await-in-loop
           await cb(tab);
         }
       });
-      jest.spyOn(tabs, 'forEachTabSync').mockImplementation(async (cb) => {
+      vi.spyOn(tabs, 'forEachTabSync').mockImplementation(async (cb) => {
         for (const tab of mockTabs) {
           // eslint-disable-next-line no-await-in-loop
           cb(tab);

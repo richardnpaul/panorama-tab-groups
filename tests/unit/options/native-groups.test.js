@@ -1,9 +1,6 @@
-/* eslint-disable global-require */
-// Top-level imports removed
-
 let mockUseNativeGroups = true;
-jest.mock('../../../src/js/share/options.js', () => ({
-  loadOptions: jest.fn().mockImplementation(() =>
+vi.mock('../../../src/js/share/options.js', () => ({
+  loadOptions: vi.fn().mockImplementation(() =>
     Promise.resolve({
       useNativeGroups: mockUseNativeGroups,
     }),
@@ -17,15 +14,15 @@ describe('options/native-groups.js', () => {
   let mockContainer;
   let mockWarningText;
 
-  const setupBrowserEnv = (mode) => {
+  const setupBrowserEnv = async (mode) => {
     mockUseNativeGroups = true;
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     global.browser = {
       storage: {
-        sync: { set: jest.fn().mockResolvedValue() },
+        sync: { set: vi.fn().mockResolvedValue() },
       },
       runtime: {
-        sendMessage: jest.fn().mockResolvedValue(),
+        sendMessage: vi.fn().mockResolvedValue(),
       },
       tabs: {},
     };
@@ -43,32 +40,30 @@ describe('options/native-groups.js', () => {
 
     mockCheckbox = {
       checked: false,
-      addEventListener: jest.fn(),
+      addEventListener: vi.fn(),
       disabled: false,
     };
     mockFeedback = { textContent: '', style: { display: 'none' } };
     mockWarningText = { textContent: '', className: '' };
     mockContainer = {
       style: { display: 'none', opacity: '1' },
-      querySelector: jest.fn(),
+      querySelector: vi.fn(),
     };
 
     global.document = {
-      getElementById: jest.fn((id) => {
+      getElementById: vi.fn((id) => {
         if (id === 'useNativeGroups') return mockCheckbox;
         if (id === 'nativeGroupsContainer') return mockContainer;
         if (id === 'nativeGroupsFeedback') return mockFeedback;
         if (id === 'nativeGroupsWarning') return mockWarningText;
         return null;
       }),
-      createElement: jest.fn().mockReturnValue(mockWarningText),
+      createElement: vi.fn().mockReturnValue(mockWarningText),
     };
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      initNativeGroupsOption =
-        require('../../../src/js/options/native-groups.js').default;
-    });
+    vi.resetModules();
+    ({ default: initNativeGroupsOption } =
+      await import('../../../src/js/options/native-groups.js'));
   };
 
   describe('hybrid mode', () => {
@@ -134,12 +129,12 @@ describe('options/native-groups.js', () => {
   });
 
   describe('error handling and edge cases', () => {
-    beforeEach(() => {
-      setupBrowserEnv('hybrid');
+    beforeEach(async () => {
+      await setupBrowserEnv('hybrid');
     });
 
     it('handles missing checkbox or container DOM elements', async () => {
-      global.document.getElementById = jest.fn().mockReturnValue(null);
+      global.document.getElementById = vi.fn().mockReturnValue(null);
       await initNativeGroupsOption();
       // Should return early and not throw
     });
@@ -148,7 +143,7 @@ describe('options/native-groups.js', () => {
       global.browser.storage.sync.set.mockRejectedValue(
         new Error('Sync set error'),
       );
-      const consoleErrorSpy = jest
+      const consoleErrorSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
@@ -171,7 +166,7 @@ describe('options/native-groups.js', () => {
       global.browser.runtime.sendMessage.mockRejectedValue(
         new Error('Migration send error'),
       );
-      const consoleErrorSpy = jest
+      const consoleErrorSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
@@ -194,7 +189,7 @@ describe('options/native-groups.js', () => {
       global.browser.runtime.sendMessage.mockRejectedValue(
         new Error('Cleanup send error'),
       );
-      const consoleErrorSpy = jest
+      const consoleErrorSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
 
@@ -221,7 +216,7 @@ describe('options/native-groups.js', () => {
 
     it('handles missing feedback DOM element when toggled', async () => {
       const origGetElementById = global.document.getElementById;
-      global.document.getElementById = jest.fn((id) => {
+      global.document.getElementById = vi.fn((id) => {
         if (id === 'nativeGroupsFeedback') return null;
         if (id === 'useNativeGroups') return mockCheckbox;
         if (id === 'nativeGroupsContainer') return mockContainer;
@@ -243,11 +238,11 @@ describe('options/native-groups.js', () => {
 
     describe('with fake timers', () => {
       beforeEach(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
       });
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('hides feedback after 3 seconds', async () => {
@@ -257,7 +252,7 @@ describe('options/native-groups.js', () => {
         changeHandler();
 
         expect(mockFeedback.style.display).toBe('block');
-        jest.advanceTimersByTime(3000);
+        vi.advanceTimersByTime(3000);
         expect(mockFeedback.style.display).toBe('none');
       });
     });

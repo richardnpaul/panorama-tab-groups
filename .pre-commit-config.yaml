@@ -22,7 +22,7 @@ repos:
         name: prettier
         entry: npx prettier --write --ignore-unknown
         language: system
-        types_or: [javascript, json, css, html, markdown]
+        types_or: [javascript, ts, json, css, html, markdown]
         exclude: |
           (?x)^(
             src/js/depends/dragscroll\.js|
@@ -35,7 +35,7 @@ repos:
         entry: npx eslint
         language: system
         types: [file]
-        files: \.(js|json)$
+        files: \.(js|ts|json)$
         exclude: |
           (?x)^(
             src/js/depends/dragscroll\.js|

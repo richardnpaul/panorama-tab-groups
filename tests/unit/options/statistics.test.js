@@ -1,24 +1,24 @@
 import getStatistics from '../../../src/js/options/statistics.js';
 import * as utils from '../../../src/js/share/utils.js';
 
-jest.mock('../../../src/js/share/utils.js', () => ({
-  formatByteSize: jest.fn().mockReturnValue('100 B'),
+vi.mock('../../../src/js/share/utils.js', () => ({
+  formatByteSize: vi.fn().mockReturnValue('100 B'),
 }));
 
 describe('options/statistics.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     global.browser = {
       tabs: {
-        query: jest.fn().mockResolvedValue([
+        query: vi.fn().mockResolvedValue([
           { id: 1, discarded: false },
           { id: 2, discarded: true },
           { id: 3, discarded: false },
         ]),
       },
       sessions: {
-        getTabValue: jest.fn().mockImplementation((id, key) => {
+        getTabValue: vi.fn().mockImplementation((id, key) => {
           if (key === 'thumbnail') {
             if (id === 1) return { thumbnail: 'A'.repeat(50) };
             if (id === 2) return 'A'.repeat(50);
@@ -28,20 +28,20 @@ describe('options/statistics.js', () => {
         }),
       },
       i18n: {
-        getMessage: jest.fn().mockReturnValue('active'),
+        getMessage: vi.fn().mockReturnValue('active'),
       },
     };
 
     global.document = {
-      getElementById: jest.fn(() => ({
-        replaceChildren: jest.fn(),
+      getElementById: vi.fn(() => ({
+        replaceChildren: vi.fn(),
       })),
-      createTextNode: jest.fn((text) => text),
+      createTextNode: vi.fn((text) => text),
     };
 
     global.console = {
       ...console,
-      debug: jest.fn(),
+      debug: vi.fn(),
     };
   });
 

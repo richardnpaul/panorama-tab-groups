@@ -2,20 +2,21 @@ import * as groupNodes from '../../../src/js/view/groupNodes.js';
 import * as groups from '../../../src/js/view/groups.js';
 import * as tabNodes from '../../../src/js/view/tabNodes.js';
 import * as tabs from '../../../src/js/view/tabs.js';
+import * as utils from '../../../src/js/share/utils.js';
 
-jest.mock('../../../src/js/view/groups.js');
-jest.mock('../../../src/js/view/tabNodes.js', () => ({
+vi.mock('../../../src/js/view/groups.js');
+vi.mock('../../../src/js/view/tabNodes.js', () => ({
   tabNodes: {},
-  getTabNode: jest.fn((id) => ({
+  getTabNode: vi.fn((id) => ({
     id,
     tagName: 'DIV',
-    classList: { add: jest.fn(), remove: jest.fn() },
+    classList: { add: vi.fn(), remove: vi.fn() },
     style: {},
   })),
 }));
-jest.mock('../../../src/js/view/tabs.js', () => ({
-  getGroupId: jest.fn().mockResolvedValue(1),
-  forEachTab: jest.fn(),
+vi.mock('../../../src/js/view/tabs.js', () => ({
+  getGroupId: vi.fn().mockResolvedValue(1),
+  forEachTab: vi.fn(),
 }));
 
 const createdElements = [];
@@ -27,8 +28,8 @@ const flushPromises = () =>
     setTimeout(resolve, 15);
   });
 
-jest.mock('../../../src/js/share/utils.js', () => ({
-  newElement: jest.fn((tag, attrs = {}, children = []) => {
+vi.mock('../../../src/js/share/utils.js', () => ({
+  newElement: vi.fn((tag, attrs = {}, children = []) => {
     const classes = new Set();
     const listeners = {};
     const el = {
@@ -36,7 +37,7 @@ jest.mock('../../../src/js/share/utils.js', () => ({
       childNodes: [...children],
       value: attrs.value || '',
       type: attrs.type || '',
-      setAttribute: jest.fn((k, v) => {
+      setAttribute: vi.fn((k, v) => {
         if (k === 'class') {
           classes.clear();
           v.split(' ').forEach((c) => classes.add(c));
@@ -47,8 +48,8 @@ jest.mock('../../../src/js/share/utils.js', () => ({
         el.attributes[k] = v;
       }),
       attributes: { ...attrs },
-      getAttribute: jest.fn((k) => el.attributes[k]),
-      appendChild: jest.fn((child) => {
+      getAttribute: vi.fn((k) => el.attributes[k]),
+      appendChild: vi.fn((child) => {
         if (child && child.isFragment) {
           el.childNodes.push(...child.childNodes);
           child.childNodes.length = 0;
@@ -56,10 +57,10 @@ jest.mock('../../../src/js/share/utils.js', () => ({
           el.childNodes.push(child);
         }
       }),
-      replaceChildren: jest.fn((...newChildren) => {
+      replaceChildren: vi.fn((...newChildren) => {
         el.childNodes = [...newChildren];
       }),
-      insertBefore: jest.fn((newChild, referenceChild) => {
+      insertBefore: vi.fn((newChild, referenceChild) => {
         const idx = el.childNodes.indexOf(referenceChild);
         const childrenToInsert =
           newChild && newChild.isFragment ? newChild.childNodes : [newChild];
@@ -72,31 +73,31 @@ jest.mock('../../../src/js/share/utils.js', () => ({
           newChild.childNodes.length = 0;
         }
       }),
-      insertAdjacentElement: jest.fn((position, element) => {
+      insertAdjacentElement: vi.fn((position, element) => {
         if (position === 'beforebegin') {
           el.childNodes.push(element);
         }
       }),
-      addEventListener: jest.fn((event, handler) => {
+      addEventListener: vi.fn((event, handler) => {
         listeners[event] = listeners[event] || [];
         listeners[event].push(handler);
       }),
-      removeEventListener: jest.fn(),
+      removeEventListener: vi.fn(),
       classList: {
-        add: jest.fn((c) => classes.add(c)),
-        remove: jest.fn((c) => classes.delete(c)),
-        contains: jest.fn((c) => classes.has(c)),
+        add: vi.fn((c) => classes.add(c)),
+        remove: vi.fn((c) => classes.delete(c)),
+        contains: vi.fn((c) => classes.has(c)),
       },
       style: {},
-      dispatchEvent: jest.fn((event) => {
+      dispatchEvent: vi.fn((event) => {
         if (listeners[event.type]) {
           listeners[event.type].forEach((h) => h(event));
         }
       }),
-      focus: jest.fn(),
-      blur: jest.fn(),
-      setSelectionRange: jest.fn(),
-      getBoundingClientRect: jest
+      focus: vi.fn(),
+      blur: vi.fn(),
+      setSelectionRange: vi.fn(),
+      getBoundingClientRect: vi
         .fn()
         .mockReturnValue({ width: 200, height: 200 }),
     };
@@ -106,12 +107,12 @@ jest.mock('../../../src/js/share/utils.js', () => ({
     createdElements.push(el);
     return el;
   }),
-  getPluralForm: jest.fn().mockReturnValue('Close group?'),
+  getPluralForm: vi.fn().mockReturnValue('Close group?'),
 }));
 
 describe('view/groupNodes.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     createdElements.length = 0;
 
     // Clear out groupNodes and tabNodes objects for test isolation
@@ -124,36 +125,36 @@ describe('view/groupNodes.js', () => {
 
     const docListeners = {};
     global.document = {
-      createTextNode: jest.fn().mockImplementation((txt) => ({ text: txt })),
-      createDocumentFragment: jest.fn().mockImplementation(() => {
+      createTextNode: vi.fn().mockImplementation((txt) => ({ text: txt })),
+      createDocumentFragment: vi.fn().mockImplementation(() => {
         const fragChildren = [];
         return {
           isFragment: true,
           childNodes: fragChildren,
-          appendChild: jest.fn((c) => fragChildren.push(c)),
+          appendChild: vi.fn((c) => fragChildren.push(c)),
         };
       }),
-      getElementById: jest.fn().mockReturnValue({
-        appendChild: jest.fn(),
+      getElementById: vi.fn().mockReturnValue({
+        appendChild: vi.fn(),
       }),
-      getElementsByTagName: jest.fn().mockReturnValue([
+      getElementsByTagName: vi.fn().mockReturnValue([
         {
-          setAttribute: jest.fn(),
-          removeAttribute: jest.fn(),
+          setAttribute: vi.fn(),
+          removeAttribute: vi.fn(),
         },
       ]),
-      addEventListener: jest.fn((event, handler) => {
+      addEventListener: vi.fn((event, handler) => {
         docListeners[event] = docListeners[event] || [];
         docListeners[event].push(handler);
       }),
-      removeEventListener: jest.fn((event, handler) => {
+      removeEventListener: vi.fn((event, handler) => {
         if (docListeners[event]) {
           docListeners[event] = docListeners[event].filter(
             (h) => h !== handler,
           );
         }
       }),
-      dispatchEvent: jest.fn((event) => {
+      dispatchEvent: vi.fn((event) => {
         if (docListeners[event.type]) {
           docListeners[event.type].forEach((h) => h(event));
         }
@@ -161,8 +162,8 @@ describe('view/groupNodes.js', () => {
     };
 
     global.window = {
-      confirm: jest.fn().mockReturnValue(true),
-      getComputedStyle: jest.fn().mockReturnValue({ cursor: 'move' }),
+      confirm: vi.fn().mockReturnValue(true),
+      getComputedStyle: vi.fn().mockReturnValue({ cursor: 'move' }),
       innerWidth: 1000,
       innerHeight: 1000,
       location: { pathname: '/view.html' },
@@ -170,18 +171,18 @@ describe('view/groupNodes.js', () => {
 
     global.browser = {
       windows: {
-        getCurrent: jest.fn().mockResolvedValue({ id: 1 }),
+        getCurrent: vi.fn().mockResolvedValue({ id: 1 }),
       },
       sessions: {
-        getWindowValue: jest.fn().mockResolvedValue('freeform'),
+        getWindowValue: vi.fn().mockResolvedValue('freeform'),
       },
       tabs: {
-        get: jest.fn().mockResolvedValue({ id: 1, index: 1 }),
-        create: jest.fn().mockResolvedValue({ id: 2 }),
-        getCurrent: jest.fn().mockResolvedValue({ id: 999 }),
-        remove: jest.fn().mockResolvedValue(),
+        get: vi.fn().mockResolvedValue({ id: 1, index: 1 }),
+        create: vi.fn().mockResolvedValue({ id: 2 }),
+        getCurrent: vi.fn().mockResolvedValue({ id: 999 }),
+        remove: vi.fn().mockResolvedValue(),
       },
-      i18n: { getMessage: jest.fn().mockReturnValue('Close group?') },
+      i18n: { getMessage: vi.fn().mockReturnValue('Close group?') },
     };
 
     groups.forEach.mockImplementation((cb) => {
@@ -194,7 +195,7 @@ describe('view/groupNodes.js', () => {
       const mockContent = { childNodes: [1] }; // 1 node = empty (only newtab node)
       const mockGroup = { id: 1 };
 
-      const mockGroupNode = { parentNode: { removeChild: jest.fn() } };
+      const mockGroupNode = { parentNode: { removeChild: vi.fn() } };
       groupNodes.groupNodes[1] = { group: mockGroupNode };
 
       await groupNodes.closeGroup(mockContent, mockGroup);
@@ -210,7 +211,7 @@ describe('view/groupNodes.js', () => {
       const mockContent = { childNodes: [1, 2, 3] }; // 3 nodes = 2 tabs
       const mockGroup = { id: 1 };
 
-      const mockGroupNode = { parentNode: { removeChild: jest.fn() } };
+      const mockGroupNode = { parentNode: { removeChild: vi.fn() } };
       groupNodes.groupNodes[1] = { group: mockGroupNode };
 
       groups.forEach.mockImplementation((cb) => cb({ id: 2 }));
@@ -227,7 +228,7 @@ describe('view/groupNodes.js', () => {
       const mockContent = { childNodes: [1, 2, 3] };
       const mockGroup = { id: 1 };
 
-      const mockGroupNode = { parentNode: { removeChild: jest.fn() } };
+      const mockGroupNode = { parentNode: { removeChild: vi.fn() } };
       groupNodes.groupNodes[1] = { group: mockGroupNode };
 
       await groupNodes.closeGroup(mockContent, mockGroup);
@@ -245,15 +246,15 @@ describe('view/groupNodes.js', () => {
     it('calculates fit and applies styles', () => {
       const mockGroup = { id: 1 };
       const mockTabNode = {
-        classList: { add: jest.fn(), remove: jest.fn() },
+        classList: { add: vi.fn(), remove: vi.fn() },
         style: {},
       };
 
       groupNodes.groupNodes[1] = {
-        tabCount: { replaceChildren: jest.fn() },
+        tabCount: { replaceChildren: vi.fn() },
         content: {
           childNodes: [mockTabNode, mockTabNode], // 1 newtab, 1 tab
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 200, height: 200 }),
         },
@@ -272,15 +273,15 @@ describe('view/groupNodes.js', () => {
     it('calculates deck mode correctly', () => {
       const mockGroup = { id: 1 };
       const mockTabNode = {
-        classList: { add: jest.fn(), remove: jest.fn() },
+        classList: { add: vi.fn(), remove: vi.fn() },
         style: {},
       };
 
       groupNodes.groupNodes[1] = {
-        tabCount: { replaceChildren: jest.fn() },
+        tabCount: { replaceChildren: vi.fn() },
         content: {
           childNodes: [mockTabNode, mockTabNode],
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 20, height: 20 }), // force small area for deck
         },
@@ -302,7 +303,7 @@ describe('view/groupNodes.js', () => {
 
       const mockGroupNode1 = {
         parentNode: {
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 1000, height: 1000 }),
         },
@@ -310,7 +311,7 @@ describe('view/groupNodes.js', () => {
       };
       const mockGroupNode2 = {
         parentNode: {
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 1000, height: 1000 }),
         },
@@ -321,23 +322,23 @@ describe('view/groupNodes.js', () => {
         group: mockGroupNode1,
         content: {
           childNodes: [],
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 200, height: 200 }),
         },
         newtab: { style: {} },
-        tabCount: { replaceChildren: jest.fn() },
+        tabCount: { replaceChildren: vi.fn() },
       };
       groupNodes.groupNodes[2] = {
         group: mockGroupNode2,
         content: {
           childNodes: [],
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 200, height: 200 }),
         },
         newtab: { style: {} },
-        tabCount: { replaceChildren: jest.fn() },
+        tabCount: { replaceChildren: vi.fn() },
       };
 
       groupNodes.resizeGroups(1, { x: 0.1, y: 0.1, w: 0.5, h: 0.5 });
@@ -366,7 +367,7 @@ describe('view/groupNodes.js', () => {
       groupNodes.makeGroupNode(group);
 
       const newtab = findElementByClass('newtab');
-      const stopSpy = jest.fn();
+      const stopSpy = vi.fn();
       newtab.dispatchEvent({ type: 'mousedown', stopPropagation: stopSpy });
       expect(stopSpy).toHaveBeenCalled();
     });
@@ -376,11 +377,11 @@ describe('view/groupNodes.js', () => {
       groupNodes.makeGroupNode(group);
 
       const closeBtn = findElementByClass('close');
-      const mockParent = { removeChild: jest.fn() };
+      const mockParent = { removeChild: vi.fn() };
       groupNodes.groupNodes[1].group.parentNode = mockParent;
 
       // Click close button
-      closeBtn.dispatchEvent({ type: 'click', stopPropagation: jest.fn() });
+      closeBtn.dispatchEvent({ type: 'click', stopPropagation: vi.fn() });
       await flushPromises();
 
       expect(groups.remove).toHaveBeenCalledWith(1);
@@ -392,7 +393,7 @@ describe('view/groupNodes.js', () => {
       groupNodes.makeGroupNode(group);
 
       const newtab = findElementByClass('newtab');
-      newtab.dispatchEvent({ type: 'click', stopPropagation: jest.fn() });
+      newtab.dispatchEvent({ type: 'click', stopPropagation: vi.fn() });
       await flushPromises();
 
       expect(groups.setActive).toHaveBeenCalledWith(1);
@@ -401,7 +402,7 @@ describe('view/groupNodes.js', () => {
     });
 
     it('handles newtab click inside view.html when remove throws error', async () => {
-      const consoleErrorSpy = jest
+      const consoleErrorSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {});
       global.browser.tabs.remove.mockRejectedValueOnce(new Error('Test error'));
@@ -410,7 +411,7 @@ describe('view/groupNodes.js', () => {
       groupNodes.makeGroupNode(group);
 
       const newtab = findElementByClass('newtab');
-      newtab.dispatchEvent({ type: 'click', stopPropagation: jest.fn() });
+      newtab.dispatchEvent({ type: 'click', stopPropagation: vi.fn() });
       await flushPromises();
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -426,7 +427,7 @@ describe('view/groupNodes.js', () => {
       groupNodes.makeGroupNode(group);
 
       const newtab = findElementByClass('newtab');
-      newtab.dispatchEvent({ type: 'click', stopPropagation: jest.fn() });
+      newtab.dispatchEvent({ type: 'click', stopPropagation: vi.fn() });
       await flushPromises();
 
       expect(browser.tabs.remove).not.toHaveBeenCalled();
@@ -451,7 +452,7 @@ describe('view/groupNodes.js', () => {
       });
 
       const parentNode = {
-        getBoundingClientRect: jest
+        getBoundingClientRect: vi
           .fn()
           .mockReturnValue({ width: 1000, height: 1000 }),
       };
@@ -459,7 +460,7 @@ describe('view/groupNodes.js', () => {
 
       const mockGroupNode2 = {
         parentNode: {
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 1000, height: 1000 }),
         },
@@ -469,12 +470,12 @@ describe('view/groupNodes.js', () => {
         group: mockGroupNode2,
         content: {
           childNodes: [],
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 200, height: 200 }),
         },
         newtab: { style: {} },
-        tabCount: { replaceChildren: jest.fn() },
+        tabCount: { replaceChildren: vi.fn() },
       };
 
       const innerGroup = createdElements.find(
@@ -486,8 +487,8 @@ describe('view/groupNodes.js', () => {
       // Trigger mousedown with coordinates
       innerGroup.dispatchEvent({
         type: 'mousedown',
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
         pageX: 100,
         pageY: 100,
       });
@@ -496,7 +497,7 @@ describe('view/groupNodes.js', () => {
       // First move to establish lx / ly starting point
       document.dispatchEvent({
         type: 'mousemove',
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         pageX: 100,
         pageY: 100,
       });
@@ -504,7 +505,7 @@ describe('view/groupNodes.js', () => {
       // Second move: drag extremely left/up to trigger x < 0 and y < 0 clamps
       document.dispatchEvent({
         type: 'mousemove',
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         pageX: -200,
         pageY: -200,
       });
@@ -512,7 +513,7 @@ describe('view/groupNodes.js', () => {
       // Third move: drag close to other group to trigger snap
       document.dispatchEvent({
         type: 'mousemove',
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         pageX: 400,
         pageY: 400,
       });
@@ -533,8 +534,8 @@ describe('view/groupNodes.js', () => {
       );
       innerGroup.dispatchEvent({
         type: 'mousedown',
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
       });
       await flushPromises();
 
@@ -556,17 +557,17 @@ describe('view/groupNodes.js', () => {
       input.dispatchEvent({
         type: 'keydown',
         key: 'a',
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
       });
       expect(input.focus).toHaveBeenCalledTimes(1);
 
-      const blurSpy = jest.spyOn(input, 'blur');
+      const blurSpy = vi.spyOn(input, 'blur');
       input.dispatchEvent({
         type: 'keydown',
         key: 'Enter',
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
       });
       expect(blurSpy).toHaveBeenCalled();
 
@@ -594,7 +595,7 @@ describe('view/groupNodes.js', () => {
       });
 
       const parentNode = {
-        getBoundingClientRect: jest
+        getBoundingClientRect: vi
           .fn()
           .mockReturnValue({ width: 1000, height: 1000 }),
       };
@@ -602,7 +603,7 @@ describe('view/groupNodes.js', () => {
 
       const mockGroupNode2 = {
         parentNode: {
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 1000, height: 1000 }),
         },
@@ -612,12 +613,12 @@ describe('view/groupNodes.js', () => {
         group: mockGroupNode2,
         content: {
           childNodes: [],
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 200, height: 200 }),
         },
         newtab: { style: {} },
-        tabCount: { replaceChildren: jest.fn() },
+        tabCount: { replaceChildren: vi.fn() },
       };
 
       const borders = [
@@ -635,8 +636,8 @@ describe('view/groupNodes.js', () => {
         const el = findElementByClass(cls);
         el.dispatchEvent({
           type: 'mousedown',
-          preventDefault: jest.fn(),
-          stopPropagation: jest.fn(),
+          preventDefault: vi.fn(),
+          stopPropagation: vi.fn(),
           pageX: 100,
           pageY: 100,
         });
@@ -646,7 +647,7 @@ describe('view/groupNodes.js', () => {
         // First move to establish lx / ly starting point
         document.dispatchEvent({
           type: 'mousemove',
-          preventDefault: jest.fn(),
+          preventDefault: vi.fn(),
           pageX: 100,
           pageY: 100,
         });
@@ -654,7 +655,7 @@ describe('view/groupNodes.js', () => {
         // Drag extremely far in one direction to trigger upper clamp limit
         document.dispatchEvent({
           type: 'mousemove',
-          preventDefault: jest.fn(),
+          preventDefault: vi.fn(),
           pageX: 2000,
           pageY: 2000,
         });
@@ -662,7 +663,7 @@ describe('view/groupNodes.js', () => {
         // Drag extremely far in the other direction to trigger lower clamp limit
         document.dispatchEvent({
           type: 'mousemove',
-          preventDefault: jest.fn(),
+          preventDefault: vi.fn(),
           pageX: -1000,
           pageY: -1000,
         });
@@ -681,17 +682,15 @@ describe('view/groupNodes.js', () => {
       groups.forEach.mockImplementation((cb) => {
         groupsList.forEach(cb);
       });
-
-      const utils = jest.requireMock('../../../src/js/share/utils.js');
       groupNodes.groupNodes[-2] = {
         content: utils.newElement('div'),
         newtab: utils.newElement('div'),
         tabCount: utils.newElement('span'),
       };
 
-      const parentNode = { appendChild: jest.fn() };
+      const parentNode = { appendChild: vi.fn() };
       global.document.getElementById.mockReturnValue({
-        appendChild: jest.fn(),
+        appendChild: vi.fn(),
       });
 
       tabs.forEachTab.mockImplementation(async (cb) => {
@@ -721,8 +720,6 @@ describe('view/groupNodes.js', () => {
       tabs.forEachTab.mockImplementation(async (cb) => {
         await cb({ id: 101, index: 5 });
       });
-
-      const utils = jest.requireMock('../../../src/js/share/utils.js');
       tabNodes.tabNodes[101] = {
         tab: utils.newElement('div', { class: 'tab' }),
       };
@@ -737,8 +734,6 @@ describe('view/groupNodes.js', () => {
 
       const group = { id: 1, name: 'Group 1' };
       groupNodes.makeGroupNode(group);
-
-      const utils = jest.requireMock('../../../src/js/share/utils.js');
       const childNode1 = utils.newElement('div', { class: 'tab' });
       childNode1.setAttribute('tabId', '102');
       const childNode2 = utils.newElement('div', { class: 'tab' });
@@ -778,8 +773,6 @@ describe('view/groupNodes.js', () => {
 
       const group = { id: 1, name: 'Group 1' };
       groupNodes.makeGroupNode(group);
-
-      const utils = jest.requireMock('../../../src/js/share/utils.js');
       const childNode1 = utils.newElement('div', { class: 'tab' });
       childNode1.setAttribute('tabId', '103');
       const childNode2 = utils.newElement('div', { class: 'tab' });
@@ -812,8 +805,6 @@ describe('view/groupNodes.js', () => {
 
       const group = { id: 1, name: 'Group 1' };
       groupNodes.makeGroupNode(group);
-
-      const utils = jest.requireMock('../../../src/js/share/utils.js');
       const childNode1 = utils.newElement('div', { class: 'tab' });
       childNode1.setAttribute('tabId', '999'); // mismatch
       const childNode2 = utils.newElement('div', { class: 'tab' });
@@ -858,7 +849,7 @@ describe('view/groupNodes.js', () => {
       groupNodes.makeGroupNode(group);
 
       const parentNode = {
-        getBoundingClientRect: jest
+        getBoundingClientRect: vi
           .fn()
           .mockReturnValue({ width: 1000, height: 1000 }),
       };
@@ -873,8 +864,8 @@ describe('view/groupNodes.js', () => {
       // Fire mousedown to attach the mouseup listener
       innerGroup.dispatchEvent({
         type: 'mousedown',
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
       });
 
       // Fire mouseup without ever firing mousemove — rect.x will be undefined
@@ -891,7 +882,7 @@ describe('view/groupNodes.js', () => {
       groupNodes.makeGroupNode(group);
 
       const newtab = findElementByClass('newtab');
-      newtab.dispatchEvent({ type: 'click', stopPropagation: jest.fn() });
+      newtab.dispatchEvent({ type: 'click', stopPropagation: vi.fn() });
       await flushPromises();
 
       expect(browser.tabs.remove).not.toHaveBeenCalled();
@@ -923,11 +914,11 @@ describe('view/groupNodes.js', () => {
 
   describe('insertTab additional paths', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('schedules fillGroupNodes when higherIndexes empty but groupNodes[groupId] missing', async () => {
@@ -941,7 +932,7 @@ describe('view/groupNodes.js', () => {
         await cb({ id: 103, index: 2 }); // lower than 5
       });
 
-      const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
+      const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
 
       await groupNodes.insertTab(oldTab);
 
@@ -957,8 +948,6 @@ describe('view/groupNodes.js', () => {
 
       const group = { id: 1, name: 'Group 1' };
       groupNodes.makeGroupNode(group);
-
-      const utils = jest.requireMock('../../../src/js/share/utils.js');
       // childNode at candidateNodeIdx-1 has tabId === tab.id (101) → triggers second lookup
       const childNode0 = utils.newElement('div', { class: 'tab' });
       childNode0.setAttribute('tabId', '105'); // [candidateNodeIdx-2] = expected preceding
@@ -979,11 +968,9 @@ describe('view/groupNodes.js', () => {
         await cb({ id: 105, index: 1 }); // even lower, preceding tab
       });
 
-      const setTimeoutSpy = jest.spyOn(globalThis, 'setTimeout');
-
-      const utils2 = jest.requireMock('../../../src/js/share/utils.js');
+      const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
       tabNodes.tabNodes[101] = {
-        tab: utils2.newElement('div', { class: 'tab' }),
+        tab: utils.newElement('div', { class: 'tab' }),
       };
 
       await groupNodes.insertTab(oldTab);
@@ -1009,19 +996,17 @@ describe('view/groupNodes.js', () => {
 
   describe('concurrent modifyingGroupContent checks', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('schedules fillGroupNodes and insertTab when modifyingGroupContent is true', async () => {
       const group = { id: 1, name: 'Group 1' };
       groups.forEach.mockImplementation((cb) => cb(group));
       groupNodes.makeGroupNode(group);
-
-      const utils = jest.requireMock('../../../src/js/share/utils.js');
       groupNodes.groupNodes.pinned = { content: utils.newElement('div') };
 
       // Ensure insertTab exits the higherIndexes=empty branch safely
@@ -1039,7 +1024,7 @@ describe('view/groupNodes.js', () => {
 
       await Promise.all([p1, p2, p3]);
 
-      jest.runOnlyPendingTimers();
+      vi.runOnlyPendingTimers();
     });
   });
 });

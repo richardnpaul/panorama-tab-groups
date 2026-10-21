@@ -1,5 +1,5 @@
 /**
- * @jest-environment jsdom
+ * @vitest-environment jsdom
  */
 
 describe('migration-status.js', () => {
@@ -9,8 +9,8 @@ describe('migration-status.js', () => {
   let mockResetButton;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    jest.useFakeTimers();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
 
     // Set up document
     document.body.innerHTML = `
@@ -26,44 +26,41 @@ describe('migration-status.js', () => {
     mockResetButton = document.getElementById('reset-migration');
 
     // Global mocks
-    global.window.alert = jest.fn();
-    global.window.confirm = jest.fn().mockReturnValue(true);
+    global.window.alert = vi.fn();
+    global.window.confirm = vi.fn().mockReturnValue(true);
 
     global.browser = {
       storage: {
         local: {
-          get: jest
+          get: vi
             .fn()
             .mockResolvedValue({ hybridGroupsMigrationComplete: false }),
         },
       },
       windows: {
-        getCurrent: jest.fn().mockResolvedValue({ id: 1 }),
+        getCurrent: vi.fn().mockResolvedValue({ id: 1 }),
       },
       sessions: {
-        getWindowValue: jest.fn().mockResolvedValue([
+        getWindowValue: vi.fn().mockResolvedValue([
           { id: 1, name: 'Group 1', nativeGroupId: null },
           { id: 2, name: 'Group 2', nativeGroupId: 10 },
         ]),
       },
       runtime: {
-        sendMessage: jest.fn().mockResolvedValue({ success: true }),
+        sendMessage: vi.fn().mockResolvedValue({ success: true }),
       },
     };
   });
 
   afterEach(() => {
-    jest.clearAllTimers();
-    jest.useRealTimers();
-    jest.resetModules();
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    vi.resetModules();
   });
 
   it('initializes and renders correctly', async () => {
-    // Isolate module because it executes initialization logic on require
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    // The module executes initialization logic on import; afterEach resets the registry
+    await import('../../src/js/migration-status.js');
 
     // Let promises resolve
     await Promise.resolve();
@@ -93,10 +90,7 @@ describe('migration-status.js', () => {
       hybridGroupsMigrationComplete: true,
     });
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     await Promise.resolve();
     await Promise.resolve();
@@ -110,10 +104,7 @@ describe('migration-status.js', () => {
       new Error('Storage failure'),
     );
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     await Promise.resolve();
     await Promise.resolve();
@@ -127,10 +118,7 @@ describe('migration-status.js', () => {
   it('handles empty groups or error in loadGroups', async () => {
     global.browser.sessions.getWindowValue.mockResolvedValue([]);
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     await Promise.resolve();
     await Promise.resolve();
@@ -143,7 +131,7 @@ describe('migration-status.js', () => {
     );
 
     // We can manually trigger interval to run it again
-    jest.advanceTimersByTime(5000);
+    vi.advanceTimersByTime(5000);
     await Promise.resolve();
     await Promise.resolve();
 
@@ -153,10 +141,7 @@ describe('migration-status.js', () => {
   });
 
   it('handles run-migration click successfully', async () => {
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     // Trigger click
     mockRunButton.click();
@@ -184,10 +169,7 @@ describe('migration-status.js', () => {
       message: 'Custom error',
     });
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     mockRunButton.click();
 
@@ -204,10 +186,7 @@ describe('migration-status.js', () => {
       new Error('Network error'),
     );
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     mockRunButton.click();
 
@@ -220,10 +199,7 @@ describe('migration-status.js', () => {
   });
 
   it('handles reset-migration click', async () => {
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     mockResetButton.click();
 
@@ -242,10 +218,7 @@ describe('migration-status.js', () => {
   it('handles reset-migration cancellation', async () => {
     global.window.confirm.mockReturnValue(false);
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     mockResetButton.click();
 
@@ -257,10 +230,7 @@ describe('migration-status.js', () => {
       new Error('Reset failed'),
     );
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     mockResetButton.click();
 
@@ -277,10 +247,7 @@ describe('migration-status.js', () => {
       success: false,
     });
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/migration-status.js');
-    });
+    await import('../../src/js/migration-status.js');
 
     mockResetButton.click();
 

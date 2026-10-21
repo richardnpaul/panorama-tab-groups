@@ -1,10 +1,10 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 
 let stateManager;
 
 // Mocks
-jest.mock('../../src/js/share/options.js', () => ({
-  loadOptions: jest.fn().mockResolvedValue({
+vi.mock('../../src/js/share/options.js', () => ({
+  loadOptions: vi.fn().mockResolvedValue({
     view: 'popup',
     shortcut: {
       'activate-next-group': { disabled: false },
@@ -13,31 +13,31 @@ jest.mock('../../src/js/share/options.js', () => ({
     },
   }),
 }));
-jest.mock('../../src/js/background/StateManager.js', () => ({
+vi.mock('../../src/js/background/StateManager.js', () => ({
   stateManager: {
-    getGroups: jest.fn().mockResolvedValue([]),
-    setGroups: jest.fn().mockResolvedValue(),
-    getTabGroup: jest.fn().mockResolvedValue(-2),
-    setTabGroup: jest.fn().mockResolvedValue(),
-    getGroupIndex: jest.fn().mockResolvedValue(1),
-    setGroupIndex: jest.fn().mockResolvedValue(),
-    getActiveGroup: jest.fn().mockResolvedValue(1),
-    setActiveGroup: jest.fn().mockResolvedValue(),
+    getGroups: vi.fn().mockResolvedValue([]),
+    setGroups: vi.fn().mockResolvedValue(),
+    getTabGroup: vi.fn().mockResolvedValue(-2),
+    setTabGroup: vi.fn().mockResolvedValue(),
+    getGroupIndex: vi.fn().mockResolvedValue(1),
+    setGroupIndex: vi.fn().mockResolvedValue(),
+    getActiveGroup: vi.fn().mockResolvedValue(1),
+    setActiveGroup: vi.fn().mockResolvedValue(),
   },
 }));
-jest.mock('../../src/js/background/utils.js', () => ({
-  mod: jest.fn((n, m) => ((n % m) + m) % m),
-  getColorForGroupId: jest.fn().mockReturnValue('blue'),
-  getLowestPositiveGroupId: jest.fn().mockReturnValue(1),
+vi.mock('../../src/js/background/utils.js', () => ({
+  mod: vi.fn((n, m) => ((n % m) + m) % m),
+  getColorForGroupId: vi.fn().mockReturnValue('blue'),
+  getLowestPositiveGroupId: vi.fn().mockReturnValue(1),
 }));
-jest.mock('../../src/js/background/menu-manager.js', () => ({
-  createMenuList: jest.fn().mockResolvedValue(),
-  handleMenuChange: jest.fn(),
+vi.mock('../../src/js/background/menu-manager.js', () => ({
+  createMenuList: vi.fn().mockResolvedValue(),
+  handleMenuChange: vi.fn(),
 }));
-jest.mock('../../src/js/background/native-groups.js', () => ({
-  migrateToHybridGroups: jest.fn().mockResolvedValue(),
-  setupTabGroupListeners: jest.fn(),
-  cleanupNativeGroups: jest.fn().mockResolvedValue(),
+vi.mock('../../src/js/background/native-groups.js', () => ({
+  migrateToHybridGroups: vi.fn().mockResolvedValue(),
+  setupTabGroupListeners: vi.fn(),
+  cleanupNativeGroups: vi.fn().mockResolvedValue(),
 }));
 
 let bgModule;
@@ -47,19 +47,19 @@ let actionSetBadgeBackgroundColorMock;
 let menuManagerMock;
 
 beforeEach(async () => {
-  jest.resetModules();
-  jest.clearAllMocks();
+  vi.resetModules();
+  vi.clearAllMocks();
 
-  actionSetTitleMock = jest.fn().mockResolvedValue();
-  actionSetBadgeTextMock = jest.fn().mockResolvedValue();
-  actionSetBadgeBackgroundColorMock = jest.fn().mockResolvedValue();
+  actionSetTitleMock = vi.fn().mockResolvedValue();
+  actionSetBadgeTextMock = vi.fn().mockResolvedValue();
+  actionSetBadgeBackgroundColorMock = vi.fn().mockResolvedValue();
 
-  const smModule = jest.requireMock('../../src/js/background/StateManager.js');
+  const smModule = await import('../../src/js/background/StateManager.js');
   stateManager = smModule.stateManager;
   // Prevent background init from creating groups and polluting mocks
   stateManager.getGroups.mockResolvedValue([{ id: 1, name: 'Group 1' }]);
 
-  menuManagerMock = jest.requireMock('../../src/js/background/menu-manager.js');
+  menuManagerMock = await import('../../src/js/background/menu-manager.js');
 
   globalThis.browser = globalThis.browser || {};
   Object.assign(globalThis.browser, {
@@ -67,115 +67,119 @@ beforeEach(async () => {
       getManifest: () => ({ version: '1.0' }),
       getURL: (path) => `moz-extension://ext-id/${path}`,
       onMessage: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
       onInstalled: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
       onMessageExternal: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
-      setUninstallURL: jest.fn(),
-      sendMessage: jest.fn().mockResolvedValue(),
+      setUninstallURL: vi.fn(),
+      sendMessage: vi.fn().mockResolvedValue(),
     },
     action: {
-      setPopup: jest.fn(),
+      setPopup: vi.fn(),
       setTitle: actionSetTitleMock,
       setBadgeText: actionSetBadgeTextMock,
       setBadgeBackgroundColor: actionSetBadgeBackgroundColorMock,
       onClicked: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
     },
     commands: {
       onCommand: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
     },
     windows: {
-      getCurrent: jest.fn().mockResolvedValue({ id: 1 }),
-      get: jest.fn().mockResolvedValue({ id: 1, type: 'normal' }),
-      getAll: jest.fn().mockResolvedValue([{ id: 1 }]),
-      getLastFocused: jest.fn().mockResolvedValue({ id: 1 }),
+      getCurrent: vi.fn().mockResolvedValue({ id: 1 }),
+      get: vi.fn().mockResolvedValue({ id: 1, type: 'normal' }),
+      getAll: vi.fn().mockResolvedValue([{ id: 1 }]),
+      getLastFocused: vi.fn().mockResolvedValue({ id: 1 }),
       onCreated: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
       onRemoved: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
     },
     tabs: {
-      get: jest.fn().mockResolvedValue({ id: 101, windowId: 1 }),
-      create: jest.fn().mockResolvedValue({ id: 100 }),
-      query: jest.fn().mockResolvedValue([]),
-      hide: jest.fn().mockResolvedValue(),
-      show: jest.fn().mockResolvedValue(),
-      update: jest.fn().mockResolvedValue(),
-      move: jest.fn().mockResolvedValue(),
-      group: jest.fn().mockResolvedValue(),
-      ungroup: jest.fn().mockResolvedValue(),
-      remove: jest.fn().mockResolvedValue(),
+      get: vi.fn().mockResolvedValue({ id: 101, windowId: 1 }),
+      create: vi.fn().mockResolvedValue({ id: 100 }),
+      query: vi.fn().mockResolvedValue([]),
+      hide: vi.fn().mockResolvedValue(),
+      show: vi.fn().mockResolvedValue(),
+      update: vi.fn().mockResolvedValue(),
+      move: vi.fn().mockResolvedValue(),
+      group: vi.fn().mockResolvedValue(),
+      ungroup: vi.fn().mockResolvedValue(),
+      remove: vi.fn().mockResolvedValue(),
       onCreated: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
       onActivated: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
       onUpdated: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
       onRemoved: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
       onAttached: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
       onDetached: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
     },
     tabGroups: {
-      get: jest.fn().mockResolvedValue({ id: 101, windowId: 1 }),
-      query: jest.fn().mockResolvedValue([]),
-      update: jest.fn().mockResolvedValue(),
+      get: vi.fn().mockResolvedValue({ id: 101, windowId: 1 }),
+      query: vi.fn().mockResolvedValue([]),
+      update: vi.fn().mockResolvedValue(),
     },
     storage: {
       local: {
-        set: jest.fn().mockResolvedValue(),
+        set: vi.fn().mockResolvedValue(),
       },
       onChanged: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
     },
     sessions: {
-      getWindowValue: jest.fn().mockResolvedValue(undefined),
-      setWindowValue: jest.fn().mockResolvedValue(),
-      getRecentlyClosed: jest.fn().mockResolvedValue([]),
+      getWindowValue: vi.fn().mockResolvedValue(undefined),
+      setWindowValue: vi.fn().mockResolvedValue(),
+      getRecentlyClosed: vi.fn().mockResolvedValue([]),
     },
     contextMenus: {
-      remove: jest.fn().mockResolvedValue(),
-      removeAll: jest.fn().mockResolvedValue(),
+      remove: vi.fn().mockResolvedValue(),
+      removeAll: vi.fn().mockResolvedValue(),
       onClicked: {
-        addListener: jest.fn(),
+        addListener: vi.fn(),
       },
     },
     i18n: {
-      getMessage: jest.fn((key) => key),
+      getMessage: vi.fn((key) => key),
     },
   });
-  // Import background.js
+  // Import background.js and let its import-time init() settle so it cannot
+  // consume mock values queued by the test
   bgModule = await import('../../src/js/background.js');
+  await vi.waitFor(() => {
+    expect(bgModule.initializationState.isInitializing).toBe(false);
+  });
 });
 
 describe('background.js', () => {
   describe('Exported Helpers', () => {
     describe('waitForInitialization', () => {
       beforeEach(() => {
-        jest.useFakeTimers({ advanceTimers: true }); // Modern fake timers
+        vi.useFakeTimers({ advanceTimers: true }); // Modern fake timers
       });
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('resolves immediately if not initializing', async () => {
@@ -188,17 +192,17 @@ describe('background.js', () => {
         const promise = bgModule.waitForInitialization();
 
         bgModule.initializationState.isInitializing = false;
-        jest.advanceTimersByTime(100);
+        vi.advanceTimersByTime(100);
 
         await expect(promise).resolves.toBeUndefined();
       });
 
       it('times out after INITIALIZATION_TIMEOUT_MS', async () => {
         bgModule.initializationState.isInitializing = true;
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
         const promise = bgModule.waitForInitialization();
-        jest.advanceTimersByTime(15000);
+        vi.advanceTimersByTime(15000);
 
         await expect(promise).resolves.toBeUndefined();
         expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -337,9 +341,7 @@ describe('background.js', () => {
 
       it('returns early if activeGroup is invalid', async () => {
         globalThis.browser.tabs.query.mockClear();
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
         await bgModule.toggleVisibleTabs('invalid');
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           expect.stringContaining('Invalid activeGroup'),
@@ -354,9 +356,7 @@ describe('background.js', () => {
         ]);
         stateManager.getTabGroup.mockResolvedValue(1);
 
-        const consoleErrorSpy = jest
-          .spyOn(console, 'error')
-          .mockImplementation();
+        const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
         await bgModule.toggleVisibleTabs(2); // different group, so tab 1 will be hidden, nothing shown
 
         expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -411,7 +411,7 @@ describe('background.js', () => {
         await bgModule.toggleVisibleTabs(-1);
         expect(globalThis.browser.tabs.show).toHaveBeenCalledWith([1]);
 
-        jest.clearAllMocks();
+        vi.clearAllMocks();
 
         // Active group is some normal group
         globalThis.browser.tabs.query.mockResolvedValue([
@@ -455,7 +455,7 @@ describe('background.js', () => {
 
       it('logs warning if setting action fails', async () => {
         actionSetTitleMock.mockRejectedValue(new Error('API Error'));
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
         await bgModule.setActionTitle(1);
 
@@ -505,7 +505,7 @@ describe('background.js', () => {
         globalThis.browser.tabs.group.mockRejectedValueOnce(
           new Error('Group error'),
         );
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
         await bgModule.moveTab(10, 2);
 
@@ -610,7 +610,7 @@ describe('background.js', () => {
       });
 
       it('assigns panorama view group (-1) if tab is view tab by URL', async () => {
-        globalThis.browser.runtime.getURL = jest
+        globalThis.browser.runtime.getURL = vi
           .fn()
           .mockReturnValue('moz-extension://ext-id/view.html');
         await bgModule.tabCreated({
@@ -624,11 +624,11 @@ describe('background.js', () => {
 
       it('assigns panorama view group (-1) if tab is view tab by openingView state', async () => {
         bgModule.backgroundState.openingView = { tabId: 10, timeout: 123 };
-        globalThis.browser.runtime.getURL = jest
+        globalThis.browser.runtime.getURL = vi
           .fn()
           .mockReturnValue('moz-extension://ext-id/view.html');
 
-        const clearTimeoutSpy = jest
+        const clearTimeoutSpy = vi
           .spyOn(globalThis, 'clearTimeout')
           .mockImplementation();
         await bgModule.tabCreated({
@@ -644,7 +644,7 @@ describe('background.js', () => {
       });
 
       it('assigns tab to active group and creates native group if missing', async () => {
-        globalThis.browser.runtime.getURL = jest
+        globalThis.browser.runtime.getURL = vi
           .fn()
           .mockReturnValue('moz-extension://ext-id/view.html');
 
@@ -725,7 +725,7 @@ describe('background.js', () => {
         globalThis.browser.tabs.group.mockRejectedValueOnce(
           new Error('Group error'),
         );
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
         await bgModule.tabCreated({
           id: 10,
@@ -814,7 +814,7 @@ describe('background.js', () => {
         stateManager.getGroups.mockResolvedValue([
           { id: 1, nativeGroupId: null, title: 'Group 1', color: 'blue' },
         ]);
-        const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+        const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
         await bgModule.tabCreated({
           id: 10,
@@ -937,7 +937,7 @@ describe('background.js', () => {
     describe('tabDetached', () => {
       it('removes groupId from tab sessions', async () => {
         globalThis.browser.sessions = {
-          removeTabValue: jest.fn().mockResolvedValue(),
+          removeTabValue: vi.fn().mockResolvedValue(),
         };
 
         await bgModule.tabDetached(10);
@@ -960,7 +960,7 @@ describe('background.js', () => {
     });
 
     it('handles createMenuItem, removeMenuItem, updateMenuItem', () => {
-      const sendResponse = jest.fn();
+      const sendResponse = vi.fn();
 
       let res = handleInternalMessage(
         { action: 'createMenuItem' },
@@ -985,7 +985,7 @@ describe('background.js', () => {
     });
 
     it('handles cleanupNativeGroups', async () => {
-      const sendResponse = jest.fn();
+      const sendResponse = vi.fn();
       const res = handleInternalMessage(
         { action: 'cleanupNativeGroups' },
         {},
@@ -995,7 +995,7 @@ describe('background.js', () => {
     });
 
     it('handles migrateToHybridGroups', async () => {
-      const sendResponse = jest.fn();
+      const sendResponse = vi.fn();
       const res = handleInternalMessage(
         { action: 'migrateToHybridGroups' },
         {},
@@ -1005,7 +1005,7 @@ describe('background.js', () => {
     });
 
     it('handles deleteGroup successfully', async () => {
-      const sendResponse = jest.fn();
+      const sendResponse = vi.fn();
 
       stateManager.getGroups.mockResolvedValue([
         { id: 1, nativeGroupId: 101 },
@@ -1044,7 +1044,7 @@ describe('background.js', () => {
     });
 
     it('handles deleteGroup when last group is deleted', async () => {
-      const sendResponse = jest.fn();
+      const sendResponse = vi.fn();
 
       stateManager.getGroups.mockResolvedValue([{ id: 1, nativeGroupId: 101 }]);
       globalThis.browser.tabs.query.mockResolvedValue([]);
@@ -1076,14 +1076,14 @@ describe('background.js', () => {
         key: 'openingBackup',
         value: true,
       };
-      const res = handleInternalMessage(msg, {}, jest.fn());
+      const res = handleInternalMessage(msg, {}, vi.fn());
 
       expect(res).toBe(false);
       expect(bgModule.backgroundState.openingBackup).toBe(true);
     });
 
     it('handles refreshView actions', () => {
-      const sendResponse = jest.fn();
+      const sendResponse = vi.fn();
 
       let res = handleInternalMessage(
         { action: 'refreshView' },
@@ -1111,7 +1111,7 @@ describe('background.js', () => {
     });
 
     it('handles resetMigration', () => {
-      const sendResponse = jest.fn();
+      const sendResponse = vi.fn();
       globalThis.browser.storage.local.set.mockResolvedValue();
 
       const res = handleInternalMessage(
@@ -1123,8 +1123,8 @@ describe('background.js', () => {
     });
 
     it('handles unknown actions', () => {
-      const sendResponse = jest.fn();
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const sendResponse = vi.fn();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
       const res = handleInternalMessage(
         { action: 'unknownAction' },
@@ -1151,7 +1151,7 @@ describe('background.js', () => {
     });
 
     it('handles unknown external messages', () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
       const res = handleMessage('unknown');
       expect(res).toBeUndefined();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -1235,7 +1235,7 @@ describe('background.js', () => {
     });
 
     it('handles tab activated event', async () => {
-      globalThis.browser.windows.get = jest
+      globalThis.browser.windows.get = vi
         .fn()
         .mockResolvedValue({ id: 1, type: 'normal' });
       globalThis.browser.tabs.query.mockResolvedValue([
@@ -1256,7 +1256,7 @@ describe('background.js', () => {
 
     it('clears openingView state if tab matches', async () => {
       bgModule.backgroundState.openingView = { tabId: 101, timeout: 123 };
-      const clearTimeoutSpy = jest
+      const clearTimeoutSpy = vi
         .spyOn(globalThis, 'clearTimeout')
         .mockImplementation();
 
@@ -1309,17 +1309,17 @@ describe('background.js', () => {
   describe('action.onClicked', () => {
     let handleActionClicked;
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       [[handleActionClicked]] =
         globalThis.browser.action.onClicked.addListener.mock.calls;
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('toggles view: creates new tab if none exists', async () => {
-      globalThis.browser.windows.getCurrent = jest
+      globalThis.browser.windows.getCurrent = vi
         .fn()
         .mockResolvedValue({ id: 1 });
       globalThis.browser.tabs.query.mockResolvedValue([]); // No ext tabs
@@ -1335,25 +1335,25 @@ describe('background.js', () => {
     });
 
     it('toggles view: switches to view if exists and not active', async () => {
-      globalThis.browser.windows.getCurrent = jest
+      globalThis.browser.windows.getCurrent = vi
         .fn()
         .mockResolvedValue({ id: 1 });
       globalThis.browser.tabs.query
         .mockResolvedValueOnce([{ id: 101 }]) // extTabs
         .mockResolvedValueOnce([{ id: 102 }]); // currentTab
 
-      globalThis.browser.tabs.update = jest.fn().mockResolvedValue();
+      globalThis.browser.tabs.update = vi.fn().mockResolvedValue();
 
       await handleActionClicked();
 
       expect(globalThis.browser.tabs.update).toHaveBeenCalledWith(101, {
         active: true,
       });
-      jest.runAllTimers(); // clear any hanging timeouts
+      vi.runAllTimers(); // clear any hanging timeouts
     });
 
     it('toggles view: switches to last accessed tab if view is active', async () => {
-      globalThis.browser.windows.getCurrent = jest
+      globalThis.browser.windows.getCurrent = vi
         .fn()
         .mockResolvedValue({ id: 1 });
       globalThis.browser.tabs.query
@@ -1366,7 +1366,7 @@ describe('background.js', () => {
           { id: 103, lastAccessed: 150 },
         ]);
 
-      globalThis.browser.tabs.update = jest.fn().mockResolvedValue();
+      globalThis.browser.tabs.update = vi.fn().mockResolvedValue();
 
       await handleActionClicked();
 
@@ -1376,14 +1376,14 @@ describe('background.js', () => {
     });
 
     it('toggles view: clears existing openingView timeout when creating new tab', async () => {
-      globalThis.browser.windows.getCurrent = jest
+      globalThis.browser.windows.getCurrent = vi
         .fn()
         .mockResolvedValue({ id: 1 });
       globalThis.browser.tabs.query.mockResolvedValue([]); // No ext tabs
 
       const existingTimeout = setTimeout(() => {}, 1000);
       bgModule.backgroundState.openingView = { timeout: existingTimeout };
-      const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
+      const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
 
       await handleActionClicked();
 
@@ -1394,19 +1394,19 @@ describe('background.js', () => {
     });
 
     it('toggles view: handles opening timeout expiration', async () => {
-      globalThis.browser.windows.getCurrent = jest
+      globalThis.browser.windows.getCurrent = vi
         .fn()
         .mockResolvedValue({ id: 1 });
       globalThis.browser.tabs.query.mockResolvedValue([]); // No ext tabs
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
 
       await handleActionClicked();
 
       expect(bgModule.backgroundState.openingView).not.toBeNull();
 
       // Advance time by 5 seconds
-      jest.advanceTimersByTime(5000);
+      vi.advanceTimersByTime(5000);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         'View tab creation timed out, clearing state',
@@ -1425,7 +1425,7 @@ describe('background.js', () => {
     });
 
     it('triggers activate-next-group', async () => {
-      globalThis.browser.windows.getCurrent = jest
+      globalThis.browser.windows.getCurrent = vi
         .fn()
         .mockResolvedValue({ id: 1, type: 'normal' });
       globalThis.browser.tabs.query.mockResolvedValue([
@@ -1441,7 +1441,7 @@ describe('background.js', () => {
     });
 
     it('triggers activate-previous-group', async () => {
-      globalThis.browser.windows.getCurrent = jest
+      globalThis.browser.windows.getCurrent = vi
         .fn()
         .mockResolvedValue({ id: 1, type: 'normal' });
       globalThis.browser.tabs.query.mockResolvedValue([
@@ -1457,7 +1457,7 @@ describe('background.js', () => {
     });
 
     it('triggers manage-extension', async () => {
-      globalThis.browser.runtime.openOptionsPage = jest.fn();
+      globalThis.browser.runtime.openOptionsPage = vi.fn();
       await handleCommand('manage-extension');
       expect(globalThis.browser.runtime.openOptionsPage).toHaveBeenCalled();
     });
@@ -1496,24 +1496,24 @@ describe('background.js', () => {
 
   describe('Browser Mode Detection', () => {
     it('detects collapse-only mode when tabGroups is available but tabHide is not', async () => {
-      jest.resetModules();
+      vi.resetModules();
       globalThis.browser.tabs.hide = undefined;
-      globalThis.browser.tabGroups = { query: jest.fn().mockResolvedValue([]) };
-      globalThis.browser.tabs.group = jest.fn().mockResolvedValue(1);
+      globalThis.browser.tabGroups = { query: vi.fn().mockResolvedValue([]) };
+      globalThis.browser.tabs.group = vi.fn().mockResolvedValue(1);
 
       await import('../../src/js/background.js');
     });
 
     it('detects legacy mode when tabHide is available but tabGroups is not', async () => {
-      jest.resetModules();
-      globalThis.browser.tabs.hide = jest.fn().mockResolvedValue();
+      vi.resetModules();
+      globalThis.browser.tabs.hide = vi.fn().mockResolvedValue();
       globalThis.browser.tabGroups = undefined;
 
       await import('../../src/js/background.js');
     });
 
     it('detects unsupported mode when neither is available', async () => {
-      jest.resetModules();
+      vi.resetModules();
       globalThis.browser.tabs.hide = undefined;
       globalThis.browser.tabGroups = undefined;
 
@@ -1525,17 +1525,17 @@ describe('background.js', () => {
   describe('Initialization Internal Functions', () => {
     beforeEach(() => {
       globalThis.browser.notifications = {
-        create: jest.fn(),
-        clear: jest.fn(),
+        create: vi.fn(),
+        clear: vi.fn(),
       };
       globalThis.browser.action = {
         ...globalThis.browser.action,
-        setBadgeText: jest.fn(),
-        setBadgeBackgroundColor: jest.fn(),
+        setBadgeText: vi.fn(),
+        setBadgeBackgroundColor: vi.fn(),
       };
       globalThis.browser.runtime = {
         ...globalThis.browser.runtime,
-        sendMessage: jest.fn().mockResolvedValue(),
+        sendMessage: vi.fn().mockResolvedValue(),
       };
       bgModule.initializationState.showingUI = false;
     });
@@ -1638,20 +1638,20 @@ describe('background.js', () => {
 
     describe('initializeTabGroupAssignments', () => {
       beforeEach(() => {
-        jest.useFakeTimers();
+        vi.useFakeTimers();
         globalThis.browser.windows.getAll.mockResolvedValue([{ id: 1 }]);
         globalThis.browser.tabs.query.mockResolvedValue([
           { id: 10, windowId: 1 },
           { id: 11, windowId: 1 },
         ]);
         stateManager.getGroups.mockResolvedValue([{ id: 5 }]);
-        globalThis.browser.sessions.getWindowValue = jest
+        globalThis.browser.sessions.getWindowValue = vi
           .fn()
           .mockResolvedValue(true);
       });
 
       afterEach(() => {
-        jest.useRealTimers();
+        vi.useRealTimers();
       });
 
       it('handles successful initialization with session recovery', async () => {
@@ -1661,7 +1661,7 @@ describe('background.js', () => {
         );
 
         const initPromise = bgModule.initializeTabGroupAssignments();
-        jest.runAllTimers(); // Trigger timeouts
+        vi.runAllTimers(); // Trigger timeouts
         await initPromise;
 
         expect(bgModule.initializationState.isInitializing).toBe(false);
@@ -1674,20 +1674,20 @@ describe('background.js', () => {
         stateManager.getTabGroup.mockResolvedValue(5); // Recovered group 5
 
         const initPromise = bgModule.initializeTabGroupAssignments();
-        jest.runAllTimers();
+        vi.runAllTimers();
         await initPromise;
 
         expect(stateManager.setTabGroup).toHaveBeenCalledWith(10, -2);
       });
 
       it('warns when session history is disabled', async () => {
-        globalThis.browser.sessions.getRecentlyClosed = jest
+        globalThis.browser.sessions.getRecentlyClosed = vi
           .fn()
           .mockRejectedValueOnce(new Error('disabled'));
         stateManager.getTabGroup.mockResolvedValue(5);
 
         const initPromise = bgModule.initializeTabGroupAssignments();
-        jest.runAllTimers();
+        vi.runAllTimers();
         await initPromise;
 
         // Session history disabled -> doesn't call getTabGroup, assigns to ungrouped
@@ -1701,11 +1701,55 @@ describe('background.js', () => {
         );
 
         const initPromise = bgModule.initializeTabGroupAssignments();
-        jest.runAllTimers();
+        vi.runAllTimers();
         await initPromise;
 
         expect(bgModule.initializationState.isInitializing).toBe(false);
       });
+    });
+  });
+
+  describe('import-time init()', () => {
+    const importFresh = async () => {
+      vi.resetModules();
+      const { stateManager: freshStateManager } =
+        await import('../../src/js/background/StateManager.js');
+      return freshStateManager;
+    };
+
+    it('moves tabs whose group no longer exists into the active group', async () => {
+      const sm = await importFresh();
+      globalThis.browser.windows.getAll.mockResolvedValue([{ id: 1 }]);
+      globalThis.browser.tabs.query.mockResolvedValue([
+        { id: 5, windowId: 1 },
+        { id: 6, windowId: 2 },
+      ]);
+      sm.getGroups.mockResolvedValue([{ id: 1, name: 'Group 1' }]);
+      sm.getTabGroup.mockResolvedValue(99);
+      sm.getActiveGroup.mockResolvedValue(1);
+
+      const bg = await import('../../src/js/background.js');
+      await vi.waitFor(() => {
+        expect(bg.initializationState.isInitializing).toBe(false);
+      });
+
+      // Tab 5 is in window 1, which has groups, and its group 99 does not exist
+      expect(sm.setTabGroup).toHaveBeenCalledWith(5, 1);
+      // Tab 6 is in a window without a groups lookup, so it is skipped
+      expect(sm.setTabGroup).not.toHaveBeenCalledWith(6, 1);
+    });
+
+    it('skips windows that have no groups yet', async () => {
+      const sm = await importFresh();
+      globalThis.browser.windows.getAll.mockResolvedValue([{ id: 1 }]);
+      sm.getGroups.mockResolvedValue([]);
+
+      const bg = await import('../../src/js/background.js');
+      await vi.waitFor(() => {
+        expect(bg.initializationState.isInitializing).toBe(false);
+      });
+
+      expect(sm.getGroups).toHaveBeenCalledWith(1);
     });
   });
 });

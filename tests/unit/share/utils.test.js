@@ -7,12 +7,12 @@ import {
 describe('share/utils.js', () => {
   beforeEach(() => {
     global.document = {
-      createElement: jest.fn((tag) => ({
+      createElement: vi.fn((tag) => ({
         tagName: tag.toUpperCase(),
-        appendChild: jest.fn(),
-        setAttribute: jest.fn(),
+        appendChild: vi.fn(),
+        setAttribute: vi.fn(),
       })),
-      createTextNode: jest.fn((text) => ({ textContent: text })),
+      createTextNode: vi.fn((text) => ({ textContent: text })),
     };
   });
 
@@ -45,7 +45,7 @@ describe('share/utils.js', () => {
     beforeEach(() => {
       global.browser = {
         i18n: {
-          getMessage: jest.fn(),
+          getMessage: vi.fn(),
         },
       };
     });

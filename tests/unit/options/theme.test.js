@@ -2,16 +2,16 @@ import saveOptionTheme from '../../../src/js/options/theme.js';
 
 describe('options/theme.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     global.browser = {
       storage: {
         sync: {
-          set: jest.fn().mockResolvedValue(),
+          set: vi.fn().mockResolvedValue(),
         },
       },
     };
     global.document = {
-      querySelector: jest.fn().mockReturnValue({ value: 'dark' }),
+      querySelector: vi.fn().mockReturnValue({ value: 'dark' }),
     };
   });
 

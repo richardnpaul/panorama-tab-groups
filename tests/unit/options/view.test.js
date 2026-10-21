@@ -5,24 +5,24 @@ import {
 
 describe('options/view.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     global.browser = {
       storage: {
         sync: {
-          set: jest.fn().mockResolvedValue(),
+          set: vi.fn().mockResolvedValue(),
         },
       },
       runtime: {
-        sendMessage: jest.fn().mockResolvedValue(),
+        sendMessage: vi.fn().mockResolvedValue(),
       },
     };
 
     global.document = {
-      querySelector: jest.fn((selector) => {
+      querySelector: vi.fn((selector) => {
         if (selector === '#optionsToolbar') {
           return {
-            setAttribute: jest.fn(),
-            removeAttribute: jest.fn(),
+            setAttribute: vi.fn(),
+            removeAttribute: vi.fn(),
           };
         }
         if (selector === 'input[name="view"]:checked') {
@@ -36,8 +36,8 @@ describe('options/view.js', () => {
   describe('showViewSpecificOptions', () => {
     it('shows freeform specific options', () => {
       const mockToolbar = {
-        setAttribute: jest.fn(),
-        removeAttribute: jest.fn(),
+        setAttribute: vi.fn(),
+        removeAttribute: vi.fn(),
       };
       global.document.querySelector.mockReturnValueOnce(mockToolbar);
 
@@ -49,8 +49,8 @@ describe('options/view.js', () => {
 
     it('hides freeform specific options for other views', () => {
       const mockToolbar = {
-        setAttribute: jest.fn(),
-        removeAttribute: jest.fn(),
+        setAttribute: vi.fn(),
+        removeAttribute: vi.fn(),
       };
       global.document.querySelector.mockReturnValueOnce(mockToolbar);
 
@@ -64,8 +64,8 @@ describe('options/view.js', () => {
   describe('saveOptionView', () => {
     it('saves selected view and sends a refresh message', async () => {
       const mockToolbar = {
-        setAttribute: jest.fn(),
-        removeAttribute: jest.fn(),
+        setAttribute: vi.fn(),
+        removeAttribute: vi.fn(),
       };
 
       global.document.querySelector.mockImplementation((selector) => {

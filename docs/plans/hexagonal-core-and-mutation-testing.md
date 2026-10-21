@@ -55,26 +55,84 @@ checker proves away many defensive guards that would otherwise produce unkillabl
     `.eslintignore`, `.prettierignore` and `.pre-commit-config.yaml` skip `src/popup-view/*` (so the popup is
     never linted or formatted) and a stale path `src/_shared/js/models/View.js` that no longer exists
     (the real directory is `src/shared`).
-12. **Toolchain compatibility is unverified.** `@stryker-mutator/jest-runner` 10.0.0 and
-    `@stryker-mutator/typescript-checker` 10.0.0 exist, but support for Jest 30 and for the current TypeScript
-    major (npm `latest` is 7.0.2) is not confirmed. `@babel/preset-typescript` latest is 8.x while the repo is on
-    Babel 7.
+12. **Toolchain compatibility was unverified** (now resolved, see the Phase 0 step 2 addendum below).
+    TypeScript 7 (npm `latest`) is not usable; the plan pins TypeScript 6.0.3. Under Jest the root
+    `babel.config.js` has to go because Stryker 10's instrumenter bundles Babel 8, which led to a runner
+    comparison; the plan moves to Vitest 4.1.12 (see addendum).
 
 ## Decisions (ADR)
 
-| Decision               | Choice                                                                                                                                                                                                                                                                                                   | Rationale                                                                                                                                           |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Language               | Strict TypeScript, migrated file by file (`allowJs` while mixed)                                                                                                                                                                                                                                         | Types prove away guards; ports become real compile-checked interfaces                                                                               |
-| Build                  | `tsc` emits ES modules to `dist/`; a small script copies static assets (html, css, icons, `_locales`, `manifest.json`). No bundler.                                                                                                                                                                      | Keeps the existing multi-file module layout, `type: "module"` background and HTML `<script type="module">` tags unchanged; smallest change          |
-| Jest transform         | `@babel/preset-typescript` (transpile only) with a `moduleNameMapper` mapping `./x.js` imports to `./x`                                                                                                                                                                                                  | Fast; type checking is done once by `tsc --noEmit`, so tests stay quick for Stryker                                                                 |
-| Mutation type-checking | `@stryker-mutator/typescript-checker`                                                                                                                                                                                                                                                                    | Mutants that cannot type-check cannot exist in a running program and are reported as compile errors. This is automatic, not a configured exclusion. |
-| Syntax subset          | `erasableSyntaxOnly: true`, `verbatimModuleSyntax: true`, `isolatedModules: true`; no `enum`, no `namespace`                                                                                                                                                                                             | Guarantees Babel-transpilable output and no runtime constructs that coverage or mutation tools handle badly                                         |
-| Strictness             | `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, `noUnusedParameters`                                                                                                                                            | Maximum compile-time proof; reduces defensive runtime code                                                                                          |
-| Escape hatches         | Banned: `any`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, non-null `!`, and type assertions (`as`, `<T>`) via `@typescript-eslint/consistent-type-assertions: never`. Untrusted data (storage, messages) enters through hand-written type-guard parsers in adapters.                               | A cast is a suppression in disguise; parsers are ordinary, testable code                                                                            |
-| Exhaustiveness         | Use `Record<Union, Handler>` tables and discriminated unions checked by the compiler. No `assertNever` default branches.                                                                                                                                                                                 | An `assertNever` default is unreachable code that coverage can never execute                                                                        |
-| Domain identifiers     | Parse stored numeric group ids at the adapter boundary into a discriminated `GroupRef` (`view` / `ungrouped` / `user` with `id`). Stored data format is unchanged. Branded number types were rejected because creating a brand requires an assertion.                                                    | Removes the `-1`/`-2` sentinel comparisons and string-vs-number bugs without a data migration                                                       |
-| Browser typings        | `@types/firefox-webext-browser` for the adapter layer only. Adapters take a narrow structural type (for example `Pick<typeof browser.tabs, 'query' \| 'update'>`) as a parameter rather than reading the global, so tests pass plain typed objects with no casts. Chromium differences stay in adapters. | Ports stay browser-neutral; tests need no `as unknown as` mocks                                                                                     |
-| Lint                   | `@typescript-eslint` `strict-type-checked` and `stylistic-type-checked` configs on `*.ts`, alongside the existing airbnb-base for `*.js` during the transition                                                                                                                                           | `eslint-config-airbnb-typescript` is not relied on; confirm in Phase 0                                                                              |
+| Decision               | Choice                                                                                                                                                                                                                                                                                                   | Rationale                                                                                                                                                                                                                                                             |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Language               | Strict TypeScript, migrated file by file (`allowJs` while mixed)                                                                                                                                                                                                                                         | Types prove away guards; ports become real compile-checked interfaces                                                                                                                                                                                                 |
+| Build                  | `tsc` emits ES modules to `dist/`; a small script copies static assets (html, css, icons, `_locales`, `manifest.json`). No bundler.                                                                                                                                                                      | Keeps the existing multi-file module layout, `type: "module"` background and HTML `<script type="module">` tags unchanged; smallest change                                                                                                                            |
+| Unit test runner       | **Vitest 4.1.12 (exact pin)** with `globals: true`, the `istanbul` coverage provider and `@stryker-mutator/vitest-runner` 10.0.0. Replaces Jest and Babel.                                                                                                                                               | Native TypeScript and ESM, so no Babel preset, no `moduleNameMapper` and no Babel 7/8 conflict with Stryker. Mutation results matched Jest exactly in the spike (see addendum). Vitest 5.0.5 is excluded: Stryker's runner silently reports every mutant as survived. |
+| Mutation type-checking | `@stryker-mutator/typescript-checker`                                                                                                                                                                                                                                                                    | Mutants that cannot type-check cannot exist in a running program and are reported as compile errors. This is automatic, not a configured exclusion.                                                                                                                   |
+| Syntax subset          | `erasableSyntaxOnly: true`, `verbatimModuleSyntax: true`, `isolatedModules: true`; no `enum`, no `namespace`                                                                                                                                                                                             | Guarantees Babel-transpilable output and no runtime constructs that coverage or mutation tools handle badly                                                                                                                                                           |
+| Strictness             | `strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`, `noFallthroughCasesInSwitch`, `noUnusedLocals`, `noUnusedParameters`                                                                                                                                            | Maximum compile-time proof; reduces defensive runtime code                                                                                                                                                                                                            |
+| Escape hatches         | Banned: `any`, `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, non-null `!`, and type assertions (`as`, `<T>`) via `@typescript-eslint/consistent-type-assertions: never`. Untrusted data (storage, messages) enters through hand-written type-guard parsers in adapters.                               | A cast is a suppression in disguise; parsers are ordinary, testable code                                                                                                                                                                                              |
+| Exhaustiveness         | Use `Record<Union, Handler>` tables and discriminated unions checked by the compiler. No `assertNever` default branches.                                                                                                                                                                                 | An `assertNever` default is unreachable code that coverage can never execute                                                                                                                                                                                          |
+| Domain identifiers     | Parse stored numeric group ids at the adapter boundary into a discriminated `GroupRef` (`view` / `ungrouped` / `user` with `id`). Stored data format is unchanged. Branded number types were rejected because creating a brand requires an assertion.                                                    | Removes the `-1`/`-2` sentinel comparisons and string-vs-number bugs without a data migration                                                                                                                                                                         |
+| Browser typings        | `@types/firefox-webext-browser` for the adapter layer only. Adapters take a narrow structural type (for example `Pick<typeof browser.tabs, 'query' \| 'update'>`) as a parameter rather than reading the global, so tests pass plain typed objects with no casts. Chromium differences stay in adapters. | Ports stay browser-neutral; tests need no `as unknown as` mocks                                                                                                                                                                                                       |
+| Lint                   | `@typescript-eslint` `strict-type-checked` and `stylistic-type-checked` configs on `*.ts`, alongside the existing airbnb-base for `*.js` during the transition                                                                                                                                           | `eslint-config-airbnb-typescript` is not relied on; confirm in Phase 0                                                                                                                                                                                                |
+
+## Addendum: Phase 0 Step 2 Toolchain Verification Results
+
+Run in a throwaway git worktree at commit `933e0169` (Node 24.22.1, Jest 30.4.1, ESLint 8.57.1), using
+`src/js/background/utils.js` converted to `utils.ts`. The existing suite (26 suites, 437 tests) passed under the
+new transform.
+
+| Check                                  | Result                                                                                                                                                                                                                                                                      |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (a) Stryker 10.0.0 with Jest 30        | **Works**, but only after deleting the root `babel.config.js`. Stryker's instrumenter bundles Babel 8 and loads the project's root Babel config, which references Babel 7's `@babel/preset-env` and fails with `BABEL_VERSION_UNSUPPORTED`. Inline Jest transform fixes it. |
+| (b) Stryker TypeScript checker         | **TypeScript 7.0.2 fails** (`ts.parseConfigFileTextToJson is not a function`: the native compiler has no JS compiler API). **TypeScript 6.0.3 works.**                                                                                                                      |
+| (c) typescript-eslint with ESLint 8    | **Works** on 8.72.0 with `strict-type-checked`, `stylistic-type-checked` and `projectService`. Its peer range caps TypeScript at `<6.1.0`, which independently rules out TypeScript 7. The `assertionStyle: 'never'` rule fires on `x as number`.                           |
+| (d) Babel preset                       | **`@babel/preset-typescript` 7.29.7** works with Babel 7.29.7 (8.x is not usable).                                                                                                                                                                                          |
+| `.js` → `.ts` import resolution (Jest) | **Works** with `moduleNameMapper: { "^(\\.{1,2}/.*)\\.js$": "$1" }`; the existing test importing `utils.js` resolved `utils.ts` unchanged.                                                                                                                                  |
+
+Pinned versions (exact, to be saved with `--save-exact` for the TypeScript packages):
+
+- `typescript` **6.0.3** (do not upgrade past `<6.1.0` until typescript-eslint and the Stryker checker support a
+  newer line; revisit when TypeScript 7 gains the JS API)
+- `@stryker-mutator/core`, `@stryker-mutator/jest-runner`, `@stryker-mutator/typescript-checker` **10.0.0**
+- `@babel/preset-typescript` **7.29.7**
+- `typescript-eslint` **8.72.0**
+- `eslint-import-resolver-typescript` **4.4.5** (resolves `./x.js` imports to `x.ts` for `import/*` rules)
+- `@types/firefox-webext-browser` (not yet exercised; confirm its version in step 3)
+
+Early evidence for the mutation approach, from `utils.js`, which already had 100% line coverage:
+
+- As JavaScript: 43 mutants, 33 killed, **10 survived (76.74% score)**. Survivors include the `> 0` vs `>= 0`
+  boundary in `getLowestPositiveGroupId` and the `'cyan'` string literal, which no test pins down.
+- As TypeScript: the checker discarded **17 of the 43 mutants** as compile errors, leaving 26 scored (17 killed,
+  9 survived). Types remove a large share of the mutant surface, but the remaining survivors still need
+  assertions or simplification. Compile-error mutants are not a configured exclusion.
+- A side finding: with `noUncheckedIndexedAccess`, `getColorForGroupId` is typed `string | undefined`. It returns
+  `undefined` for negative ids (`-1 % 9 === -1`). Callers must handle that, or the function must be made total.
+  Decide in Phase 1 step 8.
+
+### Runner comparison: Jest vs Vitest (decision: Vitest 4.1.12)
+
+Run in two throwaway worktrees at `933e0169`. In the Vitest worktree the suite got a mechanical `jest.` to `vi.`
+swap and an `@jest/globals` import swap, with no other test changes.
+
+| Measure                                    | Jest 30.4.1                                                | Vitest                                                                                                                              |
+| ------------------------------------------ | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Stryker on `utils.js` (43 mutants)         | 33 killed, 10 survived (76.74%)                            | **Identical** on 3.2.7 and 4.1.12. On **5.0.5: 0 killed, 43 survived, no error** (unusable).                                        |
+| Stryker on `StateManager.js` (140 mutants) | 89 killed, 51 survived (63.57%), 14.9 s wall               | **Identical** 89 / 51 / 63.57% on 4.1.12, 18.0 s wall. No speed advantage under Stryker.                                            |
+| Raw unit run                               | about 8 to 13 s                                            | about 3.4 s                                                                                                                         |
+| Babel                                      | Required; conflicts with Stryker 10's Babel 8 instrumenter | Not used                                                                                                                            |
+| TypeScript and `.js` to `.ts` imports      | `@babel/preset-typescript` plus a `moduleNameMapper`       | Native                                                                                                                              |
+| Mechanical-conversion result               | n/a                                                        | 233 of 437 tests pass; the dominant failures are `isolateModules` (50 calls) and `requireMock` (17); a few others were not examined |
+
+Migration cost found: `jest.mock` x35, `jest.fn` x490, `jest.spyOn` x30, `jest.isolateModules` x21,
+`jest.requireMock` x28 and `require(` x44 in `tests/unit`. The `fn`, `mock` and `spyOn` uses convert
+mechanically. Only the module-isolation idiom needs rewriting, and it is concentrated in the 8 files that test
+import-time side effects, which are the files Phase 3 replaces with a composition root.
+
+Pinned for the runner: `vitest` **4.1.12**, `@vitest/coverage-istanbul` **4.1.12**,
+`@stryker-mutator/vitest-runner` **10.0.0**. Not needed any more under this decision: `@babel/preset-typescript`,
+`@stryker-mutator/jest-runner`, `jest`, `babel-jest`, `jest-environment-jsdom`.
 
 ## Target Architecture
 
@@ -113,7 +171,7 @@ Rules:
 ## Affected Files
 
 - `package.json`, `tsconfig.json` (new), `tsconfig.build.json` (new), `stryker.config.mjs` (new),
-  `babel.config.js`, `.eslintrc.js` — toolchain, scripts, gates
+  `.eslintrc.js`, `vitest.config.mjs` (new) — toolchain, scripts, gates (`babel.config.js` is deleted)
 - `scripts/copy-static.js` (new) — copies non-TypeScript assets to `dist/`
 - `scripts/check-no-suppressions.js` (new) — CI guard (see Phase 0)
 - `.github/workflows/node.js.yml`, `.github/workflows/e2e.yml`, `.pre-commit-config.yaml` — typecheck, build,
@@ -138,20 +196,64 @@ Each step is a PR-sized slice. Within a step, tests and implementation are separ
 
 1. **Establish baseline** — run `npm run test:unit`, `test:coverage`, `lint`, `test:e2e`; record results.
    - Risk: Low. If the baseline is red, stop and hand back.
-2. **Verify the toolchain** (`package.json`, throwaway branch)
-   - Action: confirm, on one small module (`src/js/background/utils.js`), that (a) Stryker runs under Jest 30,
+2. **Verify the toolchain** (`package.json`, throwaway worktree) — **DONE**, results in the addendum below.
+   - Action: confirmed, on one small module (`src/js/background/utils.js`), that (a) Stryker runs under Jest 30,
      (b) `@stryker-mutator/typescript-checker` works with the chosen TypeScript major, (c) `typescript-eslint` v8
      supports it alongside ESLint 8, (d) a `@babel/preset-typescript` release compatible with Babel 7 is
-     available. If TypeScript 7 is not yet supported by the Stryker checker or typescript-eslint, pin the latest
-     supported major. Record each outcome and the final pinned versions as an addendum to this plan.
+     available. Outcomes and pinned versions are recorded in the addendum.
    - Why: every later phase depends on these. Risk: Medium.
-3. **TypeScript infrastructure** (`tsconfig.json`, `tsconfig.build.json`, `babel.config.js`, `package.json`,
-   `.eslintrc.js`)
-   - Action: add the compiler options from the Decisions table with `allowJs: true`, `checkJs: false` so
-     unconverted JavaScript passes through untouched; add the dependencies; add
-     `@babel/preset-typescript` and the `./x.js` → `./x` `moduleNameMapper` for Jest; add `typecheck`
-     (`tsc --noEmit`, covering `src`, `tests` and `scripts`) and the typescript-eslint override for `*.ts`.
-   - Risk: Medium. No source changes yet; all existing tests must still pass unchanged.
+3. **Test runner migration and TypeScript infrastructure**
+   - **3a. Migrate the unit runner from Jest to Vitest (test-only, no source changes). DONE** (result note below). Add `vitest@4.1.12` and
+     `@vitest/coverage-istanbul@4.1.12` (exact), `jsdom`, `@stryker-mutator/core` and
+     `@stryker-mutator/vitest-runner` at 10.0.0; add `vitest.config.mjs` (`globals: true`, `include`, the `jsdom`
+     environment via the `@vitest-environment` docblock). Convert the tests: `jest.` becomes `vi.`,
+     `@jest/globals` imports become `vitest`, and the 8 files that use `jest.isolateModules` / `jest.requireMock`
+     (`background`, `view/index`, `view/groupNodes`, `options/index`, `options/native-groups`,
+     `options/shortcuts`, `share/options`, `migration-status`) move to `vi.resetModules()` plus
+     `await import(...)` and `vi.importMock`. Then remove Jest, `babel-jest`, `jest-environment-jsdom`, the
+     `@babel/*` packages and `babel.config.js`. Acceptance: all 437 tests pass and `test:coverage` reports the same
+     numbers as the baseline (98.25% statements, 89.71% branches).
+     - Why: spike evidence in the addendum; avoids building a Babel TypeScript pipeline that would be thrown away.
+     - Risk: Medium. The `isolateModules` / `requireMock` rewrite is the bulk of the work (about 100 call sites);
+       the spike showed those are the dominant failure cause after a mechanical `jest.` to `vi.` swap; a few other failures (for example mock setup in `options` tests) were not examined and may add work.
+     - **Result:** 439 of 439 tests pass (437 plus 2 new tests for `init()` paths that the Jest suite only covered
+       by accident). Coverage rose from 98.25 / 89.71 / 97.75 / 98.42 to 98.6 / 90.18 / 98 / 98.77. Stryker on
+       `utils.js` matches Jest exactly (33 killed, 10 survived). Jest, `babel-jest`, `jest-environment-jsdom`,
+       `@jest/globals`, `@babel/core`, `@babel/preset-env` and `babel.config.js` are removed. ESLint declares the
+       Vitest globals for `tests/unit/**`. Conversion notes: `isolateModules` + `require` became
+       `vi.resetModules()` + `await import()`; CJS-style function mocks (`() => vi.fn()`) became `{ default: vi.fn() }`;
+       `requireMock` became `await import()` of the already-mocked path; `background.test.js` now waits for the
+       import-time `init()` to settle in its shared `beforeEach` so it cannot race the test's queued mock values.
+     - **Finding for Phase 1:** Stryker's sandbox copies the whole project and fails on Playwright's
+       `test-user-data-*` directories (dangling `lock` symlink). The Stryker config needs `ignorePatterns` for
+       `test-user-data-*`, `playwright-report`, `test-results` and `coverage`. This only controls the sandbox copy
+       and never touches `mutate`, so it does not conflict with the no-exclusions rule; the guard script (step 6)
+       must allow exactly these non-source entries and nothing else.
+   - **3b. TypeScript infrastructure. DONE** (result note below). (`tsconfig.json`, `tsconfig.build.json`, `package.json`, `.eslintrc.js`).
+     Add the compiler options from the Decisions table with `allowJs: true`, `checkJs: false` so unconverted
+     JavaScript passes through untouched; add the dependencies at the pinned versions from the addendum; add
+     `typecheck` (`tsc --noEmit`, covering `src`, `tests` and `scripts`) and the typescript-eslint override for
+     `*.ts`. Vitest resolves `./x.js` imports to `x.ts` natively, so no mapper is needed.
+     - Risk: Medium. No source changes yet; all existing tests must still pass unchanged.
+     - **Result:** added `tsconfig.json` (strict options from the Decisions table, `allowJs: true`,
+       `checkJs: false`, `noEmit`, `types` for `firefox-webext-browser`, `node` and `vitest/globals`, `include` of
+       `src`, `tests`, `scripts`); `typecheck` (`tsc --noEmit`) and `lint:typecheck` scripts, so `npm run lint` now
+       type-checks; the typescript-eslint override for `*.ts` with `consistent-type-assertions: never`;
+       `.ts` added to the ESLint `--ext`, the pre-commit eslint `files` pattern, the pre-commit prettier
+       `types_or`, and the Vitest `include` and coverage globs. Exact pins: `typescript` 6.0.3,
+       `typescript-eslint` 8.72.0, `eslint-import-resolver-typescript` 4.4.5, `@types/firefox-webext-browser`
+       143.0.1, `@types/node` 24.19.2, `@stryker-mutator/typescript-checker` 10.0.0. `tsconfig.build.json` belongs
+       to step 4. No source or test files were converted.
+     - **Verified end to end with a throwaway `.ts` module and test (since deleted):** `tsc` clean; typescript-eslint
+       clean; Vitest and istanbul cover `.ts`; Prettier clean; Stryker with the Vitest runner and the TypeScript
+       checker discarded 2 compile-error mutants, killed 3 and surfaced 1 survivor, `value > 0` vs `value >= 0`,
+       which is an equivalent mutant to be removed by restructuring (for example `Math.max(value, 0)`).
+     - **Finding:** the airbnb `import/extensions` rule demands a `.ts` specifier once the resolver maps
+       `./x.js` to `x.ts`. The `*.ts` override sets `{ js: 'always', ts: 'never' }`, which keeps the `.js`
+       specifier convention (conversion steps stay pure renames) and makes `.ts` specifiers an error.
+     - **Process finding:** pre-commit stashes unstaged changes and lints only what is staged. Staging the converted
+       tests without `.eslintrc.js` fails ESLint (`vi` undefined). Stage config and tests together, and always run
+       the hooks both ways: `pre-commit run --all-files` and `git add -A && pre-commit run`.
 4. **Build pipeline** (`tsconfig.build.json`, `scripts/copy-static.js`, `package.json`, `playwright.config.js`,
    `.github/workflows/*.yml`)
    - Action: `npm run build:dist` emits to `dist/` and copies static assets; `start`, `watch`, `build`,
@@ -159,9 +261,9 @@ Each step is a PR-sized slice. Within a step, tests and implementation are separ
      `dist` with a `pretest:e2e` build; CI runs the build before E2E and web-ext lint. With no `.ts` files yet
      the output is a straight copy, so E2E is a pure pipeline check.
    - Risk: Medium. Mitigation: land this before any conversion so a failure is attributable to the pipeline.
-5. **Widen measurement** (`package.json` jest config)
-   - Action: `collectCoverageFrom: ["src/**/*.{js,ts}"]`, remove `coveragePathIgnorePatterns`; add
-     `coverageThreshold` of 100 for all four metrics. Type-only modules (`ports/*`) emit no runtime statements,
+5. **Widen measurement** (`vitest.config.mjs`)
+   - Action: `coverage.include: ["src/**/*.{js,ts}"]`, no `coverage.exclude`; add `coverage.thresholds` of 100
+     for all four metrics. Type-only modules (`ports/*`) emit no runtime statements,
      so they need no special handling. The gate stays advisory in CI until Phase 6.
    - Risk: Low (it will report new gaps; that is the point).
 6. **Ban suppressions** (`scripts/check-no-suppressions.js`, `package.json` lint script, `.eslintrc.js`)
@@ -183,7 +285,7 @@ For each of: `background/constants`, `background/utils`, `share/utils`, `share/o
 
 8. **Convert to TypeScript** — rename to `.ts`, add types, no behaviour change; existing tests (still `.js`)
    must pass untouched.
-9. **Convert its tests to TypeScript** — test-only step, using explicit `@jest/globals` imports and typed fakes.
+9. **Convert its tests to TypeScript** — test-only step, using explicit `vitest` imports and typed fakes.
 10. **Run Stryker per file** (`--mutate <file>`), then for every survivor either add an exact-value assertion or
     simplify the code until the mutant cannot exist (delete redundant guards/defaults that the types now prove
     unnecessary, replace hand-rolled loops with array methods). Log-string mutants are eliminated by deleting
@@ -264,7 +366,7 @@ unchanged), then characterisation tests, then extract the pure decision into `co
 
 28. **Hard gates** (`stryker.config.mjs`, `package.json`, `.github/workflows/node.js.yml`)
     - `tsc --noEmit` blocking.
-    - Jest `coverageThreshold` 100 on all four metrics (blocking).
+    - Vitest `coverage.thresholds` 100 on all four metrics (blocking).
     - Stryker `thresholds: { high: 100, low: 100, break: 100 }`, `coverageAnalysis: "perTest"`,
       `incremental: true` with the incremental file cached between runs, and the TypeScript checker enabled; PRs
       run incremental, `main` runs a full mutation pass on merge/nightly so the baseline cannot drift.
@@ -289,7 +391,7 @@ unchanged), then characterisation tests, then extract the pure decision into `co
 
 ## Testing Strategy
 
-- **Unit (Jest):** every `core/` function table-driven; `app/` services tested with memory adapters; adapters
+- **Unit (Vitest):** every `core/` function table-driven; `app/` services tested with memory adapters; adapters
   tested with typed structural fakes plus shared contract tests; coverage 100%, mutation 100%.
 - **Type level:** `tsc --noEmit` covers source and tests, so a test that drifts from a port fails the build.
 - **E2E (Playwright), new cases required:** (a) show-nothing safety abort is active (finding 2);
@@ -303,8 +405,10 @@ npm run lint:prettier && npm run lint:eslint`; `npm run test:e2e` for any functi
 
 ## Risks & Mitigations
 
-- **Risk:** Stryker, typescript-eslint or the Babel TypeScript preset do not yet support the chosen Jest or
-  TypeScript major — Mitigation: Phase 0.2 verifies first and pins supported versions.
+- **Risk:** Stryker, typescript-eslint or the Vitest runner do not yet support the chosen Vitest or TypeScript
+  major — Mitigation: Phase 0.2 verified and pinned exact versions. Never auto-upgrade `vitest` or `typescript`
+  majors (disable them in the dependency bot). Vitest 5.0.5 fails silently with Stryker (every mutant
+  survives), so the `break: 100` gate would fail loudly rather than pass, but the pin avoids the confusion.
 - **Risk:** The new build step breaks the E2E harness or web-ext workflow — Mitigation: Phase 0.4 lands the
   pipeline with no `.ts` files, so E2E isolates pipeline problems from conversion problems.
 - **Risk:** Mixing a TypeScript conversion with refactoring hides regressions — Mitigation: conversion steps

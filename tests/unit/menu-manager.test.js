@@ -6,9 +6,9 @@ import {
 import { stateManager } from '../../src/js/background/StateManager.js';
 
 // Mock dependencies
-jest.mock('../../src/js/background/StateManager.js', () => ({
+vi.mock('../../src/js/background/StateManager.js', () => ({
   stateManager: {
-    getGroups: jest.fn(),
+    getGroups: vi.fn(),
   },
 }));
 
@@ -18,10 +18,10 @@ let contextMenusUpdateMock;
 let contextMenusRemoveAllMock;
 
 beforeEach(() => {
-  contextMenusCreateMock = jest.fn();
-  contextMenusRemoveMock = jest.fn();
-  contextMenusUpdateMock = jest.fn();
-  contextMenusRemoveAllMock = jest.fn().mockResolvedValue();
+  contextMenusCreateMock = vi.fn();
+  contextMenusRemoveMock = vi.fn();
+  contextMenusUpdateMock = vi.fn();
+  contextMenusRemoveAllMock = vi.fn().mockResolvedValue();
 
   globalThis.browser = {
     contextMenus: {
@@ -34,14 +34,14 @@ beforeEach(() => {
       create: contextMenusCreateMock,
     },
     windows: {
-      getCurrent: jest.fn().mockResolvedValue({ id: 1 }),
+      getCurrent: vi.fn().mockResolvedValue({ id: 1 }),
     },
     i18n: {
-      getMessage: jest.fn((key) => key), // just return the key as the string
+      getMessage: vi.fn((key) => key), // just return the key as the string
     },
   };
 
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('Menu Manager Unit Tests', () => {
@@ -166,7 +166,7 @@ describe('Menu Manager Unit Tests', () => {
     });
 
     it('logs error if completely fails', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       contextMenusRemoveAllMock.mockRejectedValue(
         new Error('Catastrophic failure'),
       );
@@ -204,7 +204,7 @@ describe('Menu Manager Unit Tests', () => {
     });
 
     it('handles removeMenuItem error gracefully', async () => {
-      const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation();
       contextMenusRemoveMock.mockRejectedValue(new Error('Does not exist'));
       await handleMenuChange({ action: 'removeMenuItem', groupId: 99 });
       expect(consoleSpy).toHaveBeenCalledWith(

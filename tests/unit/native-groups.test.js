@@ -7,9 +7,9 @@ import {
 } from '../../src/js/background/native-groups.js';
 import { stateManager } from '../../src/js/background/StateManager.js';
 
-jest.mock('../../src/js/background/StateManager.js');
-jest.mock('../../src/js/background/utils.js', () => ({
-  getColorForGroupId: jest.fn().mockReturnValue('blue'),
+vi.mock('../../src/js/background/StateManager.js');
+vi.mock('../../src/js/background/utils.js', () => ({
+  getColorForGroupId: vi.fn().mockReturnValue('blue'),
 }));
 
 let mockWindowsGetAll;
@@ -28,19 +28,19 @@ let tabGroupsRemovedListener;
 let tabGroupsUpdatedListener;
 
 beforeEach(() => {
-  mockWindowsGetAll = jest.fn().mockResolvedValue([]);
-  mockWindowsGet = jest.fn().mockResolvedValue({});
-  mockTabsQuery = jest.fn().mockResolvedValue([]);
-  mockTabsGroup = jest.fn().mockResolvedValue(999); // native group id
-  mockTabsUngroup = jest.fn().mockResolvedValue();
-  mockTabGroupsGet = jest
+  mockWindowsGetAll = vi.fn().mockResolvedValue([]);
+  mockWindowsGet = vi.fn().mockResolvedValue({});
+  mockTabsQuery = vi.fn().mockResolvedValue([]);
+  mockTabsGroup = vi.fn().mockResolvedValue(999); // native group id
+  mockTabsUngroup = vi.fn().mockResolvedValue();
+  mockTabGroupsGet = vi
     .fn()
     .mockResolvedValue({ windowId: 1, title: 'Group 1' });
-  mockTabGroupsUpdate = jest.fn().mockResolvedValue();
-  mockSessionsRemoveWindowValue = jest.fn().mockResolvedValue();
-  mockStorageLocalGet = jest.fn().mockResolvedValue({});
-  mockStorageLocalSet = jest.fn().mockResolvedValue();
-  mockRuntimeGetURL = jest
+  mockTabGroupsUpdate = vi.fn().mockResolvedValue();
+  mockSessionsRemoveWindowValue = vi.fn().mockResolvedValue();
+  mockStorageLocalGet = vi.fn().mockResolvedValue({});
+  mockStorageLocalSet = vi.fn().mockResolvedValue();
+  mockRuntimeGetURL = vi
     .fn()
     .mockReturnValue('moz-extension://ext-id/view.html');
 
@@ -62,17 +62,17 @@ beforeEach(() => {
       get: mockTabGroupsGet,
       update: mockTabGroupsUpdate,
       onCreated: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           tabGroupsCreatedListener = cb;
         }),
       },
       onRemoved: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           tabGroupsRemovedListener = cb;
         }),
       },
       onUpdated: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           tabGroupsUpdatedListener = cb;
         }),
       },
@@ -91,7 +91,7 @@ beforeEach(() => {
     },
   };
 
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   stateManager.getGroups.mockResolvedValue(null);
   stateManager.getActiveGroup.mockResolvedValue(null);
   stateManager.getTabGroup.mockResolvedValue(-2);
@@ -130,7 +130,7 @@ describe('Native Groups Manager', () => {
     });
 
     it('warns on title mismatch', async () => {
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
       mockWindowsGetAll.mockResolvedValue([{ id: 1 }]);
       stateManager.getGroups.mockResolvedValue([
         { id: 1, name: 'Group 1', nativeGroupId: 10 },
@@ -181,7 +181,7 @@ describe('Native Groups Manager', () => {
       stateManager.getGroups.mockResolvedValue(mockGroups);
 
       // Tab group 10 exists, 20 does not
-      global.browser.tabGroups.get = jest
+      global.browser.tabGroups.get = vi
         .fn()
         .mockResolvedValueOnce({ id: 10 })
         .mockRejectedValueOnce(new Error('No group found'));
@@ -688,10 +688,10 @@ describe('Native Groups Manager', () => {
 
   it('handles validation failures gracefully', async () => {
     const mockGroups = [{ id: 1, name: 'Test Group', tabs: [10, 20] }];
-    jest.spyOn(stateManager, 'getGroups').mockResolvedValue(mockGroups);
+    vi.spyOn(stateManager, 'getGroups').mockResolvedValue(mockGroups);
 
     // Force cross-window grouping error
-    global.browser.tabs.get = jest
+    global.browser.tabs.get = vi
       .fn()
       .mockResolvedValueOnce({ id: 10, windowId: 1 })
       .mockResolvedValueOnce({ id: 20, windowId: 2 }); // different window
@@ -703,12 +703,12 @@ describe('Native Groups Manager', () => {
 
   it('handles unexpected get window errors safely', async () => {
     const mockGroups = [{ id: 1, name: 'Test Group', tabs: [10] }];
-    jest.spyOn(stateManager, 'getGroups').mockResolvedValue(mockGroups);
-    global.browser.tabs.get = jest
+    vi.spyOn(stateManager, 'getGroups').mockResolvedValue(mockGroups);
+    global.browser.tabs.get = vi
       .fn()
       .mockResolvedValue({ id: 10, windowId: 1 });
 
-    global.browser.windows.get = jest
+    global.browser.windows.get = vi
       .fn()
       .mockRejectedValue(new Error('Window gone'));
 
@@ -747,11 +747,11 @@ describe('Native Groups Manager', () => {
 
     it('should ignore non-matching groups on removed', async () => {
       setupTabGroupListeners(true, true);
-      jest.spyOn(stateManager, 'getGroups').mockResolvedValue([
+      vi.spyOn(stateManager, 'getGroups').mockResolvedValue([
         { id: 1, nativeGroupId: 99 },
         { id: 2, nativeGroupId: 100 },
       ]);
-      const setGroupsSpy = jest.spyOn(stateManager, 'setGroups');
+      const setGroupsSpy = vi.spyOn(stateManager, 'setGroups');
 
       await tabGroupsRemovedListener({ id: 99, windowId: 1 });
 
@@ -763,11 +763,11 @@ describe('Native Groups Manager', () => {
 
     it('should sync name changes and ignore non-matching groups on updated', async () => {
       setupTabGroupListeners(true, true);
-      jest.spyOn(stateManager, 'getGroups').mockResolvedValue([
+      vi.spyOn(stateManager, 'getGroups').mockResolvedValue([
         { id: 1, nativeGroupId: 99, name: 'Old Name' },
         { id: 2, nativeGroupId: 100, name: 'Other Group' },
       ]);
-      const setGroupsSpy = jest.spyOn(stateManager, 'setGroups');
+      const setGroupsSpy = vi.spyOn(stateManager, 'setGroups');
 
       await tabGroupsUpdatedListener({
         id: 99,
@@ -863,8 +863,7 @@ describe('Native Groups Manager', () => {
       ];
       mockTabsQuery.mockResolvedValue([{ id: 101, windowId: 1, groupId: 10 }]);
 
-      jest
-        .spyOn(stateManager, 'getGroups')
+      vi.spyOn(stateManager, 'getGroups')
         .mockResolvedValueOnce(mockGroups) // Initial get
         .mockResolvedValueOnce([
           // Verification get (successful, no nativeIds)
@@ -872,7 +871,7 @@ describe('Native Groups Manager', () => {
           { id: 2, name: 'Group 2' },
         ]);
 
-      const setGroupsSpy = jest.spyOn(stateManager, 'setGroups');
+      const setGroupsSpy = vi.spyOn(stateManager, 'setGroups');
 
       await cleanupNativeGroups(true);
 
@@ -887,12 +886,11 @@ describe('Native Groups Manager', () => {
       const mockGroups = [{ id: 1, nativeGroupId: 10 }];
       mockTabsQuery.mockResolvedValue([{ id: 101, windowId: 1, groupId: 10 }]);
 
-      jest
-        .spyOn(stateManager, 'getGroups')
+      vi.spyOn(stateManager, 'getGroups')
         .mockResolvedValueOnce(mockGroups) // Initial
         .mockResolvedValueOnce(mockGroups); // Verification STILL HAS nativeGroupId
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
       await cleanupNativeGroups(true);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(

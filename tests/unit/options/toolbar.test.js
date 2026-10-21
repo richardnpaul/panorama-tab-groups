@@ -2,16 +2,16 @@ import saveOptionToolbarPosition from '../../../src/js/options/toolbar.js';
 
 describe('options/toolbar.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     global.browser = {
       storage: {
         sync: {
-          set: jest.fn().mockResolvedValue(),
+          set: vi.fn().mockResolvedValue(),
         },
       },
     };
     global.document = {
-      querySelector: jest.fn().mockReturnValue({ value: 'bottom' }),
+      querySelector: vi.fn().mockReturnValue({ value: 'bottom' }),
     };
   });
 

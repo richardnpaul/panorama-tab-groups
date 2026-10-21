@@ -1,49 +1,49 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 
-jest.mock('../../../src/js/view/tabs.js', () => ({
-  getGroupId: jest.fn().mockResolvedValue(1),
+vi.mock('../../../src/js/view/tabs.js', () => ({
+  getGroupId: vi.fn().mockResolvedValue(1),
 }));
-jest.mock('../../../src/js/view/drag.js', () => ({
-  tabMoved: jest.fn(),
-  groupDragOver: jest.fn(),
-  outsideDrop: jest.fn(),
-  createDragIndicator: jest.fn().mockReturnValue({}),
+vi.mock('../../../src/js/view/drag.js', () => ({
+  tabMoved: vi.fn(),
+  groupDragOver: vi.fn(),
+  outsideDrop: vi.fn(),
+  createDragIndicator: vi.fn().mockReturnValue({}),
 }));
-jest.mock('../../../src/js/view/groupNodes.js', () => ({
+vi.mock('../../../src/js/view/groupNodes.js', () => ({
   groupNodes: {
     1: { content: { childNodes: [] } },
     2: { content: { childNodes: [] } },
   },
-  initGroupNodes: jest.fn().mockResolvedValue(),
-  closeGroup: jest.fn(),
-  makeGroupNode: jest
+  initGroupNodes: vi.fn().mockResolvedValue(),
+  closeGroup: vi.fn(),
+  makeGroupNode: vi
     .fn()
-    .mockReturnValue({ scrollIntoView: jest.fn(), appendChild: jest.fn() }),
-  fillGroupNodes: jest.fn(),
-  insertTab: jest.fn().mockResolvedValue(),
-  resizeGroups: jest.fn(),
-  raiseGroup: jest.fn(),
-  updateGroupFit: jest.fn(),
+    .mockReturnValue({ scrollIntoView: vi.fn(), appendChild: vi.fn() }),
+  fillGroupNodes: vi.fn(),
+  insertTab: vi.fn().mockResolvedValue(),
+  resizeGroups: vi.fn(),
+  raiseGroup: vi.fn(),
+  updateGroupFit: vi.fn(),
 }));
-jest.mock('../../../src/js/view/tabNodes.js', () => ({
-  initTabNodes: jest.fn().mockResolvedValue(),
-  makeTabNode: jest.fn(),
-  updateTabNode: jest.fn(),
-  setActiveTabNode: jest.fn(),
-  setActiveTabNodeById: jest.fn(),
-  getActiveTabId: jest.fn().mockReturnValue(1),
-  deleteTabNode: jest.fn(),
-  updateThumbnail: jest.fn(),
-  updateFavicon: jest.fn(),
+vi.mock('../../../src/js/view/tabNodes.js', () => ({
+  initTabNodes: vi.fn().mockResolvedValue(),
+  makeTabNode: vi.fn(),
+  updateTabNode: vi.fn(),
+  setActiveTabNode: vi.fn(),
+  setActiveTabNodeById: vi.fn(),
+  getActiveTabId: vi.fn().mockReturnValue(1),
+  deleteTabNode: vi.fn(),
+  updateThumbnail: vi.fn(),
+  updateFavicon: vi.fn(),
 }));
-jest.mock('../../../src/js/view/groups.js', () => ({
-  getLength: jest.fn().mockReturnValue(2),
-  getIds: jest.fn().mockReturnValue([1, 2]),
-  transform: jest.fn(),
-  init: jest.fn().mockResolvedValue(),
-  get: jest.fn().mockReturnValue({ id: 1, name: 'G1' }),
-  forEach: jest.fn((cb) => [{ id: 1 }, { id: 2 }].forEach(cb)),
-  create: jest
+vi.mock('../../../src/js/view/groups.js', () => ({
+  getLength: vi.fn().mockReturnValue(2),
+  getIds: vi.fn().mockReturnValue([1, 2]),
+  transform: vi.fn(),
+  init: vi.fn().mockResolvedValue(),
+  get: vi.fn().mockReturnValue({ id: 1, name: 'G1' }),
+  forEach: vi.fn((cb) => [{ id: 1 }, { id: 2 }].forEach(cb)),
+  create: vi
     .fn()
     .mockResolvedValue({ id: 10, rect: { x: 0, y: 0, w: 0, h: 0 } }),
 }));
@@ -66,8 +66,8 @@ const flushPromises = () => new Promise(process.nextTick);
 function buildBodyClassList() {
   const classes = new Set(['theme-light', 'toolbar-top']);
   return {
-    add: jest.fn((c) => classes.add(c)),
-    remove: jest.fn((c) => classes.delete(c)),
+    add: vi.fn((c) => classes.add(c)),
+    remove: vi.fn((c) => classes.delete(c)),
     *[Symbol.iterator]() {
       yield* classes;
     },
@@ -92,8 +92,8 @@ function setupGlobals(opts = {}) {
   const bodyClassList = buildBodyClassList();
 
   const groupsNodeEl = {
-    appendChild: jest.fn(),
-    addEventListener: jest.fn((evt, cb) => {
+    appendChild: vi.fn(),
+    addEventListener: vi.fn((evt, cb) => {
       if (evt === 'dblclick') groupsDblClickCb = cb;
       if (evt === 'click') groupsClickCb = cb;
       if (evt === 'auxclick') groupsAuxClickCb = cb;
@@ -102,17 +102,17 @@ function setupGlobals(opts = {}) {
 
   global.document = {
     hidden: false,
-    getElementById: jest.fn((id) => {
+    getElementById: vi.fn((id) => {
       if (id === 'groups') return groupsNodeEl;
       if (!global.elementsById[id]) {
         const el = {
-          addEventListener: jest.fn(),
-          appendChild: jest.fn(),
+          addEventListener: vi.fn(),
+          appendChild: vi.fn(),
           title: '',
           style: {},
           listeners: {},
         };
-        el.addEventListener = jest.fn((evt, cb) => {
+        el.addEventListener = vi.fn((evt, cb) => {
           el.listeners[evt] = cb;
         });
         global.elementsById[id] = el;
@@ -120,41 +120,41 @@ function setupGlobals(opts = {}) {
       return global.elementsById[id];
     }),
     body: {
-      appendChild: jest.fn(),
-      addEventListener: jest.fn(),
+      appendChild: vi.fn(),
+      addEventListener: vi.fn(),
       classList: bodyClassList,
     },
-    getElementsByTagName: jest.fn(() => [
+    getElementsByTagName: vi.fn(() => [
       {
         classList: bodyClassList,
         title: 'Panorama',
       },
     ]),
-    addEventListener: jest.fn((evt, cb) => {
+    addEventListener: vi.fn((evt, cb) => {
       if (evt === 'visibilitychange') docVisibilityCb = cb;
       if (evt === 'keydown') docKeydownCb = cb;
     }),
-    createElement: jest.fn(() => ({
-      getContext: jest.fn().mockReturnValue({ drawImage: jest.fn() }),
+    createElement: vi.fn(() => ({
+      getContext: vi.fn().mockReturnValue({ drawImage: vi.fn() }),
       width: 0,
       height: 0,
-      toDataURL: jest.fn().mockReturnValue('data:image/jpeg;base64,x'),
+      toDataURL: vi.fn().mockReturnValue('data:image/jpeg;base64,x'),
     })),
     documentElement: { style: {} },
   };
 
   const mediaObj = {
     matches: opts.darkSystem || false,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
   };
 
   global.window = {
-    location: { reload: jest.fn(), pathname: '/view.html' },
-    addEventListener: jest.fn(),
+    location: { reload: vi.fn(), pathname: '/view.html' },
+    addEventListener: vi.fn(),
     innerWidth: 1000,
     innerHeight: 800,
-    matchMedia: jest.fn(() => mediaObj),
+    matchMedia: vi.fn(() => mediaObj),
     mediaObj,
   };
 
@@ -169,106 +169,98 @@ function setupGlobals(opts = {}) {
   };
 
   global.browser = {
-    windows: { getCurrent: jest.fn().mockResolvedValue({ id: 1 }) },
+    windows: { getCurrent: vi.fn().mockResolvedValue({ id: 1 }) },
     sessions: {
-      getWindowValue: jest.fn().mockResolvedValue('freeform'),
-      setWindowValue: jest.fn().mockResolvedValue(),
-      getTabValue: jest.fn().mockResolvedValue(null),
-      setTabValue: jest.fn().mockResolvedValue(),
+      getWindowValue: vi.fn().mockResolvedValue('freeform'),
+      setWindowValue: vi.fn().mockResolvedValue(),
+      getTabValue: vi.fn().mockResolvedValue(null),
+      setTabValue: vi.fn().mockResolvedValue(),
     },
     tabs: {
-      getCurrent: jest.fn().mockResolvedValue({ id: 99 }),
-      get: jest.fn().mockResolvedValue({ id: 1, windowId: 1 }),
-      query: jest.fn().mockResolvedValue([]),
-      update: jest.fn().mockResolvedValue(),
-      remove: jest.fn().mockResolvedValue(),
-      captureTab: jest.fn().mockResolvedValue('data:image/jpeg;base64,abc'),
+      getCurrent: vi.fn().mockResolvedValue({ id: 99 }),
+      get: vi.fn().mockResolvedValue({ id: 1, windowId: 1 }),
+      query: vi.fn().mockResolvedValue([]),
+      update: vi.fn().mockResolvedValue(),
+      remove: vi.fn().mockResolvedValue(),
+      captureTab: vi.fn().mockResolvedValue('data:image/jpeg;base64,abc'),
       onCreated: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           tabsOnCreatedCb = cb;
         }),
       },
       onRemoved: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           tabsOnRemovedCb = cb;
         }),
       },
       onUpdated: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           tabsOnUpdatedCb = cb;
         }),
       },
-      onActivated: { addListener: jest.fn() },
-      onMoved: { addListener: jest.fn() },
+      onActivated: { addListener: vi.fn() },
+      onMoved: { addListener: vi.fn() },
       onDetached: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           tabsOnDetachedCb = cb;
         }),
       },
       onAttached: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           tabsOnAttachedCb = cb;
         }),
       },
     },
     storage: {
       sync: {
-        get: jest
+        get: vi
           .fn()
           .mockResolvedValue(
             opts.storageResult || { theme: 'light', toolbarPosition: 'top' },
           ),
-        set: jest.fn().mockResolvedValue(),
+        set: vi.fn().mockResolvedValue(),
       },
       onChanged: {
-        addListener: jest.fn((cb) => {
+        addListener: vi.fn((cb) => {
           storageOnChangedCb = cb;
         }),
       },
     },
     runtime: {
-      openOptionsPage: jest.fn(),
-      sendMessage: jest.fn().mockResolvedValue({ viewRefreshOrdered: false }),
+      openOptionsPage: vi.fn(),
+      sendMessage: vi.fn().mockResolvedValue({ viewRefreshOrdered: false }),
     },
-    i18n: { getMessage: jest.fn((k) => k) },
+    i18n: { getMessage: vi.fn((k) => k) },
   };
 
   return { groupsNodeEl, bodyClassList };
 }
 
 async function loadModule() {
-  let groupsMock;
-  let groupNodesMock;
-  let tabNodesMock;
-  let tabsMock;
-
-  jest.isolateModules(() => {
-    /* eslint-disable global-require */
-    require('../../../src/js/view/index.js');
-    groupsMock = require('../../../src/js/view/groups.js');
-    groupNodesMock = require('../../../src/js/view/groupNodes.js');
-    tabNodesMock = require('../../../src/js/view/tabNodes.js');
-    tabsMock = require('../../../src/js/view/tabs.js');
-    /* eslint-enable global-require */
-  });
+  vi.resetModules();
+  await import('../../../src/js/view/index.js');
+  const groupsMock = await import('../../../src/js/view/groups.js');
+  const groupNodesMock = await import('../../../src/js/view/groupNodes.js');
+  const tabNodesMock = await import('../../../src/js/view/tabNodes.js');
+  const tabsMock = await import('../../../src/js/view/tabs.js');
 
   // flush microtasks/promises
-  for (let i = 0; i < 10; i += 1) {
-    // eslint-disable-next-line no-await-in-loop
-    await Promise.resolve();
-  }
+  await Array.from({ length: 10 }).reduce(
+    (previous) => previous.then(() => undefined),
+    Promise.resolve(),
+  );
 
   return { groupsMock, groupNodesMock, tabNodesMock, tabsMock };
 }
 
 describe('view/index.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     setupGlobals();
   });
 
   afterEach(() => {
-    jest.resetModules();
+    vi.resetModules();
   });
 
   describe('module load / initView', () => {
@@ -401,7 +393,7 @@ describe('view/index.js', () => {
     });
 
     it('reloads when viewRefreshOrdered is true', async () => {
-      global.browser.runtime.sendMessage = jest
+      global.browser.runtime.sendMessage = vi
         .fn()
         .mockResolvedValue({ viewRefreshOrdered: true });
       await loadModule();
@@ -427,18 +419,14 @@ describe('view/index.js', () => {
 
   describe('tabs event listeners', () => {
     it('tabCreated: adds tab to same window', async () => {
-      const { insertTab } = jest.requireMock(
-        '../../../src/js/view/groupNodes.js',
-      );
+      const { insertTab } = await import('../../../src/js/view/groupNodes.js');
       await loadModule();
       if (tabsOnCreatedCb) await tabsOnCreatedCb({ id: 5, windowId: 1 });
       expect(insertTab).toHaveBeenCalled();
     });
 
     it('tabCreated: ignores different window', async () => {
-      const { insertTab } = jest.requireMock(
-        '../../../src/js/view/groupNodes.js',
-      );
+      const { insertTab } = await import('../../../src/js/view/groupNodes.js');
       insertTab.mockClear();
       await loadModule();
       if (tabsOnCreatedCb) await tabsOnCreatedCb({ id: 5, windowId: 999 });
@@ -446,11 +434,9 @@ describe('view/index.js', () => {
     });
 
     it('tabCreated: skips tab when group resolved but is null (no group in view)', async () => {
-      const { insertTab } = jest.requireMock(
-        '../../../src/js/view/groupNodes.js',
-      );
-      const { get } = jest.requireMock('../../../src/js/view/groups.js');
-      const { getGroupId } = jest.requireMock('../../../src/js/view/tabs.js');
+      const { insertTab } = await import('../../../src/js/view/groupNodes.js');
+      const { get } = await import('../../../src/js/view/groups.js');
+      const { getGroupId } = await import('../../../src/js/view/tabs.js');
       get.mockReturnValue(null);
       getGroupId.mockResolvedValue(999);
       insertTab.mockClear();
@@ -468,18 +454,16 @@ describe('view/index.js', () => {
     });
 
     it('tabRemoved: deletes node in same window', async () => {
-      const { deleteTabNode } = jest.requireMock(
-        '../../../src/js/view/tabNodes.js',
-      );
+      const { deleteTabNode } =
+        await import('../../../src/js/view/tabNodes.js');
       await loadModule();
       if (tabsOnRemovedCb) tabsOnRemovedCb(5, { windowId: 1 });
       expect(deleteTabNode).toHaveBeenCalledWith(5);
     });
 
     it('tabRemoved: skips view tab (view.tabId)', async () => {
-      const { deleteTabNode } = jest.requireMock(
-        '../../../src/js/view/tabNodes.js',
-      );
+      const { deleteTabNode } =
+        await import('../../../src/js/view/tabNodes.js');
       deleteTabNode.mockClear();
       await loadModule();
       // view.tabId = 99 (from browser.tabs.getCurrent mock)
@@ -488,9 +472,8 @@ describe('view/index.js', () => {
     });
 
     it('tabRemoved: ignores different window', async () => {
-      const { deleteTabNode } = jest.requireMock(
-        '../../../src/js/view/tabNodes.js',
-      );
+      const { deleteTabNode } =
+        await import('../../../src/js/view/tabNodes.js');
       deleteTabNode.mockClear();
       await loadModule();
       if (tabsOnRemovedCb) tabsOnRemovedCb(5, { windowId: 999 });
@@ -498,9 +481,8 @@ describe('view/index.js', () => {
     });
 
     it('tabUpdated: calls updateTabNode and updateFavicon', async () => {
-      const { updateTabNode, updateFavicon } = jest.requireMock(
-        '../../../src/js/view/tabNodes.js',
-      );
+      const { updateTabNode, updateFavicon } =
+        await import('../../../src/js/view/tabNodes.js');
       await loadModule();
       if (tabsOnUpdatedCb) await tabsOnUpdatedCb(1, {}, { id: 1 });
       expect(updateTabNode).toHaveBeenCalled();
@@ -508,9 +490,8 @@ describe('view/index.js', () => {
     });
 
     it('tabUpdated: pinned triggers fillGroupNodes and reload (not hidden)', async () => {
-      const { fillGroupNodes } = jest.requireMock(
-        '../../../src/js/view/groupNodes.js',
-      );
+      const { fillGroupNodes } =
+        await import('../../../src/js/view/groupNodes.js');
       global.document.hidden = false;
       await loadModule();
       if (tabsOnUpdatedCb)
@@ -528,18 +509,14 @@ describe('view/index.js', () => {
     });
 
     it('tabAttached: creates tab if same window', async () => {
-      const { makeTabNode } = jest.requireMock(
-        '../../../src/js/view/tabNodes.js',
-      );
+      const { makeTabNode } = await import('../../../src/js/view/tabNodes.js');
       await loadModule();
       if (tabsOnAttachedCb) await tabsOnAttachedCb(5, { newWindowId: 1 });
       expect(makeTabNode).toHaveBeenCalled();
     });
 
     it('tabAttached: ignores different window', async () => {
-      const { makeTabNode } = jest.requireMock(
-        '../../../src/js/view/tabNodes.js',
-      );
+      const { makeTabNode } = await import('../../../src/js/view/tabNodes.js');
       makeTabNode.mockClear();
       await loadModule();
       if (tabsOnAttachedCb) await tabsOnAttachedCb(5, { newWindowId: 999 });
@@ -547,9 +524,8 @@ describe('view/index.js', () => {
     });
 
     it('tabDetached: deletes node in same window', async () => {
-      const { deleteTabNode } = jest.requireMock(
-        '../../../src/js/view/tabNodes.js',
-      );
+      const { deleteTabNode } =
+        await import('../../../src/js/view/tabNodes.js');
       deleteTabNode.mockClear();
       await loadModule();
       if (tabsOnDetachedCb) tabsOnDetachedCb(5, { oldWindowId: 1 });
@@ -557,9 +533,8 @@ describe('view/index.js', () => {
     });
 
     it('tabDetached: ignores different window', async () => {
-      const { deleteTabNode } = jest.requireMock(
-        '../../../src/js/view/tabNodes.js',
-      );
+      const { deleteTabNode } =
+        await import('../../../src/js/view/tabNodes.js');
       deleteTabNode.mockClear();
       await loadModule();
       if (tabsOnDetachedCb) tabsOnDetachedCb(5, { oldWindowId: 999 });
@@ -569,9 +544,7 @@ describe('view/index.js', () => {
 
   describe('groups node interactions', () => {
     it('dblclick on content closes group', async () => {
-      const { closeGroup } = jest.requireMock(
-        '../../../src/js/view/groupNodes.js',
-      );
+      const { closeGroup } = await import('../../../src/js/view/groupNodes.js');
       await loadModule();
       if (groupsDblClickCb) {
         groupsDblClickCb({
@@ -582,9 +555,8 @@ describe('view/index.js', () => {
     });
 
     it('dblclick on #groups background creates group', async () => {
-      const { makeGroupNode } = jest.requireMock(
-        '../../../src/js/view/groupNodes.js',
-      );
+      const { makeGroupNode } =
+        await import('../../../src/js/view/groupNodes.js');
       await loadModule();
       if (groupsDblClickCb) {
         await groupsDblClickCb({
@@ -597,23 +569,20 @@ describe('view/index.js', () => {
     });
 
     it('click on content raises group', async () => {
-      const { raiseGroup } = jest.requireMock(
-        '../../../src/js/view/groupNodes.js',
-      );
+      const { raiseGroup } = await import('../../../src/js/view/groupNodes.js');
       await loadModule();
       if (groupsClickCb) {
         groupsClickCb({
           target: { className: 'content transition', getAttribute: () => '1' },
-          stopPropagation: jest.fn(),
+          stopPropagation: vi.fn(),
         });
         expect(raiseGroup).toHaveBeenCalledWith(1);
       }
     });
 
     it('dblclick and click on unknown target do nothing', async () => {
-      const { makeGroupNode, closeGroup, raiseGroup } = jest.requireMock(
-        '../../../src/js/view/groupNodes.js',
-      );
+      const { makeGroupNode, closeGroup, raiseGroup } =
+        await import('../../../src/js/view/groupNodes.js');
       const { groupsMock: groups } = await loadModule();
       makeGroupNode.mockClear();
       closeGroup.mockClear();
@@ -633,7 +602,7 @@ describe('view/index.js', () => {
       if (groupsClickCb) {
         groupsClickCb({
           target: { id: 'unknown', className: 'unknown' },
-          stopPropagation: jest.fn(),
+          stopPropagation: vi.fn(),
         });
         expect(raiseGroup).not.toHaveBeenCalled();
       }
@@ -1170,7 +1139,7 @@ describe('view/index.js', () => {
     });
 
     it('captures new thumbnail when no cached thumbnail exists', async () => {
-      global.browser.tabs.captureTab = jest
+      global.browser.tabs.captureTab = vi
         .fn()
         .mockResolvedValue('data:image/jpeg;base64,abc');
       global.browser.tabs.query.mockResolvedValue([
@@ -1189,7 +1158,7 @@ describe('view/index.js', () => {
     });
 
     it('skips capture when cached thumbnail is newer than tab.lastAccessed', async () => {
-      global.browser.tabs.captureTab = jest.fn();
+      global.browser.tabs.captureTab = vi.fn();
       global.browser.tabs.query.mockResolvedValue([
         { id: 1, lastAccessed: 100, discarded: false },
       ]);
@@ -1309,8 +1278,8 @@ describe('view/index.js', () => {
       // Middle click
       groupsAuxClickCb({
         button: 1,
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
         target: global.document.getElementById('groups'),
         clientX: 100,
         clientY: 100,
@@ -1323,8 +1292,8 @@ describe('view/index.js', () => {
       // Other click
       groupsAuxClickCb({
         button: 0,
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
         target: global.document.getElementById('groups'),
         clientX: 100,
         clientY: 100,
@@ -1335,8 +1304,8 @@ describe('view/index.js', () => {
       // Middle click but on non-groups target
       groupsAuxClickCb({
         button: 1,
-        preventDefault: jest.fn(),
-        stopPropagation: jest.fn(),
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
         target: global.document.getElementById('newGroup'),
         clientX: 100,
         clientY: 100,
@@ -1378,12 +1347,12 @@ describe('view/index.js', () => {
 
   describe('onUpdated filter fallback', () => {
     it('falls back to no-filter addListener if filter throws', async () => {
-      global.browser.tabs.onUpdated.addListener = jest
+      global.browser.tabs.onUpdated.addListener = vi
         .fn()
         .mockImplementationOnce(() => {
           throw new Error('filter unsupported');
         })
-        .mockImplementation(jest.fn());
+        .mockImplementation(vi.fn());
       await loadModule();
       expect(global.browser.tabs.onUpdated.addListener).toHaveBeenCalledTimes(
         2,

@@ -7,14 +7,14 @@ import {
 } from '../../../src/js/view/tabs.js';
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   globalThis.browser = {
     sessions: {
-      setTabValue: jest.fn().mockResolvedValue(),
-      getTabValue: jest.fn().mockResolvedValue(42),
+      setTabValue: vi.fn().mockResolvedValue(),
+      getTabValue: vi.fn().mockResolvedValue(42),
     },
     tabs: {
-      query: jest.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
+      query: vi.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
     },
   };
 });
@@ -54,7 +54,7 @@ describe('view/tabs.js', () => {
 
   describe('forEachTab', () => {
     it('executes callback asynchronously for all tabs', async () => {
-      const callback = jest.fn().mockResolvedValue();
+      const callback = vi.fn().mockResolvedValue();
       await forEachTab(callback);
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenCalledWith({ id: 1 });
@@ -64,7 +64,7 @@ describe('view/tabs.js', () => {
 
   describe('forEachTabSync', () => {
     it('executes callback synchronously for all tabs', async () => {
-      const callback = jest.fn();
+      const callback = vi.fn();
       await forEachTabSync(callback);
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenCalledWith({ id: 1 });

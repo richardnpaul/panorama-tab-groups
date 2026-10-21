@@ -3,59 +3,59 @@ import * as tabs from '../../../src/js/view/tabs.js';
 import * as groupNodes from '../../../src/js/view/groupNodes.js';
 import * as groups from '../../../src/js/view/groups.js';
 
-jest.mock('../../../src/js/view/tabs.js');
-jest.mock('../../../src/js/view/groupNodes.js');
-jest.mock('../../../src/js/view/groups.js');
+vi.mock('../../../src/js/view/tabs.js');
+vi.mock('../../../src/js/view/groupNodes.js');
+vi.mock('../../../src/js/view/groups.js');
 
 describe('view/drag.js', () => {
   let mockEvent;
   let mockElement;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     mockEvent = {
-      preventDefault: jest.fn(),
-      stopPropagation: jest.fn(),
+      preventDefault: vi.fn(),
+      stopPropagation: vi.fn(),
       dataTransfer: {
-        setData: jest.fn(),
-        setDragImage: jest.fn(),
+        setData: vi.fn(),
+        setDragImage: vi.fn(),
         effectAllowed: '',
         dropEffect: '',
       },
       clientX: 50,
       clientY: 50,
       target: {
-        appendChild: jest.fn(),
+        appendChild: vi.fn(),
       },
     };
 
     mockElement = {
       classList: {
-        add: jest.fn(),
-        remove: jest.fn(),
-        contains: jest.fn().mockReturnValue(false),
+        add: vi.fn(),
+        remove: vi.fn(),
+        contains: vi.fn().mockReturnValue(false),
       },
-      getBoundingClientRect: jest.fn().mockReturnValue({
+      getBoundingClientRect: vi.fn().mockReturnValue({
         left: 0,
         top: 0,
         width: 100,
         height: 100,
       }),
-      getAttribute: jest.fn().mockReturnValue('1'),
-      insertAdjacentElement: jest.fn(),
+      getAttribute: vi.fn().mockReturnValue('1'),
+      insertAdjacentElement: vi.fn(),
     };
 
     global.browser = {
       windows: {
-        getCurrent: jest.fn().mockResolvedValue({ id: 1 }),
+        getCurrent: vi.fn().mockResolvedValue({ id: 1 }),
       },
       tabs: {
-        get: jest.fn().mockResolvedValue({ id: 1, index: 1 }),
-        move: jest.fn().mockResolvedValue(),
+        get: vi.fn().mockResolvedValue({ id: 1, index: 1 }),
+        move: vi.fn().mockResolvedValue(),
         onMoved: {
-          addListener: jest.fn(),
-          removeListener: jest.fn(),
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
         },
       },
     };
@@ -69,10 +69,10 @@ describe('view/drag.js', () => {
 
   describe('createDragIndicator', () => {
     it('creates and returns a drag indicator element', () => {
-      const mockDiv = { setAttribute: jest.fn() };
+      const mockDiv = { setAttribute: vi.fn() };
       global.document = {
-        createElement: jest.fn().mockReturnValue(mockDiv),
-        createTextNode: jest.fn(),
+        createElement: vi.fn().mockReturnValue(mockDiv),
+        createTextNode: vi.fn(),
       };
 
       const indicator = drag.createDragIndicator();
@@ -141,9 +141,9 @@ describe('view/drag.js', () => {
     beforeEach(() => {
       // Create drag indicator for these tests
       global.document = {
-        createElement: jest.fn().mockReturnValue({
-          setAttribute: jest.fn(),
-          classList: { remove: jest.fn(), add: jest.fn() },
+        createElement: vi.fn().mockReturnValue({
+          setAttribute: vi.fn(),
+          classList: { remove: vi.fn(), add: vi.fn() },
           style: {},
         }),
       };
@@ -170,21 +170,21 @@ describe('view/drag.js', () => {
   describe('tabDragOver', () => {
     beforeEach(() => {
       const mockIndicator = {
-        setAttribute: jest.fn(),
-        classList: { remove: jest.fn(), add: jest.fn() },
+        setAttribute: vi.fn(),
+        classList: { remove: vi.fn(), add: vi.fn() },
         style: {},
       };
       global.document = {
-        createElement: jest.fn().mockReturnValue(mockIndicator),
+        createElement: vi.fn().mockReturnValue(mockIndicator),
       };
       drag.createDragIndicator();
 
       drag.tabDragStart.call(
         {
-          getBoundingClientRect: jest
+          getBoundingClientRect: vi
             .fn()
             .mockReturnValue({ width: 0, height: 0 }),
-          classList: { add: jest.fn(), contains: jest.fn() },
+          classList: { add: vi.fn(), contains: vi.fn() },
         },
         mockEvent,
       );
@@ -221,12 +221,12 @@ describe('view/drag.js', () => {
   describe('tabDrop', () => {
     beforeEach(() => {
       const mockIndicator = {
-        setAttribute: jest.fn(),
-        classList: { remove: jest.fn(), add: jest.fn() },
+        setAttribute: vi.fn(),
+        classList: { remove: vi.fn(), add: vi.fn() },
         style: {},
       };
       global.document = {
-        createElement: jest.fn().mockReturnValue(mockIndicator),
+        createElement: vi.fn().mockReturnValue(mockIndicator),
       };
       drag.createDragIndicator();
     });
@@ -234,12 +234,12 @@ describe('view/drag.js', () => {
     it('processes drop on a different tab', async () => {
       const draggedEl = {
         ...mockElement,
-        getAttribute: jest.fn().mockReturnValue('1'),
+        getAttribute: vi.fn().mockReturnValue('1'),
       };
       const overEl = {
         ...mockElement,
-        getAttribute: jest.fn().mockReturnValue('2'),
-        insertAdjacentElement: jest.fn(),
+        getAttribute: vi.fn().mockReturnValue('2'),
+        insertAdjacentElement: vi.fn(),
       };
 
       draggedEl.classList.contains.mockReturnValue(false);
@@ -268,12 +268,12 @@ describe('view/drag.js', () => {
     it('handles drop when dragDropBefore is true and tab.index < toTab.index', async () => {
       const draggedEl = {
         ...mockElement,
-        getAttribute: jest.fn().mockReturnValue('1'),
+        getAttribute: vi.fn().mockReturnValue('1'),
       };
       const overEl = {
         ...mockElement,
-        getAttribute: jest.fn().mockReturnValue('2'),
-        insertAdjacentElement: jest.fn(),
+        getAttribute: vi.fn().mockReturnValue('2'),
+        insertAdjacentElement: vi.fn(),
       };
       drag.tabDragStart.call(draggedEl, mockEvent);
       drag.tabDragEnter.call(overEl, mockEvent);
@@ -301,12 +301,12 @@ describe('view/drag.js', () => {
     it('handles drop when dragDropBefore is false and tab.index >= toTab.index', async () => {
       const draggedEl = {
         ...mockElement,
-        getAttribute: jest.fn().mockReturnValue('1'),
+        getAttribute: vi.fn().mockReturnValue('1'),
       };
       const overEl = {
         ...mockElement,
-        getAttribute: jest.fn().mockReturnValue('2'),
-        insertAdjacentElement: jest.fn(),
+        getAttribute: vi.fn().mockReturnValue('2'),
+        insertAdjacentElement: vi.fn(),
       };
       drag.tabDragStart.call(draggedEl, mockEvent);
       drag.tabDragEnter.call(overEl, mockEvent);
@@ -343,12 +343,12 @@ describe('view/drag.js', () => {
     it('handles drop when dragDropBefore is true and tab.index >= toTab.index', async () => {
       const draggedEl = {
         ...mockElement,
-        getAttribute: jest.fn().mockReturnValue('1'),
+        getAttribute: vi.fn().mockReturnValue('1'),
       };
       const overEl = {
         ...mockElement,
-        getAttribute: jest.fn().mockReturnValue('2'),
-        insertAdjacentElement: jest.fn(),
+        getAttribute: vi.fn().mockReturnValue('2'),
+        insertAdjacentElement: vi.fn(),
       };
       drag.tabDragStart.call(draggedEl, mockEvent);
       drag.tabDragEnter.call(overEl, mockEvent);
@@ -373,12 +373,12 @@ describe('view/drag.js', () => {
   describe('groupDrop and outsideDrop', () => {
     beforeEach(() => {
       const mockIndicator = {
-        setAttribute: jest.fn(),
-        classList: { remove: jest.fn(), add: jest.fn() },
+        setAttribute: vi.fn(),
+        classList: { remove: vi.fn(), add: vi.fn() },
         style: {},
       };
       global.document = {
-        createElement: jest.fn().mockReturnValue(mockIndicator),
+        createElement: vi.fn().mockReturnValue(mockIndicator),
       };
       drag.createDragIndicator();
       drag.tabDragStart.call(mockElement, mockEvent);
@@ -388,8 +388,8 @@ describe('view/drag.js', () => {
       const newGroup = { id: 1, rect: {} };
       groups.create.mockResolvedValue(newGroup);
       groupNodes.groupNodes[1] = {
-        newtab: { insertAdjacentElement: jest.fn() },
-        group: { scrollIntoView: jest.fn() },
+        newtab: { insertAdjacentElement: vi.fn() },
+        group: { scrollIntoView: vi.fn() },
       };
 
       await drag.outsideDrop(mockEvent);
@@ -400,7 +400,7 @@ describe('view/drag.js', () => {
 
     it('handles groupDrop', async () => {
       groupNodes.groupNodes[1] = {
-        newtab: { insertAdjacentElement: jest.fn() },
+        newtab: { insertAdjacentElement: vi.fn() },
       };
 
       await drag.groupDrop.call(mockElement, mockEvent);
@@ -412,12 +412,12 @@ describe('view/drag.js', () => {
   describe('tabDragEnd', () => {
     it('cleans up drag classes', () => {
       const mockIndicator = {
-        setAttribute: jest.fn(),
-        classList: { remove: jest.fn(), add: jest.fn() },
+        setAttribute: vi.fn(),
+        classList: { remove: vi.fn(), add: vi.fn() },
         style: {},
       };
       global.document = {
-        createElement: jest.fn().mockReturnValue(mockIndicator),
+        createElement: vi.fn().mockReturnValue(mockIndicator),
       };
       drag.createDragIndicator();
 

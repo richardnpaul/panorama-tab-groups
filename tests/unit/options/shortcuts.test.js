@@ -6,30 +6,30 @@ describe('options/shortcuts.js', () => {
   let enableShortcutForm;
   let enableShortcut;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    vi.clearAllMocks();
 
     global.browser = {
       commands: {
-        update: jest.fn().mockResolvedValue(),
-        reset: jest.fn().mockResolvedValue(),
-        getAll: jest.fn().mockResolvedValue([
+        update: vi.fn().mockResolvedValue(),
+        reset: vi.fn().mockResolvedValue(),
+        getAll: vi.fn().mockResolvedValue([
           { name: 'test-shortcut', shortcut: 'Ctrl+A' },
           { name: 'other-shortcut', shortcut: 'Ctrl+B' },
         ]),
       },
       storage: {
         sync: {
-          set: jest.fn().mockResolvedValue(),
+          set: vi.fn().mockResolvedValue(),
         },
       },
     };
 
     const buttonMock = {
       hidden: false,
-      getAttribute: jest.fn(),
-      setAttribute: jest.fn(),
-      removeAttribute: jest.fn(),
+      getAttribute: vi.fn(),
+      setAttribute: vi.fn(),
+      removeAttribute: vi.fn(),
       parentElement: { getAttribute: () => 'test-shortcut' },
     };
 
@@ -46,29 +46,28 @@ describe('options/shortcuts.js', () => {
     };
 
     global.document = {
-      querySelector: jest.fn((selector) => {
+      querySelector: vi.fn((selector) => {
         if (mockElements[selector]) return mockElements[selector];
         return buttonMock;
       }),
     };
 
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      const shortcuts = require('../../../src/js/options/shortcuts.js');
-      updateShortcut = shortcuts.updateShortcut;
-      resetShortcut = shortcuts.resetShortcut;
-      disableShortcutForm = shortcuts.disableShortcutForm;
-      disableShortcut = shortcuts.disableShortcut;
-      enableShortcutForm = shortcuts.enableShortcutForm;
-      enableShortcut = shortcuts.enableShortcut;
-    });
+    vi.resetModules();
+    ({
+      updateShortcut,
+      resetShortcut,
+      disableShortcutForm,
+      disableShortcut,
+      enableShortcutForm,
+      enableShortcut,
+    } = await import('../../../src/js/options/shortcuts.js'));
   });
 
   describe('updateShortcut', () => {
     it('updates a shortcut with browser API', async () => {
       document.querySelector('#test-shortcut input').value = 'Ctrl+B';
       const event = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         target: document.querySelector('.updateShortcut'),
       };
 
@@ -86,7 +85,7 @@ describe('options/shortcuts.js', () => {
     it('resets a shortcut and updates the input value', async () => {
       document.querySelector('#test-shortcut input').value = 'Ctrl+B';
       const event = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         target: document.querySelector('.resetShortcut'),
       };
 
@@ -129,7 +128,7 @@ describe('options/shortcuts.js', () => {
     it('saves disabled state to options and calls disableShortcutForm', async () => {
       const options = { shortcut: {} };
       const event = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         target: document.querySelector('.disableShortcut'),
       };
 
@@ -173,7 +172,7 @@ describe('options/shortcuts.js', () => {
     it('saves enabled state to options and calls enableShortcutForm', async () => {
       const options = { shortcut: { 'test-shortcut': { disabled: true } } };
       const event = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
         target: document.querySelector('.enableShortcut'),
       };
 

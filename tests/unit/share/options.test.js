@@ -1,19 +1,19 @@
 describe('share/options.js', () => {
   beforeEach(() => {
-    jest.resetModules();
-    jest.clearAllMocks();
+    vi.resetModules();
+    vi.clearAllMocks();
 
     global.browser = {
       runtime: {
-        getManifest: jest.fn().mockReturnValue({ version: '1.0' }),
+        getManifest: vi.fn().mockReturnValue({ version: '1.0' }),
       },
       storage: {
         sync: {
-          get: jest.fn(),
+          get: vi.fn(),
         },
       },
-      tabGroups: { query: jest.fn() },
-      tabs: { group: jest.fn() },
+      tabGroups: { query: vi.fn() },
+      tabs: { group: vi.fn() },
     };
   });
 
@@ -21,13 +21,8 @@ describe('share/options.js', () => {
     delete global.browser;
   });
 
-  it('provides defaultOptions and handles majorVersion >= 1', () => {
-    let defaultOptions;
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      const optionsModule = require('../../../src/js/share/options.js');
-      defaultOptions = optionsModule.defaultOptions;
-    });
+  it('provides defaultOptions and handles majorVersion >= 1', async () => {
+    const { defaultOptions } = await import('../../../src/js/share/options.js');
 
     expect(defaultOptions).toBeDefined();
     expect(defaultOptions.toolbarPosition).toBe('top');
@@ -36,28 +31,18 @@ describe('share/options.js', () => {
     expect(defaultOptions.view).toBe('popup'); // majorVersion >= 1
   });
 
-  it('provides defaultOptions and handles majorVersion < 1', () => {
+  it('provides defaultOptions and handles majorVersion < 1', async () => {
     global.browser.runtime.getManifest.mockReturnValue({ version: '0.9.0' });
 
-    let defaultOptions;
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      const optionsModule = require('../../../src/js/share/options.js');
-      defaultOptions = optionsModule.defaultOptions;
-    });
+    const { defaultOptions } = await import('../../../src/js/share/options.js');
 
     expect(defaultOptions.theme).toBe('auto');
     expect(defaultOptions.view).toBe('freeform'); // majorVersion < 1
   });
 
-  it('disables native groups if APIs are not available', () => {
+  it('disables native groups if APIs are not available', async () => {
     delete global.browser.tabGroups;
-    let defaultOptions;
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      const optionsModule = require('../../../src/js/share/options.js');
-      defaultOptions = optionsModule.defaultOptions;
-    });
+    const { defaultOptions } = await import('../../../src/js/share/options.js');
 
     expect(defaultOptions.useNativeGroups).toBe(false);
   });
@@ -66,14 +51,9 @@ describe('share/options.js', () => {
     const mockOptions = { view: 'custom' };
     global.browser.storage.sync.get.mockResolvedValue(mockOptions);
 
-    let loadedOptions;
-    jest.isolateModules(() => {
-      // eslint-disable-next-line global-require
-      const optionsModule = require('../../../src/js/share/options.js');
-      loadedOptions = optionsModule.loadOptions();
-    });
+    const { loadOptions } = await import('../../../src/js/share/options.js');
 
-    const result = await loadedOptions;
+    const result = await loadOptions();
     expect(result).toEqual(mockOptions);
     expect(global.browser.storage.sync.get).toHaveBeenCalledWith(
       expect.any(Object),

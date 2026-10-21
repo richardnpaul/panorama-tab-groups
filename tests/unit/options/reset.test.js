@@ -2,9 +2,9 @@ import resetPTG from '../../../src/js/options/reset.js';
 
 describe('options/reset.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     global.window = {
-      alert: jest.fn(),
+      alert: vi.fn(),
     };
   });
 

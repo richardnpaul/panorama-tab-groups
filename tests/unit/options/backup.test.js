@@ -1,7 +1,7 @@
 import { loadBackup, saveBackup } from '../../../src/js/options/backup.js';
 
 let mockView = 'panorama';
-jest.mock('../../../src/js/share/options.js', () => ({
+vi.mock('../../../src/js/share/options.js', () => ({
   get currentOptions() {
     return Promise.resolve({ view: mockView });
   },
@@ -9,25 +9,25 @@ jest.mock('../../../src/js/share/options.js', () => ({
 
 describe('options/backup.js', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockView = 'panorama';
 
     global.browser = {
       runtime: {
-        sendMessage: jest.fn().mockResolvedValue(),
+        sendMessage: vi.fn().mockResolvedValue(),
       },
       windows: {
-        create: jest.fn().mockResolvedValue({ id: 1 }),
-        update: jest.fn().mockResolvedValue(),
-        getAll: jest.fn().mockResolvedValue([{ id: 1 }]),
+        create: vi.fn().mockResolvedValue({ id: 1 }),
+        update: vi.fn().mockResolvedValue(),
+        getAll: vi.fn().mockResolvedValue([{ id: 1 }]),
       },
       sessions: {
-        setWindowValue: jest.fn().mockResolvedValue(),
-        getWindowValue: jest
+        setWindowValue: vi.fn().mockResolvedValue(),
+        getWindowValue: vi
           .fn()
           .mockResolvedValue([{ id: 1, name: 'Group 1', rect: {} }]),
-        setTabValue: jest.fn().mockResolvedValue(),
-        getTabValue: jest.fn().mockImplementation((tabId, key) => {
+        setTabValue: vi.fn().mockResolvedValue(),
+        getTabValue: vi.fn().mockImplementation((tabId, key) => {
           if (key === 'groupId') {
             return tabId === 11 ? -1 : 1;
           }
@@ -35,8 +35,8 @@ describe('options/backup.js', () => {
         }),
       },
       tabs: {
-        create: jest.fn().mockResolvedValue({ id: 10 }),
-        query: jest.fn().mockResolvedValue([
+        create: vi.fn().mockResolvedValue({ id: 10 }),
+        query: vi.fn().mockResolvedValue([
           {
             id: 10,
             url: 'http://example.com',
@@ -54,21 +54,21 @@ describe('options/backup.js', () => {
             pinned: true,
           },
         ]),
-        remove: jest.fn().mockResolvedValue(),
+        remove: vi.fn().mockResolvedValue(),
       },
       downloads: {
-        download: jest.fn().mockResolvedValue(),
+        download: vi.fn().mockResolvedValue(),
       },
     };
 
     global.window = {
       URL: {
-        createObjectURL: jest.fn().mockReturnValue('blob:mock'),
+        createObjectURL: vi.fn().mockReturnValue('blob:mock'),
       },
     };
 
-    global.Blob = jest.fn();
-    global.alert = jest.fn();
+    global.Blob = vi.fn();
+    global.alert = vi.fn();
 
     // Mock FileReader
     global.FileReader = class {

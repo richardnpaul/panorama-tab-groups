@@ -3,38 +3,35 @@ describe('polyfill.js', () => {
     // Reset global environment
     delete globalThis.browser;
     delete globalThis.chrome;
-    jest.resetModules();
+    vi.resetModules();
   });
 
   describe('browser alias', () => {
-    it('sets browser to chrome if undefined', () => {
+    it('sets browser to chrome if undefined', async () => {
       globalThis.chrome = { runtime: {} };
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
       expect(globalThis.browser).toBe(globalThis.chrome);
     });
 
-    it('does not crash if browser and chrome are undefined', () => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+    it('does not crash if browser and chrome are undefined', async () => {
+      await import('../../src/js/polyfill.js');
       expect(globalThis.browser).toBeUndefined();
     });
   });
 
   describe('menus polyfill', () => {
-    it('polyfills menus using contextMenus proxy', () => {
+    it('polyfills menus using contextMenus proxy', async () => {
       const mockContextMenus = {
-        create: jest.fn().mockReturnValue(1),
-        update: jest.fn().mockReturnValue(true),
-        remove: jest.fn(),
+        create: vi.fn().mockReturnValue(1),
+        update: vi.fn().mockReturnValue(true),
+        remove: vi.fn(),
       };
 
       globalThis.browser = {
         contextMenus: mockContextMenus,
       };
 
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
 
       expect(globalThis.browser.menus).toBeDefined();
 
@@ -80,14 +77,13 @@ describe('polyfill.js', () => {
       );
     });
 
-    it('directly aliases menus if proxy polyfill not needed or previously executed', () => {
+    it('directly aliases menus if proxy polyfill not needed or previously executed', async () => {
       globalThis.chrome = {
         contextMenus: {},
       };
       globalThis.browser = undefined; // Trigger `typeof browser === 'undefined'` block
 
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
       expect(globalThis.browser.menus).toBe(globalThis.browser.contextMenus);
     });
   });
@@ -97,8 +93,8 @@ describe('polyfill.js', () => {
     let mockStorageSet;
 
     beforeEach(() => {
-      mockStorageGet = jest.fn().mockResolvedValue({});
-      mockStorageSet = jest.fn().mockResolvedValue();
+      mockStorageGet = vi.fn().mockResolvedValue({});
+      mockStorageSet = vi.fn().mockResolvedValue();
 
       globalThis.browser = {
         storage: {
@@ -111,8 +107,7 @@ describe('polyfill.js', () => {
     });
 
     it('polyfills setTabValue and getTabValue', async () => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
 
       expect(globalThis.browser.sessions).toBeDefined();
 
@@ -132,8 +127,7 @@ describe('polyfill.js', () => {
     });
 
     it('polyfills setWindowValue and getWindowValue', async () => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
 
       // Test setWindowValue
       await globalThis.browser.sessions.setWindowValue(1, 'key', 'value');
@@ -151,8 +145,7 @@ describe('polyfill.js', () => {
     });
 
     it('covers all branch paths of sessions storage', async () => {
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
 
       // 1. Storage returns mock sessions with no tabs
       mockStorageGet.mockResolvedValueOnce({
@@ -215,16 +208,15 @@ describe('polyfill.js', () => {
       });
     });
 
-    it('does not overwrite sessions methods if they already exist', () => {
-      const existingSetTabValue = jest.fn();
+    it('does not overwrite sessions methods if they already exist', async () => {
+      const existingSetTabValue = vi.fn();
       globalThis.browser = {
         sessions: {
           setTabValue: existingSetTabValue,
         },
       };
 
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
 
       expect(globalThis.browser.sessions.setTabValue).toBe(existingSetTabValue);
     });
@@ -232,11 +224,11 @@ describe('polyfill.js', () => {
 
   describe('action polyfill', () => {
     it('strips windowId from action methods if throwing', async () => {
-      const mockSetTitle = jest
+      const mockSetTitle = vi
         .fn()
         .mockRejectedValueOnce(new Error('Invalid property'))
         .mockResolvedValueOnce(true);
-      const mockSetBadgeText = jest
+      const mockSetBadgeText = vi
         .fn()
         .mockRejectedValueOnce(new Error('Invalid property'))
         .mockResolvedValueOnce(true);
@@ -248,8 +240,7 @@ describe('polyfill.js', () => {
         },
       };
 
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
 
       await globalThis.browser.action.setTitle({ windowId: 1, title: 'test' });
       expect(mockSetTitle).toHaveBeenCalledTimes(2);
@@ -264,17 +255,16 @@ describe('polyfill.js', () => {
     });
 
     it('throws original error if windowId not present', async () => {
-      const mockSetTitle = jest.fn().mockRejectedValue(new Error('Real error'));
+      const mockSetTitle = vi.fn().mockRejectedValue(new Error('Real error'));
 
       globalThis.browser = {
         action: {
           setTitle: mockSetTitle,
-          setBadgeText: jest.fn(),
+          setBadgeText: vi.fn(),
         },
       };
 
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
 
       await expect(
         globalThis.browser.action.setTitle({ title: 'test' }),
@@ -282,19 +272,18 @@ describe('polyfill.js', () => {
     });
 
     it('throws original error if windowId not present on setBadgeText', async () => {
-      const mockSetBadgeText = jest
+      const mockSetBadgeText = vi
         .fn()
         .mockRejectedValue(new Error('Real error'));
 
       globalThis.browser = {
         action: {
-          setTitle: jest.fn(),
+          setTitle: vi.fn(),
           setBadgeText: mockSetBadgeText,
         },
       };
 
-      // eslint-disable-next-line global-require
-      require('../../src/js/polyfill.js');
+      await import('../../src/js/polyfill.js');
 
       await expect(
         globalThis.browser.action.setBadgeText({ text: 'test' }),

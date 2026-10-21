@@ -4,3 +4,4 @@ test-user-data-*/
 extension.xpi
 playwright-report/
 test-results/
+coverage/
