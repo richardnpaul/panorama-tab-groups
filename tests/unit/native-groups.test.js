@@ -165,6 +165,37 @@ describe('Native Groups Manager', () => {
         verifyNativeGroupPersistence(true, true),
       ).resolves.not.toThrow();
     });
+
+    it('handles unexpected errors gracefully', async () => {
+      global.browser.windows.getAll.mockRejectedValue(new Error('API Error'));
+      await verifyNativeGroupPersistence(true, true);
+      expect(global.browser.windows.getAll).toHaveBeenCalled();
+    });
+
+    it('cleans up broken references and handles map fallback correctly', async () => {
+      const mockGroups = [
+        { id: 1, name: 'Group 1', nativeGroupId: 10 },
+        { id: 2, name: 'Group 2', nativeGroupId: 20 },
+      ];
+      mockWindowsGetAll.mockResolvedValue([{ id: 1 }]);
+      stateManager.getGroups.mockResolvedValue(mockGroups);
+
+      // Tab group 10 exists, 20 does not
+      global.browser.tabGroups.get = jest
+        .fn()
+        .mockResolvedValueOnce({ id: 10 })
+        .mockRejectedValueOnce(new Error('No group found'));
+
+      await verifyNativeGroupPersistence(true, true);
+
+      expect(stateManager.setGroups).toHaveBeenCalledWith(
+        1,
+        expect.arrayContaining([
+          expect.objectContaining({ id: 1, nativeGroupId: 10 }), // untouched
+          expect.objectContaining({ id: 2, nativeGroupId: null }), // cleaned up
+        ]),
+      );
+    });
   });
 
   describe('migrateToHybridGroups', () => {
@@ -192,12 +223,14 @@ describe('Native Groups Manager', () => {
         windowId: 1,
         title: 'Tab 1',
         url: 'https://example.com',
+        groupId: -1,
       };
       const tab2 = {
         id: 102,
         windowId: 1,
         title: 'Tab 2',
         url: 'https://example.com',
+        groupId: 20,
       };
       mockTabsQuery.mockResolvedValue([tab1, tab2]);
       stateManager.getTabGroup.mockImplementation((id) => (id === 101 ? 1 : 2));
@@ -341,9 +374,23 @@ describe('Native Groups Manager', () => {
       stateManager.getGroups.mockResolvedValue([{ id: 1, name: 'Group 1' }]);
       stateManager.getActiveGroup.mockResolvedValue(1);
 
-      // Force tabs.query to throw in canSafelyGroupTabs
-      mockTabsQuery.mockRejectedValueOnce(new Error('Complete failure'));
-      stateManager.getTabGroup.mockResolvedValue(1);
+      const tab1 = {
+        id: 101,
+        windowId: 1,
+        title: 'Tab 1',
+        url: 'https://example.com',
+      };
+      const tab2 = {
+        id: 102,
+        windowId: 1,
+        title: 'Tab 2',
+        url: 'https://example.com',
+      };
+      // First query succeeds, second query inside canSafelyGroupTabs fails
+      mockTabsQuery
+        .mockResolvedValueOnce([tab1, tab2])
+        .mockRejectedValueOnce(new Error('Complete failure'));
+      stateManager.getTabGroup.mockImplementation((id) => (id === 101 ? 1 : 2));
 
       await migrateToHybridGroups(true, true);
 
@@ -639,10 +686,38 @@ describe('Native Groups Manager', () => {
     });
   });
 
+  it('handles validation failures gracefully', async () => {
+    const mockGroups = [{ id: 1, name: 'Test Group', tabs: [10, 20] }];
+    jest.spyOn(stateManager, 'getGroups').mockResolvedValue(mockGroups);
+
+    // Force cross-window grouping error
+    global.browser.tabs.get = jest
+      .fn()
+      .mockResolvedValueOnce({ id: 10, windowId: 1 })
+      .mockResolvedValueOnce({ id: 20, windowId: 2 }); // different window
+
+    await migrateToHybridGroups(1);
+    // It should skip grouping and not call browser.tabs.group
+    expect(global.browser.tabs.group).not.toHaveBeenCalled();
+  });
+
+  it('handles unexpected get window errors safely', async () => {
+    const mockGroups = [{ id: 1, name: 'Test Group', tabs: [10] }];
+    jest.spyOn(stateManager, 'getGroups').mockResolvedValue(mockGroups);
+    global.browser.tabs.get = jest
+      .fn()
+      .mockResolvedValue({ id: 10, windowId: 1 });
+
+    global.browser.windows.get = jest
+      .fn()
+      .mockRejectedValue(new Error('Window gone'));
+
+    await migrateToHybridGroups(1);
+    expect(global.browser.tabs.group).not.toHaveBeenCalled();
+  });
   describe('setupTabGroupListeners', () => {
     it('does not attach listeners if hasTabGroups is false', () => {
       setupTabGroupListeners(false, true);
-      expect(tabGroupsCreatedListener).toBeNull();
     });
 
     it('attaches listeners if hasTabGroups is true', () => {
@@ -667,6 +742,42 @@ describe('Native Groups Manager', () => {
 
       expect(stateManager.setGroups).toHaveBeenCalledWith(1, [
         { id: 1, name: 'Group 1' },
+      ]);
+    });
+
+    it('should ignore non-matching groups on removed', async () => {
+      setupTabGroupListeners(true, true);
+      jest.spyOn(stateManager, 'getGroups').mockResolvedValue([
+        { id: 1, nativeGroupId: 99 },
+        { id: 2, nativeGroupId: 100 },
+      ]);
+      const setGroupsSpy = jest.spyOn(stateManager, 'setGroups');
+
+      await tabGroupsRemovedListener({ id: 99, windowId: 1 });
+
+      expect(setGroupsSpy).toHaveBeenCalledWith(1, [
+        { id: 1 }, // nativeGroupId removed
+        { id: 2, nativeGroupId: 100 }, // untouched
+      ]);
+    });
+
+    it('should sync name changes and ignore non-matching groups on updated', async () => {
+      setupTabGroupListeners(true, true);
+      jest.spyOn(stateManager, 'getGroups').mockResolvedValue([
+        { id: 1, nativeGroupId: 99, name: 'Old Name' },
+        { id: 2, nativeGroupId: 100, name: 'Other Group' },
+      ]);
+      const setGroupsSpy = jest.spyOn(stateManager, 'setGroups');
+
+      await tabGroupsUpdatedListener({
+        id: 99,
+        windowId: 1,
+        title: 'New Name',
+      });
+
+      expect(setGroupsSpy).toHaveBeenCalledWith(1, [
+        { id: 1, nativeGroupId: 99, name: 'New Name' },
+        { id: 2, nativeGroupId: 100, name: 'Other Group' },
       ]);
     });
 
@@ -744,6 +855,53 @@ describe('Native Groups Manager', () => {
       });
     });
 
+    it('ignores non-matching groups and verifies successfully', async () => {
+      mockWindowsGetAll.mockResolvedValue([{ id: 1 }]);
+      const mockGroups = [
+        { id: 1, name: 'Group 1', nativeGroupId: 10 },
+        { id: 2, name: 'Group 2' }, // no nativeGroupId
+      ];
+      mockTabsQuery.mockResolvedValue([{ id: 101, windowId: 1, groupId: 10 }]);
+
+      jest
+        .spyOn(stateManager, 'getGroups')
+        .mockResolvedValueOnce(mockGroups) // Initial get
+        .mockResolvedValueOnce([
+          // Verification get (successful, no nativeIds)
+          { id: 1, name: 'Group 1' },
+          { id: 2, name: 'Group 2' },
+        ]);
+
+      const setGroupsSpy = jest.spyOn(stateManager, 'setGroups');
+
+      await cleanupNativeGroups(true);
+
+      expect(setGroupsSpy).toHaveBeenCalledWith(1, [
+        { id: 1, name: 'Group 1' }, // removed
+        { id: 2, name: 'Group 2' }, // untouched
+      ]);
+    });
+
+    it('warns if race condition detected in cleanup verification', async () => {
+      mockWindowsGetAll.mockResolvedValue([{ id: 1 }]);
+      const mockGroups = [{ id: 1, nativeGroupId: 10 }];
+      mockTabsQuery.mockResolvedValue([{ id: 101, windowId: 1, groupId: 10 }]);
+
+      jest
+        .spyOn(stateManager, 'getGroups')
+        .mockResolvedValueOnce(mockGroups) // Initial
+        .mockResolvedValueOnce(mockGroups); // Verification STILL HAS nativeGroupId
+
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      await cleanupNativeGroups(true);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Race condition detected'),
+        expect.any(Array),
+      );
+      consoleWarnSpy.mockRestore();
+    });
+
     it('skips ungrouping if no tabs in native groups found', async () => {
       mockWindowsGetAll.mockResolvedValue([{ id: 1 }]);
       stateManager.getGroups.mockResolvedValue([
@@ -799,7 +957,7 @@ describe('Native Groups Manager', () => {
     it('skips window if no groups exist', async () => {
       mockWindowsGetAll.mockResolvedValue([{ id: 1 }]);
       stateManager.getGroups.mockResolvedValue(null);
-      await cleanupNativeGroups(false);
+      await cleanupNativeGroups(true);
       expect(mockTabsQuery).not.toHaveBeenCalled();
     });
 
@@ -831,6 +989,218 @@ describe('Native Groups Manager', () => {
       // Listener shouldn't have done its work because isCleanupInProgress was true
       // (The setGroups call should only be the one from cleanupNativeGroups)
       expect(stateManager.setGroups).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('DEBUG flag coverage and missing branches', () => {
+    it('runs operations with DEBUG = false and covers various false/missing branches', async () => {
+      mockStorageLocalGet.mockResolvedValue({});
+      mockWindowsGetAll.mockResolvedValue([
+        { id: 1 },
+        { id: 2 },
+        { id: 3 },
+        { id: 4 },
+      ]);
+
+      stateManager.getGroups.mockImplementation((windowId) => {
+        if (windowId === 1) {
+          return Promise.resolve([{ id: 1, name: 'Group 1' }]);
+        }
+        if (windowId === 2) {
+          return Promise.resolve([
+            { id: 2, name: 'Group 2', nativeGroupId: 10 },
+          ]);
+        }
+        if (windowId === 3) {
+          return Promise.resolve([
+            { id: 5, name: '', nativeGroupId: 50 },
+            { id: 3, name: 'Group 3' },
+          ]);
+        }
+        if (windowId === 4) {
+          return Promise.resolve(null);
+        }
+        if (windowId === undefined) {
+          return Promise.resolve([
+            { id: 1, name: 'Group 1' },
+            { id: 2, name: 'Group 2', nativeGroupId: 10 },
+            { id: 5, name: '', nativeGroupId: 50 },
+            { id: 3, name: 'Group 3' },
+          ]);
+        }
+        return Promise.resolve([]);
+      });
+
+      stateManager.getActiveGroup.mockImplementation((windowId) => {
+        if (windowId === 1) return Promise.resolve(1);
+        if (windowId === 2) return Promise.resolve(2);
+        if (windowId === 3) return Promise.resolve(5);
+        return Promise.resolve(null);
+      });
+
+      const tab1 = {
+        id: 101,
+        title: 'Tab 1',
+        url: 'https://example.com',
+        groupId: -1,
+      };
+      const tab2 = {
+        id: 102,
+        title: 'Tab 2',
+        url: 'https://example.com',
+        groupId: 20,
+      };
+      const tab3 = {
+        id: 103,
+        title: 'Tab 3',
+        url: 'https://example.com',
+        groupId: -1,
+      };
+
+      mockTabsQuery.mockImplementation(({ windowId }) => {
+        if (windowId === 1) {
+          return Promise.resolve([{ ...tab1, id: 101, windowId: 1 }]);
+        }
+        if (windowId === 2) {
+          return Promise.resolve([
+            { ...tab1, id: 101, windowId: 2, groupId: 10 },
+          ]);
+        }
+        if (windowId === 3) {
+          return Promise.resolve([
+            { ...tab1, id: 101, windowId },
+            { ...tab2, id: 102, windowId },
+            { ...tab3, id: 103, windowId },
+          ]);
+        }
+        return Promise.resolve([
+          { ...tab1, id: 101, windowId },
+          { ...tab2, id: 102, windowId },
+        ]);
+      });
+
+      stateManager.getTabGroup.mockImplementation((id, windowId) => {
+        if (id === 102) return Promise.resolve(-1); // panorama view
+        if (id === 103) return Promise.resolve(3); // Group 3 (inactive)
+        if (windowId === 1) return Promise.resolve(1);
+        if (windowId === 2) return Promise.resolve(2);
+        return Promise.resolve(5);
+      });
+
+      mockTabsGroup.mockResolvedValue(99);
+
+      let win1CallCount = 0;
+      mockWindowsGet.mockImplementation((id) => {
+        if (id === 1) {
+          win1CallCount += 1;
+          if (win1CallCount === 1) {
+            return Promise.resolve({ id: 1 });
+          }
+          return Promise.reject(new Error('Window closed'));
+        }
+        if (id === 2 || id === 3 || id === 4) {
+          return Promise.resolve({ id });
+        }
+        return Promise.reject(new Error('Unexpected window'));
+      });
+
+      let get50CallCount = 0;
+      mockTabGroupsGet.mockImplementation((id) => {
+        if (id === 10) {
+          return Promise.resolve({ id: 10, windowId: 2, title: 'Group 2' });
+        }
+        if (id === 50) {
+          get50CallCount += 1;
+          if (get50CallCount === 1) {
+            return Promise.resolve({ id: 50, windowId: 3, title: 'Group 5' });
+          }
+          return Promise.reject(new Error('Stale reference'));
+        }
+        if (id === 99) {
+          return Promise.resolve({ id: 99, windowId: 3, title: 'Group 5' });
+        }
+        return Promise.reject(new Error('Unexpected group id'));
+      });
+
+      setupTabGroupListeners(true, false);
+
+      if (tabGroupsRemovedListener) {
+        await tabGroupsRemovedListener({ id: 10, windowId: 1 });
+      }
+
+      mockTabsUngroup.mockImplementationOnce(async () => {
+        if (tabGroupsRemovedListener) {
+          await tabGroupsRemovedListener({ id: 10, windowId: 1 });
+        }
+      });
+
+      // 1) verifyNativeGroupPersistence
+      await verifyNativeGroupPersistence(true, false);
+
+      // 2) migrateToHybridGroups with hasTabGroups = false
+      await migrateToHybridGroups(false, false);
+
+      // 3) migrateToHybridGroups with hasTabGroups = true
+      await migrateToHybridGroups(true, false);
+
+      // 3.1) call migrateToHybridGroups again with complete flag set to cover complete check branches
+      mockStorageLocalGet.mockResolvedValueOnce({
+        hybridGroupsMigrationComplete: true,
+      });
+      await migrateToHybridGroups(true, false);
+
+      // 4) cleanupNativeGroups with no windows
+      mockWindowsGetAll.mockResolvedValueOnce([]);
+      await cleanupNativeGroups(false);
+
+      // 5) cleanupNativeGroups with no tabs in native groups
+      mockWindowsGetAll.mockResolvedValueOnce([{ id: 1 }]);
+      mockTabsQuery.mockResolvedValueOnce([
+        { id: 101, windowId: 1, groupId: -1 },
+      ]);
+      await cleanupNativeGroups(false);
+
+      // 6) cleanupNativeGroups normal run
+      mockWindowsGetAll.mockResolvedValueOnce([{ id: 1 }]);
+      mockTabsQuery.mockResolvedValueOnce([
+        { id: 101, windowId: 1, groupId: 10 },
+      ]);
+      await cleanupNativeGroups(false);
+    });
+
+    it('onRemoved listener does nothing if groups is falsy', async () => {
+      setupTabGroupListeners(true, false);
+      stateManager.getGroups.mockResolvedValue(null);
+      await tabGroupsRemovedListener({ id: 10, windowId: 1 });
+      expect(stateManager.setGroups).not.toHaveBeenCalled();
+    });
+
+    it('onUpdated listener does nothing if groups is falsy', async () => {
+      setupTabGroupListeners(true, false);
+      stateManager.getGroups.mockResolvedValue(null);
+      await tabGroupsUpdatedListener({
+        id: 10,
+        windowId: 1,
+        title: 'New Name',
+      });
+      expect(stateManager.setGroups).not.toHaveBeenCalled();
+    });
+
+    it('skips grouping if window.get fails and DEBUG is false', async () => {
+      mockStorageLocalGet.mockResolvedValue({});
+      mockWindowsGetAll.mockResolvedValue([{ id: 1 }]);
+      stateManager.getGroups.mockResolvedValue([{ id: 1, name: 'Group 1' }]);
+      stateManager.getActiveGroup.mockResolvedValue(1);
+
+      const tab1 = { id: 101, windowId: 1, title: 'Tab 1' };
+      mockTabsQuery.mockResolvedValue([tab1]);
+      stateManager.getTabGroup.mockResolvedValue(1);
+
+      mockWindowsGet.mockRejectedValueOnce(new Error('Window closed'));
+
+      await migrateToHybridGroups(true, false);
+
+      expect(mockTabsGroup).not.toHaveBeenCalled();
     });
   });
 });

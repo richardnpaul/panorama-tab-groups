@@ -105,6 +105,23 @@ describe('Menu Manager Unit Tests', () => {
       expect(contextMenusCreateMock).toHaveBeenCalledTimes(1);
     });
 
+    it('uses fallback title for send-tab menu if i18n returns falsy value', async () => {
+      globalThis.browser.i18n.getMessage.mockImplementation((key) => {
+        if (key === 'sendTabToGroup') return null;
+        return key;
+      });
+      stateManager.getGroups.mockResolvedValue([]);
+
+      await createMenuList();
+
+      expect(contextMenusCreateMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'send-tab',
+          title: 'Send Tab to Group',
+        }),
+      );
+    });
+
     it('creates menu items for all groups', async () => {
       stateManager.getGroups.mockResolvedValue([
         { id: 1, name: 'Group 1' },

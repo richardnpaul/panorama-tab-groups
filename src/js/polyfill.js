@@ -1,5 +1,5 @@
 if (typeof browser === 'undefined') {
-  globalThis.browser = chrome;
+  globalThis.browser = typeof chrome !== 'undefined' ? chrome : undefined;
 
   // Polyfill menus API for Chromium
   if (

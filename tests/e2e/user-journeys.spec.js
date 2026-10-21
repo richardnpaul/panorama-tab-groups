@@ -912,4 +912,73 @@ test.describe('User Journeys', () => {
     });
     expect(tabGroupsCount2).toBeGreaterThan(0);
   });
+
+  test('Journey: Toggle Layout Modes (Tiling vs Freeform)', async ({
+    page,
+    extensionId,
+    extensionProtocol,
+  }) => {
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Create a couple of groups to see layout changes
+    const initialGroupsCount = await page.locator('.group').count();
+    const groupsNeeded = 2 - initialGroupsCount;
+    await Array.from({ length: groupsNeeded }).reduce(
+      (previous) => previous.then(() => page.click('#newGroup')),
+      Promise.resolve(),
+    );
+    await expect(page.locator('.group')).toHaveCount(2, { timeout: 10000 });
+
+    // Wait for groups to settle
+    await new Promise((r) => {
+      setTimeout(r, 1000);
+    });
+
+    const group1 = page.locator('.group').nth(0);
+    const group2 = page.locator('.group').nth(1);
+
+    // Get initial rects (Freeform mode)
+    const g1BoxFreeform = await group1.boundingBox();
+    const g2BoxFreeform = await group2.boundingBox();
+
+    // 3. User clicks the "Tiling" button
+    await page.click('#tiling');
+
+    // Wait for tiling to apply
+    await new Promise((r) => {
+      setTimeout(r, 1000);
+    });
+
+    // 4. User verifies the layout switches to a grid-based tiling system
+    const g1BoxTiled = await group1.boundingBox();
+    const g2BoxTiled = await group2.boundingBox();
+
+    expect(g1BoxTiled.width).toBeGreaterThan(0);
+    expect(g2BoxTiled.width).toBeGreaterThan(0);
+    expect(g1BoxTiled).not.toEqual(g1BoxFreeform);
+    expect(g2BoxTiled).not.toEqual(g2BoxFreeform);
+
+    // 5. User clicks the "Freeform" button
+    await page.click('#freeform');
+
+    // Wait for freeform layout to apply
+    await new Promise((r) => {
+      setTimeout(r, 1000);
+    });
+
+    const g1BoxReverted = await group1.boundingBox();
+
+    // In the current implementation, tiling destructively updates the saved group rects.
+    // Therefore, switching back to freeform does not restore the original coordinates;
+    // it simply leaves them in their tiled positions until manually moved again.
+    expect(g1BoxReverted).toEqual(g1BoxTiled);
+
+    // 7. User verifies that state is maintained after reloading
+    await page.reload();
+    await expect(page.locator('body.view-ready')).toBeVisible();
+    await expect(page.locator('.group')).toHaveCount(2, { timeout: 10000 });
+  });
 });

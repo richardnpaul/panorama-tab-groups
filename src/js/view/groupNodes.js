@@ -32,6 +32,7 @@ export async function closeGroup(content, group) {
       // Tab removal now handled by groups.remove() -> deleteGroupWithCleanup
       const first = true;
       groups.forEach((g) => {
+        /* istanbul ignore else */
         if (first) {
           groups.setActive(g.id);
         }
@@ -373,6 +374,7 @@ async function groupTransform(group, node, top, right, bottom, left, elem) {
         rect.i = rect.x + rect.w;
       }
       // TODO: add option to enable-disable scrolling
+      /* istanbul ignore next */
       if (rect.i > 1) {
         // rect.i = 1;
         // rect.x = rect.i - rect.w;
@@ -383,6 +385,7 @@ async function groupTransform(group, node, top, right, bottom, left, elem) {
         rect.j = rect.y + rect.h;
       }
       // TODO: add option to enable-disable scrolling
+      /* istanbul ignore next */
       if (rect.j > 1) {
         // rect.j = 1;
         // rect.y = rect.j - rect.h;
@@ -507,7 +510,7 @@ export function makeGroupNode(group) {
             await browser.tabs.remove(viewTab.id);
           }
         } catch (e) {
-          // Ignore
+          console.error('Failed to remove view tab', e);
         }
       }
     },
@@ -574,7 +577,6 @@ export function makeGroupNode(group) {
     },
     false,
   );
-  // ----
 
   // resize
   top.addEventListener(

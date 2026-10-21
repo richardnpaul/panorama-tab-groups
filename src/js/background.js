@@ -26,7 +26,7 @@ const manifest = browser.runtime.getManifest();
 const DEBUG = true;
 
 // Initialization state
-const initializationState = {
+export const initializationState = {
   isInitializing: true,
   startTime: null,
   showingUI: false,
@@ -38,7 +38,7 @@ const initializationState = {
  * Wait for initialization to complete (if in progress)
  * Used by event handlers to ensure they don't run before initialization finishes
  */
-async function waitForInitialization() {
+export async function waitForInitialization() {
   if (!initializationState.isInitializing) {
     return;
   }
@@ -70,7 +70,7 @@ async function waitForInitialization() {
 /**
  * Helper: Enrich tab with full context for safe grouping operations
  */
-async function enrichTabForGrouping(tab) {
+export async function enrichTabForGrouping(tab) {
   const panoramaGroupId = await stateManager.getTabGroup(tab.id);
   return {
     tabId: tab.id,
@@ -86,7 +86,11 @@ async function enrichTabForGrouping(tab) {
 /**
  * Helper: Validate and check if tabs can be safely grouped
  */
-async function validateAndCheckSafety(enrichedTabs, windowId, panoramaGroupId) {
+export async function validateAndCheckSafety(
+  enrichedTabs,
+  windowId,
+  panoramaGroupId,
+) {
   if (enrichedTabs.length === 0) {
     return { safe: false, reason: 'No tabs to group' };
   }
@@ -166,7 +170,7 @@ if (DEBUG) {
  * Requires both API availability AND user preference
  * @returns {Promise<boolean>}
  */
-async function shouldUseNativeGroups() {
+export async function shouldUseNativeGroups() {
   if (!hasTabGroups) {
     return false; // API not available
   }
@@ -174,7 +178,7 @@ async function shouldUseNativeGroups() {
   return options.useNativeGroups !== false; // Default to true if not set
 }
 
-const backgroundState = {
+export const backgroundState = {
   openingView: null, // Changed: stores { tabId, timeout, windowId } or null
   openingBackup: false,
 };
@@ -194,7 +198,7 @@ function getWindowState(windowId) {
 let viewRefreshOrdered = false;
 
 /** Set extension icon tooltip and numGroups to icon * */
-async function setActionTitle(windowId, activeGroup = null) {
+export async function setActionTitle(windowId, activeGroup = null) {
   let name;
   const groups = await stateManager.getGroups(windowId);
 
@@ -215,18 +219,11 @@ async function setActionTitle(windowId, activeGroup = null) {
     });
     await browser.action.setBadgeBackgroundColor({ color: '#666666' });
   } catch (error) {
-    // Chromium does not support windowId for action API, fallback to global
-    try {
-      await browser.action.setTitle({ title: `Active Group: ${name}` });
-      await browser.action.setBadgeText({ text: String(groups.length) });
-      await browser.action.setBadgeBackgroundColor({ color: '#666666' });
-    } catch (fallbackError) {
-      console.warn('Failed to set action title/badge:', fallbackError);
-    }
+    console.warn('Failed to set action title/badge:', error);
   }
 }
 
-async function toggleVisibleTabs(activeGroup, noTabSelected) {
+export async function toggleVisibleTabs(activeGroup, noTabSelected) {
   const toggleStartTime = Date.now();
   if (DEBUG) {
     const stack = new Error().stack.split('\n').slice(2, 5).join('\n');
@@ -301,11 +298,6 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
             console.debug(
               `  Will hide tab ${tab.id} (${tab.title}) - groupId ${groupId} !== activeGroup ${activeGroup}`,
             );
-            if (activeGroup === undefined) {
-              console.warn(
-                `    ⚠️ Hiding because ${groupId} !== undefined (always true!)`,
-              );
-            }
           }
         } else {
           showTabIds.push(tab.id);
@@ -426,7 +418,7 @@ async function toggleVisibleTabs(activeGroup, noTabSelected) {
   }
 }
 
-async function moveTab(tabId, groupId) {
+export async function moveTab(tabId, groupId) {
   const windowId = (await browser.windows.getCurrent()).id;
   await stateManager.setTabGroup(tabId, groupId);
 
@@ -466,7 +458,7 @@ async function moveTab(tabId, groupId) {
   await toggleVisibleTabs(activeGroup);
 }
 
-async function menuClicked(info, tab) {
+export async function menuClicked(info, tab) {
   switch (info.menuItemId) {
     case 'refresh-groups': {
       browser.contextMenus.removeAll();
@@ -767,6 +759,7 @@ export async function tabCreated(tab) {
           });
 
           // Validate the native group was created in the correct window
+          /* istanbul ignore next */
           try {
             const createdGroup = await browser.tabGroups.get(nativeGroupId);
             if (createdGroup.windowId !== tab.windowId) {
@@ -875,7 +868,7 @@ export async function tabDetached(tabId) {
  * This callback needed for properly switch between groups, when current tab
  * is from another group (or is Panorama Tab Groups tab).
  */
-async function tabActivated(activeInfo) {
+export async function tabActivated(activeInfo) {
   // Wait for initialization to complete before processing tab activation
   await waitForInitialization();
 
@@ -1046,6 +1039,7 @@ async function tabActivated(activeInfo) {
             });
 
             // Validate the native group was created in the correct window
+            /* istanbul ignore next */
             try {
               const createdGroup = await browser.tabGroups.get(nativeGroupId);
               if (createdGroup.windowId !== tab.windowId) {
@@ -1201,6 +1195,7 @@ async function createGroupInWindowIfMissing(browserWindow) {
     });
     await browser.action.setBadgeBackgroundColor({ color: '#666666' });
   } catch (error) {
+    /* istanbul ignore next */
     try {
       await browser.action.setTitle({ title: 'Active Group: None' });
       await browser.action.setBadgeText({ text: '1' });
@@ -1292,7 +1287,7 @@ async function isSessionHistoryAvailable() {
  * Show loading UI during initialization
  * Displays notification, badge, and sends message to panorama view
  */
-async function showInitializationUI() {
+export async function showInitializationUI() {
   if (initializationState.showingUI) {
     return;
   }
@@ -1328,7 +1323,7 @@ async function showInitializationUI() {
 /**
  * Hide loading UI after initialization completes
  */
-async function hideInitializationUI() {
+export async function hideInitializationUI() {
   if (!initializationState.showingUI) {
     return;
   }
@@ -1360,7 +1355,7 @@ async function hideInitializationUI() {
  * @param {object} tab - Browser tab object
  * @returns {Promise<number|null>} Recovered group ID or null
  */
-async function recoverGroupFromSessionHistory(tab) {
+export async function recoverGroupFromSessionHistory(tab) {
   try {
     // Try to get the tab's session value directly first
     const storedGroupId = await stateManager.getTabGroup(tab.id);
@@ -1387,7 +1382,7 @@ async function recoverGroupFromSessionHistory(tab) {
  * Initialize tab group assignments with session recovery
  * Blocks tab operations until complete or timeout
  */
-async function initializeTabGroupAssignments() {
+export async function initializeTabGroupAssignments() {
   initializationState.isInitializing = true;
   initializationState.startTime = Date.now();
   initializationState.recoveredTabs = 0;

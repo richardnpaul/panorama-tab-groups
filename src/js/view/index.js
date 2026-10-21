@@ -92,7 +92,7 @@ async function setLayoutMode(mode) {
 
   if (mode === 'tiling') {
     await browser.sessions.setWindowValue(windowId, 'layoutMode', 'tiling');
-    activateTiling();
+    await activateTiling();
   } else {
     await browser.sessions.setWindowValue(windowId, 'layoutMode', 'freeform');
     resizeGroups();
@@ -160,6 +160,7 @@ async function captureThumbnails() {
 }
 
 async function createGroup(x = 75, y = 75) {
+  console.log('createGroup CALLED!');
   const group = await groups.create();
 
   group.rect.x = (x - 75) / window.innerWidth;
@@ -422,6 +423,7 @@ async function singleClick(e) {
  * to respond to user actions and react to changes
  */
 async function initView() {
+  console.log('INIT VIEW RAN');
   // set locale specific titles
   document.getElementById('newGroup').title =
     browser.i18n.getMessage('newGroupButton');

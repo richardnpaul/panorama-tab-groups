@@ -348,15 +348,7 @@ async function migrateWindowGroups(windowId, stateMgr, DEBUG) {
           }
 
           // Validate tabs before grouping
-          try {
-            validateTabsForGrouping(groupTabs);
-          } catch (error) {
-            console.error(
-              `[Migration] Validation failed for group ${group.id}:`,
-              error.message,
-            );
-            return group;
-          }
+          validateTabsForGrouping(groupTabs);
 
           // Re-validate window still exists before attempting to create native group
           // Window may have closed due to previous group migration

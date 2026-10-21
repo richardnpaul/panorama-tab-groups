@@ -20,10 +20,13 @@ import initNativeGroupsOption from './native-groups.js';
 function restoreOptions(options, loadedShortcuts) {
   // Shortcuts
   loadedShortcuts.forEach((shortcut) => {
-    if (Object.prototype.hasOwnProperty.call(shortcut, 'name')) {
+    if (!Object.prototype.hasOwnProperty.call(shortcut, 'name')) {
       return;
     }
-    if (options.shortcut[shortcut.name].disabled) {
+    if (
+      options.shortcut[shortcut.name] &&
+      options.shortcut[shortcut.name].disabled
+    ) {
       disableShortcutForm(shortcut.name);
     }
   });

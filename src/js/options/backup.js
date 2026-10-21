@@ -20,7 +20,7 @@ function convertBackup(tgData) {
       groupIndex: tabviewGroups.nextID,
       position: {},
     };
-    data.windows[wi].position = {
+    data.windows[index].position = {
       left: wi.screenX,
       top: wi.screenY,
       height: wi.height,

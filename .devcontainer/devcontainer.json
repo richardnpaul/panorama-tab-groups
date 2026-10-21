@@ -25,8 +25,18 @@
       "source": "user-home-data",
       "target": "/home/vscode",
       "type": "volume"
+    },
+    {
+      "source": "${localEnv:HOME}/.claude",
+      "target": "/home/vscode/.claude",
+      "type": "bind"
     }
   ],
+  "updateRemoteUserUID": true,
+  "containerEnv": {
+    "SHELL": "/bin/bash",
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  },
   "remoteEnv": {
     "DISPLAY": ":1",
     "PLAYWRIGHT_FIREFOX_HEADED": "0"
@@ -47,9 +57,10 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-playwright.playwright",
+        "anthropic.claude-code",
         "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "ms-playwright.playwright"
       ]
     }
   }

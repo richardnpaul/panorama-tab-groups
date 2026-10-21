@@ -35,6 +35,9 @@ globalThis.browser = {
   },
   commands: {
     onCommand: { addListener: () => {} },
+    getAll: async () => [],
+    update: async () => {},
+    reset: async () => {},
   },
   sessions: {
     removeTabValue: async () => {},
@@ -68,3 +71,5 @@ globalThis.browser = {
     query: async () => [],
   },
 };
+
+global.browser = globalThis.browser;

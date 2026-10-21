@@ -192,6 +192,13 @@ describe('StateManager Unit Tests', () => {
       const state = await stateManager.getWindowState(1);
       expect(state).toEqual({ viewTabId: null });
     });
+
+    it('removeWindowState works when windowStates is not defined', async () => {
+      storageLocalGetMock = {};
+      storageLocalSetMock = {};
+      await stateManager.removeWindowState(1);
+      expect(storageLocalSetMock.windowStates).toEqual({});
+    });
   });
 
   describe('Batch Operations', () => {

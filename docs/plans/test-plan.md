@@ -147,3 +147,15 @@
 5. User opens the extension settings again and re-enables "Use Native Tab Groups".
 6. User navigates back to the Tab Groups view.
 7. User verifies that the extension successfully migrates the previously created group to a native browser tab group.
+
+### Toggle Layout Modes (Tiling vs Freeform)
+
+- Test: `Journey: Toggle Layout Modes (Tiling vs Freeform)`
+
+1. User navigates to the extension's Tab Groups view.
+2. User verifies the default layout mode is Freeform (or whatever was last saved).
+3. User clicks the "Tiling" button in the settings/UI.
+4. User verifies the layout of groups switches to a grid-based tiling system.
+5. User clicks the "Freeform" button.
+6. User verifies the layout reverts to freeform, allowing groups to be moved and resized arbitrarily.
+7. User verifies that state is maintained after reloading the Tab Groups view.

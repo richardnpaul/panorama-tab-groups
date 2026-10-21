@@ -33,16 +33,11 @@ export class StateManager {
    * @returns {Promise<Array>} Array of group objects
    */
   async getGroups(windowId) {
-    const DEBUG = true;
-    if (DEBUG) {
-      console.debug(`[StateManager] getGroups called for window ${windowId}`);
-    }
+    console.debug(`[StateManager] getGroups called for window ${windowId}`);
     const groups = await browser.sessions.getWindowValue(windowId, 'groups');
-    if (DEBUG) {
-      console.debug(
-        `[StateManager] getGroups returning ${groups?.length || 0} groups for window ${windowId}`,
-      );
-    }
+    console.debug(
+      `[StateManager] getGroups returning ${groups?.length || 0} groups for window ${windowId}`,
+    );
     return groups;
   }
 
@@ -52,25 +47,22 @@ export class StateManager {
    * @param {Array} groups - Array of group objects
    */
   async setGroups(windowId, groups) {
-    const DEBUG = true;
-    if (DEBUG) {
-      // Log call stack to identify concurrent callers
-      const stack = new Error().stack
-        .split('\n')
-        .slice(2, 4)
-        .map((line) => line.trim())
-        .join(' -> ');
-      console.debug(
-        `[StateManager] setGroups called for window ${windowId} with ${groups?.length || 0} groups`,
-      );
-      console.debug(`  Caller: ${stack}`);
+    // Log call stack to identify concurrent callers
+    const stack = new Error().stack
+      .split('\n')
+      .slice(2, 4)
+      .map((line) => line.trim())
+      .join(' -> ');
+    console.debug(
+      `[StateManager] setGroups called for window ${windowId} with ${groups?.length || 0} groups`,
+    );
+    console.debug(`  Caller: ${stack}`);
 
-      // Log groups with nativeGroupId for tracking
-      const withNative =
-        groups?.filter((g) => g.nativeGroupId != null).length || 0;
-      if (withNative > 0) {
-        console.debug(`  ${withNative} groups have nativeGroupId`);
-      }
+    // Log groups with nativeGroupId for tracking
+    const withNative =
+      groups?.filter((g) => g.nativeGroupId != null).length || 0;
+    if (withNative > 0) {
+      console.debug(`  ${withNative} groups have nativeGroupId`);
     }
 
     // Ensure group -2 always exists
@@ -94,11 +86,9 @@ export class StateManager {
       const ungroupedIndex = groups.findIndex(
         (g) => g.id === UNGROUPED_GROUP_ID,
       );
-      if (ungroupedIndex !== -1) {
-        groups[ungroupedIndex].name = UNGROUPED_GROUP_NAME;
-        groups[ungroupedIndex].isSystemGroup = true;
-        groups[ungroupedIndex].nativeGroupId = null;
-      }
+      groups[ungroupedIndex].name = UNGROUPED_GROUP_NAME;
+      groups[ungroupedIndex].isSystemGroup = true;
+      groups[ungroupedIndex].nativeGroupId = null;
     }
 
     await browser.sessions.setWindowValue(windowId, 'groups', groups);
