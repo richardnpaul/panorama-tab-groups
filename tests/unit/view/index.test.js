@@ -3,6 +3,9 @@ import { vi } from 'vitest';
 vi.mock('../../../src/js/view/tabs.js', () => ({
   getGroupId: vi.fn().mockResolvedValue(1),
 }));
+vi.mock('../../../src/js/view/dragscroll.js', () => ({
+  initDragScroll: vi.fn(),
+}));
 vi.mock('../../../src/js/view/drag.js', () => ({
   tabMoved: vi.fn(),
   groupDragOver: vi.fn(),
@@ -243,6 +246,7 @@ async function loadModule() {
   const groupNodesMock = await import('../../../src/js/view/groupNodes.js');
   const tabNodesMock = await import('../../../src/js/view/tabNodes.js');
   const tabsMock = await import('../../../src/js/view/tabs.js');
+  const dragScrollMock = await import('../../../src/js/view/dragscroll.js');
 
   // flush microtasks/promises
   await Array.from({ length: 10 }).reduce(
@@ -250,7 +254,13 @@ async function loadModule() {
     Promise.resolve(),
   );
 
-  return { groupsMock, groupNodesMock, tabNodesMock, tabsMock };
+  return {
+    groupsMock,
+    groupNodesMock,
+    tabNodesMock,
+    tabsMock,
+    dragScrollMock,
+  };
 }
 
 describe('view/index.js', () => {
@@ -268,6 +278,15 @@ describe('view/index.js', () => {
       await loadModule();
       expect(global.browser.tabs.getCurrent).toHaveBeenCalled();
       expect(global.document.getElementById).toHaveBeenCalledWith('groups');
+    });
+
+    it('enables drag scrolling on the document and window', async () => {
+      const { dragScrollMock } = await loadModule();
+      expect(dragScrollMock.initDragScroll).toHaveBeenCalledTimes(1);
+      expect(dragScrollMock.initDragScroll).toHaveBeenCalledWith(
+        global.document,
+        global.window,
+      );
     });
 
     it('registers tab event listeners', async () => {

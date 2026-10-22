@@ -981,4 +981,41 @@ test.describe('User Journeys', () => {
     await expect(page.locator('body.view-ready')).toBeVisible();
     await expect(page.locator('.group')).toHaveCount(2, { timeout: 10000 });
   });
+
+  test('Journey: Dragging the canvas scrolls the groups area', async ({
+    page,
+    extensionId,
+    extensionProtocol,
+  }) => {
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Make the canvas scrollable with a spacer larger than the viewport
+    await page.evaluate(() => {
+      const spacer = document.createElement('div');
+      spacer.style.cssText =
+        'width: 5000px; height: 5000px; pointer-events: none;';
+      document.getElementById('groups').appendChild(spacer);
+    });
+
+    const groups = page.locator('#groups');
+    const box = await groups.boundingBox();
+    const startX = box.x + box.width - 20;
+    const startY = box.y + box.height - 20;
+
+    // Dragging towards the top-left scrolls the content towards the bottom-right
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.mouse.move(startX - 100, startY - 80, { steps: 5 });
+    await page.mouse.up();
+
+    const scroll = await groups.evaluate((el) => ({
+      left: el.scrollLeft,
+      top: el.scrollTop,
+    }));
+    expect(scroll.left).toBeGreaterThan(0);
+    expect(scroll.top).toBeGreaterThan(0);
+  });
 });

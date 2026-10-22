@@ -45,7 +45,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 2. Navigate to `about:debugging`
 3. Click "This Firefox"
 4. Click "Load Temporary Add-on..."
-5. Navigate to the `src/` folder and select `manifest.json`
+5. Run `npm run dist`, then navigate to the `dist/` folder and select `manifest.json`
 
 ## Method 3: Developer Mode (Best for debugging)
 
@@ -60,7 +60,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 
 1. Go to `about:debugging#/runtime/this-firefox`
 2. Click "Load Temporary Add-on..."
-3. Select `src/manifest.json`
+3. Run `npm run dist`, then select `dist/manifest.json`
 
 ## What to Test
 
@@ -184,9 +184,9 @@ The extension requires Firefox 109+ for full Manifest V3 support.
 
 ```bash
 # Test with different Firefox versions
-web-ext run -s src --firefox=/path/to/firefox-esr
-web-ext run -s src --firefox=/path/to/firefox-beta
-web-ext run -s src --firefox=/path/to/firefox-nightly
+web-ext run -s dist --firefox=/path/to/firefox-esr
+web-ext run -s dist --firefox=/path/to/firefox-beta
+web-ext run -s dist --firefox=/path/to/firefox-nightly
 ```
 
 ## Performance Testing

@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # Deliberate pins: see docs/plans/hexagonal-core-and-mutation-testing.md
+      # (Vitest 5 silently breaks the Stryker runner; TypeScript 7 has no JS API
+      # for Stryker's checker and typescript-eslint caps below 6.1)
+      - dependency-name: vitest
+        update-types: [version-update:semver-major]
+      - dependency-name: '@vitest/*'
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major, version-update:semver-minor]
+      - dependency-name: typescript-eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: '@stryker-mutator/*'
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

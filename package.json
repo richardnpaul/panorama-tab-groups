@@ -8,20 +8,31 @@
     "test:lint": "npm run lint",
     "lint": "npm-run-all lint:*",
     "lint:prettier": "prettier --check .",
-    "lint:eslint": "eslint --ext=.js,.ts,.json .",
-    "lint:webext": "web-ext -s src lint",
+    "lint:eslint": "eslint --ext=.js,.mjs,.ts,.json .",
+    "lint:webext": "npm run dist && web-ext -s dist lint",
     "lint:typecheck": "npm run typecheck",
+    "lint:suppressions": "node scripts/check-no-suppressions.mjs",
     "format": "npm-run-all format:*",
     "format:prettier": "prettier --write .",
-    "format:eslint": "eslint --ext=.js,.ts,.json --fix .",
+    "format:eslint": "eslint --ext=.js,.mjs,.ts,.json --fix .",
     "precommit": "pre-commit run",
-    "build": "web-ext build -s src",
-    "build:xpi": "web-ext build -s src --artifacts-dir . --filename extension.xpi --overwrite-dest",
-    "watch": "web-ext run -s src",
-    "start": "web-ext run -s src",
+    "dist:clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "dist:tsc": "tsc -p tsconfig.build.json",
+    "dist:static": "node scripts/copy-static.mjs",
+    "dist": "npm-run-all dist:clean dist:tsc dist:static",
+    "build": "npm run dist && web-ext build -s dist",
+    "build:xpi": "npm run dist && web-ext build -s dist --artifacts-dir . --filename extension.xpi --overwrite-dest",
+    "watch": "npm run dist && npm-run-all --parallel watch:tsc watch:static watch:ext",
+    "watch:tsc": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "watch:static": "node --watch-path=src scripts/copy-static.mjs",
+    "watch:ext": "web-ext run -s dist",
+    "start": "npm run dist && web-ext run -s dist",
+    "pretest:e2e": "npm run dist",
     "test:e2e": "playwright test",
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:coverage:gate": "vitest run --coverage --coverage.thresholds.100",
+    "audit:check": "npm audit --audit-level=low",
     "typecheck": "tsc --noEmit"
   },
   "repository": {
@@ -68,5 +79,8 @@
   "dependencies": {
     "playwright-webextext": "^0.0.5",
     "tslib": "^2.8.1"
-  }
+  },
+  "workspaces": [
+    "tools/adbkit-stub"
+  ]
 }

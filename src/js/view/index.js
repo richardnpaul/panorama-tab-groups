@@ -1,5 +1,6 @@
 import '../polyfill.js';
 import { getGroupId } from './tabs.js';
+import { initDragScroll } from './dragscroll.js';
 import {
   tabMoved,
   groupDragOver,
@@ -528,6 +529,7 @@ async function initView() {
     false,
   );
 
+  initDragScroll(document, window);
   window.addEventListener('resize', resizeGroups);
   document.addEventListener('keydown', keyInput);
 

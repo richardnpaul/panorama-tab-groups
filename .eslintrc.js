@@ -20,13 +20,21 @@ module.exports = {
     'function-paren-newline': 'off',
     'class-methods-use-this': 'warn',
     'no-restricted-syntax': ['error', 'WithStatement'],
+    // Imports keep their emitted `.js` specifier; `.ts` specifiers are forbidden
     'import/extensions': [
       'error',
       'ignorePackages',
       {
         js: 'always',
+        ts: 'never',
       },
     ],
+  },
+  settings: {
+    'import/resolver': {
+      typescript: { project: './tsconfig.json' },
+      node: {},
+    },
   },
   globals: {
     browser: 'readonly',
@@ -45,16 +53,7 @@ module.exports = {
         'plugin:@typescript-eslint/stylistic-type-checked',
         'prettier',
       ],
-      settings: {
-        'import/resolver': { typescript: { project: './tsconfig.json' } },
-      },
       rules: {
-        // Imports keep their emitted `.js` specifier; `.ts` specifiers are forbidden
-        'import/extensions': [
-          'error',
-          'ignorePackages',
-          { js: 'always', ts: 'never' },
-        ],
         '@typescript-eslint/consistent-type-assertions': [
           'error',
           { assertionStyle: 'never' },
@@ -62,7 +61,7 @@ module.exports = {
       },
     },
     {
-      files: ['tests/unit/**/*.js'],
+      files: ['tests/unit/**/*.js', 'tools/**/*.test.js'],
       globals: {
         describe: 'readonly',
         it: 'readonly',

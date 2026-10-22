@@ -5,3 +5,5 @@ extension.xpi
 playwright-report/
 test-results/
 coverage/
+dist/
+web-ext-artifacts/

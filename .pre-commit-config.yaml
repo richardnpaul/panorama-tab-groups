@@ -25,9 +25,7 @@ repos:
         types_or: [javascript, ts, json, css, html, markdown]
         exclude: |
           (?x)^(
-            src/js/depends/dragscroll\.js|
-            src/popup-view/.*|
-            src/_shared/js/models/View\.js
+            src/popup-view/.*
           )$
 
       - id: eslint
@@ -35,10 +33,15 @@ repos:
         entry: npx eslint
         language: system
         types: [file]
-        files: \.(js|ts|json)$
+        files: \.(js|mjs|ts|json)$
         exclude: |
           (?x)^(
-            src/js/depends/dragscroll\.js|
-            src/popup-view/.*|
-            src/_shared/js/models/View\.js
+            src/popup-view/.*
           )$
+
+      - id: no-suppressions
+        name: no suppressions
+        entry: node scripts/check-no-suppressions.mjs
+        language: system
+        pass_filenames: false
+        always_run: true

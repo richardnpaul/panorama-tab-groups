@@ -59,6 +59,16 @@ checker proves away many defensive guards that would otherwise produce unkillabl
     TypeScript 7 (npm `latest`) is not usable; the plan pins TypeScript 6.0.3. Under Jest the root
     `babel.config.js` has to go because Stryker 10's instrumenter bundles Babel 8, which led to a runner
     comparison; the plan moves to Vitest 4.1.12 (see addendum).
+13. **18 known vulnerabilities in the dependency tree** (`npm audit`: 3 critical, 12 high, 3 moderate). All are
+    transitive dev dependencies, so nothing vulnerable ships in the extension (only `src/` is packaged), but they
+    run on developer machines and in CI. Main roots: `web-ext` (via `fx-runner` to `shell-quote`, `addons-linter`
+    to `image-size`, `firefox-profile` to `adm-zip`, `@devicefarmer/adbkit` to `node-forge`), `undici`, `tmp`,
+    `js-yaml`, `qs`, `fast-uri`, `brace-expansion` and `browserslist`. In a throwaway worktree, a plain
+    `npm audit fix` reduced 18 to 3 and left the 439 unit tests and lint green. The remaining 3 high findings
+    (`node-forge`, `@devicefarmer/adbkit`, `web-ext`) share one root: every released `node-forge` (latest 1.4.0)
+    is flagged and no patched version exists. `npm audit fix --force` is **not** an acceptable fix: it downgrades
+    `web-ext` from 10.x to 5.1.0. `node-forge` is only reachable through `web-ext`'s Android runner
+    (`web-ext run -t firefox-android`), which this project does not use.
 
 ## Decisions (ADR)
 
@@ -254,29 +264,133 @@ Each step is a PR-sized slice. Within a step, tests and implementation are separ
      - **Process finding:** pre-commit stashes unstaged changes and lints only what is staged. Staging the converted
        tests without `.eslintrc.js` fails ESLint (`vi` undefined). Stage config and tests together, and always run
        the hooks both ways: `pre-commit run --all-files` and `git add -A && pre-commit run`.
-4. **Build pipeline** (`tsconfig.build.json`, `scripts/copy-static.js`, `package.json`, `playwright.config.js`,
-   `.github/workflows/*.yml`)
+4. **Build pipeline. DONE** (`tsconfig.build.json`, `scripts/copy-static.mjs`, `package.json`,
+   `playwright.config.js`, `.github/workflows/*.yml`)
    - Action: `npm run build:dist` emits to `dist/` and copies static assets; `start`, `watch`, `build`,
      `build:xpi` and `lint:webext` point at `dist`; Playwright's extension path and local-server root move to
      `dist` with a `pretest:e2e` build; CI runs the build before E2E and web-ext lint. With no `.ts` files yet
      the output is a straight copy, so E2E is a pure pipeline check.
    - Risk: Medium. Mitigation: land this before any conversion so a failure is attributable to the pipeline.
-5. **Widen measurement** (`vitest.config.mjs`)
-   - Action: `coverage.include: ["src/**/*.{js,ts}"]`, no `coverage.exclude`; add `coverage.thresholds` of 100
+   - **Result:** `npm run dist` (`dist:clean`, `dist:tsc`, `dist:static`) builds `dist/` with the same 100 files as
+     `src/`; non-JS assets are byte-identical. `build`, `build:xpi`, `start`, `watch` (tsc watch, a Node
+     `--watch-path` static copy, and `web-ext run`) and `lint:webext` all use `dist`; `pretest:e2e` builds it, so
+     the CI workflows needed no change (they call the npm scripts). Playwright's extension path, static root and
+     locale lookup point at `dist`. The full E2E suite against `dist/` matches the baseline (42 passed, 6
+     skipped). `dist/` and `web-ext-artifacts/` are git-ignored. `scripts/lib/static-assets.mjs` holds the logic
+     and `scripts/copy-static.mjs` is a thin entry; both are unit-tested (18 tests) and counted in coverage.
+     The scripts are `.mjs` because `package.json` is not `"type": "module"`, and `.mjs` was added to the ESLint
+     extension list and the pre-commit hook patterns (this also starts linting `vitest.config.mjs`).
+   - **Finding:** `tsc` re-prints every JS file (formatting only) and, because of `strict`, adds `"use strict"` to
+     script-style files. `alwaysStrict: false` is deprecated in TypeScript 6 and removed in 7, so it cannot be
+     turned off without a suppression. The affected files are `polyfill.js` (imported as a module, so already
+     strict), and the two classic `<script>` files `migration-status.js` and `depends/dragscroll.js`. Neither has
+     sloppy-mode hazards (checked for implicit globals, `arguments.callee`, `with`, octal literals) and E2E is
+     unchanged. `dragscroll.js` becomes an ES module in step 7.
+5. **Widen measurement. DONE** (`vitest.config.mjs`)
+   - Action: `coverage.include: ["src/**/*.{js,ts}", "scripts/**/*.mjs"]` (already includes `scripts/`), no
+     `coverage.exclude`; add `coverage.thresholds` of 100
      for all four metrics. Type-only modules (`ports/*`) emit no runtime statements,
      so they need no special handling. The gate stays advisory in CI until Phase 6.
    - Risk: Low (it will report new gaps; that is the point).
-6. **Ban suppressions** (`scripts/check-no-suppressions.js`, `package.json` lint script, `.eslintrc.js`)
+   - **Result:** `coverage.include` is `src/**/*.{js,ts}` plus `scripts/**/*.mjs`, with no `exclude` and no ignore
+     patterns. Measured honestly, coverage is **83.73 / 81.08 / 77.44 / 83.89** (statements, branches, functions,
+     lines), against the 98.6 / 90.2 / 98.0 / 98.8 that only counted `src/js`. The gap is `src/popup-view/` and
+     `src/shared/`, about 1,200 lines at 0%, which Phase 4 replaces. The 100% gate exists as
+     `npm run test:coverage:gate` (`vitest run --coverage --coverage.thresholds.100`) and fails by design until
+     Phase 6 moves the thresholds into the config and CI.
+6. **Ban suppressions. DONE** (`scripts/check-no-suppressions.mjs`, `scripts/lib/suppressions.mjs`,
+   `scripts/suppression-allowlist.json`, `package.json` lint script, `.pre-commit-config.yaml`)
    - Action: fail on `istanbul ignore`, `c8 ignore`, `Stryker disable`, `stryker-disable`, `@ts-ignore`,
      `@ts-expect-error`, `@ts-nocheck`, `eslint-disable` (all forms); fail on any `mutate` negation,
      `coveragePathIgnorePatterns` entry, tsconfig `exclude` of source, or `.eslintignore`/`.prettierignore`
      entry other than build outputs, `node_modules`, `coverage` and reports. Wired into `npm run lint` and CI.
    - Risk: Low. It is initially red (6 istanbul ignores, 53 eslint-disables, the stale ignores), so the existing
      occurrences are listed in an enumerated, temporary allow-list that must reach empty by Phase 6.
-7. **Vendored code** (`src/js/depends/dragscroll.js`, `src/view.html`)
+   - **Result:** `npm run lint:suppressions` (part of `npm run lint`) and an always-run `no-suppressions`
+     pre-commit hook. It scans code files (`.js`, `.mjs`, `.cjs`, `.ts`) for coverage, mutation, type and lint
+     suppression directives; reads `.eslintignore`, `.prettierignore` and the hook excludes in
+     `.pre-commit-config.yaml` for anything other than generated output; checks `tsconfig*.json` `exclude`,
+     the Vitest `coverage.exclude`, and (once it exists) the Stryker `mutate` negations and `ignorePatterns`.
+     The allow-list is a **ratchet**: `scripts/suppression-allowlist.json` records the exact count per file and
+     kind, a new or increased suppression fails, and a count that fell below its allowance also fails until the
+     allow-list is lowered, so it can only shrink. It starts at **40 suppressions in 14 entries** (down from 59 after
+     the Vitest migration): 6 coverage ignores, 30 lint disables across 9 files, and the `src/popup-view/*` ignore
+     entries (`.eslintignore`, `.prettierignore`, 2 hook excludes). Stale ignore entries for files that do not
+     exist (`playwright-demo-extension`, two diagnostic scripts, `src/_shared`) were deleted. The guard is itself
+     unit-tested and has a **100% mutation score** (242 mutants killed, 0 survived, no suppressions); its
+     only equivalent mutant (`config.mutate ?? []`) was removed by restructuring so the default is the returned
+     result. The guard caught a literal directive in its own test on the first run.
+   - **Finding:** JS files that import a `.ts` module need the TypeScript import resolver and
+     `import/extensions: { js: 'always', ts: 'never' }` globally, not only in the `*.ts` override; both are now in
+     the base ESLint config.
+7. **Vendored code. DONE** (`src/js/depends/dragscroll.js`, `src/view.html`)
    - Action: port into `src/js/view/dragscroll.ts` as a tested ES module (90 lines, UMD wrapper removed) and
      update the `view.html` script tag.
    - Risk: Low.
+   - **Result:** `src/js/view/dragscroll.ts` exports `initDragScroll(document, window)` and narrow structural
+     types, so the tests use plain typed fakes with no casts. Features nothing in the repo used were dropped
+     (`container`, `scroller`, `nochilddrag`, the `body` special case, the exported `reset`), because dead branches
+     cannot survive mutation testing. `view/index.js` calls it from `initView`; `view.html` no longer has the
+     classic `<script>`; `src/js/depends/` is deleted, along with its ignore entries in `.eslintignore`,
+     `.prettierignore`, the pre-commit excludes and the Vitest coverage exclude. Tests were written first
+     (12 tests, TypeScript, explicit `vitest` imports) and then the implementation; the view wiring has its own
+     test. A new E2E journey drags the canvas and checks `#groups` scrolls (passes on Firefox and Chromium).
+     `dragscroll.ts` has a **100% mutation score** (28 killed, 0 survived; 4 mutants discarded as non-compiling).
+
+### Phase 0B: Dependency Vulnerability Remediation. DONE
+
+Can start any time after step 3 and must finish before Phase 1. Each step is its own commit so the lockfile
+changes are reviewable. The no-exclusions rule applies here too: no audit allow-list, no `--force` downgrades.
+**Outcome: `npm audit` reports 0 vulnerabilities (from 3 critical, 12 high, 3 moderate), and it is now a blocking
+CI check.**
+
+V1. **Apply the non-breaking fixes** (`package-lock.json`). DONE
+
+- Action: `npm audit fix` (never `--force`). Exact-pinned packages (`vitest`, `typescript`, the Stryker packages)
+  are untouched because `audit fix` stays inside the ranges in `package.json`.
+- Result: 18 findings became 3 (`node-forge`, `@devicefarmer/adbkit`, `web-ext`). `package.json` dependency
+  ranges and pins did not change (`web-ext` moved to 10.8.0 inside its range). Unit tests, lint and the build
+  stayed green.
+  After the whole of Phase 0B the full E2E suite passed (44 passed, 6 skipped) on the second of two runs. The
+  first run had one failure, `Journey: Move tab between OS windows` on Chromium, which passed alone and in the
+  repeat run, so it is recorded here as a suspected pre-existing flake; if it recurs it needs its own
+  investigation before the E2E suite is trusted as a refactoring safety net in Phase 3.
+
+V2. **Resolve the `node-forge` chain** (`package.json`, `tools/adbkit-stub/`). DONE
+
+- Context: no patched `node-forge` exists. `web-ext/lib/util/adb.js` imports `@devicefarmer/adbkit`, but only
+  `extension-runners/firefox-android.js` imports `adb.js`, and `extension-runners/index.js` loads that with a
+  dynamic `import()` only for `--target firefox-android`. So lint, build and desktop run never touch it.
+- **Rejected approach:** an npm `overrides` entry pointing at `file:tools/adbkit-stub`. It installed correctly
+  but recorded the link relative to `web-ext` in the lockfile, and `npm ci` then failed with
+  `Missing: @devicefarmer/adbkit@ from lock file`. This was caught by running `npm ci` in a clean copy; CI uses
+  `npm ci`, so it would have broken the build.
+- **Chosen approach:** `tools/adbkit-stub` is an npm workspace package (`workspaces: ["tools/adbkit-stub"]`) named
+  `@devicefarmer/adbkit` with version `3.3.9`, the exact version `web-ext` pins, so npm links the workspace
+  instead of installing the registry package. The lockfile records `resolved: tools/adbkit-stub` at the root and
+  a clean `npm ci` works. The stub's `createClient()` throws a message explaining the Android target is disabled
+  and pointing at `CONTRIBUTION.md`; running `web-ext run -t firefox-android` prints that message.
+- Tests: the stub's behaviour is tested in `tools/adbkit-stub/index.test.js`, colocated because importing a
+  workspace package by relative path from `tests/` breaks `import/no-relative-packages`, and importing it by name
+  resolves outside Stryker's sandbox so the mutated copy is never exercised. A second test,
+  `tests/unit/tools/adbkit-workspace.test.js`, asserts that `@devicefarmer/adbkit` resolves to the stub, that it is
+  private, and that its version equals the one `web-ext` pins, so a `web-ext` upgrade that changes the pin fails
+  loudly instead of silently reinstalling `node-forge`. The stub has a **100% mutation score** (7 killed, 0 survived).
+- **Consequence for Phase 1:** because the test file lives beside the source, the Stryker `mutate` globs must be
+  positive and explicit (`tools/adbkit-stub/index.js`, not `tools/**/*.js`), since negations are forbidden.
+- Removal instructions for when `node-forge` is fixed are in `CONTRIBUTION.md`.
+
+V3. **Automate keeping it clean** (`.github/dependabot.yml`, `.github/workflows/`). DONE
+
+- `.github/dependabot.yml`: weekly npm updates (dev dependencies grouped for minor and patch) and weekly GitHub
+  Actions updates, with `ignore` rules for **major** updates of `vitest`, `@vitest/*`, `typescript` (and minors,
+  since typescript-eslint caps below 6.1), `typescript-eslint` and `@stryker-mutator/*`. These are the deliberate
+  pins from the toolchain addendum.
+- `npm run audit:check` (`npm audit --audit-level=low`) is a blocking step in `node.js.yml` right after `npm ci`,
+  and a new weekly `audit.yml` workflow (plus manual dispatch) runs it so new advisories surface without a code
+  change. It is deliberately not part of `npm run lint`, so local linting works offline.
+- Not a vulnerability, but noticed: `eslint@8.57.1` is end of life (npm prints a deprecation warning). Moving to
+  ESLint 9 and flat config is a separate task; it is not in this plan.
 
 ### Phase 1: Leaf Modules — Convert, Then 100% Mutation
 
@@ -371,6 +485,7 @@ unchanged), then characterisation tests, then extract the pure decision into `co
       `incremental: true` with the incremental file cached between runs, and the TypeScript checker enabled; PRs
       run incremental, `main` runs a full mutation pass on merge/nightly so the baseline cannot drift.
     - `scripts/check-no-suppressions.js` allow-list empty and blocking.
+    - `npm audit --audit-level=low` blocking, with no advisory allow-list (Phase 0B).
     - Risk: Medium (CI duration). Mitigation: per-test coverage analysis and caching; measure before enabling.
 
 ## WebExtension API Notes
@@ -447,4 +562,5 @@ npm run lint:prettier && npm run lint:eslint`; `npm run test:e2e` for any functi
 - [ ] `DEBUG` removed; safety aborts are unconditional and tested
 - [ ] Extension loads from `dist/` in `web-ext`, Playwright and CI; E2E green on Firefox and Chromium, including
       the new cases above
+- [ ] `npm audit` reports 0 vulnerabilities and is a blocking CI gate; Dependabot (or Renovate) is configured
 - [ ] `npm run lint` (prettier, eslint, web-ext) and `npm run typecheck` clean

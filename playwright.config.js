@@ -28,7 +28,7 @@ async function startLocalServer() {
     '.svg': 'image/svg+xml',
   };
 
-  const rootDir = fs.realpathSync(path.join(process.cwd(), 'src'));
+  const rootDir = fs.realpathSync(path.join(process.cwd(), 'dist'));
 
   localServer = http.createServer((req, res) => {
     let filePath = path.join(rootDir, req.url.split('?')[0]);
@@ -111,7 +111,7 @@ function createFirefoxPageProxy(initialPage) {
           console.log(`[PROXY GOTO] Mapping ${url} -> ${localUrl}`);
 
           const messagesJson = fs.readFileSync(
-            path.join(process.cwd(), 'src', '_locales', 'en', 'messages.json'),
+            path.join(process.cwd(), 'dist', '_locales', 'en', 'messages.json'),
             'utf8',
           );
 
@@ -287,7 +287,7 @@ function createFirefoxPageProxy(initialPage) {
   });
 }
 
-const pathToExtension = path.join(process.cwd(), 'src');
+const pathToExtension = path.join(process.cwd(), 'dist');
 // Must match browser_specific_settings.gecko.id in manifest.json
 const EXTENSION_ID = 'tab-groups-viewer@example.com';
 
