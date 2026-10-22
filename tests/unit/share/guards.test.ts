@@ -1,10 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { isBoolean, isRecord, isString } from '../../../src/js/share/guards.js';
+import {
+  isBoolean,
+  isNumber,
+  isRecord,
+  isString,
+} from '../../../src/js/share/guards.js';
 
 const samples: Record<string, unknown> = {
   string: 'text',
   emptyString: '',
   number: 0,
+  nan: NaN,
   true: true,
   false: false,
   null: null,
@@ -26,6 +32,10 @@ function namesWhere(guard: (value: unknown) => boolean): string[] {
 describe('share/guards.ts', () => {
   it('isString accepts only strings', () => {
     expect(namesWhere(isString)).toEqual(['string', 'emptyString']);
+  });
+
+  it('isNumber accepts only numbers', () => {
+    expect(namesWhere(isNumber)).toEqual(['number', 'nan']);
   });
 
   it('isBoolean accepts only booleans', () => {

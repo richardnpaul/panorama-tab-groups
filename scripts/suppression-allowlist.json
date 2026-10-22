@@ -1,8 +1,6 @@
 {
   "comment|playwright.config.js|lint": 9,
   "comment|src/js/background.js|coverage-istanbul": 3,
-  "comment|src/js/background/StateManager.js|lint": 1,
-  "comment|src/js/polyfill.js|lint": 10,
   "comment|src/js/view/groupNodes.js|coverage-istanbul": 3,
   "comment|src/shared/js/models/View.js|lint": 1,
   "comment|tests/e2e/extension.spec.js|lint": 2,

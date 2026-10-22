@@ -1,7 +1,7 @@
 import {
   UNGROUPED_GROUP_ID,
   UNGROUPED_GROUP_NAME,
-} from '../../../js/background/constants.js';
+} from '../../../js/core/constants.js';
 
 export default class Group {
   constructor(View, group) {

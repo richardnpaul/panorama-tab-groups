@@ -4,7 +4,7 @@ import {
   UNGROUPED_GROUP_ID,
   isReservedGroupId,
   isValidUserGroupId,
-} from '../../src/js/background/constants.js';
+} from '../../../src/js/core/constants.js';
 
 describe('constants', () => {
   describe('isReservedGroupId', () => {

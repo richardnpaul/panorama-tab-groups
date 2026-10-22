@@ -6,7 +6,7 @@
  */
 
 import { stateManager } from './StateManager.js';
-import { getColorForGroupId } from './utils.js';
+import { getColorForGroupId } from '../core/utils.js';
 
 /**
  * Helper: Enrich tab with full context (panorama group, window, native group)

@@ -457,7 +457,7 @@ npm run test:mutation` narrows a run while iterating.
 - A test helper that adds a listener to the shared jsdom `document` leaks it into later tests; dispatch
   non-bubbling, one-shot events or capture the listener instead.
 
-### Phase 2: Ports, Fakes, and State Unification
+### Phase 2: Ports, Fakes, and State Unification. DONE (scope adjusted, see below)
 
 11. **Define ports** (`src/js/ports/*.ts`): interfaces and types with one line of contract each, including the
     discriminated `GroupRef` and the persisted-state types.
@@ -473,6 +473,75 @@ npm run test:mutation` narrows a run while iterating.
     module-level `windowId` / `groups` in `view/groups`; replace `getLength` / `getIndex` with
     `groups.length` / `findIndex`.
     - Risk: Medium (touches every surface; E2E gates it).
+
+**Result.** 42 source modules, `scripts/` and `tools/` are at a **100% mutation score** in a clean run (911 mutants
+killed, 11 timeouts, 0 survived, 2m26s) with the 100% break threshold enforced. 1,152 unit tests pass; the full E2E
+suite is unchanged (44 passed, 6 skipped). Statement and branch coverage across everything in `src/` is 84.22 / 80.89
+(the remainder is the JS that Phases 3 and 4 convert).
+
+**What exists now:**
+
+- **Ports** (`src/js/ports/`, types only): `GroupState` (with `Group` and `Rect`), `Clock`, `Scheduler`, `Messaging`,
+  `Tabs`, `I18n`, `Logger`, `Menus`, `Windows`.
+- **`core/`** (pure): `constants`, `utils` (both moved here from `background/`), and `groups.ts` with
+  `ensureUngroupedGroup`, which returns a new list instead of mutating its input.
+- **Browser adapters:** `group-state` (reads through a type guard that keeps the stored object and its unknown
+  fields), `messaging`, `tabs`, `i18n`, `windows`, `menus` (owns the Chromium `'tab'` to `'all'` retry that was
+  copied in three places), `sessions-emulation` and `action-compat` (the Chromium shims from `polyfill.js`).
+- **Memory adapters:** `group-state`, `clock`, `scheduler` (manual time), `messaging`, `tabs`, `windows`, `menus`.
+  `GroupState` and `Scheduler` have shared contract suites (`tests/support/*-contract.ts`) that run against the real
+  and the fake implementation; the sessions emulation also passes the `GroupState` contract.
+- **System adapters:** `clock`, `scheduler`.
+- **`app/`:** `withUngroupedGroup` (the ungrouped-group rule as a decorator), `createGroupsStore`,
+  `createMenuManager`.
+- **JS-facing compositions:** `background/StateManager.ts` (`stateManager` is the browser `GroupState` wrapped in the
+  ungrouped-group rule), `background/menu-manager.ts`, `view/groups.ts` and `polyfill.ts`. They keep the module paths
+  and function names the JS callers already import.
+
+**Scope adjustments** (the plan listed more under step 14):
+
+- **Routed through `GroupState`:** `view/groups` (now a thin layer over `createGroupsStore`) and everything that used
+  `stateManager`. **Not** routed: `shared/js/models/*` (the popup, deleted in Phase 4 step 24),
+  `options/backup` (rewritten in Phase 4 step 25), and the direct `browser.sessions` / `browser.storage` calls in
+  `background.js` and `native-groups.js` (they move with their extraction in Phase 3). `view/index`, `groupNodes`
+  and `tabNodes` still read the `layoutMode` and `thumbnail` values directly; those belong to the view rewrite.
+- **Ports are defined where there is a consumer.** `NativeGroups`, `Options` and a richer `Tabs` arrive with the Phase 3
+  extractions that use them. The `GroupRef` union is deferred to Phase 3 for the same reason: every current caller
+  still compares plain numeric ids.
+- `StateManager`'s unused methods (background state, window state, batch and migration helpers, `getTabGroups`) were
+  deleted rather than ported; nothing called them.
+
+**Deliberate behaviour changes** (each pinned by a test):
+
+- **The ungrouped group survives a save from the view.** The old view wrote only the non-system groups, dropping the
+  system group until the background next saved; saving now goes through `stateManager`, which keeps it.
+- Stored groups are validated when read: an entry that is not a group (no numeric `id`, no `name`, `containerId` or
+  `rect`, or a wrongly typed optional field) is dropped from the list instead of being passed on.
+- Numeric reads accept a whole number stored as text (`"3"` becomes `3`) and reject anything else. This was needed
+  because the E2E tests (and possibly older data) store ids as text, and treating them as "nothing stored" sent tabs
+  to a fallback group.
+- Chromium: the sessions emulation now also provides `removeTabValue` and `removeWindowValue`, which the code calls
+  but the old shim never defined; a failed write no longer blocks every later one; a key named `__proto__` is stored as
+  data. The never-used `browser.menus` alias and `Proxy` (about 45 lines) are gone.
+- Context menus: `createMenuItem` now also gets the Chromium fallback; a malformed menu message is ignored instead of
+  creating an item titled "id: undefined".
+- The view now logs a failed menu update instead of leaving an unhandled rejection, and only treats a delete as
+  successful when the background answers `success: true`.
+
+**Findings:**
+
+- **A regression the E2E suite caught.** The first version of the `GroupState` adapter rejected non-numeric ids; the
+  Chromium run of "Move tab between existing groups" failed deterministically (Firefox passed). It is the reason the
+  tolerant read above exists. It also confirms that Chromium runs only through the sessions emulation, so it must stay
+  in the E2E matrix.
+- Equivalent mutants removed by restructuring, not suppressed: the memory group state's `undefined` ternary
+  (`structuredClone(undefined)` is `undefined`), the Chromium menu retry (`['tab'→'all']` mapping over a two-value
+  type is `['all']`), the system scheduler's handle map (`Number()` of a timer is its id), and the store's `?? []`
+  default (kept as the result so a changed default shows).
+- The ratchet works as designed: deleting `StateManager.js` and `polyfill.js` removed 11 `eslint-disable` comments, and
+  the guard failed until the allow-list was lowered. It is down from 40 to 29 suppressions.
+- Config changes this phase: `import/prefer-default-export` is off for `*.ts` (named exports are the convention), and
+  `@typescript-eslint/no-unused-vars` uses `ignoreRestSiblings: true`, the same setting airbnb applies to the base rule.
 
 ### Phase 3: Extract the Background Core (largest, riskiest — one PR per function)
 

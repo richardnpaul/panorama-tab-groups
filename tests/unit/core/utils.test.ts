@@ -3,7 +3,7 @@ import {
   mod,
   getColorForGroupId,
   getLowestPositiveGroupId,
-} from '../../src/js/background/utils.js';
+} from '../../../src/js/core/utils.js';
 
 describe('Background Utils', () => {
   describe('mod', () => {

@@ -8,7 +8,7 @@ import {
 import { stateManager } from '../../src/js/background/StateManager.js';
 
 vi.mock('../../src/js/background/StateManager.js');
-vi.mock('../../src/js/background/utils.js', () => ({
+vi.mock('../../src/js/core/utils.js', () => ({
   getColorForGroupId: vi.fn().mockReturnValue('blue'),
 }));
 

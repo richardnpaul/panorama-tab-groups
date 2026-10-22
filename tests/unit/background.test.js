@@ -25,7 +25,7 @@ vi.mock('../../src/js/background/StateManager.js', () => ({
     setActiveGroup: vi.fn().mockResolvedValue(),
   },
 }));
-vi.mock('../../src/js/background/utils.js', () => ({
+vi.mock('../../src/js/core/utils.js', () => ({
   mod: vi.fn((n, m) => ((n % m) + m) % m),
   getColorForGroupId: vi.fn().mockReturnValue('blue'),
   getLowestPositiveGroupId: vi.fn().mockReturnValue(1),
@@ -764,7 +764,7 @@ describe('background.js', () => {
 
         stateManager.getGroups.mockResolvedValue([]); // No groups
         const { getLowestPositiveGroupId } =
-          await import('../../src/js/background/utils.js');
+          await import('../../src/js/core/utils.js');
         getLowestPositiveGroupId.mockReturnValueOnce(undefined);
 
         await bgModule.tabCreated({

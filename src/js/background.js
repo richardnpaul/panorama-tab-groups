@@ -5,7 +5,7 @@ import {
   mod,
   getColorForGroupId,
   getLowestPositiveGroupId,
-} from './background/utils.js';
+} from './core/utils.js';
 import { createMenuList, handleMenuChange } from './background/menu-manager.js';
 import {
   migrateToHybridGroups,
@@ -18,7 +18,7 @@ import {
   INITIALIZATION_TIMEOUT_MS,
   SHOW_LOADING_UI_AFTER_MS,
   isReservedGroupId,
-} from './background/constants.js';
+} from './core/constants.js';
 
 const manifest = browser.runtime.getManifest();
 

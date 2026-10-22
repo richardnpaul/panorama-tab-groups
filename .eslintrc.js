@@ -54,6 +54,14 @@ module.exports = {
         'prettier',
       ],
       rules: {
+        // Named exports are the convention for TypeScript modules
+        'import/prefer-default-export': 'off',
+        // The same setting airbnb uses for the base rule: leaving a property out
+        // with a rest pattern is not an unused variable
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          { ignoreRestSiblings: true },
+        ],
         '@typescript-eslint/consistent-type-assertions': [
           'error',
           { assertionStyle: 'never' },
