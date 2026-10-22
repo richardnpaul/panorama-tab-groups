@@ -12,6 +12,7 @@ export interface SessionsApi {
     ): Promise<void>;
     getTabValue(tabId: number, key: string): Promise<unknown>;
     setTabValue(tabId: number, key: string, value: unknown): Promise<void>;
+    removeTabValue(tabId: number, key: string): Promise<void>;
   };
 }
 
@@ -107,6 +108,10 @@ export function createBrowserGroupState(getApi: () => SessionsApi): GroupState {
 
     async setTabGroup(tabId, groupId) {
       await sessions().setTabValue(tabId, 'groupId', groupId);
+    },
+
+    async clearTabGroup(tabId) {
+      await sessions().removeTabValue(tabId, 'groupId');
     },
   };
 }

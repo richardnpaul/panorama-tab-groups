@@ -33,4 +33,6 @@ export interface GroupState {
   setGroupIndex(windowId: number, index: number): Promise<void>;
   getTabGroup(tabId: number): Promise<number | undefined>;
   setTabGroup(tabId: number, groupId: number): Promise<void>;
+  /** Forget which group a tab was in */
+  clearTabGroup(tabId: number): Promise<void>;
 }

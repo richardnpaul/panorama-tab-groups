@@ -23,6 +23,10 @@ export function createFakeSessions() {
         tabValues.set(slot(tabId, key), structuredClone(value));
         return Promise.resolve();
       },
+      removeTabValue: (tabId, key) => {
+        tabValues.delete(slot(tabId, key));
+        return Promise.resolve();
+      },
     },
   };
 

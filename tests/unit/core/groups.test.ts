@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { ensureUngroupedGroup } from '../../../src/js/core/groups.js';
+import {
+  ensureUngroupedGroup,
+  groupBeside,
+  nativeGroupIdOf,
+} from '../../../src/js/core/groups.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
 
 const NOW = 1_700_000_000_000;
@@ -110,6 +114,81 @@ describe('core/groups.ts', () => {
       expect(
         ensureUngroupedGroup([ungrouped], NOW).filter(({ id }) => id === -2),
       ).toHaveLength(1);
+    });
+  });
+
+  describe('nativeGroupIdOf', () => {
+    it('is the native group of the group', () => {
+      expect(nativeGroupIdOf({ ...userGroup(1), nativeGroupId: 42 })).toBe(42);
+    });
+
+    it.each([[null], [0]])(
+      'is nothing for the native group %s',
+      (nativeGroupId) => {
+        expect(
+          nativeGroupIdOf({ ...userGroup(1), nativeGroupId }),
+        ).toBeUndefined();
+      },
+    );
+
+    it('is nothing for a group that has none', () => {
+      expect(nativeGroupIdOf(userGroup(1))).toBeUndefined();
+    });
+
+    it('is nothing for a group that is not there', () => {
+      expect(nativeGroupIdOf(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('groupBeside', () => {
+    const groups = [userGroup(1), userGroup(4), userGroup(7), ungrouped];
+    const idBeside = (active: number | undefined, direction: 1 | -1) =>
+      groupBeside(groups, active, direction)?.id;
+
+    it('is the next group', () => {
+      expect(idBeside(1, 1)).toBe(4);
+      expect(idBeside(4, 1)).toBe(7);
+    });
+
+    it('is the previous group', () => {
+      expect(idBeside(7, -1)).toBe(4);
+      expect(idBeside(4, -1)).toBe(1);
+    });
+
+    it('wraps round from the last group to the first, skipping the system group', () => {
+      expect(idBeside(7, 1)).toBe(1);
+    });
+
+    it('wraps round from the first group to the last, skipping the system group', () => {
+      expect(idBeside(1, -1)).toBe(7);
+    });
+
+    it.each([[-2], [-1], [undefined], [99]])(
+      'starts from the first group going next when the active group is %s',
+      (active) => {
+        expect(idBeside(active, 1)).toBe(1);
+      },
+    );
+
+    it.each([[-2], [-1], [undefined], [99]])(
+      'starts from the last group going previous when the active group is %s',
+      (active) => {
+        expect(idBeside(active, -1)).toBe(7);
+      },
+    );
+
+    it('is the group itself when it is the only one', () => {
+      expect(groupBeside([userGroup(3), ungrouped], 3, 1)?.id).toBe(3);
+      expect(groupBeside([userGroup(3), ungrouped], 3, -1)?.id).toBe(3);
+    });
+
+    it('counts the first group, which is numbered 0', () => {
+      expect(groupBeside([userGroup(0), userGroup(1)], 1, 1)?.id).toBe(0);
+    });
+
+    it('is nothing when there are no groups of the user', () => {
+      expect(groupBeside([ungrouped], -2, 1)).toBeUndefined();
+      expect(groupBeside([], undefined, -1)).toBeUndefined();
     });
   });
 });

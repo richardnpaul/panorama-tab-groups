@@ -29,5 +29,9 @@ export function createMemoryGroupState(): GroupState {
       tabGroups.set(tabId, groupId);
       return Promise.resolve();
     },
+    clearTabGroup: (tabId) => {
+      tabGroups.delete(tabId);
+      return Promise.resolve();
+    },
   };
 }

@@ -35,9 +35,9 @@
 
 ## Architecture
 
-- **`src/js/background.js`** — MV3 service worker entry; event-driven, ephemeral (state is lost on termination)
-- **`src/js/background/StateManager.js`** — Single source of truth for all extension state; wraps `browser.sessions` (per-window/tab, Firefox-only) and `browser.storage.local` (persistent, cross-browser)
-- **`src/js/background/constants.js`** — Reserved group IDs and application constants
+- **`src/js/background/main.ts`** — MV3 service worker entry (composition root only); event-driven, ephemeral (state is lost on termination). It builds `src/js/app/` services over the ports in `src/js/ports/` (`background/compose.ts`) and registers the listeners (`adapters/browser/events.ts`)
+- **`src/js/background/StateManager.ts`** — Single source of truth for all extension state; wraps `browser.sessions` (per-window/tab, Firefox-only) and `browser.storage.local` (persistent, cross-browser)
+- **`src/js/core/constants.ts`** — Reserved group IDs and application constants
 - **`src/js/view/`** — Freeform tab groups canvas view
 - **`src/popup-view/`** — Quick group switcher popup
 - **`src/js/_share/js/models/`** — Shared `View`, `Group`, `Tab` base models

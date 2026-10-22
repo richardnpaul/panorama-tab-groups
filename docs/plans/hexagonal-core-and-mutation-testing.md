@@ -543,7 +543,7 @@ suite is unchanged (44 passed, 6 skipped). Statement and branch coverage across 
 - Config changes this phase: `import/prefer-default-export` is off for `*.ts` (named exports are the convention), and
   `@typescript-eslint/no-unused-vars` uses `ignoreRestSiblings: true`, the same setting airbnb applies to the base rule.
 
-### Phase 3: Extract the Background Core (largest, riskiest — one PR per function)
+### Phase 3: Extract the Background Core. DONE (see the result below; step 21 is split with Phase 4)
 
 Order chosen by risk-reduction value. For each: convert the function's file region to TypeScript first (behaviour
 unchanged), then characterisation tests, then extract the pure decision into `core/`, then the orchestration into
@@ -573,6 +573,93 @@ unchanged), then characterisation tests, then extract the pure decision into `co
     service call. `background.js` is deleted (`manifest.json` `background.scripts` updated to the built path).
 21. **Remove all six `istanbul ignore` comments** — each is either covered by the new structure or its branch
     deleted. Shrink the Phase 0.6 allow-list for coverage ignores to empty.
+
+**Result.** `background.js` (1,901 lines) and `background/native-groups.js` (751 lines) are deleted. The manifest
+loads `js/background/main.js`, a composition root of 16 lines that adds every listener before awaiting anything and
+then starts `init()`. Everything it used to do is in `core/` and `app/` services over ports, each with memory-adapter
+tests and a 100% mutation score; unit tests number about 1,700, and statements, branches, functions and lines are at
+100% for everything under `src/js/{core,app,ports,adapters,background,share,options}` and `polyfill`. The full E2E suite
+is 43 passed, 6 skipped, and one Chromium failure, "Move tab between OS windows", which fails the same one run in
+three on the Phase 2 commit as well (a pre-existing flake, not caused by this phase; see Findings).
+
+**What exists now** (new in this phase):
+
+- **`core/`:** `visibility` (`planVisibility`: what to show, hide, collapse, expand and activate), `tab-assignment`
+  (is this the view tab; the fallback group), `grouping-safety` (would grouping leave the window with no other tab),
+  `menu-items` (which group a menu item stands for; the neighbour of the tab that is sent away), `view` (the tab to
+  go back to), `messages` (parsers for what the pages send), and `groupBeside` / `nativeGroupIdOf` in `groups`.
+- **`app/` services**, each taking only the ports it uses: `visibility-service`, `toolbar-service`,
+  `native-group-assignment` (the one flow that makes a native group for a group, used by tab creation, tab
+  activation and the migration), `tab-lifecycle` (`tabCreated`, `tabAttached`, `tabDetached`, `tabActivated`),
+  `tab-moves` (`moveTab`, `menuClicked`), `view-toggle`, `view-opening`, `commands`, `initialization` (the state and
+  `waitForInitialization`, on the `Scheduler` port), `initialization-ui`, `window-groups`, `group-recovery`,
+  `startup`, `native-groups-sync` (migration, clean-up and following the browser's own group events), `delete-group`,
+  `view-refresh`, `message-handler` (a table of handlers keyed by action), `external-messages`, `browser-events`
+  (the tab, storage and install handlers) and `use-native-groups`.
+- **Ports** added: `NativeGroups`, `Toolbar`, `Notifications`, `Extension`, `SessionHistory`, `OptionsStore`,
+  `MigrationFlag`; `Tabs`, `Windows`, `GroupState` and `Logger` grew. Each has a browser adapter and a memory
+  fake; the new browser event wiring is `adapters/browser/events.ts` (`registerListeners`), tested by firing every
+  event on a fake emitter and checking which handler gets what.
+- **The composition:** `background/compose.ts` builds everything from the browser it runs in and is tested against a
+  fake browser; `background/main.ts` only calls it, registers the listeners and starts up.
+
+**Deliberate behaviour changes** (each pinned by a test):
+
+- Toggling to a group whose tabs would all be hidden now always aborts with a logged error; before, the abort
+  depended on the `DEBUG` flag. Selecting nothing while there is nothing to show is a no-op; before, it threw.
+- Switching groups with the shortcuts skips the system group for ungrouped tabs. It used to stop on it, which
+  stored an active group that `toggleVisibleTabs` then refused. From an active group that is not switchable, next
+  goes to the first group and previous to the last.
+- A tab that is attached to a window whose active group is unknown keeps its group instead of being given
+  `undefined`. A tab that was detached has its group forgotten, as before.
+- The menu clicks only look at the window of the tab that was clicked. They used to ask every window for the selected
+  and visible tabs, so with two windows a single click could move the other window's active tab. A click on an item
+  that is no group (or a click that is not on a tab, which Chromium sends for page contexts) is ignored instead of
+  storing the group `NaN`. Several selected tabs are moved one after another instead of all at once, so they keep
+  their order.
+- A native group the browser put in the wrong window now has its tabs taken out again, for all callers; before only
+  the migration did that, and tab creation and activation left an orphan group.
+- The migration uses the same safety rule as tab creation (do not group the only tab of a window); it used to refuse
+  whenever the group held all the tabs. It no longer re-verifies persisted references afterwards: it already drops the
+  stale ones, and the extra pass only logged a title mismatch.
+- `migrateToHybridGroups` answers `success: false` when it failed. It used to say "Migration completed" whatever
+  happened. `resetMigration` answers a failure instead of never answering.
+- `setBackgroundState` accepts only `openingBackup` with a boolean; it used to set any key of the background state.
+  An unparseable message gets a defined error answer, as does an unknown action.
+- Event handlers that fail are logged with the name of the event instead of being left unhandled, and a failed
+  message handler answers an error so the sender is not left waiting.
+- Dead state is gone: the per-window `viewTabId` map was written but never read, and so was the listener that cleaned
+  it. The `onCreated` listener for native groups only logged and is gone. The Chromium fallback in
+  `createGroupInWindowIfMissing` was unreachable once the polyfill retries without a window id.
+- The `DEBUG` flag and the timing instrumentation are removed; useful messages are `debug` on the `Logger` port.
+
+**Findings:**
+
+- **Two safety rules existed.** Tab creation refused to group only when the group was the single tab in the window;
+  the migration refused whenever the group was all the regular tabs. They are now one rule (above). The browser's real
+  behaviour on grouping every tab of a window is still untested; if windows do close, the rule must become the
+  stricter one everywhere. This is a decision for the user, not a refactoring question.
+- **A group is never recreated when the last one is deleted.** `deleteGroupWithCleanup` creates a new first group
+  when no groups are left, but the list it checks always holds the system group, so the branch is dead in the real
+  extension (the unit test reaches it with a state that has no system group). Left as it was; a user group should
+  probably be checked for instead.
+- **When grouping is not safe or fails, the visibility is not updated.** Both `tabCreated` and `tabActivated` return
+  early then, so the view may stay in front of a tab that was just opened. It looks unintended and was kept.
+- **E2E cases for findings 2 and 3 were not added.** The only way into `toggleVisibleTabs` that those two cases need
+  is the keyboard shortcut, which Playwright cannot press, and the other callers cannot produce an empty group. They
+  are covered by unit tests of the service against the memory adapters.
+- **`Move tab between OS windows` is flaky on Chromium** at about one run in three, with or without this phase
+  (checked by running the Phase 2 commit in a clean worktree). It goes through `tabAttached` and `tabDetached`, so it
+  is worth a look before the E2E suite is made a blocking gate in Phase 6.
+- Equivalent mutants again removed by restructuring: a stale request's `opened` call (nothing refers to the replaced
+  request), `if (ui.isShowing())` before `hide` (which already does nothing when not showing), the migration's
+  reference check (now by `typeof` so `null` and absent differ), and the nested sums of the recovery tally (now one
+  flat sum, since two negations cancel).
+- Typing the colours of native groups as the browser's own union (`NativeGroupColor`) was needed for the real
+  `browser` to satisfy the adapter, with no cast.
+
+**Step 21 is split.** The three `istanbul ignore` comments in `background.js` are gone with the file, and the
+allow-list entry for it is removed. The three in `view/groupNodes.js` belong to the Phase 4 view rewrite.
 
 ### Phase 4: View, Popup, and Options
 

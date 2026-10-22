@@ -190,6 +190,47 @@ export function describeGroupStateContract(
       });
     });
 
+    describe('forgetting the group of a tab', () => {
+      it('leaves the tab without a group', async () => {
+        await state.setTabGroup(7, 3);
+
+        await state.clearTabGroup(7);
+
+        await expect(state.getTabGroup(7)).resolves.toBeUndefined();
+      });
+
+      it('only forgets the tab it was asked about', async () => {
+        await state.setTabGroup(7, 3);
+        await state.setTabGroup(8, 4);
+
+        await state.clearTabGroup(7);
+
+        await expect(state.getTabGroup(8)).resolves.toBe(4);
+      });
+
+      it('does not mind a tab that had no group', async () => {
+        await expect(state.clearTabGroup(7)).resolves.toBeUndefined();
+      });
+
+      it('lets the tab be given a group again', async () => {
+        await state.setTabGroup(7, 3);
+        await state.clearTabGroup(7);
+
+        await state.setTabGroup(7, 5);
+
+        await expect(state.getTabGroup(7)).resolves.toBe(5);
+      });
+
+      it('does not touch a window with the same number', async () => {
+        await state.setTabGroup(1, 3);
+        await state.setActiveGroup(1, 9);
+
+        await state.clearTabGroup(1);
+
+        await expect(state.getActiveGroup(1)).resolves.toBe(9);
+      });
+    });
+
     describe('the different kinds of state', () => {
       it('do not overwrite each other', async () => {
         await state.setGroups(1, [group(1)]);

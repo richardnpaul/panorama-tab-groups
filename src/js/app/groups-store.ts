@@ -9,7 +9,7 @@ import { isRecord, isString } from '../share/guards.js';
 export interface GroupsStoreDeps {
   groupState: GroupState;
   messaging: Messaging;
-  tabs: Tabs;
+  tabs: Pick<Tabs, 'listIdsInCurrentWindow'>;
   clock: Clock;
   i18n: I18n;
   logger: Pick<Logger, 'error'>;

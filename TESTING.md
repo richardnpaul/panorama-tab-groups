@@ -118,7 +118,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 ### Background Script Debugging
 
 - The background script logs will appear in the extension's console
-- Use `console.log()` statements in `js/background.js` for debugging
+- Use `console.log()` statements in `src/js/background/main.ts` or the `src/js/app/` service you are debugging for debugging
 
 ## Common Issues and Solutions
 

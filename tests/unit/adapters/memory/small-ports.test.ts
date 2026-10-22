@@ -46,9 +46,10 @@ describe('adapters/memory/messaging.ts', () => {
 
 describe('adapters/memory/tabs.ts', () => {
   it('has no tabs to begin with', async () => {
-    await expect(createMemoryTabs().listIdsInCurrentWindow()).resolves.toEqual(
-      [],
-    );
+    const tabs = createMemoryTabs();
+
+    await expect(tabs.listIdsInCurrentWindow()).resolves.toEqual([]);
+    await expect(tabs.listInCurrentWindow()).resolves.toEqual([]);
   });
 
   it('lists the tab ids it was given', async () => {
@@ -57,19 +58,76 @@ describe('adapters/memory/tabs.ts', () => {
     await expect(tabs.listIdsInCurrentWindow()).resolves.toEqual([3, 1, 2]);
   });
 
+  it('makes plain tabs of ids, and keeps the tabs it is given as they are', async () => {
+    const tabs = createMemoryTabs([
+      4,
+      { id: 5, pinned: true, lastAccessed: 99 },
+    ]);
+
+    await expect(tabs.listInCurrentWindow()).resolves.toEqual([
+      { id: 4, pinned: false, lastAccessed: 0 },
+      { id: 5, pinned: true, lastAccessed: 99 },
+    ]);
+  });
+
   it('lists the tab ids it was last told to have', async () => {
     const tabs = createMemoryTabs([1]);
 
     tabs.setIds([5, 6]);
 
     await expect(tabs.listIdsInCurrentWindow()).resolves.toEqual([5, 6]);
+    await expect(tabs.listInCurrentWindow()).resolves.toEqual([
+      { id: 5, pinned: false, lastAccessed: 0 },
+      { id: 6, pinned: false, lastAccessed: 0 },
+    ]);
   });
 
-  it('hands out a copy, so changing the list does not change the tabs', async () => {
-    const tabs = createMemoryTabs([1, 2]);
+  it('lists the tabs it was last told to have', async () => {
+    const tabs = createMemoryTabs([1]);
+
+    tabs.setTabs([{ id: 9, pinned: true, lastAccessed: 7 }]);
+
+    await expect(tabs.listInCurrentWindow()).resolves.toEqual([
+      { id: 9, pinned: true, lastAccessed: 7 },
+    ]);
+  });
+
+  it('hands out copies, so changing what it gave does not change the tabs', async () => {
+    const given = { id: 1, pinned: false, lastAccessed: 5 };
+    const tabs = createMemoryTabs([given]);
 
     (await tabs.listIdsInCurrentWindow()).push(3);
+    const listed = await tabs.listInCurrentWindow();
+    const first = listed[0];
+    if (first) {
+      first.pinned = true;
+    }
+    given.lastAccessed = 99;
 
-    await expect(tabs.listIdsInCurrentWindow()).resolves.toEqual([1, 2]);
+    await expect(tabs.listIdsInCurrentWindow()).resolves.toEqual([1]);
+    await expect(tabs.listInCurrentWindow()).resolves.toEqual([
+      { id: 1, pinned: false, lastAccessed: 5 },
+    ]);
+  });
+
+  it('keeps a copy of the tabs it is told to have', async () => {
+    const tabs = createMemoryTabs();
+    const told = [{ id: 1, pinned: false, lastAccessed: 5 }];
+
+    tabs.setTabs(told);
+    told[0] = { id: 2, pinned: true, lastAccessed: 6 };
+
+    await expect(tabs.listIdsInCurrentWindow()).resolves.toEqual([1]);
+  });
+
+  it('keeps track of hidden tabs and of what was done, in order', async () => {
+    const tabs = createMemoryTabs([1, 2, 3]);
+
+    await tabs.hide([1, 2]);
+    await tabs.activate(3);
+    await tabs.show([2]);
+
+    expect([...tabs.hiddenIds]).toEqual([1]);
+    expect(tabs.calls).toEqual(['hide 1,2', 'activate 3', 'show 2']);
   });
 });

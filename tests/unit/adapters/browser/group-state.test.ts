@@ -51,6 +51,26 @@ describe('adapters/browser/group-state.ts', () => {
       expect(tabValues.get(slot(5, 'groupId'))).toBe(2);
     });
 
+    it('forgets a tab’s group by removing the groupId value', async () => {
+      const removeTabValue = vi.fn().mockResolvedValue(undefined);
+      const state = createBrowserGroupState(
+        (): SessionsApi => ({
+          sessions: {
+            getWindowValue: vi.fn(),
+            setWindowValue: vi.fn(),
+            getTabValue: vi.fn(),
+            setTabValue: vi.fn(),
+            removeTabValue,
+          },
+        }),
+      );
+
+      await state.clearTabGroup(5);
+
+      expect(removeTabValue).toHaveBeenCalledTimes(1);
+      expect(removeTabValue).toHaveBeenCalledWith(5, 'groupId');
+    });
+
     it('asks the browser for the right window and key', async () => {
       const getWindowValue = vi.fn().mockResolvedValue(undefined);
       const getTabValue = vi.fn().mockResolvedValue(undefined);
@@ -61,6 +81,7 @@ describe('adapters/browser/group-state.ts', () => {
             setWindowValue: vi.fn(),
             getTabValue,
             setTabValue: vi.fn(),
+            removeTabValue: vi.fn(),
           },
         }),
       );
@@ -96,6 +117,7 @@ describe('adapters/browser/group-state.ts', () => {
           getTabValue: vi.fn(),
           setWindowValue: vi.fn().mockRejectedValue(failure),
           setTabValue: vi.fn().mockRejectedValue(failure),
+          removeTabValue: vi.fn().mockRejectedValue(failure),
         },
       }));
 
@@ -103,6 +125,7 @@ describe('adapters/browser/group-state.ts', () => {
       await expect(state.setActiveGroup(1, 1)).rejects.toBe(failure);
       await expect(state.setGroupIndex(1, 1)).rejects.toBe(failure);
       await expect(state.setTabGroup(1, 1)).rejects.toBe(failure);
+      await expect(state.clearTabGroup(1)).rejects.toBe(failure);
     });
 
     it('waits for the browser to finish storing', async () => {
@@ -119,6 +142,10 @@ describe('adapters/browser/group-state.ts', () => {
             await Promise.resolve();
             stored = true;
           },
+          removeTabValue: async () => {
+            await Promise.resolve();
+            stored = true;
+          },
         },
       }));
 
@@ -127,6 +154,10 @@ describe('adapters/browser/group-state.ts', () => {
 
       stored = false;
       await state.setTabGroup(1, 1);
+      expect(stored).toBe(true);
+
+      stored = false;
+      await state.clearTabGroup(1);
       expect(stored).toBe(true);
     });
   });

@@ -2,6 +2,7 @@
  * Utility functions for Panorama Tab Groups
  * Pure functions with no state dependencies
  */
+import type { NativeGroupColor } from '../ports/native-groups.js';
 
 /**
  * Mathematical modulo operation
@@ -21,8 +22,10 @@ export function mod(x: number, n: number): number {
  * @param groupId - The group ID
  * @returns Color name for the group
  */
-export function getColorForGroupId(groupId: number): string | undefined {
-  const colors = [
+export function getColorForGroupId(
+  groupId: number,
+): NativeGroupColor | undefined {
+  const colors: readonly NativeGroupColor[] = [
     'grey',
     'blue',
     'red',

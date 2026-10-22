@@ -16,7 +16,7 @@ export interface MenuManagerDeps {
   groupState: Pick<GroupState, 'getGroups'>;
   windows: Windows;
   i18n: I18n;
-  logger: Logger;
+  logger: Pick<Logger, 'warn' | 'error'>;
 }
 
 export interface MenuManager {
