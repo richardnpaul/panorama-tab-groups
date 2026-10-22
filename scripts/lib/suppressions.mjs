@@ -38,6 +38,7 @@ export const ALLOWED_SANDBOX_IGNORES = [
   'test-results',
   'coverage',
   'dist',
+  'reports',
 ];
 
 export const IGNORE_FILES = ['.eslintignore', '.prettierignore'];

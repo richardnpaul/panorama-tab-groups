@@ -32,6 +32,7 @@
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:coverage:gate": "vitest run --coverage --coverage.thresholds.100",
+    "test:mutation": "stryker run",
     "audit:check": "npm audit --audit-level=low",
     "typecheck": "tsc --noEmit"
   },

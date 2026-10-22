@@ -76,6 +76,7 @@ describe('scripts/lib/suppressions.mjs', () => {
         'test-results',
         'coverage',
         'dist',
+        'reports',
       ]);
     });
 

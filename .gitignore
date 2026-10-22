@@ -7,3 +7,5 @@ test-results/
 coverage/
 dist/
 web-ext-artifacts/
+reports/
+.stryker-tmp/

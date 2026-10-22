@@ -392,7 +392,7 @@ V3. **Automate keeping it clean** (`.github/dependabot.yml`, `.github/workflows/
 - Not a vulnerability, but noticed: `eslint@8.57.1` is end of life (npm prints a deprecation warning). Moving to
   ESLint 9 and flat config is a separate task; it is not in this plan.
 
-### Phase 1: Leaf Modules — Convert, Then 100% Mutation
+### Phase 1: Leaf Modules — Convert, Then 100% Mutation. DONE (three modules deferred)
 
 For each of: `background/constants`, `background/utils`, `share/utils`, `share/options`, `options/*`, `polyfill`,
 `background/menu-manager`, `view/tabs`:
@@ -405,6 +405,57 @@ For each of: `background/constants`, `background/utils`, `share/utils`, `share/o
     unnecessary, replace hand-rolled loops with array methods). Log-string mutants are eliminated by deleting
     non-error logging, not by asserting on it.
     - Dependencies: Phase 0. Risk: Low. Done when each file reports 100% mutation with no config change.
+
+**Result.** 17 source modules are strict TypeScript with a **100% mutation score**: a clean, non-incremental
+`npm run test:mutation` reports 659 mutants killed, 0 survived, 0 uncovered (1m27s), and the break threshold of 100
+is enforced by `stryker.config.mjs`. The suite has 806 unit tests; the full E2E suite is unchanged (44 passed, 6
+skipped). Converted: `background/{constants,utils}`, `view/tabs`, `share/{options,utils}`, and
+`options/{reset,toolbar,theme,view,statistics,shortcuts,translations,native-groups,index}`. Three shared modules were
+created because several converted modules needed them: `share/dom.ts` (`requireElement`, `requireElementById`,
+`findElement`, `asListener`), `share/guards.ts` (`isRecord`, `isString`, `isBoolean`) and `share/capabilities.ts`
+(`detectCapabilities`, `browserModeOf`, which also replaces the duplicated feature detection in `share/options.ts` and
+`options/native-groups`). `npm run test:mutation` runs everything listed in `stryker.config.mjs`; `MUTATE=a.ts,b.ts
+npm run test:mutation` narrows a run while iterating.
+
+**Deferred, with reasons** (the plan listed these under Phase 1):
+
+- `options/backup` → Phase 4 step 25. It parses an untrusted user file and converts a legacy session format; the right
+  shape is pure validation in `core/` plus I/O behind ports, so converting it now would be thrown away.
+- `polyfill` → Phase 2 step 12. It is the Chromium shim that Phase 2 turns into typed browser adapters.
+- `background/menu-manager` → Phase 2. It calls the JS `stateManager` and the polyfilled `browser.menus`, which the
+  `GroupState` and `Menus` ports replace.
+
+**Deliberate behaviour changes** (everything else is behaviour-preserving, and each is pinned by a test):
+
+- `loadOptions()` now validates what storage returns and falls back to the default for any field of the wrong type
+  (the Firefox typings return `{ [s: string]: any }`, which strict linting will not pass on as `Options`).
+- Shortcut state is saved with an object spread instead of `Object.assign`; the latter wrote to a key named
+  `__proto__` through the prototype setter instead of storing data.
+- A command with no shortcut shows an empty field instead of the text "undefined"; a click with no identifiable
+  shortcut throws a descriptive error instead of a `TypeError`.
+- `options/statistics` counts an unusable cached thumbnail as 0 bytes instead of producing `NaN`, and no longer
+  logs the active-tab count.
+- A missing page element now throws `Element not found: <selector>` (or `Element is not an <Class>`) instead of
+  `Cannot read properties of null`. Async event listeners are registered through `asListener`, which logs a
+  failure instead of leaving an unhandled rejection.
+
+**Findings that shape later phases:**
+
+- `@types/firefox-webext-browser` types `sessions.setTabValue` as taking `string | object` although this code
+  stores numbers. Casting is banned, so each module declares the narrow API it uses and reads the `browser` global
+  lazily (`const api = (): Api => browser`). The real `browser` is assignable to such an interface through method
+  bivariance, which is the pattern Phase 2's adapters formalise.
+- A type parameter that appears only in a return type is an unchecked assertion
+  (`no-unnecessary-type-parameters`). `requireElement` therefore takes the element class and checks it with
+  `instanceof`, so DOM tests use real jsdom elements (fakes cannot pass `instanceof`) and convert the module and its
+  tests together; for those modules steps 8 and 9 were not separable.
+- The stale, unreferenced `tests/unit/setup.js` assigned `globalThis.browser`, which overrode the real Firefox typings
+  for the whole project through `allowJs`. It is deleted.
+- Equivalent mutants were removed by restructuring, not suppressed: the plural-form boundary checks became membership
+  tests (`isFewCount`), `getLowestPositiveGroupId` lost two redundant guards, and the Stryker-config helper returns its
+  default as the result so a changed default is visible.
+- A test helper that adds a listener to the shared jsdom `document` leaks it into later tests; dispatch
+  non-bubbling, one-shot events or capture the listener instead.
 
 ### Phase 2: Ports, Fakes, and State Unification
 
