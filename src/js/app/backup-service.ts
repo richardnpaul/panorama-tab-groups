@@ -30,7 +30,7 @@ export interface BackupDeps {
   >;
   // To tell the background that the tabs about to be made are not new tabs
   messaging: Messaging;
-  options: OptionsStore;
+  options: Pick<OptionsStore, 'load'>;
   downloads: Downloads;
   clock: Clock;
   logger: Pick<Logger, 'debug'>;

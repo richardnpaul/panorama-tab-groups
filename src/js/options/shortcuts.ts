@@ -1,20 +1,7 @@
+import type { Options } from '../core/options.js';
+import type { OptionsStore } from '../ports/options.js';
+import type { Shortcuts } from '../ports/shortcuts.js';
 import { requireElement } from '../share/dom.js';
-import type { Options } from '../share/options.js';
-
-type Command = browser.commands.Command;
-
-interface ShortcutsApi {
-  commands: {
-    getAll(): Promise<Command[]>;
-    update(detail: { name: string; shortcut: string }): Promise<void>;
-    reset(name: string): Promise<void>;
-  };
-  storage: { sync: { set(items: Options): Promise<void> } };
-}
-
-const api = (): ShortcutsApi => browser;
-
-export const shortcuts = api().commands.getAll();
 
 // Each shortcut is a form whose id is the command name; its buttons sit inside it
 function shortcutNameOf(event: Event): string {
@@ -31,28 +18,6 @@ function shortcutNameOf(event: Event): string {
 
 const shortcutInput = (shortcut: string): HTMLInputElement =>
   requireElement(HTMLInputElement, `#${shortcut} input`);
-
-export async function updateShortcut(event: Event): Promise<void> {
-  event.preventDefault();
-  const shortcut = shortcutNameOf(event);
-
-  await api().commands.update({
-    name: shortcut,
-    shortcut: shortcutInput(shortcut).value,
-  });
-}
-
-export async function resetShortcut(event: Event): Promise<void> {
-  event.preventDefault();
-  const shortcut = shortcutNameOf(event);
-
-  await api().commands.reset(shortcut);
-  const commands = await api().commands.getAll();
-  const command = commands.find(({ name }) => name === shortcut);
-  if (command !== undefined) {
-    shortcutInput(shortcut).value = command.shortcut ?? '';
-  }
-}
 
 function setShortcutFormEnabled(shortcut: string, enabled: boolean): void {
   shortcutInput(shortcut).disabled = !enabled;
@@ -76,32 +41,66 @@ export function enableShortcutForm(shortcut: string): void {
   setShortcutFormEnabled(shortcut, true);
 }
 
-async function saveShortcutState(
-  options: Options,
-  event: Event,
-  disabled: boolean,
-): Promise<string> {
-  event.preventDefault();
-  const shortcut = shortcutNameOf(event);
-
-  // A spread defines the key as plain data; assigning to a key called
-  // `__proto__` would replace the prototype instead
-  options.shortcut = { ...options.shortcut, [shortcut]: { disabled } };
-  await api().storage.sync.set(options);
-
-  return shortcut;
+// Handlers of events, so they are passed around on their own
+export interface ShortcutHandlers {
+  update: (event: Event) => Promise<void>;
+  reset: (event: Event) => Promise<void>;
+  /** Turn the shortcut off, keeping the choice in the loaded options */
+  disable: (options: Options, event: Event) => Promise<void>;
+  enable: (options: Options, event: Event) => Promise<void>;
 }
 
-export async function disableShortcut(
-  options: Options,
-  event: Event,
-): Promise<void> {
-  disableShortcutForm(await saveShortcutState(options, event, true));
-}
+/** What the buttons of each shortcut's form do */
+export function createShortcutHandlers({
+  shortcuts,
+  options: store,
+}: {
+  shortcuts: Shortcuts;
+  options: Pick<OptionsStore, 'save'>;
+}): ShortcutHandlers {
+  async function saveShortcutState(
+    options: Options,
+    event: Event,
+    disabled: boolean,
+  ): Promise<string> {
+    event.preventDefault();
+    const shortcut = shortcutNameOf(event);
 
-export async function enableShortcut(
-  options: Options,
-  event: Event,
-): Promise<void> {
-  enableShortcutForm(await saveShortcutState(options, event, false));
+    // A spread defines the key as plain data; assigning to a key called
+    // `__proto__` would replace the prototype instead
+    options.shortcut = { ...options.shortcut, [shortcut]: { disabled } };
+    await store.save({ shortcut: options.shortcut });
+
+    return shortcut;
+  }
+
+  return {
+    async update(event) {
+      event.preventDefault();
+      const shortcut = shortcutNameOf(event);
+
+      await shortcuts.update(shortcut, shortcutInput(shortcut).value);
+    },
+
+    async reset(event) {
+      event.preventDefault();
+      const shortcut = shortcutNameOf(event);
+
+      await shortcuts.reset(shortcut);
+      const command = (await shortcuts.getAll()).find(
+        ({ name }) => name === shortcut,
+      );
+      if (command !== undefined) {
+        shortcutInput(shortcut).value = command.shortcut;
+      }
+    },
+
+    async disable(options, event) {
+      disableShortcutForm(await saveShortcutState(options, event, true));
+    },
+
+    async enable(options, event) {
+      enableShortcutForm(await saveShortcutState(options, event, false));
+    },
+  };
 }

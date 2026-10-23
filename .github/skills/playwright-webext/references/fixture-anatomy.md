@@ -1,6 +1,8 @@
 # Reference: Fixture Anatomy
 
-Annotated walkthrough of the custom Playwright fixtures in `playwright.config.js`.
+Annotated walkthrough of the custom Playwright fixtures in `tests/e2e/fixtures.ts`. The snippets below explain the
+ideas; the file itself is the typed, current version (for example, the Firefox extension id is kept in a `WeakMap`
+keyed by the context rather than on the context object).
 These fixtures exist to work around Firefox MV3 + Juggler navigation quirks.
 
 ---

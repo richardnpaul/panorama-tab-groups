@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMemoryToolbar } from '../../../src/js/adapters/memory/toolbar.js';
 import { createViewRefresh } from '../../../src/js/app/view-refresh.js';
-import type { Options } from '../../../src/js/share/options.js';
+import type { Options } from '../../../src/js/core/options.js';
 
 const optionsWith = (view: string): Options => ({
   toolbarPosition: 'top',

@@ -1,10 +1,5 @@
+import type { I18n } from '../ports/i18n.js';
 import { requireElement } from '../share/dom.js';
-
-interface TranslationsApi {
-  i18n: { getMessage(messageName: string): string };
-}
-
-const api = (): TranslationsApi => browser;
 
 // [selector of the one element to translate, message name]
 const TEXTS: readonly (readonly [string, string])[] = [
@@ -58,9 +53,7 @@ const BUTTON_TEXTS: readonly (readonly [string, string])[] = [
   ],
 ];
 
-export default function addTranslations(): void {
-  const { i18n } = api();
-
+export default function addTranslations(i18n: I18n): void {
   TEXTS.forEach(([selector, messageName]) => {
     requireElement(Element, selector).textContent =
       i18n.getMessage(messageName);

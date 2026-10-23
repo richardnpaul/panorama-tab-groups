@@ -9,7 +9,7 @@ export function createUseNativeGroups({
   options,
 }: {
   hasTabGroups: boolean;
-  options: OptionsStore;
+  options: Pick<OptionsStore, 'load'>;
 }): () => Promise<boolean> {
   return async () => hasTabGroups && (await options.load()).useNativeGroups;
 }

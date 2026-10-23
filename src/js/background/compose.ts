@@ -5,6 +5,7 @@ import { createBrowserMessaging } from '../adapters/browser/messaging.js';
 import { createBrowserMigrationFlag } from '../adapters/browser/migration-flag.js';
 import { createBrowserNativeGroups } from '../adapters/browser/native-groups.js';
 import { createBrowserNotifications } from '../adapters/browser/notifications.js';
+import { createBrowserOptions } from '../adapters/browser/options.js';
 import { createBrowserSessionHistory } from '../adapters/browser/session-history.js';
 import { createBrowserTabs } from '../adapters/browser/tabs.js';
 import { createBrowserToolbar } from '../adapters/browser/toolbar.js';
@@ -33,7 +34,6 @@ import { createViewToggle } from '../app/view-toggle.js';
 import { createVisibilityService } from '../app/visibility-service.js';
 import { createWindowGroups } from '../app/window-groups.js';
 import { browserModeOf, detectCapabilities } from '../share/capabilities.js';
-import { loadOptions } from '../share/options.js';
 import { createMenuList, handleMenuChange } from './menu-manager.js';
 import { stateManager } from './StateManager.js';
 
@@ -64,7 +64,7 @@ export function composeBackground(): Background {
   const toolbar = createBrowserToolbar(() => browser);
   const extension = createBrowserExtension(() => browser);
   const menus = createBrowserMenus(() => browser);
-  const options = { load: loadOptions };
+  const options = createBrowserOptions(() => browser);
   const migrationFlag = createBrowserMigrationFlag(() => browser);
   const viewUrl = extension.urlOf('view.html');
   const useNativeGroups = createUseNativeGroups({

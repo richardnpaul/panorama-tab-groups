@@ -1,3 +1,12 @@
+// airbnb's list, which an override of the rule would otherwise replace
+const airbnbRestrictedGlobals =
+  require('eslint-config-airbnb-base/rules/variables').rules[
+    'no-restricted-globals'
+  ].slice(1);
+
+const ONLY_THROUGH_ADAPTERS =
+  'The browser is reached through a port; only an adapter or a composition root names it (see .eslintrc.js)';
+
 module.exports = {
   env: {
     browser: true,
@@ -41,12 +50,57 @@ module.exports = {
   },
   overrides: [
     {
-      // The configuration of the test runner imports it, which is all it is for
-      files: ['playwright.config.js'],
+      // The configuration of a test runner imports it, which is all it is for
+      files: ['playwright.config.ts', 'vitest.config.ts'],
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
           { devDependencies: true },
+        ],
+      },
+    },
+    {
+      // The stub is a package of its own, but its test runs with the root's dev dependencies
+      files: ['tools/adbkit-stub/index.test.ts'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          { devDependencies: true, packageDir: [__dirname] },
+        ],
+      },
+    },
+    {
+      // The architecture written down: outside these files the extension reaches
+      // the browser only through the ports. The adapters implement them, the
+      // polyfill fills in what a browser lacks, and the composition roots build
+      // the adapters over the browser. Adding a file here is reviewed like code.
+      files: ['src/**/*.ts'],
+      excludedFiles: [
+        'src/js/adapters/**',
+        'src/js/polyfill.ts',
+        'src/js/background/main.ts',
+        'src/js/background/compose.ts',
+        'src/js/background/StateManager.ts',
+        'src/js/background/menu-manager.ts',
+        'src/js/view/start.ts',
+        'src/popup-view/start.ts',
+        'src/js/options/start.ts',
+        'src/js/migration-status/start.ts',
+      ],
+      rules: {
+        'no-restricted-globals': [
+          'error',
+          ...airbnbRestrictedGlobals,
+          { name: 'browser', message: ONLY_THROUGH_ADAPTERS },
+          { name: 'chrome', message: ONLY_THROUGH_ADAPTERS },
+        ],
+        'no-restricted-syntax': [
+          'error',
+          'WithStatement',
+          {
+            selector: 'MemberExpression[property.name=/^(storage|sessions)$/]',
+            message: ONLY_THROUGH_ADAPTERS,
+          },
         ],
       },
     },
@@ -76,20 +130,6 @@ module.exports = {
           'error',
           { assertionStyle: 'never' },
         ],
-      },
-    },
-    {
-      files: ['tests/unit/**/*.js', 'tools/**/*.test.js'],
-      globals: {
-        describe: 'readonly',
-        it: 'readonly',
-        test: 'readonly',
-        expect: 'readonly',
-        beforeAll: 'readonly',
-        beforeEach: 'readonly',
-        afterAll: 'readonly',
-        afterEach: 'readonly',
-        vi: 'readonly',
       },
     },
   ],

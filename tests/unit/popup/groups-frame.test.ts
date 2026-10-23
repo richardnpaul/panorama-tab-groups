@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryScheduler } from '../../../src/js/adapters/memory/scheduler.js';
 import type {
   PopupGroup,
@@ -27,9 +27,14 @@ const MESSAGES: Record<string, string> = {
   newGroupButton: 'New group',
 };
 
+// The plural rule of the language the messages are in; English unless a test says otherwise
+let pluralRule = '1';
+
 const i18n = {
   getMessage: (name: string, substitutions: readonly string[] = []) =>
-    (MESSAGES[name] ?? name).replaceAll('$1', substitutions[0] ?? ''),
+    name === 'pluralRule'
+      ? pluralRule
+      : (MESSAGES[name] ?? name).replaceAll('$1', substitutions[0] ?? ''),
 };
 
 const tab = (id: number, title = `Title ${String(id)}`): ViewTab => ({
@@ -63,11 +68,7 @@ function setUp(
   },
 ) {
   setUpPopupPage();
-  vi.stubGlobal('browser', {
-    i18n: {
-      getMessage: (name: string) => (name === 'pluralRule' ? '1' : name),
-    },
-  });
+  pluralRule = '1';
   const scheduler = createMemoryScheduler();
   const frame = createFrame({
     node: elementById('main-frame'),
@@ -164,10 +165,6 @@ const dragEvent = (
 describe('popup-view/groups-frame.ts', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   describe('the groups', () => {
@@ -294,11 +291,7 @@ describe('popup-view/groups-frame.ts', () => {
     it('shows a count of tabs that has no form for the number as nothing', async () => {
       const many = [1, 2, 3, 4, 5].map((id) => tab(id));
       const env = setUp({ groups: [group(1, 'Many', many)], lastUsed: null });
-      vi.stubGlobal('browser', {
-        i18n: {
-          getMessage: (name: string) => (name === 'pluralRule' ? '7' : name),
-        },
-      });
+      pluralRule = '7';
 
       await env.render();
 
@@ -484,11 +477,7 @@ describe('popup-view/groups-frame.ts', () => {
     it('asks with nothing when the message has no form for the number', async () => {
       const many = [1, 2, 3, 4, 5].map((id) => tab(id));
       const env = setUp({ groups: [group(1, 'Many', many)], lastUsed: null });
-      vi.stubGlobal('browser', {
-        i18n: {
-          getMessage: (name: string) => (name === 'pluralRule' ? '7' : name),
-        },
-      });
+      pluralRule = '7';
       await env.render();
 
       click(closeButtonOf(0));

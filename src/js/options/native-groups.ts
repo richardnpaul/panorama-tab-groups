@@ -3,21 +3,21 @@
  * Manages the toggle for using native browser tab groups
  */
 
+import type { Messaging } from '../ports/messaging.js';
+import type { OptionsStore } from '../ports/options.js';
 import {
   browserModeOf,
-  detectCapabilities,
   type BrowserMode,
-  type CapabilityApi,
+  type Capabilities,
 } from '../share/capabilities.js';
 import { requireElementById } from '../share/dom.js';
-import { loadOptions } from '../share/options.js';
 
-interface NativeGroupsApi extends CapabilityApi {
-  storage: { sync: { set(items: Record<string, unknown>): Promise<void> } };
-  runtime: { sendMessage(message: unknown): Promise<unknown> };
+export interface NativeGroupsOptionPorts {
+  options: OptionsStore;
+  messaging: Messaging;
+  /** What the browser the page runs in can do */
+  capabilities: Capabilities;
 }
-
-const api = (): NativeGroupsApi => browser;
 
 const FEEDBACK_VISIBLE_MS = 3000;
 
@@ -72,9 +72,12 @@ const MODE_DISPLAY: Record<BrowserMode, ModeDisplay> = {
  * Save the option, then tell the background to clean up or migrate. This is a
  * direct message because storage.onChanged is unreliable in MV3.
  */
-async function persist(newValue: boolean): Promise<void> {
-  await api().storage.sync.set({ useNativeGroups: newValue });
-  await api().runtime.sendMessage({
+async function persist(
+  { options, messaging }: NativeGroupsOptionPorts,
+  newValue: boolean,
+): Promise<void> {
+  await options.save({ useNativeGroups: newValue });
+  await messaging.send({
     action: newValue ? 'migrateToHybridGroups' : 'cleanupNativeGroups',
   });
 }
@@ -94,8 +97,11 @@ function showFeedback(newValue: boolean): void {
   }, FEEDBACK_VISIBLE_MS);
 }
 
-function saveNativeGroupsOption(newValue: boolean): void {
-  persist(newValue).catch((error: unknown) => {
+function saveNativeGroupsOption(
+  ports: NativeGroupsOptionPorts,
+  newValue: boolean,
+): void {
+  persist(ports, newValue).catch((error: unknown) => {
     console.error('[Options] Failed to update native groups:', error);
   });
   showFeedback(newValue);
@@ -104,8 +110,10 @@ function saveNativeGroupsOption(newValue: boolean): void {
 /**
  * Initialize the native groups option UI
  */
-export default async function initNativeGroupsOption(): Promise<void> {
-  const options = await loadOptions();
+export default async function initNativeGroupsOption(
+  ports: NativeGroupsOptionPorts,
+): Promise<void> {
+  const options = await ports.options.load();
   const checkbox = document.getElementById('useNativeGroups');
   const container = document.getElementById('nativeGroupsContainer');
 
@@ -114,7 +122,7 @@ export default async function initNativeGroupsOption(): Promise<void> {
   }
 
   const warningText = requireElementById(HTMLElement, 'nativeGroupsWarning');
-  const display = MODE_DISPLAY[browserModeOf(detectCapabilities(api()))];
+  const display = MODE_DISPLAY[browserModeOf(ports.capabilities)];
 
   checkbox.checked = display.checked ?? options.useNativeGroups;
   checkbox.disabled = display.disabled;
@@ -125,6 +133,6 @@ export default async function initNativeGroupsOption(): Promise<void> {
   }
 
   checkbox.addEventListener('change', () => {
-    saveNativeGroupsOption(checkbox.checked);
+    saveNativeGroupsOption(ports, checkbox.checked);
   });
 }

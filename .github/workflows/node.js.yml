@@ -1,7 +1,11 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# A clean install, the audit, and `npm test`: lint (which builds dist for
+# web-ext), the type check, the suppression guard and the unit tests with the
+# coverage gate
 
 name: Node.js CI
+
+permissions:
+  contents: read
 
 on:
   push:
@@ -9,13 +13,18 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A newer push to a pull request replaces the run; runs on main all finish
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [20.x, 22.x, 24.x, 26.x]
+        node-version: [26.x]
 
     steps:
       - uses: actions/checkout@v6
@@ -26,5 +35,4 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run audit:check
-      - run: npm run build --if-present
       - run: npm test

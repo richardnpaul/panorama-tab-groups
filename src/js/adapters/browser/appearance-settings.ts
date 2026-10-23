@@ -1,3 +1,4 @@
+import { DEFAULT_THEME, DEFAULT_TOOLBAR_POSITION } from '../../core/options.js';
 import { isRecord, isString } from '../../share/guards.js';
 
 /** The part of the browser the settings of the look of the view are kept in */
@@ -22,7 +23,11 @@ export interface AppearanceStorageApi {
   };
 }
 
-const DEFAULTS = { useDarkTheme: false, theme: 'auto', toolbarPosition: 'top' };
+const DEFAULTS = {
+  useDarkTheme: false,
+  theme: DEFAULT_THEME,
+  toolbarPosition: DEFAULT_TOOLBAR_POSITION,
+};
 
 export function createAppearanceSettings(getApi: () => AppearanceStorageApi) {
   const storage = () => getApi().storage;

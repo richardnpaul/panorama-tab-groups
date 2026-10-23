@@ -1,12 +1,18 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  saveOptionView,
+  createViewSaver,
   showViewSpecificOptions,
 } from '../../../src/js/options/view.js';
+import type { Messaging } from '../../../src/js/ports/messaging.js';
+import type { OptionsStore } from '../../../src/js/ports/options.js';
 
-const set = vi.fn();
-const sendMessage = vi.fn();
+const set = vi.fn<OptionsStore['save']>();
+const sendMessage = vi.fn<Messaging['send']>();
+const saveOptionView = createViewSaver({
+  options: { save: set },
+  messaging: { send: sendMessage },
+});
 
 function renderPage(checkedView: string | null) {
   const checked = (value: string) => (value === checkedView ? 'checked' : '');
@@ -23,14 +29,10 @@ describe('options/view.ts', () => {
   beforeEach(() => {
     set.mockReset().mockResolvedValue(undefined);
     sendMessage.mockReset().mockResolvedValue(undefined);
-    Object.assign(globalThis, {
-      browser: { storage: { sync: { set } }, runtime: { sendMessage } },
-    });
     renderPage('popup');
   });
 
   afterEach(() => {
-    Reflect.deleteProperty(globalThis, 'browser');
     document.body.innerHTML = '';
   });
 
@@ -68,7 +70,7 @@ describe('options/view.ts', () => {
     });
   });
 
-  describe('saveOptionView', () => {
+  describe('createViewSaver', () => {
     it('saves the checked view and asks the background to refresh it', async () => {
       renderPage('freeform');
 
@@ -93,6 +95,7 @@ describe('options/view.ts', () => {
       sendMessage.mockImplementation(async () => {
         await Promise.resolve();
         answered = true;
+        return undefined;
       });
       renderPage('freeform');
       toolbar()?.setAttribute('hidden', '');

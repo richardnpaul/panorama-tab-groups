@@ -28,6 +28,18 @@ For deeper insight it's recommended to read the [Internationalization guide for 
 1. Replace all `message`s.
 1. For `pluralRule` please see [this definition](https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_and_Plurals#List_of_Plural_Rules). Current implemented rules are 0, 1, 2, 7 and 9 within [the utility function `getPluralForm()`](src/js/share/utils.js);
 
+## Pinned tools of the devcontainer
+
+The devcontainer pins what Dependabot does not update, and these are refreshed by hand:
+
+- `act`: `ACT_VERSION` and `ACT_SHA256` in `.devcontainer/Dockerfile`, from the release's `checksums.txt`
+  (`act_Linux_x86_64.tar.gz`).
+- The runner image of `act`: the digest of `catthehacker/ubuntu:act-24.04` in `.actrc` (`docker pull` it and take
+  the digest it reports). The image is a community one and moves, which is why it is pinned.
+- The `docker-in-docker` feature: `npx @devcontainers/cli upgrade --workspace-folder .` rewrites
+  `.devcontainer/devcontainer-lock.json`.
+- `actionlint`: the `rev` in `.pre-commit-config.yaml` (`pre-commit autoupdate` updates it).
+
 ## Dependency security
 
 `npm run audit:check` (`npm audit --audit-level=low`) must report no vulnerabilities. It is a blocking step in the Node.js CI workflow and also runs weekly in the `Dependency audit` workflow, so new advisories show up without a code change. Dependabot opens weekly update pull requests.
@@ -39,4 +51,4 @@ Fix findings with `npm audit fix`. Never use `npm audit fix --force`: it can dow
 `web-ext` depends on `@devicefarmer/adbkit`, which depends on `node-forge`. Every released `node-forge` is flagged by an advisory and no fixed release exists. `web-ext` only loads `adbkit` for `web-ext run --target firefox-android`, which this project does not use, so `tools/adbkit-stub` is an npm workspace package with the same name and the version `web-ext` pins (currently `3.3.9`). npm links the workspace instead of downloading the real package. Using the Android target fails with a message that points here.
 
 - If `web-ext` changes the `adbkit` version it pins, update the version in `tools/adbkit-stub/package.json` to match. A unit test fails until you do, and otherwise npm would install the real package again.
-- Once `node-forge` has a fixed release, remove the stub: delete `tools/adbkit-stub`, the `workspaces` entry in `package.json` and `tests/unit/tools/adbkit-workspace.test.js`, remove `tools/**/*.js` from the coverage `include` and `tools/**/*.test.js` from the test `include` in `vitest.config.mjs`, and the `tools/**/*.test.js` entry in `.eslintrc.js`, then run `npm install`.
+- Once `node-forge` has a fixed release, remove the stub: delete `tools/adbkit-stub` (and its entry in `ALLOWED_JAVASCRIPT_FILES` in `scripts/lib/suppressions.ts`), the `workspaces` entry in `package.json` and `tests/unit/tools/adbkit-workspace.test.ts`, remove `tools/**/*.js` from the coverage `include` and `tools/**/*.test.ts` from the test `include` in `vitest.config.ts`, the `tools/adbkit-stub/index.test.ts` override in `.eslintrc.js` and `"tools"` from the `include` of `tsconfig.json`, then run `npm install`.

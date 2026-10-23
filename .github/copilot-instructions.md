@@ -25,18 +25,22 @@
 
 ## Build & Test Commands
 
-| Command             | Purpose                                |
-| ------------------- | -------------------------------------- |
-| `npm run lint`      | ESLint + Prettier check + web-ext lint |
-| `npm run format`    | Auto-fix Prettier + ESLint violations  |
-| `npm run build:xpi` | Build Firefox XPI via web-ext          |
-| `npm run test:e2e`  | Playwright E2E (Chromium + Firefox)    |
-| `npm test`          | Alias for lint (CI primary command)    |
+| Command                      | Purpose                                                                      |
+| ---------------------------- | ---------------------------------------------------------------------------- |
+| `npm run lint`               | ESLint + Prettier check + web-ext lint                                       |
+| `npm run format`             | Auto-fix Prettier + ESLint violations                                        |
+| `npm run build:xpi`          | Build Firefox XPI via web-ext                                                |
+| `npm run test:e2e`           | Playwright E2E (Chromium + Firefox)                                          |
+| `npm test`                   | Lint, then unit tests with the 100% coverage gate (CI primary command)       |
+| `npm run test:mutation`      | Stryker, only what changed since the last run (the CI run for pull requests) |
+| `npm run test:mutation:full` | Stryker on everything (the CI run for `main` and nightly)                    |
+| `npm run act:list`           | List the GitHub workflow jobs `act` can run locally (user-started only)      |
 
 ## Architecture
 
 - **`src/js/background/main.ts`** — MV3 service worker entry (composition root only); event-driven, ephemeral (state is lost on termination). It builds `src/js/app/` services over the ports in `src/js/ports/` (`background/compose.ts`) and registers the listeners (`adapters/browser/events.ts`)
 - **`src/js/background/StateManager.ts`** — Single source of truth for all extension state; wraps `browser.sessions` (per-window/tab, Firefox-only) and `browser.storage.local` (persistent, cross-browser)
+- **The browser boundary** — outside `src/js/adapters/`, `src/js/polyfill.ts` and the composition roots listed in `.eslintrc.js` (`background/{main,compose,StateManager,menu-manager}.ts` and the `start.ts` of each page), naming `browser`/`chrome` or reading `.storage`/`.sessions` is a lint error. Code reaches the browser through a port in `src/js/ports/`; the options page uses `OptionsStore` and `Shortcuts`
 - **`src/js/core/constants.ts`** — Reserved group IDs and application constants
 - **`src/js/view/`** — Freeform tab groups canvas view, built over the ports in `src/js/ports/` and `app/groups-store.ts`
 - **`src/popup-view/`** — Quick group switcher popup, built over the same ports and `app/popup-service.ts` (the pure logic is `core/popup.ts`)
@@ -87,8 +91,10 @@ Run `npm run format` before committing. Run `npm run lint` to validate.
 
 ## Testing
 
-Playwright E2E only — no unit tests. Custom fixtures in `playwright.config.js` handle MV3 persistent context,
-Firefox RDP extension loading, and `moz-extension://` navigation quirks.
+Unit tests (Vitest, `tests/unit/`) run with a 100% coverage gate; Playwright E2E specs live in `tests/e2e/`.
+Custom fixtures in `tests/e2e/fixtures.ts` handle MV3 persistent context, Firefox RDP extension loading, and
+`moz-extension://` navigation quirks. Everything except `.eslintrc.js`, `stryker.config.mjs` and
+`tools/adbkit-stub/index.js` is TypeScript, and the suppression guard fails on any other JavaScript file.
 See `#skill:playwright-webext` for details.
 
 ## Skills

@@ -263,6 +263,7 @@ export function createGroupNodes({
 
     if (tabCount > 0) {
       const warning = getPluralForm(
+        i18n,
         tabCount,
         i18n.getMessage('closeGroupWarning', [String(tabCount)]),
       );

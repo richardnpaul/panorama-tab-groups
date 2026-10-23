@@ -27,7 +27,7 @@ const pathToExtension = path.join(process.cwd(), 'src');
 
 ## Fixture Exports
 
-All fixtures are exported from `playwright.config.js`:
+All fixtures are exported from `tests/e2e/fixtures.ts` (`playwright.config.ts` holds only the configuration):
 
 | Fixture             | Type                        | Value                                                                                         |
 | ------------------- | --------------------------- | --------------------------------------------------------------------------------------------- |
@@ -38,10 +38,10 @@ All fixtures are exported from `playwright.config.js`:
 
 ## How to Add a New Test
 
-Create a new file in `tests/` ending in `.spec.js`:
+Create a new file in `tests/e2e/` ending in `.spec.ts`:
 
-```javascript
-import { test, expect } from '../playwright.config.js';
+```typescript
+import { test, expect } from './fixtures.js';
 
 test('my feature works', async ({ page, extensionProtocol, extensionId }) => {
   // Navigate to an extension page
@@ -52,7 +52,7 @@ test('my feature works', async ({ page, extensionProtocol, extensionId }) => {
 });
 ```
 
-> **Important**: Import `test` and `expect` from `../playwright.config.js`, not from `@playwright/test` directly. The config re-exports a custom `test` object with the extension fixtures.
+> **Important**: Import `test` and `expect` from `./fixtures.js` (the `.js` specifier resolves to `fixtures.ts`), not from `@playwright/test` directly. It exports a custom `test` object with the extension fixtures.
 
 ## Navigating to Extension Pages
 
@@ -76,7 +76,7 @@ npx playwright test --project=firefox
 npx playwright test --project=chromium
 
 # Run a specific test file
-npx playwright test tests/extension.spec.js
+npx playwright test tests/e2e/extension.spec.ts
 
 # Show HTML report
 npx playwright show-report

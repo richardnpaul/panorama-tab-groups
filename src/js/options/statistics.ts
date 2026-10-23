@@ -1,51 +1,41 @@
-import { isRecord } from '../share/guards.js';
-import { formatByteSize } from '../share/utils.js';
+import type { I18n } from '../ports/i18n.js';
+import type { ViewState } from '../ports/view-state.js';
+import type { ViewTabs } from '../ports/view-tabs.js';
 import { requireElementById } from '../share/dom.js';
+import { formatByteSize } from '../share/utils.js';
 
-type Tab = browser.tabs.Tab;
-
-interface StatisticsApi {
-  tabs: { query(queryInfo: Record<string, never>): Promise<Tab[]> };
-  sessions: { getTabValue(tabId: number, key: string): Promise<unknown> };
-  i18n: { getMessage(messageName: string): string };
+export interface StatisticsPorts {
+  viewTabs: Pick<ViewTabs, 'listAll'>;
+  viewState: Pick<ViewState, 'thumbnail'>;
+  i18n: I18n;
 }
 
-const api = (): StatisticsApi => browser;
+/** Show how many tabs there are and how much room their thumbnails take */
+export function createStatistics({
+  viewTabs,
+  viewState,
+  i18n,
+}: StatisticsPorts): () => Promise<void> {
+  const thumbnailSize = async (tabId: number): Promise<number> =>
+    (await viewState.thumbnail(tabId))?.image.length ?? 0;
 
-// A cached thumbnail is either a data URL or an object that holds one
-function thumbnailSize(cached: unknown): number {
-  if (typeof cached === 'string') {
-    return cached.length;
-  }
-  if (isRecord(cached) && typeof cached.thumbnail === 'string') {
-    return cached.thumbnail.length;
-  }
-  return 0;
-}
+  return async () => {
+    const tabs = await viewTabs.listAll();
 
-async function tabThumbnailSize(tab: Tab): Promise<number> {
-  if (tab.id === undefined) {
-    return 0;
-  }
-  return thumbnailSize(await api().sessions.getTabValue(tab.id, 'thumbnail'));
-}
+    const sizes = await Promise.all(tabs.map(({ id }) => thumbnailSize(id)));
+    const totalSize = sizes.reduce((sum, size) => sum + size, 0);
+    const numActiveTabs = tabs.filter((tab) => !tab.discarded).length;
 
-export default async function getStatistics(): Promise<void> {
-  const tabs = await api().tabs.query({});
+    requireElementById(HTMLElement, 'thumbnailCacheSize').replaceChildren(
+      document.createTextNode(formatByteSize(totalSize)),
+    );
 
-  const sizes = await Promise.all(tabs.map(tabThumbnailSize));
-  const totalSize = sizes.reduce((sum, size) => sum + size, 0);
-  const numActiveTabs = tabs.filter((tab) => !tab.discarded).length;
-
-  requireElementById(HTMLElement, 'thumbnailCacheSize').replaceChildren(
-    document.createTextNode(formatByteSize(totalSize)),
-  );
-
-  requireElementById(HTMLElement, 'numberOfTabs').replaceChildren(
-    document.createTextNode(
-      `${String(tabs.length)} (${api().i18n.getMessage(
-        'optionsStatisticsNumberOfTabsActive',
-      )} ${String(numActiveTabs)})`,
-    ),
-  );
+    requireElementById(HTMLElement, 'numberOfTabs').replaceChildren(
+      document.createTextNode(
+        `${String(tabs.length)} (${i18n.getMessage(
+          'optionsStatisticsNumberOfTabsActive',
+        )} ${String(numActiveTabs)})`,
+      ),
+    );
+  };
 }

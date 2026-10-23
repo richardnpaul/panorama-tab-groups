@@ -16,6 +16,12 @@ repos:
       - id: check-json
       - id: check-yaml
 
+  # Workflow syntax, expressions, inputs and shell quoting; no Docker needed
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.12
+    hooks:
+      - id: actionlint
+
   - repo: local
     hooks:
       - id: prettier
@@ -33,7 +39,7 @@ repos:
 
       - id: no-suppressions
         name: no suppressions
-        entry: node scripts/check-no-suppressions.mjs
+        entry: npx tsx scripts/check-no-suppressions.ts
         language: system
         pass_filenames: false
         always_run: true

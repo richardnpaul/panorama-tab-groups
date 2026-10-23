@@ -131,6 +131,7 @@ export function createGroupsFrame({
           newElement('span', {
             content:
               getPluralForm(
+                i18n,
                 tabCount,
                 i18n.getMessage('tabCount', [String(tabCount)]),
               ) ?? '',
@@ -175,6 +176,7 @@ export function createGroupsFrame({
         report(
           (async () => {
             const warning = getPluralForm(
+              i18n,
               tabCount,
               i18n.getMessage('closeGroupWarning', [String(tabCount)]),
             );

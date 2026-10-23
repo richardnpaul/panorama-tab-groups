@@ -783,7 +783,7 @@ the ones the "restructure so it cannot exist" rule leaves behind by design (for 
 survivors were left from Phase 4, since each module was taken to 100% as it was written, so this phase was the
 check that nothing had drifted rather than a loop of fixes.
 
-### Phase 6: Enforce in CI
+### Phase 6: Enforce in CI. DONE locally; the workflows have not yet run on GitHub (see the result below)
 
 28. **Hard gates** (`stryker.config.mjs`, `package.json`, `.github/workflows/node.js.yml`)
     - `tsc --noEmit` blocking.
@@ -794,6 +794,53 @@ check that nothing had drifted rather than a loop of fixes.
     - `scripts/check-no-suppressions.js` allow-list empty and blocking.
     - `npm audit --audit-level=low` blocking, with no advisory allow-list (Phase 0B).
     - Risk: Medium (CI duration). Mitigation: per-test coverage analysis and caching; measure before enabling.
+
+#### Phase 6 result
+
+- **`npm test` is the gate.** It is `lint` (Prettier, ESLint, `web-ext lint` on `dist/`, `tsc --noEmit`, the suppression
+  guard) and then `test:coverage`. Until now it was lint only, so CI ran no unit test at all. `node.js.yml` already ran
+  it across Node 20 to 26, together with `npm audit --audit-level=low` (no allow-list; 0 vulnerabilities).
+  Locally it takes 22 seconds and passes.
+- **Coverage gate.** `vitest.config.mjs` has `coverage.thresholds` of 100 on statements, branches, functions and lines,
+  so `test:coverage` itself fails below that (a run of one folder fails with the three metrics it misses). The
+  `test:coverage:gate` script, which only existed to pass the flag, is gone.
+- **Mutation gate.** `stryker.config.mjs` already had `thresholds` of 100, `coverageAnalysis: 'perTest'`, the TypeScript
+  checker and `incremental`. `.github/workflows/mutation.yml` is new: a pull request restores the incremental report
+  from the cache and runs `npm run test:mutation` (1 minute 6 seconds locally with nothing changed); a push to `main`, the
+  nightly schedule (03:41 UTC) and a manual run use `npm run test:mutation:full` (`--force`, about 5 minutes 40
+  seconds) and save the report to the cache, so the incremental file a pull request starts from is always one from a
+  full run.
+- **The guard guards the gates.** `check-no-suppressions` (part of `npm test`) now also fails when a coverage threshold
+  is not 100 or is missing, when a Stryker `high`, `low` or `break` threshold is not 100 or is missing, and when the
+  TypeScript checker or per-test coverage analysis is taken out of the Stryker config. Lowering a gate to make a build
+  pass is therefore the same kind of change as adding a suppression: the guard, not a reviewer's memory, stops it.
+  The allow-list stays `{}`.
+- **Not done, and needs you:** making the three checks (the Node CI matrix, the pre-commit run and the mutation run)
+  required status checks on `main` is a repository setting. The two new pieces (the `mutation.yml` workflow and the
+  cache keys) have not run on GitHub; the first pull request will show whether the cache restores. Running the workflows locally with
+  `act` first, and fixing what that shows, is planned in `act-local-workflow-testing.md`.
+- **Left unticked because they name CI**: the mutation score with `break: 100` in CI, and the extension loading from
+  `dist/` with the E2E cases green in CI. Both pass locally and are tied to workflows that have not yet run on GitHub.
+- **Success criteria not met, so left unticked below:**
+  - "All source and tests are strict TypeScript" (planned in `typescript-tests-and-tooling.md`): the source is, but seven Playwright specs, `playwright.config.js`, six
+    unit tests of the scripts and tools, and `tools/adbkit-stub` are still JavaScript.
+  - "No direct `browser.sessions` / `browser.storage` access outside the `GroupState` adapter" (planned in
+    `options-port-and-browser-access.md`): the options pages
+    (`options/{theme,toolbar,shortcuts,native-groups,view}.ts`, `share/options.ts`) read and write the user's options in
+    `storage.sync`, `options/statistics.ts` reads a tab's thumbnail from `sessions`, and the polyfill sets the
+    emulation up. The adapters of the other ports (`view-state`, `appearance-settings`, `migration-flag`,
+    `session-history`) are where their own access belongs. The options pages want an `Options` port (one already
+    exists in `ports/options.ts` for the background's reads), which is the work that remains.
+- **Both met since, by the two follow-up plans** (see their "Result" sections):
+  - `typescript-tests-and-tooling.md`: the scripts, the unit tests of the scripts and tools, `vitest.config.ts`,
+    `playwright.config.ts`, the fixtures and all eight end-to-end specs are TypeScript under the same strict `tsc` and
+    ESLint rules as the source, `allowJs` is gone, and the suppression guard fails on any JavaScript file other than
+    `.eslintrc.js`, `stryker.config.mjs` and `tools/adbkit-stub/index.js`, which tools load as JavaScript.
+  - `options-port-and-browser-access.md`: the options page reaches the browser through `OptionsStore`, `Shortcuts`,
+    `ViewTabs`, `ViewState`, `I18n` and `Messaging`; `share/options.ts` is gone; and an ESLint rule fails on the
+    `browser`/`chrome` globals or `.storage`/`.sessions` access anywhere in `src` but the adapters, the polyfill and
+    the composition roots. That is the criterion's intent, wider than its wording: the `GroupState` adapter is one of
+    several adapters, each of which owns its own part of `storage` or `sessions`.
 
 ## WebExtension API Notes
 
@@ -855,19 +902,20 @@ npm run lint:prettier && npm run lint:eslint`; `npm run test:e2e` for any functi
 
 ## Success Criteria
 
-- [ ] All source and tests are strict TypeScript; `tsc --noEmit` is blocking in CI
-- [ ] `collectCoverageFrom` is `src/**/*.{js,ts}` with no ignore patterns; 100% statements, branches, functions,
+- [x] All source and tests are strict TypeScript; `tsc --noEmit` is blocking in CI
+- [x] `collectCoverageFrom` is `src/**/*.{js,ts}` with no ignore patterns; 100% statements, branches, functions,
       lines
 - [ ] Stryker reports 100% mutation score, 0 survived, 0 no-coverage, with `break: 100` in CI
-- [ ] Zero suppression comments (coverage, mutation, TypeScript, ESLint) or config exclusions; guard script
+- [x] Zero suppression comments (coverage, mutation, TypeScript, ESLint) or config exclusions; guard script
       blocking with an empty allow-list
-- [ ] No `any`, non-null assertions or type assertions in source
-- [ ] `core/` has no browser, DOM, `Date` or timer references
-- [ ] `background.js` removed; `background/main.ts` contains no logic
-- [ ] No direct `browser.sessions` / `browser.storage` access outside the `GroupState` adapter
-- [ ] Popup and full-page view share one group store and model code; the popup is linted and formatted
-- [ ] `DEBUG` removed; safety aborts are unconditional and tested
+- [x] No `any`, non-null assertions or type assertions in source
+- [x] `core/` has no browser, DOM, `Date` or timer references
+- [x] `background.js` removed; `background/main.ts` contains no logic
+- [x] No direct `browser.sessions` / `browser.storage` access outside the `GroupState` adapter (outside the adapters,
+      the polyfill and the composition roots, enforced by ESLint; see the Phase 6 result)
+- [x] Popup and full-page view share one group store and model code; the popup is linted and formatted
+- [x] `DEBUG` removed; safety aborts are unconditional and tested
 - [ ] Extension loads from `dist/` in `web-ext`, Playwright and CI; E2E green on Firefox and Chromium, including
       the new cases above
-- [ ] `npm audit` reports 0 vulnerabilities and is a blocking CI gate; Dependabot (or Renovate) is configured
-- [ ] `npm run lint` (prettier, eslint, web-ext) and `npm run typecheck` clean
+- [x] `npm audit` reports 0 vulnerabilities and is a blocking CI gate; Dependabot (or Renovate) is configured
+- [x] `npm run lint` (prettier, eslint, web-ext) and `npm run typecheck` clean

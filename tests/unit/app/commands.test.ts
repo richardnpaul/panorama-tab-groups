@@ -4,7 +4,7 @@ import { createMemoryGroupState } from '../../../src/js/adapters/memory/group-st
 import { createMemoryWindows } from '../../../src/js/adapters/memory/windows.js';
 import { createCommands } from '../../../src/js/app/commands.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
-import type { Options } from '../../../src/js/share/options.js';
+import type { Options } from '../../../src/js/core/options.js';
 
 const WINDOW = 3;
 

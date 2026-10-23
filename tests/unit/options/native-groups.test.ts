@@ -1,34 +1,35 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  createDefaultOptions,
+  type Options,
+} from '../../../src/js/core/options.js';
 import initNativeGroupsOption from '../../../src/js/options/native-groups.js';
+import type { Messaging } from '../../../src/js/ports/messaging.js';
+import type { OptionsStore } from '../../../src/js/ports/options.js';
+import type { BrowserMode } from '../../../src/js/share/capabilities.js';
 
-const loadOptions = vi.fn();
-vi.mock('../../../src/js/share/options.js', () => ({
-  loadOptions: (): unknown => loadOptions(),
-}));
-
-const set = vi.fn();
-const sendMessage = vi.fn();
-
-type Mode = 'hybrid' | 'collapse-only' | 'legacy' | 'unsupported';
+const loadOptions = vi.fn<OptionsStore['load']>();
+const set = vi.fn<OptionsStore['save']>();
+const sendMessage = vi.fn<Messaging['send']>();
 
 const fn = () => undefined;
 
-function installBrowser(mode: Mode) {
-  const hasHide = mode === 'hybrid' || mode === 'legacy';
-  const hasGroups = mode === 'hybrid' || mode === 'collapse-only';
-  Object.assign(globalThis, {
-    browser: {
-      tabs: {
-        ...(hasHide ? { hide: fn } : {}),
-        ...(hasGroups ? { group: fn } : {}),
-      },
-      ...(hasGroups ? { tabGroups: { query: fn } } : {}),
-      storage: { sync: { set } },
-      runtime: { sendMessage },
+/** Start the option on a browser that can do what the mode needs */
+const initIn = (mode: BrowserMode) =>
+  initNativeGroupsOption({
+    options: { load: loadOptions, save: set },
+    messaging: { send: sendMessage },
+    capabilities: {
+      hasTabHide: mode === 'hybrid' || mode === 'legacy',
+      hasTabGroups: mode === 'hybrid' || mode === 'collapse-only',
     },
   });
-}
+
+const optionsWith = (useNativeGroups: boolean): Options => ({
+  ...createDefaultOptions('1.0', true),
+  useNativeGroups,
+});
 
 const PAGE = `
   <div id="nativeGroupsContainer">
@@ -47,10 +48,9 @@ const checkbox = () => {
 };
 const html = (id: string) => document.getElementById(id);
 
-async function setUp(mode: Mode, useNativeGroups = true) {
-  installBrowser(mode);
-  loadOptions.mockResolvedValue({ useNativeGroups });
-  await initNativeGroupsOption();
+async function setUp(mode: BrowserMode, useNativeGroups = true) {
+  loadOptions.mockResolvedValue(optionsWith(useNativeGroups));
+  await initIn(mode);
 }
 
 function toggle(checked: boolean) {
@@ -71,7 +71,6 @@ describe('options/native-groups.ts', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
-    Reflect.deleteProperty(globalThis, 'browser');
     document.body.innerHTML = '';
   });
 
@@ -155,19 +154,18 @@ describe('options/native-groups.ts', () => {
 
   describe('initialisation', () => {
     it('waits for the stored options before it touches the page', async () => {
-      installBrowser('hybrid');
-      let release: (value: unknown) => void = () => undefined;
+      let release: (value: Options) => void = () => undefined;
       loadOptions.mockReturnValue(
         new Promise((resolve) => {
           release = resolve;
         }),
       );
 
-      const done = initNativeGroupsOption();
+      const done = initIn('hybrid');
       await Promise.resolve();
       expect(html('nativeGroupsWarning')?.textContent).toBe('');
 
-      release({ useNativeGroups: true });
+      release(optionsWith(true));
       await done;
       expect(html('nativeGroupsWarning')?.textContent).not.toBe('');
     });

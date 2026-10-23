@@ -1,0 +1,8 @@
+{
+  "ref": "refs/pull/1/merge",
+  "pull_request": {
+    "number": 1,
+    "base": { "ref": "main" },
+    "head": { "ref": "act-local" }
+  }
+}

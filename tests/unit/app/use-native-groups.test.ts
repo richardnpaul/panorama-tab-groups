@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createUseNativeGroups } from '../../../src/js/app/use-native-groups.js';
-import type { Options } from '../../../src/js/share/options.js';
+import type { Options } from '../../../src/js/core/options.js';
 
 const optionsWith = (useNativeGroups: boolean): Options => ({
   toolbarPosition: 'top',

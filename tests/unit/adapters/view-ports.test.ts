@@ -57,6 +57,37 @@ describe('adapters/browser/view-tabs.ts', () => {
     expect(query).toHaveBeenCalledWith({ currentWindow: true });
   });
 
+  it('lists the tabs of every window, leaving out any without an id or window', async () => {
+    const query = vi
+      .fn()
+      .mockResolvedValue([
+        rawTab(),
+        rawTab({ id: undefined }),
+        rawTab({ id: 5, windowId: 3 }),
+        rawTab({ windowId: undefined }),
+      ]);
+    const tabs = createBrowserViewTabs(() => api({ query }));
+
+    const listed = await tabs.listAll();
+
+    expect(listed.map(({ id, windowId }) => [id, windowId])).toEqual([
+      [4, 2],
+      [5, 3],
+    ]);
+    expect(listed[0]).toEqual({
+      id: 4,
+      windowId: 2,
+      index: 1,
+      title: 'T',
+      url: 'https://a/',
+      favIconUrl: 'https://a/i.png',
+      pinned: true,
+      discarded: true,
+      lastAccessed: 99,
+    });
+    expect(query).toHaveBeenNthCalledWith(1, {});
+  });
+
   it('fills in what the browser leaves out', async () => {
     const tabs = createBrowserViewTabs(() =>
       api({
@@ -225,6 +256,16 @@ describe('adapters/memory/view-tabs.ts', () => {
 
   it('has no tabs to begin with', async () => {
     await expect(createMemoryViewTabs().list()).resolves.toEqual([]);
+    await expect(createMemoryViewTabs().listAll()).resolves.toEqual([]);
+  });
+
+  it('lists copies of all its tabs as the tabs of every window', async () => {
+    const tabs = createMemoryViewTabs([viewTab(1), viewTab(2)]);
+
+    const listed = await tabs.listAll();
+    listed[0] = { ...viewTab(1), title: 'changed' };
+
+    expect(await tabs.listAll()).toEqual([viewTab(1), viewTab(2)]);
   });
 
   it('gives a tab by id as a copy, and fails for one that is not there', async () => {

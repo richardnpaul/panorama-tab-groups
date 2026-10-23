@@ -11,7 +11,7 @@ import {
   type Backup,
   type BackupWindow,
 } from '../../../src/js/core/backup.js';
-import type { Options } from '../../../src/js/share/options.js';
+import type { Options } from '../../../src/js/core/options.js';
 
 const rect = { x: 0.1, y: 0.2, w: 0.3, h: 0.4 };
 

@@ -1,25 +1,52 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import getStatistics from '../../../src/js/options/statistics.js';
+import { createBrowserViewState } from '../../../src/js/adapters/browser/view-state.js';
+import { createMemoryViewState } from '../../../src/js/adapters/memory/view-state.js';
+import { createMemoryViewTabs } from '../../../src/js/adapters/memory/view-tabs.js';
+import { createStatistics } from '../../../src/js/options/statistics.js';
+import type { ViewState } from '../../../src/js/ports/view-state.js';
+import type { ViewTab } from '../../../src/js/ports/view-tabs.js';
+import { createFakeSessions } from '../../support/fake-sessions.js';
 
-const query = vi.fn();
-const getTabValue = vi.fn();
-const getMessage = vi.fn();
+const getMessage = vi.fn<(messageName: string) => string>();
 
 const text = (id: string) => document.getElementById(id)?.textContent;
 
+const tab = (id: number, discarded = false): ViewTab => ({
+  id,
+  windowId: 1,
+  index: id,
+  title: '',
+  url: undefined,
+  favIconUrl: undefined,
+  pinned: false,
+  discarded,
+  lastAccessed: 0,
+});
+
+/** The statistics over these tabs, with thumbnails as the browser stores them */
+function statisticsOf(
+  tabs: ViewTab[],
+  stored: Record<number, unknown> = {},
+): { show: () => Promise<void>; viewState: ViewState } {
+  const sessions = createFakeSessions();
+  Object.entries(stored).forEach(([id, value]) => {
+    sessions.tabValues.set(sessions.slot(Number(id), 'thumbnail'), value);
+  });
+  const viewState = createBrowserViewState(() => sessions.api);
+  return {
+    show: createStatistics({
+      viewTabs: createMemoryViewTabs(tabs),
+      viewState,
+      i18n: { getMessage },
+    }),
+    viewState,
+  };
+}
+
 describe('options/statistics.ts', () => {
   beforeEach(() => {
-    query.mockReset();
-    getTabValue.mockReset().mockResolvedValue(undefined);
     getMessage.mockReset().mockReturnValue('active');
-    Object.assign(globalThis, {
-      browser: {
-        tabs: { query },
-        sessions: { getTabValue },
-        i18n: { getMessage },
-      },
-    });
     document.body.innerHTML = `
       <span id="thumbnailCacheSize">old size</span>
       <span id="numberOfTabs">old tabs</span>
@@ -27,99 +54,67 @@ describe('options/statistics.ts', () => {
   });
 
   afterEach(() => {
-    Reflect.deleteProperty(globalThis, 'browser');
     document.body.innerHTML = '';
   });
 
-  function givenTabs(
-    tabs: { id?: number; discarded: boolean }[],
-    thumbnails: Record<number, unknown>,
-  ) {
-    query.mockResolvedValue(tabs);
-    getTabValue.mockImplementation(async (id: number) =>
-      Promise.resolve(thumbnails[id]),
-    );
-  }
+  it('reads the thumbnail of every tab of every window', async () => {
+    const viewState = createMemoryViewState();
+    const thumbnail = vi.spyOn(viewState, 'thumbnail');
+    const viewTabs = createMemoryViewTabs([tab(1), tab(2, true)]);
+    const listAll = vi.spyOn(viewTabs, 'listAll');
 
-  it('queries all tabs and reads the cached thumbnail of each', async () => {
-    givenTabs(
-      [
-        { id: 1, discarded: false },
-        { id: 2, discarded: true },
-      ],
-      {},
-    );
+    await createStatistics({ viewTabs, viewState, i18n: { getMessage } })();
 
-    await getStatistics();
-
-    expect(query).toHaveBeenCalledTimes(1);
-    expect(query).toHaveBeenCalledWith({});
-    expect(getTabValue).toHaveBeenCalledTimes(2);
-    expect(getTabValue).toHaveBeenCalledWith(1, 'thumbnail');
-    expect(getTabValue).toHaveBeenCalledWith(2, 'thumbnail');
+    expect(listAll).toHaveBeenCalledTimes(1);
+    expect(thumbnail).toHaveBeenCalledTimes(2);
+    expect(thumbnail).toHaveBeenCalledWith(1);
+    expect(thumbnail).toHaveBeenCalledWith(2);
   });
 
-  it('adds up thumbnails stored as objects and as plain strings', async () => {
-    givenTabs(
-      [
-        { id: 1, discarded: false },
-        { id: 2, discarded: true },
-        { id: 3, discarded: false },
-      ],
-      { 1: { thumbnail: 'A'.repeat(50) }, 2: 'B'.repeat(70) },
-    );
+  it('adds up thumbnails stored as records and as plain strings', async () => {
+    const { show } = statisticsOf([tab(1), tab(2, true), tab(3)], {
+      1: { thumbnail: 'A'.repeat(50), capturedTime: 5 },
+      2: 'B'.repeat(70),
+    });
 
-    await getStatistics();
+    await show();
 
     expect(text('thumbnailCacheSize')).toBe('120 bytes');
   });
 
-  it('counts a thumbnail object without a string thumbnail as empty', async () => {
-    givenTabs(
-      [
-        { id: 1, discarded: false },
-        { id: 2, discarded: false },
-        { id: 3, discarded: false },
-      ],
-      { 1: { thumbnail: 5 }, 2: {}, 3: null },
-    );
+  it.each([
+    ['a record whose picture is not text', { thumbnail: 5 }],
+    ['a record without a picture', {}],
+    ['nothing', null],
+  ])('counts a thumbnail stored as %s as empty', async (_name, stored) => {
+    const { show } = statisticsOf([tab(1)], { 1: stored });
 
-    await getStatistics();
+    await show();
 
     expect(text('thumbnailCacheSize')).toBe('0 bytes');
   });
 
-  it('does not read a thumbnail for a tab without an id', async () => {
-    givenTabs([{ discarded: false }], {});
+  it('counts the pictures the view keeps now', async () => {
+    const { show, viewState } = statisticsOf([tab(1)]);
+    await viewState.setThumbnail(1, { image: 'C'.repeat(30), capturedAt: 1 });
 
-    await getStatistics();
+    await show();
 
-    expect(getTabValue).not.toHaveBeenCalled();
-    expect(text('thumbnailCacheSize')).toBe('0 bytes');
-    expect(text('numberOfTabs')).toBe('1 (active 1)');
+    expect(text('thumbnailCacheSize')).toBe('30 bytes');
   });
 
   it('formats a large cache size', async () => {
-    givenTabs([{ id: 1, discarded: false }], {
-      1: 'A'.repeat(2048),
-    });
+    const { show } = statisticsOf([tab(1)], { 1: 'A'.repeat(2048) });
 
-    await getStatistics();
+    await show();
 
     expect(text('thumbnailCacheSize')).toBe('2.000 KiB');
   });
 
   it('reports the number of tabs and how many are not discarded', async () => {
-    givenTabs(
-      [
-        { id: 1, discarded: false },
-        { id: 2, discarded: true },
-        { id: 3, discarded: false },
-      ],
-      {},
-    );
+    const { show } = statisticsOf([tab(1), tab(2, true), tab(3)]);
 
-    await getStatistics();
+    await show();
 
     expect(getMessage).toHaveBeenCalledWith(
       'optionsStatisticsNumberOfTabsActive',
@@ -127,19 +122,19 @@ describe('options/statistics.ts', () => {
     expect(text('numberOfTabs')).toBe('3 (active 2)');
   });
 
-  it('reports zero for a window without tabs', async () => {
-    givenTabs([], {});
+  it('reports zero when there are no tabs', async () => {
+    const { show } = statisticsOf([]);
 
-    await getStatistics();
+    await show();
 
     expect(text('numberOfTabs')).toBe('0 (active 0)');
     expect(text('thumbnailCacheSize')).toBe('0 bytes');
   });
 
   it('replaces the old text instead of adding to it', async () => {
-    givenTabs([{ id: 1, discarded: false }], {});
+    const { show } = statisticsOf([tab(1)]);
 
-    await getStatistics();
+    await show();
 
     expect(document.getElementById('numberOfTabs')?.childNodes).toHaveLength(1);
     expect(
@@ -148,11 +143,9 @@ describe('options/statistics.ts', () => {
   });
 
   it('fails when the page lacks the statistics elements', async () => {
-    givenTabs([], {});
+    const { show } = statisticsOf([]);
     document.body.innerHTML = '<span id="thumbnailCacheSize"></span>';
 
-    await expect(getStatistics()).rejects.toThrow(
-      'Element not found: #numberOfTabs',
-    );
+    await expect(show()).rejects.toThrow('Element not found: #numberOfTabs');
   });
 });

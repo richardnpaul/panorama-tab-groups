@@ -4,6 +4,12 @@
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:4": {
+      "moby": false
+    }
+  },
+  "privileged": true,
   "runArgs": ["--shm-size=1g", "--security-opt", "seccomp=unconfined"],
   "mounts": [
     {
@@ -27,9 +33,9 @@
       "type": "volume"
     },
     {
-      "source": "${localEnv:HOME}/.claude",
+      "source": "claude-config-dir",
       "target": "/home/vscode/.claude",
-      "type": "bind"
+      "type": "volume"
     }
   ],
   "updateRemoteUserUID": true,

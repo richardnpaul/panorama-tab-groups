@@ -1,71 +1,18 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import type {
+  BackupControls,
+  ChosenFile,
+} from '../../../src/js/app/backup-controls.js';
+import { createBackupHandlers } from '../../../src/js/options/backup.js';
 
-const backupJson = JSON.stringify({
-  file: { type: 'panoramaView', version: 1 },
-  windows: [
-    {
-      groups: [{ id: 1, name: 'Work', rect: { x: 0, y: 0, w: 0.5, h: 0.5 } }],
-      tabs: [{ url: 'https://a/', groupId: 1, pinned: false }],
-      activeGroup: 1,
-      groupIndex: 2,
-    },
-  ],
-});
-
-function fakeBrowser() {
-  const tabValues = new Map<string, unknown>();
-  const windowValues = new Map<string, unknown>();
-  return {
-    runtime: {
-      getManifest: () => ({ version: '2.0' }),
-      sendMessage: vi.fn().mockResolvedValue(undefined),
-    },
-    storage: {
-      sync: {
-        get: vi.fn((defaults: object) =>
-          Promise.resolve({ ...defaults, view: 'popup' }),
-        ),
-      },
-    },
-    sessions: {
-      getWindowValue: (id: number, key: string) =>
-        Promise.resolve(windowValues.get(`${String(id)}:${key}`)),
-      setWindowValue: (id: number, key: string, value: unknown) => {
-        windowValues.set(`${String(id)}:${key}`, value);
-        return Promise.resolve();
-      },
-      getTabValue: (id: number, key: string) =>
-        Promise.resolve(tabValues.get(`${String(id)}:${key}`)),
-      setTabValue: (id: number, key: string, value: unknown) => {
-        tabValues.set(`${String(id)}:${key}`, value);
-        return Promise.resolve();
-      },
-      removeTabValue: () => Promise.resolve(),
-    },
-    windows: {
-      getAll: vi.fn().mockResolvedValue([{ id: 1 }]),
-      create: vi.fn().mockResolvedValue({ id: 9 }),
-      update: vi.fn().mockResolvedValue({}),
-    },
-    tabs: {
-      query: vi.fn().mockResolvedValue([]),
-      create: vi.fn().mockResolvedValue({ id: 70 }),
-      remove: vi.fn().mockResolvedValue(undefined),
-    },
-    downloads: { download: vi.fn().mockResolvedValue(1) },
-    tabValues,
-    windowValues,
-  };
-}
-
-async function load() {
-  vi.resetModules();
-  const browser = fakeBrowser();
-  vi.stubGlobal('browser', browser);
-  const alert = vi.spyOn(window, 'alert').mockImplementation(() => undefined);
-  const module = await import('../../../src/js/options/backup.js');
-  return { ...module, browser, alert };
+function setUp() {
+  const openFile = vi.fn<(file: ChosenFile | undefined) => Promise<void>>(() =>
+    Promise.resolve(),
+  );
+  const save = vi.fn(() => Promise.resolve());
+  const controls: BackupControls = { openFile, save };
+  return { handlers: createBackupHandlers(controls), openFile, save };
 }
 
 const inputWith = (files: File[]): HTMLInputElement => {
@@ -79,108 +26,74 @@ const inputWith = (files: File[]): HTMLInputElement => {
   return input;
 };
 
-const changeOf = (input: HTMLInputElement): Event => {
+const changeOf = (target: EventTarget): Event => {
   const event = new Event('change');
-  Object.defineProperty(event, 'target', { value: input });
+  Object.defineProperty(event, 'target', { value: target });
   return event;
 };
 
 describe('options/backup.ts', () => {
-  beforeEach(() => {
-    vi.spyOn(console, 'debug').mockImplementation(() => undefined);
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
-  });
-
   describe('loadBackup', () => {
-    it('opens the backup in the file that was chosen, in a window of its own', async () => {
-      const { loadBackup, browser, alert } = await load();
-      const file = new File([backupJson], 'backup.json', {
-        type: 'application/json',
-      });
+    it('opens the first file chosen in the input', async () => {
+      const { handlers, openFile } = setUp();
+      const first = new File(['{}'], 'a.json', { type: 'application/json' });
+      const second = new File(['{}'], 'b.json', { type: 'application/json' });
 
-      await loadBackup(changeOf(inputWith([file])));
+      await handlers.loadBackup(changeOf(inputWith([first, second])));
 
-      expect(alert).not.toHaveBeenCalled();
-      expect(browser.windows.create).toHaveBeenCalledTimes(1);
-      expect(browser.tabs.create).toHaveBeenCalledWith(
-        expect.objectContaining({ url: 'https://a/', windowId: 9 }),
+      expect(openFile).toHaveBeenCalledTimes(1);
+      expect(openFile).toHaveBeenCalledWith(first);
+    });
+
+    it('opens nothing when no file was chosen', async () => {
+      const { handlers, openFile } = setUp();
+
+      await handlers.loadBackup(changeOf(inputWith([])));
+
+      expect(openFile).toHaveBeenCalledWith(undefined);
+    });
+
+    it('opens nothing when the input has no list of files', async () => {
+      const { handlers, openFile } = setUp();
+
+      await handlers.loadBackup(changeOf(document.createElement('input')));
+
+      expect(openFile).toHaveBeenCalledWith(undefined);
+    });
+
+    it('opens nothing when the event is not from an input', async () => {
+      const { handlers, openFile } = setUp();
+
+      await handlers.loadBackup(changeOf(document.createElement('div')));
+
+      expect(openFile).toHaveBeenCalledWith(undefined);
+    });
+
+    it('opens nothing when the event has no target', async () => {
+      const { handlers, openFile } = setUp();
+
+      await handlers.loadBackup(new Event('change'));
+
+      expect(openFile).toHaveBeenCalledWith(undefined);
+    });
+
+    it('waits for the backup to open', async () => {
+      const { handlers, openFile } = setUp();
+      openFile.mockRejectedValueOnce(new Error('cannot open'));
+
+      await expect(handlers.loadBackup(new Event('change'))).rejects.toThrow(
+        'cannot open',
       );
-      expect(browser.windowValues.get('9:activeGroup')).toBe(1);
-    });
-
-    it('says the file is invalid when it is not JSON', async () => {
-      const { loadBackup, alert, browser } = await load();
-      const file = new File(['x'], 'backup.txt', { type: 'text/plain' });
-
-      await loadBackup(changeOf(inputWith([file])));
-
-      expect(alert).toHaveBeenCalledWith('Invalid file');
-      expect(browser.windows.create).not.toHaveBeenCalled();
-    });
-
-    it('says the file is invalid when none was chosen', async () => {
-      const { loadBackup, alert } = await load();
-
-      await loadBackup(changeOf(inputWith([])));
-
-      expect(alert).toHaveBeenCalledWith('Invalid file');
-    });
-
-    it('says the file is invalid when the event is not from an input', async () => {
-      const { loadBackup, alert } = await load();
-      const event = new Event('change');
-      Object.defineProperty(event, 'target', {
-        value: document.createElement('div'),
-      });
-
-      await loadBackup(event);
-
-      expect(alert).toHaveBeenCalledWith('Invalid file');
-    });
-
-    it('says the file is invalid when the event has no target', async () => {
-      const { loadBackup, alert } = await load();
-
-      await loadBackup(new Event('change'));
-
-      expect(alert).toHaveBeenCalledWith('Invalid file');
     });
   });
 
   describe('saveBackup', () => {
-    it('offers a file made from a link to the backup', async () => {
-      const { saveBackup, browser } = await load();
-      const createObjectURL = vi.fn().mockReturnValue('blob:backup');
-      Object.defineProperty(URL, 'createObjectURL', {
-        value: createObjectURL,
-        configurable: true,
-      });
+    it('saves a backup', async () => {
+      const { handlers, save } = setUp();
 
-      try {
-        await saveBackup();
-      } finally {
-        Reflect.deleteProperty(URL, 'createObjectURL');
-      }
+      await handlers.saveBackup();
 
-      expect(createObjectURL).toHaveBeenCalledTimes(1);
-      const blob: unknown = createObjectURL.mock.calls[0]?.[0];
-      expect(blob).toBeInstanceOf(Blob);
-      expect(blob instanceof Blob && blob.type).toBe('application/json');
-      const text = blob instanceof Blob ? await blob.text() : '';
-      expect(text).toContain('"type": "panoramaView"');
-      const options: unknown = browser.downloads.download.mock.calls[0]?.[0];
-      expect(options).toMatchObject({
-        url: 'blob:backup',
-        conflictAction: 'uniquify',
-        saveAs: true,
-      });
-      expect(JSON.stringify(options)).toMatch(
-        /panoramaView-backup-\d{6}-\d{6}\.json/u,
-      );
+      expect(save).toHaveBeenCalledTimes(1);
     });
   });
 });

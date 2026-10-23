@@ -5,7 +5,7 @@ import type { Toolbar } from '../ports/toolbar.js';
 const POPUP_PAGE = 'popup-view/index.html';
 
 export interface ViewRefreshDeps {
-  options: OptionsStore;
+  options: Pick<OptionsStore, 'load'>;
   toolbar: Pick<Toolbar, 'setPopup'>;
   logger: Pick<Logger, 'debug'>;
 }

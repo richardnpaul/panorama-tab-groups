@@ -1,16 +1,18 @@
+import type { OptionsStore } from '../ports/options.js';
 import { requireElement } from '../share/dom.js';
 
-interface ThemeApi {
-  storage: { sync: { set(items: Record<string, unknown>): Promise<void> } };
-}
+/** Keep the theme that is checked on the page */
+export function createThemeSaver({
+  options,
+}: {
+  options: Pick<OptionsStore, 'save'>;
+}): () => Promise<void> {
+  return async () => {
+    const selectedTheme = requireElement(
+      HTMLInputElement,
+      'input[name="theme"]:checked',
+    ).value;
 
-const api = (): ThemeApi => browser;
-
-export default async function saveOptionTheme(): Promise<void> {
-  const selectedTheme = requireElement(
-    HTMLInputElement,
-    'input[name="theme"]:checked',
-  ).value;
-
-  await api().storage.sync.set({ theme: selectedTheme });
+    await options.save({ theme: selectedTheme });
+  };
 }

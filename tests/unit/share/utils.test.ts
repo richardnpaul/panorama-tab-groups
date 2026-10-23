@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   formatByteSize,
   getPluralForm,
   newElement,
 } from '../../../src/js/share/utils.js';
 
-const getMessage = vi.fn();
+const getMessage = vi.fn<(messageName: string) => string>();
+const i18n = { getMessage };
 
 describe('share/utils.ts', () => {
   describe('newElement', () => {
@@ -73,22 +74,17 @@ describe('share/utils.ts', () => {
 
   describe('getPluralForm', () => {
     beforeEach(() => {
-      Object.assign(globalThis, { browser: { i18n: { getMessage } } });
       getMessage.mockReset();
-    });
-
-    afterEach(() => {
-      Reflect.deleteProperty(globalThis, 'browser');
     });
 
     const withRule = (rule: string) => {
       getMessage.mockReturnValue(rule);
     };
 
-    it('asks the browser for the plural rule of the current language', () => {
+    it('asks the translations for the plural rule of the current language', () => {
       withRule('1');
 
-      getPluralForm(1, 'a|b');
+      getPluralForm(i18n, 1, 'a|b');
 
       expect(getMessage).toHaveBeenCalledTimes(1);
       expect(getMessage).toHaveBeenCalledWith('pluralRule');
@@ -99,47 +95,47 @@ describe('share/utils.ts', () => {
       (rule) => {
         withRule(rule);
 
-        expect(getPluralForm(5, 'single form')).toBe('single form');
+        expect(getPluralForm(i18n, 5, 'single form')).toBe('single form');
       },
     );
 
     it('uses a count of 1 and an empty string by default', () => {
       withRule('1');
 
-      expect(getPluralForm()).toBe('');
-      expect(getPluralForm(undefined, 'one|other')).toBe('one');
+      expect(getPluralForm(i18n)).toBe('');
+      expect(getPluralForm(i18n, undefined, 'one|other')).toBe('one');
     });
 
     it('accepts the count as a string', () => {
       withRule('1');
 
-      expect(getPluralForm('1', 'one|other')).toBe('one');
-      expect(getPluralForm('2', 'one|other')).toBe('other');
+      expect(getPluralForm(i18n, '1', 'one|other')).toBe('one');
+      expect(getPluralForm(i18n, '2', 'one|other')).toBe('other');
     });
 
     it('treats a count that is not a number as not matching', () => {
       withRule('1');
 
-      expect(getPluralForm('abc', 'one|other')).toBe('other');
+      expect(getPluralForm(i18n, 'abc', 'one|other')).toBe('other');
     });
 
     it('returns the whole string for an unknown rule', () => {
       withRule('999');
 
-      expect(getPluralForm(5, 'form1|form2')).toBe('form1|form2');
+      expect(getPluralForm(i18n, 5, 'form1|form2')).toBe('form1|form2');
     });
 
     it('returns the whole string when the rule is not a number', () => {
       withRule('');
 
-      expect(getPluralForm(5, 'form1|form2')).toBe('form1|form2');
+      expect(getPluralForm(i18n, 5, 'form1|form2')).toBe('form1|form2');
     });
 
     it('rule 0 always uses the first form', () => {
       withRule('0');
 
-      expect(getPluralForm(0, 'form1|form2')).toBe('form1');
-      expect(getPluralForm(5, 'form1|form2')).toBe('form1');
+      expect(getPluralForm(i18n, 0, 'form1|form2')).toBe('form1');
+      expect(getPluralForm(i18n, 5, 'form1|form2')).toBe('form1');
     });
 
     it.each([
@@ -151,7 +147,7 @@ describe('share/utils.ts', () => {
     ])('rule 1: %s is %s', (count, form) => {
       withRule('1');
 
-      expect(getPluralForm(count, 'one|other')).toBe(form);
+      expect(getPluralForm(i18n, count, 'one|other')).toBe(form);
     });
 
     it.each([
@@ -163,7 +159,7 @@ describe('share/utils.ts', () => {
     ])('rule 2: %s is %s', (count, form) => {
       withRule('2');
 
-      expect(getPluralForm(count, 'one|other')).toBe(form);
+      expect(getPluralForm(i18n, count, 'one|other')).toBe(form);
     });
 
     it.each([
@@ -195,7 +191,7 @@ describe('share/utils.ts', () => {
     ])('rule 7: %s is %s', (count, form) => {
       withRule('7');
 
-      expect(getPluralForm(count, 'one|few|other')).toBe(form);
+      expect(getPluralForm(i18n, count, 'one|few|other')).toBe(form);
     });
 
     it.each([
@@ -222,13 +218,13 @@ describe('share/utils.ts', () => {
     ])('rule 9: %s is %s', (count, form) => {
       withRule('9');
 
-      expect(getPluralForm(count, 'one|few|other')).toBe(form);
+      expect(getPluralForm(i18n, count, 'one|few|other')).toBe(form);
     });
 
     it('returns undefined when the string lacks the needed form', () => {
       withRule('7');
 
-      expect(getPluralForm(5, 'one|few')).toBeUndefined();
+      expect(getPluralForm(i18n, 5, 'one|few')).toBeUndefined();
     });
   });
 

@@ -18,6 +18,8 @@ export interface ViewTab {
 export interface ViewTabs {
   /** The tabs of the window, in the order the browser has them */
   list(): Promise<ViewTab[]>;
+  /** The tabs of every window; a tab the browser gives no id or window is left out */
+  listAll(): Promise<ViewTab[]>;
   /** Rejects if the tab no longer exists */
   get(tabId: number): Promise<ViewTab>;
   activate(tabId: number): Promise<void>;

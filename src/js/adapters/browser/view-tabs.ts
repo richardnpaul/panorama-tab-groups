@@ -16,7 +16,7 @@ export interface RawViewTab {
 /** The part of `browser.tabs` the view uses */
 export interface ViewTabsApi {
   tabs: {
-    query(queryInfo: { currentWindow: true }): Promise<RawViewTab[]>;
+    query(queryInfo: { currentWindow?: true }): Promise<RawViewTab[]>;
     get(tabId: number): Promise<RawViewTab>;
     getCurrent(): Promise<{ id?: number | undefined } | undefined>;
     update(tabId: number, updateProperties: { active: true }): Promise<unknown>;
@@ -57,6 +57,13 @@ export function createBrowserViewTabs(getApi: () => ViewTabsApi): ViewTabs {
   return {
     async list() {
       return (await tabs().query({ currentWindow: true })).map(viewTabOf);
+    },
+    async listAll() {
+      return (await tabs().query({}))
+        .filter(
+          ({ id, windowId }) => id !== undefined && windowId !== undefined,
+        )
+        .map(viewTabOf);
     },
     async get(tabId) {
       return viewTabOf(await tabs().get(tabId));

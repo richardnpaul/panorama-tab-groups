@@ -206,7 +206,7 @@ web-ext run -s dist --firefox=/path/to/firefox-nightly
 
 ### Automated Testing (Playwright)
 
-We use Playwright for end-to-end automated testing in both Chromium and Firefox. Firefox is the primary browser for extension behavior, and the repository includes a custom fixture in `playwright.config.js` to handle temporary addon install, UUID discovery, and `moz-extension://` navigation.
+We use Playwright for end-to-end automated testing in both Chromium and Firefox. Firefox is the primary browser for extension behavior, and the repository includes custom fixtures in `tests/e2e/fixtures.ts` (configured by `playwright.config.ts`) to handle temporary addon install, UUID discovery, and `moz-extension://` navigation. The specs are TypeScript and are type-checked with the rest of the repository by `npm run typecheck`.
 
 ```bash
 # Run all end-to-end tests
@@ -228,14 +228,14 @@ npx playwright test --project=chromium
 **What is tested:**
 
 - **Extension bootstrap**: Verifies the extension loads and resolves a non-null runtime ID/UUID before navigation.
-- **Popup View**: Verifies the popup opens and reaches its ready UI state, and (`tests/e2e/popup.spec.js`) lists the groups, makes and names a group, shows the tabs of a group, searches, moves the focus with the arrow keys and puts the groups in order by dragging.
-- **Options Page**: Verifies the options page initializes its settings UI.
+- **Popup View**: Verifies the popup opens and reaches its ready UI state, and (`tests/e2e/popup.spec.ts`) lists the groups, makes and names a group, shows the tabs of a group, searches, moves the focus with the arrow keys and puts the groups in order by dragging.
+- **Options Page**: Verifies the options page initializes its settings UI, and (`tests/e2e/options-persistence.spec.ts`) that the theme, the toolbar position, the view and a shortcut turned off and on are still as chosen when the page is opened again.
 - **Firefox multi-page navigation**: Verifies Firefox can open a second extension page without regressing the custom `moz-extension://` proxy path.
 
 **Chromium compatibility notes:**
 
 - **`src/manifest.json`**: Uses `background.service_worker` for MV3 compatibility.
-- **Polyfill**: `src/js/polyfill.js` maps `browser` to `chrome` and mocks the Firefox-specific `sessions` API with storage-backed fallbacks when needed.
+- **Polyfill**: `src/js/polyfill.ts` maps `browser` to `chrome` and mocks the Firefox-specific `sessions` API with storage-backed fallbacks when needed.
 
 **Firefox troubleshooting:**
 
@@ -243,6 +243,50 @@ npx playwright test --project=chromium
 - **`Extension ID for firefox was not resolved`**: Check the temporary addon install logs and confirm `browser_specific_settings.gecko.id` in `src/manifest.json` still matches the test fixture.
 - **`moz-extension://null/...` navigation**: This indicates UUID resolution failed before page navigation; inspect the Playwright report and `prefs.js` UUID registration.
 - **Headed launch fails due to `DISPLAY`/`WAYLAND_DISPLAY`**: Use the dev container desktop or rerun without `PLAYWRIGHT_FIREFOX_HEADED=1`.
+
+### Running the GitHub workflows locally (`act`)
+
+[`act`](https://github.com/nektos/act) runs the jobs of `.github/workflows/` in Docker containers in the devcontainer,
+so a broken workflow shows up before a push. The devcontainer gets its own Docker daemon from the `docker-in-docker`
+feature, which makes the container **privileged**: anything running in it, an AI agent's commands included, can do
+more than before. So `act` is only ever started by you, by hand; no hook, script or agent default runs it.
+
+The pinned pieces: the `act` binary (version and SHA-256 in `.devcontainer/Dockerfile`), the Docker feature (digest in
+`.devcontainer/devcontainer-lock.json`) and the runner image (digest in `.actrc`). The event files in
+`.github/act/events/` stand in for the events GitHub sends, so a workflow that tests `github.event_name` takes the same
+branch as on GitHub.
+
+```bash
+# List the jobs of every workflow (needs no Docker)
+npm run act:list
+
+# Run the workflows a push to main runs
+npm run act:run -- push -e .github/act/events/push-main.json
+
+# One workflow, as a pull request runs it (the incremental mutation run)
+act pull_request -W .github/workflows/mutation.yml -e .github/act/events/pull_request.json
+
+# The full mutation run of main, which saves its report to act's local cache
+act push -W .github/workflows/mutation.yml -e .github/act/events/push-main.json
+
+# The weekly audit and the nightly mutation run
+act workflow_dispatch -W .github/workflows/audit.yml
+act schedule -W .github/workflows/mutation.yml -e .github/act/events/schedule.json
+```
+
+`actionlint` checks the workflows on every commit that touches one (a pre-commit hook), with no Docker at all.
+
+What a green `act` run does and does not mean:
+
+| It can check                                                                          | It cannot check                                                            |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Workflow syntax, job graph, `needs`, `if` conditions                                  | Whether a cache saved by one run is found by the next (its cache is local) |
+| That every step's command works in a runner-like container                            | Branch protection and required status checks (repository settings)         |
+| Matrix expansion, environment, working directories                                    | `schedule` timing, permissions of the real `GITHUB_TOKEN`, rate limits     |
+| Behaviour per event (`push`, `pull_request`, `workflow_dispatch`) given an event file | Exactly what `ubuntu-latest` contains (the act image is an approximation)  |
+| Step durations, as a rough guide to `timeout-minutes`                                 | Marketplace actions that need GitHub's service (some artifact/cache calls) |
+
+A green `act` run is not a green GitHub run; the pull request is still the final check.
 
 ### Lint Everything
 

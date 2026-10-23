@@ -1,11 +1,11 @@
 // Mutation testing. `mutate` covers all the source with positive globs only;
-// negated globs are forbidden (scripts/check-no-suppressions.mjs).
+// negated globs are forbidden (scripts/check-no-suppressions.ts).
 // `MUTATE=src/a.ts,src/b.ts npm run test:mutation` narrows a run while iterating
 const only = process.env.MUTATE?.split(',');
 
 export default {
   testRunner: 'vitest',
-  vitest: { configFile: 'vitest.config.mjs' },
+  vitest: { configFile: 'vitest.config.ts' },
   checkers: ['typescript'],
   tsconfigFile: 'tsconfig.json',
   plugins: [
@@ -13,7 +13,7 @@ export default {
     '@stryker-mutator/typescript-checker',
   ],
   mutate: only ?? [
-    'scripts/**/*.mjs',
+    'scripts/**/*.ts',
     'tools/adbkit-stub/index.js',
     'src/**/*.ts',
   ],

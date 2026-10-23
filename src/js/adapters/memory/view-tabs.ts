@@ -33,6 +33,8 @@ export function createMemoryViewTabs(
       tabs = next.map((tab) => ({ ...tab }));
     },
     list: () => Promise.resolve(tabs.map((tab) => ({ ...tab }))),
+    // One window is all it holds
+    listAll: () => Promise.resolve(tabs.map((tab) => ({ ...tab }))),
     get(tabId) {
       const found = find(tabId);
       return found === undefined

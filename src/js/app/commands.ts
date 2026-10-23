@@ -11,7 +11,7 @@ export interface CommandsDeps {
     GroupState,
     'getGroups' | 'getActiveGroup' | 'setActiveGroup'
   >;
-  options: OptionsStore;
+  options: Pick<OptionsStore, 'load'>;
   extension: Pick<Extension, 'openOptionsPage'>;
   // Show the tabs of the group, and one of them
   showGroup: (activeGroup: number) => Promise<void>;

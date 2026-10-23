@@ -18,10 +18,15 @@
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
 
-    "allowJs": true,
-    "checkJs": false,
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": ["src", "tests", "scripts"]
+  "include": [
+    "src",
+    "tests",
+    "scripts",
+    "tools",
+    "vitest.config.ts",
+    "playwright.config.ts"
+  ]
 }

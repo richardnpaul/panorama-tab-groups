@@ -1,13 +1,16 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import saveOptionToolbarPosition from '../../../src/js/options/toolbar.js';
+import type { OptionsStore } from '../../../src/js/ports/options.js';
+import { createToolbarSaver } from '../../../src/js/options/toolbar.js';
 
-const set = vi.fn();
+const set = vi.fn<OptionsStore['save']>();
+const saveOptionToolbarPosition = createToolbarSaver({
+  options: { save: set },
+});
 
 describe('options/toolbar.ts', () => {
   beforeEach(() => {
     set.mockReset().mockResolvedValue(undefined);
-    Object.assign(globalThis, { browser: { storage: { sync: { set } } } });
     document.body.innerHTML = `
       <input type="radio" name="toolbarPosition" value="top" />
       <input type="radio" name="toolbarPosition" value="bottom" checked />
@@ -16,7 +19,6 @@ describe('options/toolbar.ts', () => {
   });
 
   afterEach(() => {
-    Reflect.deleteProperty(globalThis, 'browser');
     document.body.innerHTML = '';
   });
 

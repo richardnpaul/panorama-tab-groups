@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import saveOptionTheme from '../../../src/js/options/theme.js';
+import type { OptionsStore } from '../../../src/js/ports/options.js';
+import { createThemeSaver } from '../../../src/js/options/theme.js';
 
-const set = vi.fn();
+const set = vi.fn<OptionsStore['save']>();
+const saveOptionTheme = createThemeSaver({ options: { save: set } });
 
 describe('options/theme.ts', () => {
   beforeEach(() => {
     set.mockReset().mockResolvedValue(undefined);
-    Object.assign(globalThis, { browser: { storage: { sync: { set } } } });
     document.body.innerHTML = `
       <input type="radio" name="theme" value="light" />
       <input type="radio" name="theme" value="dark" checked />
@@ -16,7 +17,6 @@ describe('options/theme.ts', () => {
   });
 
   afterEach(() => {
-    Reflect.deleteProperty(globalThis, 'browser');
     document.body.innerHTML = '';
   });
 

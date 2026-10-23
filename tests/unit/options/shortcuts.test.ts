@@ -1,11 +1,20 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Options } from '../../../src/js/share/options.js';
-
-const getAll = vi.fn();
-const update = vi.fn();
-const reset = vi.fn();
-const set = vi.fn();
+import {
+  createMemoryOptions,
+  type MemoryOptions,
+} from '../../../src/js/adapters/memory/options.js';
+import {
+  createMemoryShortcuts,
+  type MemoryShortcuts,
+} from '../../../src/js/adapters/memory/shortcuts.js';
+import type { Options } from '../../../src/js/core/options.js';
+import {
+  createShortcutHandlers,
+  disableShortcutForm,
+  enableShortcutForm,
+  type ShortcutHandlers,
+} from '../../../src/js/options/shortcuts.js';
 
 const FORM = (name: string, value: string) => `
   <div id="${name}">
@@ -52,10 +61,6 @@ function click<T>(target: EventTarget, handler: (event: Event) => T) {
   return { event, result };
 }
 
-async function loadModule() {
-  return import('../../../src/js/options/shortcuts.js');
-}
-
 const storedOptions = (): Options => ({
   toolbarPosition: 'top',
   useNativeGroups: true,
@@ -65,77 +70,59 @@ const storedOptions = (): Options => ({
 });
 
 describe('options/shortcuts.ts', () => {
-  beforeEach(() => {
-    vi.resetModules();
-    getAll.mockReset().mockResolvedValue([
+  let shortcuts: MemoryShortcuts;
+  let store: MemoryOptions;
+  let handlers: ShortcutHandlers;
+
+  const start = (
+    initial = [
       { name: 'first', shortcut: 'Ctrl+A' },
       { name: 'second', shortcut: 'Ctrl+B' },
-    ]);
-    update.mockReset().mockResolvedValue(undefined);
-    reset.mockReset().mockResolvedValue(undefined);
-    set.mockReset().mockResolvedValue(undefined);
-    Object.assign(globalThis, {
-      browser: {
-        commands: { getAll, update, reset },
-        storage: { sync: { set } },
-      },
-    });
+    ],
+  ) => {
+    shortcuts = createMemoryShortcuts(initial);
+    handlers = createShortcutHandlers({ shortcuts, options: store });
+  };
+
+  beforeEach(() => {
+    store = createMemoryOptions();
+    start();
     document.body.innerHTML = FORM('first', 'Alt+1') + FORM('second', 'Alt+2');
   });
 
   afterEach(() => {
-    Reflect.deleteProperty(globalThis, 'browser');
+    vi.restoreAllMocks();
     document.body.innerHTML = '';
-  });
-
-  describe('shortcuts', () => {
-    it('is the list of commands requested when the module loads', async () => {
-      const { shortcuts } = await loadModule();
-
-      expect(getAll).toHaveBeenCalledTimes(1);
-      await expect(shortcuts).resolves.toEqual([
-        { name: 'first', shortcut: 'Ctrl+A' },
-        { name: 'second', shortcut: 'Ctrl+B' },
-      ]);
-    });
   });
 
   describe('updateShortcut', () => {
     it('applies the typed shortcut to the command of the clicked form', async () => {
-      const { updateShortcut } = await loadModule();
       input('second').value = 'Ctrl+Shift+Y';
 
       const { event, result } = click(
         button('second', 'updateShortcut'),
-        updateShortcut,
+        handlers.update,
       );
       await result;
 
       expect(event.defaultPrevented).toBe(true);
-      expect(update).toHaveBeenCalledTimes(1);
-      expect(update).toHaveBeenCalledWith({
-        name: 'second',
-        shortcut: 'Ctrl+Shift+Y',
-      });
+      expect(shortcuts.calls).toEqual(['update second Ctrl+Shift+Y']);
     });
 
     it('fails when the click did not come from an element', async () => {
-      const { updateShortcut } = await loadModule();
-
-      const { result } = click(document, updateShortcut);
+      const { result } = click(document, handlers.update);
 
       await expect(result).rejects.toThrow(
         'Cannot tell which shortcut was clicked',
       );
-      expect(update).not.toHaveBeenCalled();
+      expect(shortcuts.calls).toEqual([]);
     });
 
     it('fails when the button is not inside a form with an id', async () => {
-      const { updateShortcut } = await loadModule();
       document.body.innerHTML = '<div><button id="lone"></button></div>';
       const lone = document.getElementById('lone');
 
-      const { result } = click(lone ?? document, updateShortcut);
+      const { result } = click(lone ?? document, handlers.update);
 
       await expect(result).rejects.toThrow(
         'Cannot tell which shortcut was clicked',
@@ -143,10 +130,9 @@ describe('options/shortcuts.ts', () => {
     });
 
     it('fails when the button has no parent', async () => {
-      const { updateShortcut } = await loadModule();
       const orphan = document.createElement('button');
 
-      const { result } = click(orphan, updateShortcut);
+      const { result } = click(orphan, handlers.update);
 
       await expect(result).rejects.toThrow(
         'Cannot tell which shortcut was clicked',
@@ -156,26 +142,28 @@ describe('options/shortcuts.ts', () => {
 
   describe('resetShortcut', () => {
     it('resets the command and shows the shortcut the browser now has', async () => {
-      const { resetShortcut } = await loadModule();
+      await shortcuts.update('second', 'Alt+2');
 
       const { event, result } = click(
         button('second', 'resetShortcut'),
-        resetShortcut,
+        handlers.reset,
       );
       await result;
 
       expect(event.defaultPrevented).toBe(true);
-      expect(reset).toHaveBeenCalledTimes(1);
-      expect(reset).toHaveBeenCalledWith('second');
+      expect(shortcuts.calls).toEqual(['update second Alt+2', 'reset second']);
       expect(input('second').value).toBe('Ctrl+B');
       expect(input('first').value).toBe('Alt+1');
     });
 
     it('resets before it reads the commands again', async () => {
-      const { resetShortcut } = await loadModule();
-      getAll.mockClear();
+      const reset = vi.spyOn(shortcuts, 'reset');
+      const getAll = vi.spyOn(shortcuts, 'getAll');
 
-      const { result } = click(button('first', 'resetShortcut'), resetShortcut);
+      const { result } = click(
+        button('first', 'resetShortcut'),
+        handlers.reset,
+      );
       await result;
 
       expect(reset.mock.invocationCallOrder[0]).toBeLessThan(
@@ -184,20 +172,24 @@ describe('options/shortcuts.ts', () => {
     });
 
     it('shows an empty field when the command has no shortcut', async () => {
-      const { resetShortcut } = await loadModule();
-      getAll.mockResolvedValue([{ name: 'first' }]);
+      start([{ name: 'first', shortcut: '' }]);
 
-      const { result } = click(button('first', 'resetShortcut'), resetShortcut);
+      const { result } = click(
+        button('first', 'resetShortcut'),
+        handlers.reset,
+      );
       await result;
 
       expect(input('first').value).toBe('');
     });
 
     it('leaves the field alone when the command is not listed', async () => {
-      const { resetShortcut } = await loadModule();
-      getAll.mockResolvedValue([{ name: 'unrelated', shortcut: 'Ctrl+Z' }]);
+      start([{ name: 'unrelated', shortcut: 'Ctrl+Z' }]);
 
-      const { result } = click(button('first', 'resetShortcut'), resetShortcut);
+      const { result } = click(
+        button('first', 'resetShortcut'),
+        handlers.reset,
+      );
       await result;
 
       expect(input('first').value).toBe('Alt+1');
@@ -205,9 +197,7 @@ describe('options/shortcuts.ts', () => {
   });
 
   describe('disableShortcutForm / enableShortcutForm', () => {
-    it('disabling locks the input and swaps the buttons', async () => {
-      const { disableShortcutForm } = await loadModule();
-
+    it('disabling locks the input and swaps the buttons', () => {
       disableShortcutForm('first');
 
       expect(input('first').disabled).toBe(true);
@@ -217,8 +207,7 @@ describe('options/shortcuts.ts', () => {
       expect(isHidden('first', 'enableShortcut')).toBe(false);
     });
 
-    it('enabling unlocks the input and swaps the buttons back', async () => {
-      const { disableShortcutForm, enableShortcutForm } = await loadModule();
+    it('enabling unlocks the input and swaps the buttons back', () => {
       disableShortcutForm('first');
 
       enableShortcutForm('first');
@@ -230,9 +219,7 @@ describe('options/shortcuts.ts', () => {
       expect(isHidden('first', 'enableShortcut')).toBe(true);
     });
 
-    it('only changes the form it was asked about', async () => {
-      const { disableShortcutForm } = await loadModule();
-
+    it('only changes the form it was asked about', () => {
       disableShortcutForm('first');
 
       expect(input('second').disabled).toBe(false);
@@ -240,9 +227,7 @@ describe('options/shortcuts.ts', () => {
       expect(isHidden('second', 'enableShortcut')).toBe(true);
     });
 
-    it('fails when the form is missing', async () => {
-      const { disableShortcutForm } = await loadModule();
-
+    it('fails when the form is missing', () => {
       expect(() => {
         disableShortcutForm('missing');
       }).toThrow('Element not found: #missing input');
@@ -253,8 +238,7 @@ describe('options/shortcuts.ts', () => {
       'resetShortcut',
       'disableShortcut',
       'enableShortcut',
-    ])('fails when the %s button is missing', async (kind) => {
-      const { enableShortcutForm } = await loadModule();
+    ])('fails when the %s button is missing', (kind) => {
       button('first', kind).remove();
 
       expect(() => {
@@ -265,12 +249,11 @@ describe('options/shortcuts.ts', () => {
 
   describe('disableShortcut', () => {
     it('stores the shortcut as disabled and locks its form', async () => {
-      const { disableShortcut } = await loadModule();
       const options = storedOptions();
 
       const { event, result } = click(
         button('second', 'disableShortcut'),
-        (e) => disableShortcut(options, e),
+        (e) => handlers.disable(options, e),
       );
       await result;
 
@@ -279,23 +262,32 @@ describe('options/shortcuts.ts', () => {
         other: { disabled: false },
         second: { disabled: true },
       });
-      expect(set).toHaveBeenCalledTimes(1);
-      expect(set.mock.calls[0]?.[0]).toBe(options);
+      expect((await store.load()).shortcut).toEqual(options.shortcut);
       expect(input('second').disabled).toBe(true);
       expect(isHidden('second', 'enableShortcut')).toBe(false);
     });
 
+    it('stores only the shortcuts, not the options the user did not change', async () => {
+      const { result } = click(button('first', 'disableShortcut'), (e) =>
+        handlers.disable(storedOptions(), e),
+      );
+      await result;
+
+      expect(store.stored).toEqual({
+        shortcut: { other: { disabled: false }, first: { disabled: true } },
+      });
+    });
+
     it('does not touch the form until the options are stored', async () => {
-      const { disableShortcut } = await loadModule();
       let release: () => void = () => undefined;
-      set.mockReturnValue(
+      vi.spyOn(store, 'save').mockReturnValue(
         new Promise<void>((resolve) => {
           release = resolve;
         }),
       );
 
       const { result } = click(button('first', 'disableShortcut'), (e) =>
-        disableShortcut(storedOptions(), e),
+        handlers.disable(storedOptions(), e),
       );
       await Promise.resolve();
 
@@ -306,12 +298,11 @@ describe('options/shortcuts.ts', () => {
     });
 
     it('stores a shortcut called __proto__ as plain data', async () => {
-      const { disableShortcut } = await loadModule();
       document.body.innerHTML = FORM('__proto__', 'x');
       const options = storedOptions();
 
       const { result } = click(button('__proto__', 'disableShortcut'), (e) =>
-        disableShortcut(options, e),
+        handlers.disable(options, e),
       );
       await result;
 
@@ -322,13 +313,12 @@ describe('options/shortcuts.ts', () => {
 
   describe('enableShortcut', () => {
     it('stores the shortcut as enabled and unlocks its form', async () => {
-      const { disableShortcutForm, enableShortcut } = await loadModule();
       disableShortcutForm('second');
       const options = storedOptions();
       options.shortcut.second = { disabled: true };
 
       const { event, result } = click(button('second', 'enableShortcut'), (e) =>
-        enableShortcut(options, e),
+        handlers.enable(options, e),
       );
       await result;
 
@@ -337,7 +327,7 @@ describe('options/shortcuts.ts', () => {
         other: { disabled: false },
         second: { disabled: false },
       });
-      expect(set.mock.calls[0]?.[0]).toBe(options);
+      expect((await store.load()).shortcut).toEqual(options.shortcut);
       expect(input('second').disabled).toBe(false);
       expect(isHidden('second', 'enableShortcut')).toBe(true);
     });

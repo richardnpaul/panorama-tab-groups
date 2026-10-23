@@ -1,3 +1,5 @@
+import type { I18n } from '../ports/i18n.js';
+
 /**
  * Helper function to create a new element with the given attributes and children
  */
@@ -26,16 +28,18 @@ function isFewCount(count: number): boolean {
 }
 
 /**
- * Extract correct plural form for a translated string.
+ * Extract correct plural form for a translated string, by the plural rule of
+ * the language the translations are in.
  * For insight for the plural rules see:
  * https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_and_Plurals#List_of_Plural_Rules
  */
 export function getPluralForm(
+  i18n: I18n,
   pluralCount: number | string = 1,
   translatedString = '',
 ): string | undefined {
   const count = parseInt(String(pluralCount), 10);
-  const pluralRule = parseInt(browser.i18n.getMessage('pluralRule'), 10);
+  const pluralRule = parseInt(i18n.getMessage('pluralRule'), 10);
   const pluralForms = translatedString.split('|');
 
   if (pluralForms.length === 1) {

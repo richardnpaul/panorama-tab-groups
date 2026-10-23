@@ -55,12 +55,10 @@ const expectedButtonTexts: readonly (readonly [string, string])[] = [
 describe('options/translations.ts', () => {
   beforeEach(() => {
     getMessage.mockClear();
-    Object.assign(globalThis, { browser: { i18n: { getMessage } } });
     document.body.innerHTML = pageBody;
   });
 
   afterEach(() => {
-    Reflect.deleteProperty(globalThis, 'browser');
     document.body.innerHTML = '';
   });
 
@@ -69,7 +67,7 @@ describe('options/translations.ts', () => {
   });
 
   it.each(expectedTexts)('translates %s with %s', (selector, messageName) => {
-    addTranslations();
+    addTranslations({ getMessage });
 
     expect(textOf(selector)).toBe(`msg:${messageName}`);
   });
@@ -77,7 +75,7 @@ describe('options/translations.ts', () => {
   it.each(expectedButtonTexts)(
     'translates every .%s button with %s',
     (className, messageName) => {
-      addTranslations();
+      addTranslations({ getMessage });
 
       const buttons = document.querySelectorAll(
         `#optionKeyboardShortcuts .${className}`,
@@ -90,7 +88,7 @@ describe('options/translations.ts', () => {
   );
 
   it('sets the help link address and text', () => {
-    addTranslations();
+    addTranslations({ getMessage });
 
     const link = document.querySelector<HTMLAnchorElement>(
       '#optionKeyboardShortcuts a',
@@ -102,7 +100,7 @@ describe('options/translations.ts', () => {
   });
 
   it('asks for exactly the messages it displays', () => {
-    addTranslations();
+    addTranslations({ getMessage });
 
     const asked = getMessage.mock.calls.map(([name]) => name).sort();
     const expected = [
@@ -118,7 +116,7 @@ describe('options/translations.ts', () => {
     document.body.innerHTML = '';
 
     expect(() => {
-      addTranslations();
+      addTranslations({ getMessage });
     }).toThrow('Element not found: #optionKeyboardShortcuts h2');
   });
 
@@ -128,7 +126,7 @@ describe('options/translations.ts', () => {
     });
 
     expect(() => {
-      addTranslations();
+      addTranslations({ getMessage });
     }).toThrow('Element not found: #optionKeyboardShortcuts a');
   });
 
@@ -140,7 +138,7 @@ describe('options/translations.ts', () => {
       });
 
     expect(() => {
-      addTranslations();
+      addTranslations({ getMessage });
     }).not.toThrow();
   });
 });

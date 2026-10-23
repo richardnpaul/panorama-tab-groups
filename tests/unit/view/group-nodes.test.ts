@@ -90,6 +90,8 @@ interface Options {
   layoutMode?: LayoutMode | undefined;
   confirmed?: boolean;
   pluralRule?: string;
+  // What the question before closing a group says, in all its forms
+  question?: string;
 }
 
 async function setUp({
@@ -98,15 +100,11 @@ async function setUp({
   tabGroups = {},
   confirmed = true,
   pluralRule = '0',
+  question,
   ...rest
 }: Options = {}) {
   // Given as undefined, the layout mode means it was never stored
   const layoutMode = 'layoutMode' in rest ? rest.layoutMode : 'freeform';
-  vi.stubGlobal('browser', {
-    i18n: {
-      getMessage: (name: string) => (name === 'pluralRule' ? pluralRule : name),
-    },
-  });
   const groups = fakeGroups(initial);
   const viewTabs = createMemoryViewTabs(listed);
   const groupState = createMemoryGroupState();
@@ -130,8 +128,15 @@ async function setUp({
   const leaveView = vi.fn().mockResolvedValue(undefined);
   const logger = { debug: vi.fn(), warn: vi.fn(), error: vi.fn() };
   const getMessage = vi.fn(
-    (name: string, substitutions?: readonly string[]) =>
-      `[${name}${substitutions ? `:${substitutions.join(',')}` : ''}]`,
+    (name: string, substitutions?: readonly string[]) => {
+      if (name === 'pluralRule') {
+        return pluralRule;
+      }
+      if (name === 'closeGroupWarning' && question !== undefined) {
+        return question;
+      }
+      return `[${name}${substitutions ? `:${substitutions.join(',')}` : ''}]`;
+    },
   );
   const nodes = createGroupNodes({
     groups,
@@ -230,7 +235,6 @@ describe('view/group-nodes.ts', () => {
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.body.innerHTML = '';
   });
@@ -362,8 +366,10 @@ describe('view/group-nodes.ts', () => {
     });
 
     it('asks the form of the question that goes with the number of tabs', async () => {
-      const env = await setUp({ pluralRule: '1' });
-      env.getMessage.mockReturnValue('Close the tab?|Close the tabs?');
+      const env = await setUp({
+        pluralRule: '1',
+        question: 'Close the tab?|Close the tabs?',
+      });
       const node = env.nodes.make(group(1));
       const content = part(node, '.content');
       content.insertBefore(document.createElement('div'), content.firstChild);
@@ -375,8 +381,7 @@ describe('view/group-nodes.ts', () => {
     });
 
     it('asks an empty question where the message has no form for the number', async () => {
-      const env = await setUp({ pluralRule: '7' });
-      env.getMessage.mockReturnValue('one|few');
+      const env = await setUp({ pluralRule: '7', question: 'one|few' });
       const node = env.nodes.make(group(1));
       const content = part(node, '.content');
       [1, 2, 3, 4, 5].forEach(() => {
@@ -1512,7 +1517,6 @@ describe('view/group-nodes.ts', () => {
 
 describe('view/group-nodes.ts: tabIdsOf', () => {
   afterEach(() => {
-    vi.unstubAllGlobals();
     document.body.innerHTML = '';
   });
 
