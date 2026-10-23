@@ -764,13 +764,24 @@ mutants). Coverage is 100% on all four metrics.
 - **Left for Phase 5/6**: the `mutate` list is still a list of files (all at 100%), to become `src/**/*.ts`; the ports
   have no mutants (types only).
 
-### Phase 5: Drive Remaining Survivors to Zero
+### Phase 5: Drive Remaining Survivors to Zero. DONE (see the result below)
 
 27. **Full Stryker run**, then loop: for each survivor, (a) add an exact-value assertion; (b) if it is
     equivalent, restructure the code so the mutant cannot exist; (c) never add a suppression. Typical
     restructurings: remove redundant `?.` and defaults by validating at the adapter boundary, replace index
     arithmetic with array methods, collapse guards whose removal is unobservable.
     - Done when: the full run reports 100%, zero survived, zero no-coverage.
+
+#### Phase 5 result
+
+`mutate` in `stryker.config.mjs` is now `scripts/**/*.mjs`, `tools/adbkit-stub/index.js` and `src/**/*.ts` (positive
+globs only), so a new file is mutated the moment it exists instead of when someone lists it. One forced run with no
+incremental cache (5 minutes 41 seconds) reports 100.00: 3,753 killed, 11 timeouts (counted as detected), 0 survived,
+0 with no coverage. A further 2,254 mutants are discarded by the type checker because they do not compile; these are
+the ones the "restructure so it cannot exist" rule leaves behind by design (for example a condition replaced by
+`true` removes the narrowing that the branch relies on). The ports are types only and have no mutants. No
+survivors were left from Phase 4, since each module was taken to 100% as it was written, so this phase was the
+check that nothing had drifted rather than a loop of fixes.
 
 ### Phase 6: Enforce in CI
 
