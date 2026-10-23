@@ -3,6 +3,7 @@ import {
   type BadgeTextDetails,
   type TitleDetails,
 } from './adapters/browser/action-compat.js';
+import { createExclusively, type Locks } from './adapters/browser/exclusive.js';
 import {
   createSessionsEmulation,
   type StorageArea,
@@ -40,6 +41,8 @@ export interface PolyfillTarget {
 export interface PolyfillScope {
   browser?: PolyfillTarget | undefined;
   chrome?: PolyfillTarget | undefined;
+  // Shared by all the contexts of the extension, where the browser has it
+  navigator?: { locks?: Locks | undefined } | undefined;
 }
 
 /**
@@ -54,7 +57,10 @@ export function installPolyfills(scope: PolyfillScope): void {
     return;
   }
 
-  const emulation = createSessionsEmulation(() => target.storage.local);
+  const emulation = createSessionsEmulation(
+    () => target.storage.local,
+    createExclusively(scope.navigator?.locks),
+  );
   target.sessions ??= {};
   const { sessions } = target;
   sessions.getTabValue ??= emulation.getTabValue;

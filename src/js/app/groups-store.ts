@@ -4,6 +4,7 @@ import type { I18n } from '../ports/i18n.js';
 import type { Logger } from '../ports/logger.js';
 import type { Messaging } from '../ports/messaging.js';
 import type { Tabs } from '../ports/tabs.js';
+import { moveGroupTo } from '../core/popup.js';
 import { isRecord, isString } from '../share/guards.js';
 
 export interface GroupsStoreDeps {
@@ -26,6 +27,8 @@ export interface GroupsStore {
   remove(id: number): Promise<void>;
   rename(id: number, newName: string): Promise<void>;
   transform(id: number, rect: Rect): Promise<void>;
+  /** Put the group in the gap of the list it was dropped in (0 is before the first) */
+  moveTo(id: number, gap: number): Promise<void>;
   getActive(): Promise<number | undefined>;
   setActive(id: number): Promise<void>;
 }
@@ -148,6 +151,19 @@ export async function createGroupsStore(
       }
       group.rect = rect;
       group.lastMoved = clock.now();
+      await save();
+    },
+
+    async moveTo(id, gap) {
+      if (get(id) === null) {
+        return;
+      }
+      const order = moveGroupTo(
+        groups.map((group) => group.id),
+        id,
+        gap,
+      );
+      groups.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
       await save();
     },
 

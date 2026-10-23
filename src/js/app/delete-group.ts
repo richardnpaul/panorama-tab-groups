@@ -4,6 +4,7 @@ import type { Logger } from '../ports/logger.js';
 import type { Menus } from '../ports/menus.js';
 import type { NativeGroups } from '../ports/native-groups.js';
 import type { Tabs } from '../ports/tabs.js';
+import { messageOf } from '../share/guards.js';
 import type { WindowGroups } from './window-groups.js';
 
 export interface DeleteGroupDeps {
@@ -20,9 +21,6 @@ export interface DeleteGroupDeps {
 export type DeletionResult =
   | { success: true }
   | { success: false; error: string };
-
-const messageOf = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 /**
  * Delete a group completely: take its tabs out of its native group, close

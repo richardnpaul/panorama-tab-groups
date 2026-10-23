@@ -7,7 +7,11 @@ const windowsApi = (
   getLastFocused = vi.fn().mockResolvedValue({ id: 2 }),
   get = vi.fn().mockResolvedValue({ id: 3 }),
   getAll = vi.fn().mockResolvedValue([{ id: 1 }, { id: 2 }]),
-) => ({ windows: { getCurrent, getLastFocused, get, getAll } });
+  create = vi.fn().mockResolvedValue({ id: 8 }),
+  update = vi.fn().mockResolvedValue({}),
+) => ({
+  windows: { getCurrent, getLastFocused, get, getAll, create, update },
+});
 
 describe('adapters/browser/windows.ts', () => {
   describe('currentWindowId', () => {
@@ -77,6 +81,67 @@ describe('adapters/browser/windows.ts', () => {
         'No current window',
       );
     });
+  });
+});
+
+describe('adapters/browser/windows.ts: create and place', () => {
+  it('opens an empty window and gives its id', async () => {
+    const create = vi.fn().mockResolvedValue({ id: 15 });
+    const windows = createBrowserWindows(() =>
+      windowsApi(undefined, undefined, undefined, undefined, create),
+    );
+
+    await expect(windows.create()).resolves.toBe(15);
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith({});
+  });
+
+  it('fails when the browser does not say which window it made', async () => {
+    const windows = createBrowserWindows(() =>
+      windowsApi(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        vi.fn().mockResolvedValue({}),
+      ),
+    );
+
+    await expect(windows.create()).rejects.toThrow('No current window');
+  });
+
+  it('moves and resizes a window', async () => {
+    const update = vi.fn().mockResolvedValue({});
+    const windows = createBrowserWindows(() =>
+      windowsApi(undefined, undefined, undefined, undefined, undefined, update),
+    );
+
+    await windows.place(4, { left: 1, top: 2, width: 800, height: 600 });
+
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update).toHaveBeenCalledWith(4, {
+      left: 1,
+      top: 2,
+      width: 800,
+      height: 600,
+    });
+  });
+
+  it('passes on a failure to place a window', async () => {
+    const failure = new Error('no window');
+    const windows = createBrowserWindows(() =>
+      windowsApi(
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        vi.fn().mockRejectedValue(failure),
+      ),
+    );
+
+    await expect(windows.place(4, {})).rejects.toBe(failure);
   });
 });
 
@@ -154,6 +219,27 @@ describe('adapters/memory/windows.ts', () => {
     await expect(windows.exists(5)).resolves.toBe(true);
     await expect(windows.exists(9)).resolves.toBe(true);
     await expect(windows.exists(6)).resolves.toBe(false);
+  });
+
+  it('makes windows with counting ids, and knows them', async () => {
+    const windows = createMemoryWindows(5);
+
+    const first = await windows.create();
+    const second = await windows.create();
+
+    expect(second).toBe(first + 1);
+    await expect(windows.exists(first)).resolves.toBe(true);
+    await expect(windows.listIds()).resolves.toEqual([5, first, second]);
+  });
+
+  it('remembers where a window was placed, as a copy', async () => {
+    const windows = createMemoryWindows(5);
+    const placement = { left: 1 };
+
+    await windows.place(5, placement);
+    placement.left = 99;
+
+    expect(windows.placements.get(5)).toEqual({ left: 1 });
   });
 
   it('lists the windows it knows', async () => {

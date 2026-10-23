@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import {
   defineConfig,
   devices,
@@ -103,8 +102,7 @@ function createFirefoxPageProxy(initialPage) {
             return activePage.goto(url, options);
           }
 
-          // eslint-disable-next-line no-underscore-dangle
-          const extensionId = activePage.context()._panoramaExtensionId;
+          const extensionId = activePage.context().panoramaExtensionId;
           const urlObj = new URL(url);
           const localUrl = `http://127.0.0.1:${localServerPort}${urlObj.pathname}${urlObj.search}${urlObj.hash}`;
 
@@ -269,8 +267,7 @@ function createFirefoxPageProxy(initialPage) {
         return () => {
           const currentUrl = activePage.url();
           if (currentUrl.startsWith(`http://127.0.0.1:${localServerPort}/`)) {
-            // eslint-disable-next-line no-underscore-dangle
-            const extensionId = activePage.context()._panoramaExtensionId;
+            const extensionId = activePage.context().panoramaExtensionId;
             return currentUrl.replace(
               `http://127.0.0.1:${localServerPort}/`,
               `moz-extension://${extensionId}/`,
@@ -348,31 +345,34 @@ function ensureExtensionId(browserName, id) {
   return id;
 }
 
+const sleep = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+function extensionUuidIn(prefsPath, extensionId) {
+  if (!fs.existsSync(prefsPath)) return undefined;
+  const contents = fs.readFileSync(prefsPath, 'utf8');
+  const match = contents.match(
+    /user_pref\("extensions\.webextensions\.uuids",\s*"(.+?)"\)/,
+  );
+  return match
+    ? JSON.parse(match[1].replace(/\\"/g, '"'))[extensionId]
+    : undefined;
+}
+
 // Poll prefs.js until Firefox has written the extension's UUID (typically < 2s).
 async function readFirefoxUuidFromPrefs(
   prefsPath,
   extensionId,
   timeoutMs = 10000,
+  deadline = Date.now() + timeoutMs,
 ) {
-  const deadline = Date.now() + timeoutMs;
-  // eslint-disable-next-line no-await-in-loop
-  while (Date.now() < deadline) {
-    if (fs.existsSync(prefsPath)) {
-      const contents = fs.readFileSync(prefsPath, 'utf8');
-      const match = contents.match(
-        /user_pref\("extensions\.webextensions\.uuids",\s*"(.+?)"\)/,
-      );
-      if (match) {
-        const uuids = JSON.parse(match[1].replace(/\\"/g, '"'));
-        if (uuids[extensionId]) return uuids[extensionId];
-      }
-    }
-    // eslint-disable-next-line no-await-in-loop
-    await new Promise((r) => {
-      setTimeout(r, 500);
-    });
-  }
-  return null;
+  if (Date.now() >= deadline) return null;
+  const uuid = extensionUuidIn(prefsPath, extensionId);
+  if (uuid) return uuid;
+  await sleep(500);
+  return readFirefoxUuidFromPrefs(prefsPath, extensionId, timeoutMs, deadline);
 }
 
 export const test = base.extend({
@@ -457,12 +457,9 @@ export const test = base.extend({
         EXTENSION_ID,
         15000,
       );
-      // eslint-disable-next-line no-underscore-dangle
-      context._panoramaExtensionId = ensureExtensionId(browserName, uuid);
-      // eslint-disable-next-line no-underscore-dangle
+      context.panoramaExtensionId = ensureExtensionId(browserName, uuid);
       console.log(
-        // eslint-disable-next-line no-underscore-dangle
-        `[rdp] Extension installed, UUID: ${context._panoramaExtensionId}`,
+        `[rdp] Extension installed, UUID: ${context.panoramaExtensionId}`,
       );
     }
 
@@ -543,8 +540,7 @@ export const test = base.extend({
         }
       }
     } else if (browserName === 'firefox') {
-      // eslint-disable-next-line no-underscore-dangle
-      id = context._panoramaExtensionId;
+      id = context.panoramaExtensionId;
     }
 
     const resolvedId = ensureExtensionId(browserName, id);

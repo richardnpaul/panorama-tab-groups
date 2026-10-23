@@ -18,6 +18,18 @@ export interface TabDetails {
   browserGroupId: number | undefined;
 }
 
+/** What a backup keeps of a tab */
+export interface TabSnapshot {
+  id: number;
+  url: string | undefined;
+  title: string | undefined;
+  // Place in the window, from the first
+  index: number;
+  // Milliseconds since the epoch; 0 for a tab the browser has no time for
+  lastAccessed: number;
+  pinned: boolean;
+}
+
 export interface Tabs {
   /** The ids of the tabs in the window the code is running in */
   listIdsInCurrentWindow(): Promise<number[]>;
@@ -35,6 +47,19 @@ export interface Tabs {
   moveToEnd(tabId: number): Promise<void>;
   /** Rejects if the tab is already closed */
   close(tabId: number): Promise<void>;
+  /** The tabs of a window as a backup keeps them, in the order of the window */
+  snapshotsInWindow(windowId: number): Promise<TabSnapshot[]>;
+  /**
+   * Open a page in a tab of a window, and give its id; rejects if the browser
+   * refuses. A tab that is discarded is not loaded until it is used.
+   */
+  create(options: {
+    url: string;
+    windowId: number;
+    active: boolean;
+    discarded: boolean;
+    pinned: boolean;
+  }): Promise<number>;
   /** Open a page in a new tab in the window the code is running in */
   open(url: string, active: boolean): Promise<number>;
   /** Only browsers that can hide tabs (see Capabilities) support this */

@@ -41,6 +41,16 @@ module.exports = {
   },
   overrides: [
     {
+      // The configuration of the test runner imports it, which is all it is for
+      files: ['playwright.config.js'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          { devDependencies: true },
+        ],
+      },
+    },
+    {
       files: ['**/*.ts'],
       parser: '@typescript-eslint/parser',
       parserOptions: {

@@ -17,12 +17,7 @@ async function gotoExtensionPage(
   );
   await page.goto(targetUrl, { timeout: 15000 });
 
-  const startTime = Date.now();
-  while (page.url() !== targetUrl && Date.now() - startTime < 5000) {
-    // eslint-disable-next-line no-await-in-loop
-    await page.waitForTimeout(50);
-  }
-  expect(page.url()).toBe(targetUrl);
+  await expect.poll(() => page.url(), { timeout: 5000 }).toBe(targetUrl);
   return targetUrl;
 }
 

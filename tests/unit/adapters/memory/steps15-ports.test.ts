@@ -302,6 +302,100 @@ describe('adapters/memory/tabs.ts (actions)', () => {
   });
 });
 
+describe('adapters/memory/tabs.ts (backup)', () => {
+  const tab = (id: number, windowId: number, pinned = false) => ({
+    id,
+    windowId,
+    active: false,
+    pinned,
+    url: `https://site${String(id)}/`,
+    pendingUrl: undefined,
+    title: `T${String(id)}`,
+    browserGroupId: undefined,
+  });
+
+  it('gives snapshots of the tabs of a window in order, with the time each was used', async () => {
+    const tabs = createMemoryTabs();
+    tabs.setDetails([tab(1, 7), tab(2, 8), tab(3, 7, true)]);
+    tabs.setLastAccessed({ 3: 500 });
+
+    expect(await tabs.snapshotsInWindow(7)).toEqual([
+      {
+        id: 1,
+        url: 'https://site1/',
+        title: 'T1',
+        index: 0,
+        lastAccessed: 0,
+        pinned: false,
+      },
+      {
+        id: 3,
+        url: 'https://site3/',
+        title: 'T3',
+        index: 1,
+        lastAccessed: 500,
+        pinned: true,
+      },
+    ]);
+  });
+
+  it('forgets the times it was told when told again', async () => {
+    const tabs = createMemoryTabs();
+    tabs.setDetails([tab(1, 7)]);
+    tabs.setLastAccessed({ 1: 5 });
+    tabs.setLastAccessed({});
+
+    expect((await tabs.snapshotsInWindow(7))[0]?.lastAccessed).toBe(0);
+  });
+
+  it('creates tabs with counting ids, as asked', async () => {
+    const tabs = createMemoryTabs();
+
+    const first = await tabs.create({
+      url: '/a',
+      windowId: 7,
+      active: true,
+      discarded: true,
+      pinned: true,
+    });
+    const second = await tabs.create({
+      url: '/b',
+      windowId: 8,
+      active: false,
+      discarded: false,
+      pinned: false,
+    });
+
+    expect(second).toBe(first + 1);
+    expect(await tabs.get(first)).toMatchObject({
+      windowId: 7,
+      active: true,
+      pinned: true,
+      url: '/a',
+    });
+    expect(tabs.calls).toEqual([
+      'create /a in 7 discarded pinned active',
+      'create /b in 8',
+    ]);
+  });
+
+  it('refuses the next creation when told to, and only that one', async () => {
+    const tabs = createMemoryTabs();
+    const failure = new Error('refused');
+    tabs.refuseNextCreate(failure);
+    const options = {
+      url: '/a',
+      windowId: 1,
+      active: false,
+      discarded: false,
+      pinned: false,
+    };
+
+    await expect(tabs.create(options)).rejects.toBe(failure);
+    await expect(tabs.create(options)).resolves.toBeTypeOf('number');
+  });
+});
+
 describe('adapters/memory/toolbar.ts (popup and default badge)', () => {
   it('remembers the popup and the default badge text', async () => {
     const toolbar = createMemoryToolbar();

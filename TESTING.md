@@ -228,7 +228,7 @@ npx playwright test --project=chromium
 **What is tested:**
 
 - **Extension bootstrap**: Verifies the extension loads and resolves a non-null runtime ID/UUID before navigation.
-- **Popup View**: Verifies the popup opens and reaches its ready UI state.
+- **Popup View**: Verifies the popup opens and reaches its ready UI state, and (`tests/e2e/popup.spec.js`) lists the groups, makes and names a group, shows the tabs of a group, searches, moves the focus with the arrow keys and puts the groups in order by dragging.
 - **Options Page**: Verifies the options page initializes its settings UI.
 - **Firefox multi-page navigation**: Verifies Firefox can open a second extension page without regressing the custom `moz-extension://` proxy path.
 

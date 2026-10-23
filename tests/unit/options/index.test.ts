@@ -138,6 +138,8 @@ describe('options/index.ts', () => {
     });
     loadOptions.mockResolvedValue(storedOptions());
     getStatistics.mockResolvedValue(undefined);
+    loadBackup.mockResolvedValue(undefined);
+    saveBackup.mockResolvedValue(undefined);
     initNativeGroupsOption.mockResolvedValue(undefined);
     commands.value = Promise.resolve([]);
     document.body.innerHTML = pageBody;

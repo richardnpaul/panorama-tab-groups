@@ -579,8 +579,9 @@ loads `js/background/main.js`, a composition root of 16 lines that adds every li
 then starts `init()`. Everything it used to do is in `core/` and `app/` services over ports, each with memory-adapter
 tests and a 100% mutation score; unit tests number about 1,700, and statements, branches, functions and lines are at
 100% for everything under `src/js/{core,app,ports,adapters,background,share,options}` and `polyfill`. The full E2E suite
-is 43 passed, 6 skipped, and one Chromium failure, "Move tab between OS windows", which fails the same one run in
-three on the Phase 2 commit as well (a pre-existing flake, not caused by this phase; see Findings).
+is 46 passed, 8 skipped (the two new cases are Chromium only), and was 43 passed, 6 skipped, and one Chromium failure before the fixes below, "Move tab between OS windows", which fails the same one run in
+three on the Phase 2 commit as well (a pre-existing flake, not caused by this phase). After the fixes under Findings
+it passed in three full runs of four; the other run failed a different Chromium test that passed in 15 runs alone.
 
 **What exists now** (new in this phase):
 
@@ -617,6 +618,8 @@ three on the Phase 2 commit as well (a pre-existing flake, not caused by this ph
   that is no group (or a click that is not on a tab, which Chromium sends for page contexts) is ignored instead of
   storing the group `NaN`. Several selected tabs are moved one after another instead of all at once, so they keep
   their order.
+- Declining to make a native group (it would not be safe, or it failed) no longer stops a tab's group from being
+  shown; see the findings.
 - A native group the browser put in the wrong window now has its tabs taken out again, for all callers; before only
   the migration did that, and tab creation and activation left an orphan group.
 - The migration uses the same safety rule as tab creation (do not group the only tab of a window); it used to refuse
@@ -636,21 +639,36 @@ three on the Phase 2 commit as well (a pre-existing flake, not caused by this ph
 **Findings:**
 
 - **Two safety rules existed.** Tab creation refused to group only when the group was the single tab in the window;
-  the migration refused whenever the group was all the regular tabs. They are now one rule (above). The browser's real
-  behaviour on grouping every tab of a window is still untested; if windows do close, the rule must become the
-  stricter one everywhere. This is a decision for the user, not a refactoring question.
+  the migration refused whenever the group was all the regular tabs. They are now one rule: the first one (decided
+  with the user).
 - **A group is never recreated when the last one is deleted.** `deleteGroupWithCleanup` creates a new first group
   when no groups are left, but the list it checks always holds the system group, so the branch is dead in the real
-  extension (the unit test reaches it with a state that has no system group). Left as it was; a user group should
-  probably be checked for instead.
-- **When grouping is not safe or fails, the visibility is not updated.** Both `tabCreated` and `tabActivated` return
-  early then, so the view may stay in front of a tab that was just opened. It looks unintended and was kept.
-- **E2E cases for findings 2 and 3 were not added.** The only way into `toggleVisibleTabs` that those two cases need
-  is the keyboard shortcut, which Playwright cannot press, and the other callers cannot produce an empty group. They
-  are covered by unit tests of the service against the memory adapters.
-- **`Move tab between OS windows` is flaky on Chromium** at about one run in three, with or without this phase
-  (checked by running the Phase 2 commit in a clean worktree). It goes through `tabAttached` and `tabDetached`, so it
-  is worth a look before the E2E suite is made a blocking gate in Phase 6.
+  extension (the unit test reaches it with a state that has no system group). Left as it was (decided with the user).
+- **Declining to make a native group no longer skips the group switch.** `tabCreated` and `tabActivated` used to
+  return early when making the native group was unsafe, which skipped the visibility update, the collapsing of the
+  other groups and the toolbar title, so the window switched group only in what was stored. Native groups are
+  incidental to switching group (and tab hiding does not exist in Chromium), so the switch now always goes ahead.
+- **Three bugs found by writing the E2E cases for this** (all fixed, each with a unit test):
+  - A tab that the browser had put in a native group by itself (a tab opened from a grouped tab joins that group) was
+    linked to its group's reference even when another group already had that native group, so two groups shared one.
+    A native group that another group has is no longer linked.
+  - The handler for the browser's "native group updated" event wrote the groups back whether or not any referred to
+    that group. The browser reports a group right after it is made, before the group that made it has stored its
+    reference, so the write erased the reference. Nothing is written now unless a group refers to the native group.
+  - On Chromium all the sessions values (which Chromium lacks) live in one storage entry that each call reads and
+    rewrites; calls took turns only within one context, so a write from the view or the options page that overlapped
+    one from the background was lost. The calls now take turns under the Web Locks of the extension, which all its
+    contexts share, with the old in-context queue where the browser has no locks. This is probably the cause of the
+    flaky "Move tab between OS windows" run (it passed in all but one of the last five full runs, against about one
+    in three before). A read-modify-write that spans calls (read the groups, change, write them) can still lose an
+    update to an overlapping one; the real fix is the Phase 4 work that gives the view a single owner for each
+    value.
+- **New E2E cases** (`tests/e2e/group-switching.spec.js`, Chromium only, because Firefox's extension pages run behind a
+  mock): activating a tab of another group switches to that group and collapses the others (this is what exposed the
+  two bugs above), and activating the only tab of a window still switches that window to its group (the early-return
+  fix). Findings 2 and 3 (aborting when nothing would be shown, and selecting nothing in an empty group) and the
+  shortcut skipping the system group are only reachable through the keyboard shortcuts, which neither Playwright nor
+  the browser lets a test press; they are covered by unit tests against the memory adapters.
 - Equivalent mutants again removed by restructuring: a stale request's `opened` call (nothing refers to the replaced
   request), `if (ui.isShowing())` before `hide` (which already does nothing when not showing), the migration's
   reference check (now by `typeof` so `null` and absent differ), and the nested sums of the recovery tally (now one
@@ -661,7 +679,7 @@ three on the Phase 2 commit as well (a pre-existing flake, not caused by this ph
 **Step 21 is split.** The three `istanbul ignore` comments in `background.js` are gone with the file, and the
 allow-list entry for it is removed. The three in `view/groupNodes.js` belong to the Phase 4 view rewrite.
 
-### Phase 4: View, Popup, and Options
+### Phase 4: View, Popup, and Options. DONE (see the result below)
 
 22. **`core/layout.ts`**: tiling/rect/drag maths extracted from `view/groupNodes`, `view/drag`, `view/index` as
     pure functions with table-driven tests.
@@ -674,6 +692,77 @@ allow-list entry for it is removed. The three in `view/groupNodes.js` belong to 
 25. **`options/backup`**: serialise/validate into `core/backup.ts` (pure), I/O via ports.
 26. **Remove the 53 `eslint-disable` comments** — mostly polyfill `no-underscore-dangle` lines and test files;
     restructure or rename so each rule is satisfied. Shrink the lint allow-list to empty.
+
+#### Phase 4 result
+
+Every `.js` file left in `src/` is now TypeScript: the full-page view (`view/`), the popup (`popup-view/`), the
+options page backup (`options/backup`) and the migration status page (`migration-status/`) were rewritten over the ports, with `shared/js/models/*` and `shared/js/utilities/node.js` deleted. The suppression
+allow-list is `{}`, the `src/popup-view/*` entries are gone from `.eslintignore`, `.prettierignore` and the
+pre-commit hooks, and every new module is in the Stryker `mutate` list at 100% (no survivors, no uncovered
+mutants). Coverage is 100% on all four metrics.
+
+- **Step 22 (`core/layout.ts`)**: tiling rects, snapping, the clamping of a group to the minimum size, the drop mark
+  for a dragged tab, and the rect of a group made by a click, all pure and table-driven. The maths was checked
+  against the old code with a differential random test before that was deleted.
+- **Step 23 (full-page view)**: `view/{tab-nodes,group-nodes,drag,controller,leave-view,page,start,theme,thumbnail-image}.ts`
+  over new ports (`ViewTabs`, `ViewState`, `I18n`, `Downloads`) with memory fakes and browser adapters. Nodes are made
+  with DOM calls only, and `view/late.ts` breaks the one construction cycle (the drag handlers need the group nodes that
+  need the drag handlers) without a module-level variable. Behaviour that changed, all deliberately:
+  - Keyboard navigation between tabs goes round and skips groups with no tabs; it used to stop at the ends and land
+    in an empty group.
+  - Closing a group makes the first remaining group the active one.
+  - Placing a tab is one serial queue; the `modifyingGroupContent` flag that pretended to be a mutex is gone.
+  - A tab the view moves itself is counted (`ownMoves`), so the browser's event for that move is not applied a second
+    time.
+  - The mouse-up listener of a drag is registered with `once`; it used to stack up with every drag.
+  - Pressing Enter in the name field of a group saves it, the same as leaving the field; a `<spawn>` typo in the markup
+    is now a `<span>`.
+- **Step 25 (backup)**: `core/backup.ts` parses and converts the file (an untrusted input, including the legacy session
+  format) and `app/backup-service.ts` / `app/backup-controls.ts` do the I/O through `Windows`, `Tabs` and `Downloads`.
+  Opening a backup resets `openingBackup` in a `finally`, so a failure no longer leaves the background believing a
+  backup is still opening. A tab with no group is saved without a `groupId` instead of `undefined`, and file names
+  use a two-digit year.
+- **Step 24 (popup)**: `popup-view/{frame,tab-list,groups-frame,detail-frame,start,index}.ts` over `createGroupsStore`,
+  `GroupState`, `ViewTabs` and the new `app/popup-service.ts`, with the logic in `core/popup.ts`
+  (`searchMode`, `matchingTabs`, `searchGroups`, `moveGroupTo`, `gridRect`, `navigate`, `nextGroupName`,
+  `mostRecent`). The old popup built its markup from strings, so a tab title or group name containing markup became
+  DOM in an extension page, and a web page chooses its own title; everything is now made with DOM calls and text is text. Other changes:
+  - **The search is a text search.** It used to make `new RegExp(query, 'gi')` from what the user typed, so `(` threw
+    and `.` matched anything.
+  - **`Esc` was never matched** (the key is `Escape`), so Escape did not save a group name in the field.
+  - **A new group goes in the next place of a grid.** The old code used `groups.length - 1` as the place, so the first
+    group got a negative position, and the 8 by 4 grid for more than 18 groups could not be reached because the
+    test for more than 8 came first. Groups can now also be put in order by dragging (`GroupsStore.moveTo`), which
+    only the popup's `moveToIndex` did before and which is now tested.
+  - **A group with no tabs can be shown** (it opens a tab in it); the old code threw on `tabs[0]`. The popup is now closed
+    only after what it started has finished: it used to call `window.close()` right after starting `Group.show()`, which
+    could drop the request.
+  - Closing a group asks only when it has tabs, as the full view does, and the node is removed only if the background
+    removed the group. A blank group name keeps the old name, and a name that is the same is not saved.
+  - The left arrow goes back from the tabs of a group when the focus is on the first thing of its row; it used to use
+    the remembered place, which a click on a button did not update.
+  - A tab with no icon has no `src` (it was `src="undefined"`, a request for a file of that name), "Edit group" is a
+    message (`editGroup`) rather than English in the code, and the popup takes its theme from the same `applyAppearance`
+    as the view.
+  - The popup stopped listening for tab activation to remember the last used tab: a popup is closed by one.
+  - **A race found by the new E2E case**: the frame that was shown first removed the active state of its siblings
+    100 ms later, and in a tab that is not in front the browser delays timers, so the timer of the groups frame
+    removed the active state of the tabs frame that had been shown since. The frame shown last in a shell is now the
+    only one that takes the others away (a unit test shows the order).
+- **Migration status page**: `migration-status/{status-page,start,index}.ts`; the page loads as a module, looks again
+  five seconds after the last look is done (not on an interval, so looks cannot overlap), and shows the new list only
+  once it is loaded, where it used to empty it first and flicker. A reset that fails now says so. `messageOf` moved to
+  `share/guards.ts`, replacing three copies.
+- **Step 26 (suppressions)**: the 14 remaining `eslint-disable` comments are gone: the `_panoramaExtensionId` property
+  of the Playwright context is `panoramaExtensionId`; the polling loops are recursion or `expect.poll`; and the one
+  import of a development dependency by `playwright.config.js` is allowed by an ESLint override for that file (a
+  rule setting, not a suppression, and not something `check-no-suppressions` reports).
+- **New E2E cases** (`tests/e2e/popup.spec.js`, all seven on both browsers; the drag case was first skipped on Firefox on a guess
+  about the mock, and when run there it passed, so it is not skipped): the groups are listed with their tab counts, the search has the focus, a new group is made
+  and named and listed, the tabs of a group are shown and the left arrow goes back, the search finds tabs and treats
+  what looks like a pattern as text, the arrow keys move the focus, and a group is dragged to the front.
+- **Left for Phase 5/6**: the `mutate` list is still a list of files (all at 100%), to become `src/**/*.ts`; the ports
+  have no mutants (types only).
 
 ### Phase 5: Drive Remaining Survivors to Zero
 

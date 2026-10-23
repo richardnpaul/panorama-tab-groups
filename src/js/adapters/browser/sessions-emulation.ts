@@ -1,4 +1,5 @@
 import { isRecord } from '../../share/guards.js';
+import { createExclusively, type Exclusively } from './exclusive.js';
 
 /** The part of `browser.storage.local` the emulation uses */
 export interface StorageArea {
@@ -50,16 +51,8 @@ function recordsIn(value: unknown): Scope {
  */
 export function createSessionsEmulation(
   getStorage: () => StorageArea,
+  exclusively: Exclusively = createExclusively(undefined),
 ): SessionsEmulation {
-  let queue: Promise<unknown> = Promise.resolve();
-
-  const exclusively = <T>(task: () => Promise<T>): Promise<T> => {
-    const run = queue.then(task);
-    // A failed call must not stop the ones after it
-    queue = run.catch(() => undefined);
-    return run;
-  };
-
   const load = async (): Promise<Data> => {
     const stored = (await getStorage().get(STORAGE_KEY))[STORAGE_KEY];
     const data = isRecord(stored) ? stored : {};

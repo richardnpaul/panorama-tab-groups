@@ -38,9 +38,9 @@
 - **`src/js/background/main.ts`** — MV3 service worker entry (composition root only); event-driven, ephemeral (state is lost on termination). It builds `src/js/app/` services over the ports in `src/js/ports/` (`background/compose.ts`) and registers the listeners (`adapters/browser/events.ts`)
 - **`src/js/background/StateManager.ts`** — Single source of truth for all extension state; wraps `browser.sessions` (per-window/tab, Firefox-only) and `browser.storage.local` (persistent, cross-browser)
 - **`src/js/core/constants.ts`** — Reserved group IDs and application constants
-- **`src/js/view/`** — Freeform tab groups canvas view
-- **`src/popup-view/`** — Quick group switcher popup
-- **`src/js/_share/js/models/`** — Shared `View`, `Group`, `Tab` base models
+- **`src/js/view/`** — Freeform tab groups canvas view, built over the ports in `src/js/ports/` and `app/groups-store.ts`
+- **`src/popup-view/`** — Quick group switcher popup, built over the same ports and `app/popup-service.ts` (the pure logic is `core/popup.ts`)
+- **`src/js/migration-status/`** — Diagnostic page for the migration to native tab groups
 
 ## Code Conventions
 

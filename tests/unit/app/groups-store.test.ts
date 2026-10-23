@@ -300,6 +300,47 @@ describe('app/groups-store.ts', () => {
     });
   });
 
+  describe('moveTo', () => {
+    const three = [stored(1), stored(2), stored(3)];
+
+    it('puts the group in the gap it was dropped in, and saves the order', async () => {
+      const { store, groupState } = await setUp(three);
+
+      await store.moveTo(1, 3);
+
+      expect(store.getIds()).toEqual([2, 3, 1]);
+      const saved = await groupState.getGroups(WINDOW);
+      expect(saved?.map(({ id }) => id)).toEqual([2, 3, 1]);
+    });
+
+    it('moves a group to the front', async () => {
+      const { store } = await setUp(three);
+
+      await store.moveTo(3, 0);
+
+      expect(store.getIds()).toEqual([3, 1, 2]);
+    });
+
+    it('keeps the groups themselves', async () => {
+      const { store } = await setUp(three);
+      const second = store.get(2);
+
+      await store.moveTo(2, 0);
+
+      expect(store.get(2)).toBe(second);
+    });
+
+    it('leaves the order and the saved groups as they are for an unknown group', async () => {
+      const { store, groupState } = await setUp(three);
+      const save = vi.spyOn(groupState, 'setGroups');
+
+      await store.moveTo(99, 0);
+
+      expect(store.getIds()).toEqual([1, 2, 3]);
+      expect(save).not.toHaveBeenCalled();
+    });
+  });
+
   describe('the active group', () => {
     it('is kept in the state of the window', async () => {
       const { store, groupState } = await setUp();

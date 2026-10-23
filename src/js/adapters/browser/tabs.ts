@@ -1,4 +1,4 @@
-import type { TabDetails, Tabs } from '../../ports/tabs.js';
+import type { TabDetails, Tabs, TabSnapshot } from '../../ports/tabs.js';
 
 interface QueriedTab {
   id?: number | undefined;
@@ -10,6 +10,7 @@ interface QueriedTab {
   pendingUrl?: string | undefined;
   title?: string | undefined;
   groupId?: number | undefined;
+  index?: number | undefined;
 }
 
 /** The part of `browser.tabs` the extension uses */
@@ -31,6 +32,9 @@ export interface TabsApi {
     create(createProperties: {
       url: string;
       active: boolean;
+      windowId?: number;
+      discarded?: boolean;
+      pinned?: boolean;
     }): Promise<{ id?: number | undefined }>;
     hide(tabIds: number[]): Promise<unknown>;
     show(tabIds: number[]): Promise<unknown>;
@@ -55,6 +59,18 @@ function detailsOf(
     title: tab.title,
     browserGroupId: tab.groupId,
   };
+}
+
+// The id of the tab the browser opened for a page
+async function createdTabId(
+  created: Promise<{ id?: number | undefined }>,
+  url: string,
+): Promise<number> {
+  const { id } = await created;
+  if (id === undefined) {
+    throw new Error(`The new tab for ${url} has no id`);
+  }
+  return id;
 }
 
 const idsOf = (tabs: readonly QueriedTab[]): number[] =>
@@ -111,13 +127,29 @@ export function createBrowserTabs(getApi: () => TabsApi): Tabs {
       await getApi().tabs.remove(tabId);
     },
 
-    async open(url, active) {
-      const { id } = await getApi().tabs.create({ url, active });
-      if (id === undefined) {
-        throw new Error(`The new tab for ${url} has no id`);
-      }
-      return id;
+    async snapshotsInWindow(windowId) {
+      const tabs = await getApi().tabs.query({ windowId });
+      return tabs.flatMap((tab, position): TabSnapshot[] =>
+        tab.id === undefined
+          ? []
+          : [
+              {
+                id: tab.id,
+                url: tab.url,
+                title: tab.title,
+                index: tab.index ?? position,
+                lastAccessed: tab.lastAccessed ?? 0,
+                pinned: tab.pinned === true,
+              },
+            ],
+      );
     },
+
+    create: (options) =>
+      createdTabId(getApi().tabs.create(options), options.url),
+
+    open: (url, active) =>
+      createdTabId(getApi().tabs.create({ url, active }), url),
 
     async hide(tabIds) {
       await getApi().tabs.hide([...tabIds]);

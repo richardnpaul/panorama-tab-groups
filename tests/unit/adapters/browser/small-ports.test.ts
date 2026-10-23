@@ -294,6 +294,112 @@ describe('adapters/browser/tabs.ts', () => {
     });
   });
 
+  describe('snapshotsInWindow', () => {
+    it('gives what a backup keeps of the tabs of the window, in order', async () => {
+      const query = vi.fn().mockResolvedValue([
+        {
+          id: 4,
+          url: 'https://a/',
+          title: 'A',
+          index: 0,
+          lastAccessed: 100,
+          pinned: true,
+          groupId: 8,
+        },
+        { id: 9, url: 'https://b/', title: 'B', index: 1, lastAccessed: 200 },
+      ]);
+      const tabs = createBrowserTabs(() => api({ query }));
+
+      await expect(tabs.snapshotsInWindow(3)).resolves.toEqual([
+        {
+          id: 4,
+          url: 'https://a/',
+          title: 'A',
+          index: 0,
+          lastAccessed: 100,
+          pinned: true,
+        },
+        {
+          id: 9,
+          url: 'https://b/',
+          title: 'B',
+          index: 1,
+          lastAccessed: 200,
+          pinned: false,
+        },
+      ]);
+      expect(query).toHaveBeenCalledWith({ windowId: 3 });
+    });
+
+    it('uses the place in the list for a tab without an index, 0 for no time, and leaves out tabs without an id', async () => {
+      const query = vi.fn().mockResolvedValue([{}, { id: 6 }]);
+      const tabs = createBrowserTabs(() => api({ query }));
+
+      await expect(tabs.snapshotsInWindow(3)).resolves.toEqual([
+        {
+          id: 6,
+          url: undefined,
+          title: undefined,
+          index: 1,
+          lastAccessed: 0,
+          pinned: false,
+        },
+      ]);
+    });
+  });
+
+  describe('create', () => {
+    it('opens the page in the window, as asked, and gives the id', async () => {
+      const create = vi.fn().mockResolvedValue({ id: 12 });
+      const tabs = createBrowserTabs(() => api({ create }));
+      const options = {
+        url: 'https://a/',
+        windowId: 3,
+        active: false,
+        discarded: true,
+        pinned: false,
+      };
+
+      await expect(tabs.create(options)).resolves.toBe(12);
+
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(create).toHaveBeenCalledWith(options);
+    });
+
+    it('fails when the browser gives the new tab no id', async () => {
+      const tabs = createBrowserTabs(() =>
+        api({ create: vi.fn().mockResolvedValue({}) }),
+      );
+
+      await expect(
+        tabs.create({
+          url: 'https://a/',
+          windowId: 3,
+          active: false,
+          discarded: false,
+          pinned: false,
+        }),
+      ).rejects.toThrow('The new tab for https://a/ has no id');
+    });
+
+    it('passes on a refusal', async () => {
+      const failure = new Error('refused');
+      const tabs = createBrowserTabs(() =>
+        api({ create: vi.fn().mockRejectedValue(failure) }),
+      );
+
+      await expect(
+        tabs.create({
+          url: 'x',
+          windowId: 1,
+          active: false,
+          discarded: false,
+          pinned: false,
+        }),
+      ).rejects.toBe(failure);
+    });
+  });
+
   describe('open', () => {
     it('opens the page in a new tab and gives its id', async () => {
       const create = vi.fn().mockResolvedValue({ id: 31 });
@@ -402,6 +508,19 @@ describe('adapters/browser/i18n.ts', () => {
 
     expect(getMessage).toHaveBeenCalledTimes(1);
     expect(getMessage).toHaveBeenCalledWith('defaultGroupName');
+  });
+
+  it('puts the substitutions in the message, as a copy', () => {
+    const getMessage = vi.fn().mockReturnValue('Close 3 tabs?');
+    const i18n = createBrowserI18n(() => ({ i18n: { getMessage } }));
+    const substitutions = ['3'];
+
+    expect(i18n.getMessage('closeGroupWarning', substitutions)).toBe(
+      'Close 3 tabs?',
+    );
+
+    expect(getMessage).toHaveBeenCalledWith('closeGroupWarning', ['3']);
+    expect(getMessage.mock.calls[0]?.[1]).not.toBe(substitutions);
   });
 
   it('uses the browser that exists when it is called', () => {

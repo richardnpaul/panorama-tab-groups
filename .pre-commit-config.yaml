@@ -23,10 +23,6 @@ repos:
         entry: npx prettier --write --ignore-unknown
         language: system
         types_or: [javascript, ts, json, css, html, markdown]
-        exclude: |
-          (?x)^(
-            src/popup-view/.*
-          )$
 
       - id: eslint
         name: eslint
@@ -34,10 +30,6 @@ repos:
         language: system
         types: [file]
         files: \.(js|mjs|ts|json)$
-        exclude: |
-          (?x)^(
-            src/popup-view/.*
-          )$
 
       - id: no-suppressions
         name: no suppressions

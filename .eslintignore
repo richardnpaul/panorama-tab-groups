@@ -2,7 +2,6 @@
 build
 dist
 node_modules
-src/popup-view/*
 test-user-data*
 playwright-report
 coverage

@@ -33,7 +33,7 @@ body > * {
 }
 
 .content-loading::before {
-  content: "";
+  content: '';
   width: 32px;
   height: 32px;
   position: fixed;
@@ -215,7 +215,7 @@ footer .button-ghost::before {
 
 .list__drag::after,
 .list__close::after {
-  content: "";
+  content: '';
   display: block;
   height: 16px;
   width: 16px;
@@ -275,11 +275,12 @@ footer .button-ghost::before {
 }
 
 .list__link--extend::after {
-  content: "";
+  content: '';
   height: 16px;
   width: 16px;
   background: var(--button-ghost-icon-color);
-  -webkit-mask: url(../../shared/icons/Arrowhead_Right.svg) center center no-repeat;
+  -webkit-mask: url(../../shared/icons/Arrowhead_Right.svg) center center
+    no-repeat;
   mask: url(../../shared/icons/Arrowhead_Right.svg) center center no-repeat;
   -webkit-mask-size: 16px;
   mask-size: 16px;
@@ -331,7 +332,7 @@ footer .button-ghost::before {
 }
 
 .group-edit::after {
-  content: "";
+  content: '';
   display: block;
   height: 16px;
   width: 16px;
@@ -349,7 +350,9 @@ footer .button-ghost::before {
 /* Drag and Drop */
 [draggable] {
   user-select: none;
-  transition: transform, opacity 0.3s linear;
+  transition:
+    transform,
+    opacity 0.3s linear;
 }
 
 [draggable].dragged {

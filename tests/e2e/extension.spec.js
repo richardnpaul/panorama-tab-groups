@@ -25,13 +25,7 @@ async function gotoExtensionPage(
   await page.goto(targetUrl, { timeout: 15000 });
 
   // Poll client-side page.url() to avoid server-side toHaveURL hang/failures in Firefox
-  const startTime = Date.now();
-  // eslint-disable-next-line no-await-in-loop
-  while (page.url() !== targetUrl && Date.now() - startTime < 5000) {
-    // eslint-disable-next-line no-await-in-loop
-    await page.waitForTimeout(50);
-  }
-  expect(page.url()).toBe(targetUrl);
+  await expect.poll(() => page.url(), { timeout: 5000 }).toBe(targetUrl);
 
   return targetUrl;
 }

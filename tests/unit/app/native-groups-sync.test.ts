@@ -447,6 +447,16 @@ describe('app/native-groups-sync.ts', () => {
       ]);
     });
 
+    it('does not write the groups when none of them has the native group', async () => {
+      const env = setUp();
+      await env.groupState.setGroups(1, [group(1, 60)]);
+      const setGroups = vi.spyOn(env.groupState, 'setGroups');
+
+      await env.sync.onRemoved({ id: 50, windowId: 1 });
+
+      expect(setGroups).not.toHaveBeenCalled();
+    });
+
     it('leaves the groups of other windows', async () => {
       const env = setUp({ windowIds: [1, 2] });
       await env.groupState.setGroups(1, [group(1, 50)]);
@@ -510,6 +520,16 @@ describe('app/native-groups-sync.ts', () => {
       await env.sync.onUpdated({ id: 50, windowId: 1, title: '' });
 
       expect((await env.groupState.getGroups(1))?.[0]?.name).toBe('');
+    });
+
+    it('does not write the groups when none of them has the native group', async () => {
+      const env = setUp();
+      await env.groupState.setGroups(1, [group(1, 60)]);
+      const setGroups = vi.spyOn(env.groupState, 'setGroups');
+
+      await env.sync.onUpdated({ id: 50, windowId: 1, title: 'x' });
+
+      expect(setGroups).not.toHaveBeenCalled();
     });
 
     it('keeps the native group', async () => {

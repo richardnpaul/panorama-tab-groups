@@ -304,6 +304,20 @@ describe('app/tab-lifecycle.ts', () => {
     });
 
     describe('without native groups', () => {
+      it('does not make a native group for a group with tabs', async () => {
+        const env = await setUp({
+          useNative: false,
+          tabs: [
+            { tab: details(5), group: 1 },
+            { tab: details(6), group: 1 },
+          ],
+        });
+
+        await env.lifecycle.tabCreated(created(5));
+
+        expect(env.nativeGroups.calls).toEqual([]);
+      });
+
       it('shows the group of a new tab that is active', async () => {
         const env = await setUp({ useNative: false, activeGroup: 2 });
 
@@ -396,16 +410,25 @@ describe('app/tab-lifecycle.ts', () => {
         expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
       });
 
-      it('gives up when grouping is not safe, and leaves the visibility alone', async () => {
+      it('still shows the group of an active tab when grouping is not safe', async () => {
         const env = await setUp({ tabs: [{ tab: details(5), group: 1 }] });
 
         await env.lifecycle.tabCreated(created(5, { active: true }));
 
         expect(env.nativeGroups.calls).toEqual([]);
-        expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
+        expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
         expect(env.logger.debug).toHaveBeenCalledWith(
           '[TabCreated] Skipping native group creation: Would group only tab in window (window closure risk)',
         );
+      });
+
+      it('leaves the visibility alone for a tab in the background when grouping is not safe', async () => {
+        const env = await setUp({ tabs: [{ tab: details(5), group: 1 }] });
+
+        await env.lifecycle.tabCreated(created(5));
+
+        expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
       });
 
       it('shows the group of an active tab although making the native group failed', async () => {
@@ -667,6 +690,15 @@ describe('app/tab-lifecycle.ts', () => {
         { tab: details(6), group: 2 },
       ];
 
+      it('does not look for or make native groups when they are switched off', async () => {
+        const env = await setUp({ tabs: twoTabs, useNative: false });
+
+        await env.lifecycle.tabActivated({ tabId: 5 });
+
+        expect(env.nativeGroups.calls).toEqual([]);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+      });
+
       it('makes a native group for a group that has none', async () => {
         const env = await setUp({ tabs: twoTabs });
 
@@ -693,6 +725,38 @@ describe('app/tab-lifecycle.ts', () => {
           'Linked existing native group 71 to panorama group 2',
         );
         expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+      });
+
+      it('does not link a native group that another group already has', async () => {
+        const env = await setUp({
+          groups: [group(1, 71), group(2)],
+          tabs: twoTabs,
+          nativeGroupIds: [71],
+        });
+        env.nativeGroups.seed(71, WINDOW, [5]);
+
+        await env.lifecycle.tabActivated({ tabId: 5 });
+
+        expect(
+          (await env.groupState.getGroups(WINDOW))?.map((g) => g.nativeGroupId),
+        ).toEqual([71, 1000]);
+        expect(await env.nativeGroups.tabIdsIn(1000)).toEqual([5, 6]);
+        expect(await env.nativeGroups.tabIdsIn(71)).toEqual([]);
+      });
+
+      it('links an unclaimed native group even when another is claimed', async () => {
+        const env = await setUp({
+          groups: [group(1, 71), group(2)],
+          tabs: twoTabs,
+          nativeGroupIds: [71, 72],
+        });
+        env.nativeGroups.seed(72, WINDOW, [5]);
+
+        await env.lifecycle.tabActivated({ tabId: 5 });
+
+        expect(
+          (await env.groupState.getGroups(WINDOW))?.map((g) => g.nativeGroupId),
+        ).toEqual([71, 72]);
       });
 
       it('finds the tab in the native groups of its own window only', async () => {
@@ -746,13 +810,14 @@ describe('app/tab-lifecycle.ts', () => {
         expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
       });
 
-      it('stops when grouping is not safe', async () => {
+      it('still shows the group when grouping is not safe', async () => {
         const env = await setUp({ tabs: [{ tab: details(5), group: 2 }] });
 
         await env.lifecycle.tabActivated({ tabId: 5 });
 
         expect(env.nativeGroups.calls).toEqual([]);
-        expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(await env.groupState.getActiveGroup(WINDOW)).toBe(2);
         expect(env.logger.debug).toHaveBeenCalledWith(
           '[TabActivated] Skipping native group creation: Would group only tab in window (window closure risk)',
         );

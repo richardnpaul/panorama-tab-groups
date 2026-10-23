@@ -76,23 +76,22 @@ test.describe('Background Listeners & Visibility Toggle', () => {
       });
       if (!activeTab) return null;
 
-      // Poll until groupId is set (tabCreated finishes)
-      let groupId;
-      let checks = 0;
       console.log('Active tab found:', activeTab.id, activeTab.url);
-      for (let i = 0; i < 100; i += 1) {
-        checks = i;
-        // eslint-disable-next-line no-await-in-loop
-        groupId = await window.browser.sessions.getTabValue(
+      // Poll until groupId is set (tabCreated finishes)
+      const poll = async (checks) => {
+        const groupId = await window.browser.sessions.getTabValue(
           activeTab.id,
           'groupId',
         );
-        if (groupId !== undefined && groupId !== null) break;
-        // eslint-disable-next-line no-await-in-loop
+        if ((groupId !== undefined && groupId !== null) || checks >= 99) {
+          return { groupId, checks };
+        }
         await new Promise((r) => {
           setTimeout(r, 100);
         });
-      }
+        return poll(checks + 1);
+      };
+      const { groupId, checks } = await poll(0);
 
       return { tabId: activeTab.id, groupId, url: activeTab.url, checks };
     });

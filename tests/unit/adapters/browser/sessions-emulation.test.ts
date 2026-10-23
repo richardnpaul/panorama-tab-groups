@@ -4,6 +4,8 @@ import {
   createSessionsEmulation,
   type StorageArea,
 } from '../../../../src/js/adapters/browser/sessions-emulation.js';
+import { createExclusively } from '../../../../src/js/adapters/browser/exclusive.js';
+import { createFakeLocks } from '../../../support/fake-locks.js';
 import { createFakeStorage } from '../../../support/fake-storage.js';
 import { describeGroupStateContract } from '../../../support/group-state-contract.js';
 
@@ -299,6 +301,57 @@ describe('adapters/browser/sessions-emulation.ts', () => {
 
       await expect(sessions.getWindowValue(1, 'k')).rejects.toBe(failure);
       await expect(sessions.setWindowValue(1, 'k', 1)).rejects.toBe(failure);
+    });
+  });
+
+  describe('from several contexts of the extension', () => {
+    // A storage that is slow to read, as it is when others are busy with it
+    const slowStorage = (storage: ReturnType<typeof createFakeStorage>) => ({
+      get: async (key: string) => {
+        const stored = await storage.area.get(key);
+        await Promise.resolve();
+        await Promise.resolve();
+        return stored;
+      },
+      set: storage.area.set,
+    });
+
+    it('loses a write when the contexts do not share locks', async () => {
+      const storage = createFakeStorage();
+      const background = createSessionsEmulation(() => slowStorage(storage));
+      const page = createSessionsEmulation(() => slowStorage(storage));
+
+      await Promise.all([
+        background.setWindowValue(1, 'groups', ['a']),
+        page.setTabValue(2, 'groupId', 3),
+      ]);
+
+      const stored = storage.data.get('__mock_sessions');
+      const kept = JSON.stringify(stored).includes('groups');
+      const alsoKept = JSON.stringify(stored).includes('groupId');
+      expect(kept && alsoKept).toBe(false);
+    });
+
+    it('keeps every write when the contexts share locks', async () => {
+      const storage = createFakeStorage();
+      const { locks } = createFakeLocks();
+      const background = createSessionsEmulation(
+        () => slowStorage(storage),
+        createExclusively(locks),
+      );
+      const page = createSessionsEmulation(
+        () => slowStorage(storage),
+        createExclusively(locks),
+      );
+
+      await Promise.all([
+        background.setWindowValue(1, 'groups', ['a']),
+        page.setTabValue(2, 'groupId', 3),
+        page.removeTabValue(9, 'groupId'),
+      ]);
+
+      await expect(page.getWindowValue(1, 'groups')).resolves.toEqual(['a']);
+      await expect(background.getTabValue(2, 'groupId')).resolves.toBe(3);
     });
   });
 });

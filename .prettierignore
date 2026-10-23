@@ -1,7 +1,6 @@
 node_modules
 build
 dist
-src/popup-view/*
 coverage/
 playwright-report/
 test-results/

@@ -181,7 +181,10 @@ export function createNativeGroupsSync({
     }
   }
 
-  // Change the groups of a window that refer to the native group
+  // Change the groups of a window that refer to the native group. Nothing is
+  // written when none does: the browser reports a group right after it is made,
+  // before the group that made it has been given its reference, and writing the
+  // groups back as they were then would lose that reference.
   async function followNativeGroup(
     { id, windowId }: NativeGroupEvent,
     change: (group: Group) => Group,
@@ -189,7 +192,7 @@ export function createNativeGroupsSync({
   ): Promise<void> {
     try {
       const groups = await groupState.getGroups(windowId);
-      if (groups !== undefined) {
+      if (groups?.some((group) => group.nativeGroupId === id) === true) {
         await groupState.setGroups(
           windowId,
           groups.map((group) =>

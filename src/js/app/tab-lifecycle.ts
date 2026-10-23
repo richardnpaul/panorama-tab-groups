@@ -107,12 +107,13 @@ export function createTabLifecycle({
   }
 
   // Put the new tab in the native group of its group, making one if there is
-  // none yet. 'abort' is for when nothing more is to be done for the tab, and
-  // 'show-group' for when its group is to be shown even if the tab is not active.
+  // none yet. 'show-group' is for when its group is to be shown even if the tab
+  // is not active. A native group that could not safely be made changes
+  // nothing about the group the tab is in, so the tab is treated like any other.
   async function assignNewTabToNativeGroup(
     tab: CreatedTab,
     groupId: number,
-  ): Promise<'abort' | 'show-group' | 'as-is'> {
+  ): Promise<'show-group' | 'as-is'> {
     const groups = (await groupState.getGroups(tab.windowId)) ?? [];
     const group = groups.find(({ id }) => id === groupId);
     const activeGroup = await groupState.getActiveGroup(tab.windowId);
@@ -125,9 +126,6 @@ export function createTabLifecycle({
         groups,
         label: 'TabCreated',
       });
-      if (creation.kind === 'aborted') {
-        return 'abort';
-      }
       // The browser group is new, so the view may have to give way to it
       return creation.kind === 'created' && groupId === activeGroup
         ? 'show-group'
@@ -147,10 +145,12 @@ export function createTabLifecycle({
     return 'as-is';
   }
 
-  // The native group the tab is in, if it is in one
-  async function nativeGroupOfTab(
+  // The native group the tab is in, if it is in one that no group has
+  // claimed: a tab opened from a grouped tab joins that group by itself
+  async function unclaimedNativeGroupOfTab(
     tabId: number,
     windowId: number,
+    claimed: readonly number[],
   ): Promise<number | undefined> {
     const nativeGroupIds = await nativeGroups.listIdsInWindow(windowId);
     const members = await Promise.all(
@@ -159,7 +159,10 @@ export function createTabLifecycle({
         tabIds: await nativeGroups.tabIdsIn(nativeGroupId),
       })),
     );
-    return members.find(({ tabIds }) => tabIds.includes(tabId))?.nativeGroupId;
+    return members.find(
+      ({ nativeGroupId, tabIds }) =>
+        !claimed.includes(nativeGroupId) && tabIds.includes(tabId),
+    )?.nativeGroupId;
   }
 
   const withNativeGroup = (
@@ -172,19 +175,23 @@ export function createTabLifecycle({
     );
 
   // Give the group of the activated tab a native group: the one its tab is
-  // already in, or a new one. Gives false if the rest of the activation should
-  // not go ahead.
+  // already in, or a new one. Whether that worked does not matter to showing
+  // the group.
   async function ensureNativeGroup(
     tab: { id: number; windowId: number },
     activeGroup: number,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const groups = (await groupState.getGroups(tab.windowId)) ?? [];
     const group = groups.find(({ id }) => id === activeGroup);
     if (group === undefined || nativeGroupIdOf(group) !== undefined) {
-      return true;
+      return;
     }
 
-    const existing = await nativeGroupOfTab(tab.id, tab.windowId);
+    const existing = await unclaimedNativeGroupOfTab(
+      tab.id,
+      tab.windowId,
+      groups.flatMap((other) => nativeGroupIdOf(other) ?? []),
+    );
     if (existing !== undefined) {
       await groupState.setGroups(
         tab.windowId,
@@ -193,23 +200,21 @@ export function createTabLifecycle({
       logger.debug(
         `Linked existing native group ${String(existing)} to panorama group ${String(activeGroup)}`,
       );
-      return true;
+      return;
     }
 
     try {
-      const creation = await assignment.createNativeGroup({
+      await assignment.createNativeGroup({
         windowId: tab.windowId,
         group,
         groups,
         label: 'TabActivated',
       });
-      return creation.kind !== 'aborted';
     } catch (error) {
       logger.warn(
         `[TabActivated] Could not create native tab group in window ${String(tab.windowId)}:`,
         error,
       );
-      return true;
     }
   }
 
@@ -248,10 +253,7 @@ export function createTabLifecycle({
     }
 
     // The view must give way to a new tab that is active, native groups or not
-    if (
-      outcome !== 'abort' &&
-      (tab.active === true || outcome === 'show-group')
-    ) {
+    if (tab.active === true || outcome === 'show-group') {
       await toggleVisibleTabs(groupId);
     }
   }
@@ -304,11 +306,8 @@ export function createTabLifecycle({
         );
       }
 
-      if (
-        (await useNativeGroups()) &&
-        !(await ensureNativeGroup(tab, activeGroup))
-      ) {
-        return;
+      if (await useNativeGroups()) {
+        await ensureNativeGroup(tab, activeGroup);
       }
     }
 

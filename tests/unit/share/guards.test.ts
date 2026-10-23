@@ -4,6 +4,7 @@ import {
   isNumber,
   isRecord,
   isString,
+  messageOf,
 } from '../../../src/js/share/guards.js';
 
 const samples: Record<string, unknown> = {
@@ -44,5 +45,20 @@ describe('share/guards.ts', () => {
 
   it('isRecord accepts objects and arrays but not null or functions', () => {
     expect(namesWhere(isRecord)).toEqual(['object', 'emptyObject', 'array']);
+  });
+
+  describe('messageOf', () => {
+    it('gives the message of an error', () => {
+      expect(messageOf(new Error('went wrong'))).toBe('went wrong');
+      expect(messageOf(new TypeError('bad type'))).toBe('bad type');
+    });
+
+    it('gives anything else as text', () => {
+      expect(messageOf('plain text')).toBe('plain text');
+      expect(messageOf(42)).toBe('42');
+      expect(messageOf(null)).toBe('null');
+      expect(messageOf(undefined)).toBe('undefined');
+      expect(messageOf({ message: 'not an error' })).toBe('[object Object]');
+    });
   });
 });

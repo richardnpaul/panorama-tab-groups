@@ -1,4 +1,9 @@
-import type { TabDetails, Tabs, TabSummary } from '../../ports/tabs.js';
+import type {
+  TabDetails,
+  Tabs,
+  TabSnapshot,
+  TabSummary,
+} from '../../ports/tabs.js';
 
 export interface MemoryTabs extends Tabs {
   /** Replace the tabs with plain tabs that have these ids */
@@ -6,6 +11,10 @@ export interface MemoryTabs extends Tabs {
   setTabs(tabs: readonly TabSummary[]): void;
   /** Make these tabs exist, whichever window they are in */
   setDetails(tabs: readonly TabDetails[]): void;
+  /** Set when tabs were last used; the default is 0 */
+  setLastAccessed(times: Readonly<Record<number, number>>): void;
+  /** Make the next `create` refuse with this */
+  refuseNextCreate(error: Error): void;
   /** Mark tabs as selected by the user, besides the active ones */
   setHighlighted(ids: readonly number[]): void;
   /** The window new tabs are opened in */
@@ -32,6 +41,8 @@ export function createMemoryTabs(
   let details: TabDetails[] = [];
   const hiddenIds = new Set<number>();
   const highlighted = new Set<number>();
+  const lastAccessed = new Map<number, number>();
+  let refusal: Error | undefined;
   let nextId = 9000;
   const calls: string[] = [];
 
@@ -92,6 +103,45 @@ export function createMemoryTabs(
       details = details.filter(({ id }) => id !== tabId);
       return Promise.resolve();
     },
+    snapshotsInWindow: (windowId) =>
+      Promise.resolve(
+        inWindow(windowId).map(
+          (tab, index): TabSnapshot => ({
+            id: tab.id,
+            url: tab.url,
+            title: tab.title,
+            index,
+            lastAccessed: lastAccessed.get(tab.id) ?? 0,
+            pinned: tab.pinned,
+          }),
+        ),
+      ),
+    create(options) {
+      calls.push(
+        `create ${options.url} in ${String(options.windowId)}${options.discarded ? ' discarded' : ''}${options.pinned ? ' pinned' : ''}${options.active ? ' active' : ''}`,
+      );
+      if (refusal) {
+        const error = refusal;
+        refusal = undefined;
+        return Promise.reject(error);
+      }
+      const id = nextId;
+      nextId += 1;
+      details = [
+        ...details,
+        {
+          id,
+          windowId: options.windowId,
+          active: options.active,
+          pinned: options.pinned,
+          url: options.url,
+          pendingUrl: undefined,
+          title: undefined,
+          browserGroupId: undefined,
+        },
+      ];
+      return Promise.resolve(id);
+    },
     open(url, active) {
       calls.push(`open ${url}`);
       const id = nextId;
@@ -110,6 +160,15 @@ export function createMemoryTabs(
         },
       ];
       return Promise.resolve(id);
+    },
+    setLastAccessed(times) {
+      lastAccessed.clear();
+      Object.entries(times).forEach(([id, time]) => {
+        lastAccessed.set(Number(id), time);
+      });
+    },
+    refuseNextCreate(error) {
+      refusal = error;
     },
     setHighlighted(ids) {
       highlighted.clear();

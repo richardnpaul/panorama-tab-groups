@@ -119,7 +119,7 @@ function attachEventHandlers(
   // Backup
   requireElementById(HTMLElement, 'backupFileInput').addEventListener(
     'change',
-    loadBackup,
+    asListener(loadBackup),
   );
   requireElementById(HTMLElement, 'saveBackupButton').addEventListener(
     'click',

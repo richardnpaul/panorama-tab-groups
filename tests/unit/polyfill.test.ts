@@ -4,6 +4,7 @@ import {
   type PolyfillScope,
   type PolyfillTarget,
 } from '../../src/js/polyfill.js';
+import { createFakeLocks } from '../support/fake-locks.js';
 import { createFakeStorage } from '../support/fake-storage.js';
 
 const target = (extra: Partial<PolyfillTarget> = {}): PolyfillTarget => ({
@@ -54,6 +55,30 @@ describe('polyfill.ts', () => {
       installPolyfills({ chrome });
 
       expect(chrome.sessions).toBeDefined();
+    });
+  });
+
+  describe('sessions, kept under the locks of the extension where there are any', () => {
+    it('takes the lock for every read and write', async () => {
+      const fake = createFakeLocks();
+      const browser = target();
+
+      installPolyfills({ browser, navigator: { locks: fake.locks } });
+      await browser.sessions?.setTabValue?.(1, 'groupId', 'two');
+      await browser.sessions?.getTabValue?.(1, 'groupId');
+
+      expect(fake.requests).toEqual(['panorama-sessions', 'panorama-sessions']);
+    });
+
+    it('works without locks', async () => {
+      const browser = target();
+
+      installPolyfills({ browser, navigator: {} });
+      await browser.sessions?.setTabValue?.(1, 'groupId', 'two');
+
+      await expect(browser.sessions?.getTabValue?.(1, 'groupId')).resolves.toBe(
+        'two',
+      );
     });
   });
 

@@ -8,6 +8,7 @@ import type { Logger } from '../ports/logger.js';
 import type { MigrationFlag } from '../ports/migration-flag.js';
 import type { DeletionResult } from './delete-group.js';
 import type { NativeGroupsSync } from './native-groups-sync.js';
+import { messageOf } from '../share/guards.js';
 import type { ViewRefresh } from './view-refresh.js';
 
 export interface MessageHandlerDeps {
@@ -22,9 +23,6 @@ export interface MessageHandlerDeps {
 }
 
 type Handler = (message: Record<string, unknown>) => Promise<unknown>;
-
-const messageOf = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 /**
  * What the extension's own pages ask of the background. Gives what to answer
