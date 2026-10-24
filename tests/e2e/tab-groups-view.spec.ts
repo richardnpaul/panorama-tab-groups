@@ -29,8 +29,13 @@ test.describe('Tab Groups View E2E', () => {
     );
     await popupPage.goto(viewUrl);
 
+    // The buttons are in the page before the view has attached what they do,
+    // and the groups are not there until it has read them
+    await expect(popupPage.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+
     // Create a group using the UI to ensure at least one .group element exists
-    await popupPage.waitForSelector('#newGroup');
     if ((await popupPage.locator('.group').count()) === 0) {
       await popupPage.click('#newGroup');
     }

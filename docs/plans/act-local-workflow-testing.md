@@ -326,6 +326,12 @@ field "mime_type"`) and the step fails after five retries (about 90 s). It is a 
   It waits at most 5 s for the background to give a group a native group, and the run overlapped with other work in
   the same container. It had not failed in about a dozen earlier runs. Left as it is; if it shows up on GitHub, the
   wait should be longer or the step should wait for the event itself.
+- **A second flaky test, seen on GitHub: `tab-groups-view`, "Tab Search filters tabs correctly"** (Chromium; it passed
+  on the retry). Cause: its setup waited for `#newGroup`, which is in the static HTML, then counted `.group` and clicked
+  the button, but the view attaches the button's handler and reads the groups during start-up and only then sets
+  `body.view-ready`. On a slow runner the click came first and did nothing, so no group appeared. It failed 2 of 36 runs
+  locally with retries off. The setup now waits for `body.view-ready` first, as the other specs do: 90 of 90 passes with
+  retries off, and the Firefox runs pass. The other specs that count groups were checked and already wait.
 
 After the change: E2E 64 passed and 8 skipped, job green (4 m 8 s); mutation pull request with a restored cache 43 s,
 score 100%, job green. The full mutation run (push) also saved its report with `actions/cache/save` v6.
