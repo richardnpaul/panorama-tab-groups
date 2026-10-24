@@ -1,0 +1,64 @@
+# Smoke tests against a deployed environment, behind a GitHub Environment (approvals, scoped secrets).
+# Use when: tests need credentials for staging or production; Avoid when: they only use a local dev server.
+# Every `uses:` is a full commit SHA with its version in the comment, so a moved tag cannot change
+# what runs. Dependabot (`package-ecosystem: github-actions`) keeps them current. GitHub sets
+# `CI=true` itself. Look up a SHA with:  git ls-remote https://github.com/<owner>/<repo> 'refs/tags/<tag>*'
+name: Playwright (Staging)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: staging # protection rules and the secrets of this environment
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24 # the active LTS; or `node-version-file: .nvmrc` to follow the project
+          cache: npm
+
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install browsers and OS dependencies
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
+
+      # The browsers come from the cache; the OS packages they need do not
+      - name: Install OS dependencies only
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps
+
+      # Secrets go to the one step that needs them, not to the whole job
+      - name: Run smoke tests against staging
+        env:
+          BASE_URL: ${{ vars.STAGING_URL }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+          API_KEY: ${{ secrets.API_KEY }}
+        run: npx playwright test --grep @smoke
+
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: staging-report
+          path: playwright-report/
+          retention-days: 14

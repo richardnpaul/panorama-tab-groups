@@ -1,0 +1,18 @@
+# Calls playwright-reusable.yml. A called workflow gets the permissions its caller grants, so they are set here too.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    uses: ./.github/workflows/playwright-reusable.yml
+    with:
+      shards: '["1/4","2/4","3/4","4/4"]'
+      base-url: ${{ vars.STAGING_URL }}
+    secrets:
+      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}

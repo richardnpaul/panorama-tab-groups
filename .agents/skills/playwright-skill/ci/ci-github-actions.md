@@ -1,552 +1,114 @@
 # CI: GitHub Actions
 
-> **When to use**: Running Playwright tests automatically on pull requests, merges to main, or on a schedule. GitHub Actions is the most common CI for Playwright projects.
+> **When to use**: Running Playwright tests automatically on pull requests, merges to main, or on a schedule with GitHub Actions.
+
+The complete workflows are separate files in [examples/github-actions/](examples/github-actions/). Open **only the one that matches the scenario** (see the Decision Guide); this page holds the rules every workflow follows, so none of them needs to be read to apply those rules.
 
 ## Quick Reference
 
 ```bash
-# Key CLI flags for CI
-npx playwright install --with-deps    # install browsers + OS deps
-npx playwright test --shard=1/4       # run 1 of 4 shards
-npx playwright test --reporter=github # annotate PR with failures
-npx playwright merge-reports ./blob-report  # merge shard reports
+npx playwright install --with-deps            # browsers + OS packages
+npx playwright test --shard=1/4               # one of four shards
+npx playwright test --reporter=github         # annotate the pull request with failures
+npx playwright merge-reports ./blob-report    # merge the reports of the shards
 ```
+
+## Rules Every Workflow Follows
+
+| Rule                                                                                                                                                         | Why                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| `permissions: contents: read` at the top of the workflow; widen it per job only when a job needs more                                                        | The token of a workflow gets broad rights by default                                                                            |
+| Every `uses:` is a full commit SHA with the version as a comment: `uses: actions/checkout@<40 hex> # v7.0.1`                                                 | A tag can be moved to other code without notice (supply-chain risk); Dependabot's `github-actions` ecosystem keeps SHAs current |
+| `actions/checkout` with `persist-credentials: false`                                                                                                         | The token is not left in `.git/config` for later steps to read                                                                  |
+| `timeout-minutes` on every job                                                                                                                               | A stuck job otherwise runs for six hours                                                                                        |
+| `concurrency` with `cancel-in-progress: ${{ github.event_name == 'pull_request' }}`                                                                          | A new push replaces the run of a pull request; a run on `main` always finishes                                                  |
+| Upload reports with `if: ${{ !cancelled() }}`, traces with `if: failure()`                                                                                   | `!cancelled()` uploads when tests fail but stops when the run is cancelled; `always()` keeps going after a cancel               |
+| Never write `${{ inputs.x }}`, `${{ github.head_ref }}` or any other text someone else controls inside `run:`; pass it through `env:` and quote the variable | Otherwise that text becomes part of the shell script (injection)                                                                |
+| Secrets go in `env:` of the one step that needs them, not of the whole job                                                                                   | Fewer steps can read them                                                                                                       |
+| A supported Node line (the active LTS, currently 24, or `node-version-file: .nvmrc`), not an end-of-life one                                                 | Old Node versions stop getting fixes and tools drop them                                                                        |
+| `retention-days` on artifacts (7 to 14 for reports)                                                                                                          | The default is 90 days                                                                                                          |
+| Do not set `CI: true`                                                                                                                                        | GitHub sets it on every runner                                                                                                  |
 
 ## Patterns
 
-### Pattern 1: Production-Ready Workflow (Copy-Paste Starter)
-
-**Use when**: Any project using GitHub Actions. This is the complete, battle-tested workflow.
-
-```yaml
-# .github/workflows/playwright.yml
-name: Playwright Tests
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-# Cancel in-progress runs for the same PR/branch
-concurrency:
-  group: playwright-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  CI: true
-
-jobs:
-  test:
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
-
-      - name: Install Playwright OS dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
-
-      - name: Run Playwright tests
-        run: npx playwright test
-
-      - name: Upload HTML report
-        uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 14
-
-      - name: Upload test traces
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: playwright-traces
-          path: test-results/
-          retention-days: 7
-```
-
-### Pattern 2: Sharded Execution with Matrix Strategy
-
-**Use when**: Test suite takes more than 10 minutes. Split across parallel runners to cut wall-clock time.
-**Avoid when**: Suite runs under 5 minutes -- sharding overhead (checkout, install, merge) negates the benefit.
-
-```yaml
-# .github/workflows/playwright-sharded.yml
-name: Playwright Tests (Sharded)
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-concurrency:
-  group: playwright-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  CI: true
-
-jobs:
-  test:
-    timeout-minutes: 20
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1/4, 2/4, 3/4, 4/4]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
-
-      - name: Install Playwright OS dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
-
-      - name: Run Playwright tests (shard ${{ matrix.shard }})
-        run: npx playwright test --shard=${{ matrix.shard }}
-
-      - name: Upload blob report
-        uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: blob-report-${{ strategy.job-index }}
-          path: blob-report/
-          retention-days: 1
-
-  merge-reports:
-    if: ${{ !cancelled() }}
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Download all blob reports
-        uses: actions/download-artifact@v4
-        with:
-          path: all-blob-reports
-          pattern: blob-report-*
-          merge-multiple: true
-
-      - name: Merge reports
-        run: npx playwright merge-reports --reporter=html ./all-blob-reports
-
-      - name: Upload merged HTML report
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 14
-```
-
-**Config for sharding** -- add blob reporter so shard output can be merged:
-
-```ts
-// playwright.config.ts
-import { defineConfig } from '@playwright/test';
-
-export default defineConfig({
-  reporter: process.env.CI
-    ? [['blob'], ['github']]
-    : [['html', { open: 'on-failure' }]],
-});
-```
-
-### Pattern 3: Reusable Workflow
-
-**Use when**: Multiple repositories or multiple workflow files need the same Playwright setup.
-**Avoid when**: Single repo with one workflow.
-
-```yaml
-# .github/workflows/playwright-reusable.yml
-name: Playwright Reusable
-
-on:
-  workflow_call:
-    inputs:
-      node-version:
-        type: string
-        default: '20'
-      test-command:
-        type: string
-        default: 'npx playwright test'
-      shard-total:
-        type: number
-        default: 1
-    secrets:
-      BASE_URL:
-        required: false
-      TEST_PASSWORD:
-        required: false
-
-jobs:
-  test:
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: ${{ fromJson(format('[{0}]', join(fromJson(format('[{0}]', inputs.shard-total == 1 && '"1/1"' || '"1/4","2/4","3/4","4/4"')), ','))) }}
-
-    env:
-      CI: true
-      BASE_URL: ${{ secrets.BASE_URL }}
-      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.node-version }}
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
-
-      - name: Install Playwright OS dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
-
-      - name: Run tests
-        run: ${{ inputs.test-command }} --shard=${{ matrix.shard }}
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report-${{ strategy.job-index }}
-          path: playwright-report/
-          retention-days: 14
-```
-
-**Calling the reusable workflow:**
-
-```yaml
-# .github/workflows/ci.yml
-name: CI
-on:
-  pull_request:
-    branches: [main]
-
-jobs:
-  e2e:
-    uses: ./.github/workflows/playwright-reusable.yml
-    with:
-      node-version: '20'
-      shard-total: 4
-    secrets:
-      BASE_URL: ${{ secrets.STAGING_URL }}
-      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-```
-
-### Pattern 4: Running in a Container
-
-**Use when**: You need a reproducible environment identical to local Docker runs, or the runner's OS dependencies cause issues.
-**Avoid when**: Standard `ubuntu-latest` with `--with-deps` works fine (the common case).
-
-```yaml
-# .github/workflows/playwright-container.yml
-name: Playwright (Container)
-
-on:
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.52.0-noble
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - run: npm ci
-
-      # No browser install needed -- they're in the container image
-      - name: Run Playwright tests
-        run: npx playwright test
-        env:
-          HOME: /root # required when running as root in container
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 14
-```
-
-### Pattern 5: Environment Secrets and Deployment Targets
-
-**Use when**: Tests run against staging/production environments that require authentication credentials.
-**Avoid when**: Tests only run against a locally started dev server.
-
-```yaml
-# .github/workflows/playwright-staging.yml
-name: Playwright (Staging)
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  test:
-    timeout-minutes: 30
-    runs-on: ubuntu-latest
-    environment: staging # GitHub Environment with protection rules
-
-    env:
-      CI: true
-      BASE_URL: ${{ vars.STAGING_URL }}
-      TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-      API_KEY: ${{ secrets.API_KEY }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps
-
-      - name: Install Playwright OS dependencies
-        if: steps.playwright-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps
-
-      - name: Run tests against staging
-        run: npx playwright test --grep @smoke
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: staging-report
-          path: playwright-report/
-          retention-days: 14
-```
-
-### Pattern 6: Scheduled Runs (Nightly Regression)
-
-**Use when**: Full regression suite is too slow for every PR. Run it nightly against main.
-**Avoid when**: Suite runs in under 15 minutes and can run on every PR.
-
-```yaml
-# .github/workflows/playwright-nightly.yml
-name: Nightly Regression
-
-on:
-  schedule:
-    - cron: '0 3 * * 1-5' # 3 AM UTC, Mon-Fri
-  workflow_dispatch: # allow manual trigger
-
-jobs:
-  test:
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-
-    env:
-      CI: true
-      BASE_URL: ${{ vars.STAGING_URL }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Run full regression suite
-        run: npx playwright test --grep @regression
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: nightly-report-${{ github.run_number }}
-          path: playwright-report/
-          retention-days: 30
-
-      - name: Notify on failure
-        if: failure()
-        uses: slackapi/slack-github-action@v1.27.0
-        with:
-          payload: |
-            {
-              "text": "Nightly Playwright regression failed: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-```
+| Scenario                                     | File                                                                                                                                                | Use when                                                        | Avoid when                                                     |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- |
+| Any project, first workflow                  | [playwright.yml](examples/github-actions/playwright.yml)                                                                                            | The default; install, test, upload report and traces            | The suite takes over ~10 minutes                               |
+| Long suite                                   | [playwright-sharded.yml](examples/github-actions/playwright-sharded.yml)                                                                            | Over ~10 minutes: split over runners and merge the blob reports | Under 5 minutes (the setup per shard costs more than it saves) |
+| Same setup in many workflows or repositories | [playwright-reusable.yml](examples/github-actions/playwright-reusable.yml) and [its caller](examples/github-actions/playwright-reusable-caller.yml) | Several workflows need the same job                             | One workflow                                                   |
+| Same environment as local Docker             | [playwright-container.yml](examples/github-actions/playwright-container.yml)                                                                        | The runner's packages cause trouble                             | `ubuntu-latest` with `--with-deps` works (the usual case)      |
+| Tests against a deployed environment         | [playwright-staging.yml](examples/github-actions/playwright-staging.yml)                                                                            | Credentials, approvals, scoped secrets                          | Only a local dev server is tested                              |
+| Nightly full regression                      | [playwright-nightly.yml](examples/github-actions/playwright-nightly.yml)                                                                            | The full suite is too slow for every pull request               | It runs in under ~15 minutes                                   |
+
+For the config the sharded pattern needs (`reporter: process.env.CI ? [['blob'], ['github']] : [['html']]`), see [parallel-and-sharding.md](parallel-and-sharding.md).
 
 ## Decision Guide
 
-| Scenario                   | Approach                                   | Why                                     |
-| -------------------------- | ------------------------------------------ | --------------------------------------- |
-| Small suite (< 5 min)      | Single job, no sharding                    | Overhead of sharding exceeds time saved |
-| Medium suite (5-20 min)    | 2-4 shards with matrix                     | Cut wall-clock time by ~60-75%          |
-| Large suite (20+ min)      | 4-8 shards + blob report merge             | Keep PR feedback under 10 minutes       |
-| Cross-browser on PRs       | Chromium only on PRs; all browsers on main | 3x fewer minutes burned on PRs          |
-| Staging/prod smoke tests   | Separate workflow with `environment:`      | Isolate secrets, add approval gates     |
-| Nightly full regression    | `schedule` trigger + `workflow_dispatch`   | Full coverage without blocking PRs      |
-| Multiple repos, same setup | Reusable workflow with `workflow_call`     | DRY; update one file, all repos benefit |
-| Reproducible env needed    | Container job with Playwright image        | Identical to local Docker environment   |
+| Scenario                          | Approach                                           | Why                                             |
+| --------------------------------- | -------------------------------------------------- | ----------------------------------------------- |
+| Small suite (< 5 min)             | One job, no sharding                               | The overhead of sharding exceeds the time saved |
+| Medium suite (5-20 min)           | 2-4 shards                                         | Cuts wall-clock time by 60-75%                  |
+| Large suite (20+ min)             | 4-8 shards and merged blob reports                 | Keeps pull-request feedback under 10 minutes    |
+| Cross-browser on pull requests    | Chromium on pull requests; every browser on `main` | Three times fewer minutes on pull requests      |
+| Staging or production smoke tests | A separate workflow with `environment:`            | Isolates secrets, allows approval gates         |
+| Nightly full regression           | `schedule` and `workflow_dispatch`                 | Full coverage without blocking pull requests    |
 
-## Security: Pinning Actions to Commit SHAs
+## Pinning Actions to Commit SHAs
 
-Version tags like `actions/checkout@v4` are mutable — the tag can be moved to a different commit without warning, introducing unverified code into your CI pipeline (supply-chain risk W012).
-
-**Best practice**: pin every action to its full commit SHA.
-
-```yaml
-# Instead of:
-- uses: actions/checkout@v4
-
-# Pin to a specific immutable commit SHA:
-- uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-```
-
-**How to find the SHA for any action:**
+Find the SHA of a release, preferring a release that is at least two weeks old:
 
 ```bash
-# Look up the SHA for a tagged release on GitHub:
-# https://github.com/<owner>/<action>/releases
-# Click the tag → copy the full commit SHA from the URL or commit details
-
-# Or use the gh CLI:
-gh api repos/actions/checkout/git/ref/tags/v4.2.2 --jq '.object.sha'
+# A lightweight tag gives the commit; an annotated tag lists the commit on the line ending in ^{}
+git ls-remote https://github.com/actions/checkout 'refs/tags/v7.0.1*'
 ```
 
-**Example pinned workflow step set (verify SHAs at release pages before use):**
+Write it as `uses: actions/checkout@<SHA> # v7.0.1`. Let Dependabot move them:
 
 ```yaml
-steps:
-  - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-  - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
-  - uses: actions/cache@d4323d4df104b026a6aa633fdb11d772146be0bf # v4.2.2
-  - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
-  - uses: actions/download-artifact@fa0a91b85d4f404e444306234b4f18a22b3d1e57 # v4.1.8
+# .github/dependabot.yml
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
 ```
 
-> Always verify these SHAs against the official release pages at github.com/actions before adding them to production workflows.
+Pin a container image the same way, by digest next to the tag (`image: name:tag@sha256:...`); `docker buildx imagetools inspect <image:tag>` prints the digest.
 
 ## Anti-Patterns
 
-| Anti-Pattern                                | Problem                                                                  | Do This Instead                                             |
-| ------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
-| No `concurrency` group                      | Duplicate runs waste minutes on every push                               | Add `concurrency: { group: ..., cancel-in-progress: true }` |
-| `fail-fast: true` with sharding             | One shard failure cancels others; you lose their results                 | Set `fail-fast: false` to collect all failures              |
-| Installing browsers without caching         | 60-90 seconds wasted every run                                           | Cache `~/.cache/ms-playwright` keyed on lockfile hash       |
-| `timeout-minutes` not set                   | Stuck jobs run for 6 hours (GitHub default)                              | Set explicit timeout: 20-30 minutes                         |
-| Uploading artifacts only on failure         | No report when tests pass; can't verify results                          | Use `if: ${{ !cancelled() }}` to always upload              |
-| Hardcoding secrets in workflow files        | Security breach                                                          | Use GitHub Secrets and Environments                         |
-| Running all browsers on every PR            | 3x CI cost for marginal benefit                                          | Chromium on PR; cross-browser on main merge                 |
-| `actions/upload-artifact` with no retention | Default 90-day retention fills storage                                   | Set `retention-days: 7-14` for reports                      |
-| No `--with-deps` on browser install         | Missing OS libraries cause browser launch failures                       | Always use `npx playwright install --with-deps`             |
-| Using mutable action version tags (`@v4`)   | Tag can be silently re-pointed to a different commit (supply-chain risk) | Pin to full commit SHA; see Security section above          |
+| Anti-pattern                          | Problem                                                   | Do this instead                                       |
+| ------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------- |
+| Version tags (`@v4`) for actions      | Mutable; supply-chain risk                                | Full commit SHA with the version in a comment         |
+| No `permissions` block                | Broad default token rights                                | `permissions: contents: read`                         |
+| `if: always()` on uploads             | Keeps running after the run is cancelled                  | `if: ${{ !cancelled() }}`                             |
+| Untrusted text inside `run:`          | Script injection                                          | Pass through `env:`, quote the variable               |
+| No `concurrency` group                | Duplicate runs on every push                              | Cancel in-progress runs of pull requests only         |
+| `fail-fast: true` with shards         | One failure cancels the others and their results are lost | `fail-fast: false`                                    |
+| Installing browsers without caching   | 60-90 seconds on every run                                | Cache `~/.cache/ms-playwright`, keyed on the lockfile |
+| No `timeout-minutes`                  | A stuck job runs six hours                                | An explicit limit                                     |
+| Uploading reports only on failure     | Nothing to look at when tests pass                        | `!cancelled()` for the report, `failure()` for traces |
+| All browsers on every pull request    | Three times the cost for little gain                      | Chromium on pull requests, the rest on `main`         |
+| Browser install without `--with-deps` | Missing OS libraries; the browser will not start          | `npx playwright install --with-deps`                  |
+| Secrets in workflow files             | Leaks                                                     | GitHub Secrets and Environments                       |
 
 ## Troubleshooting
 
 ### Browser launch fails: "Missing dependencies"
 
-**Cause**: Browsers installed from cache but OS dependencies were not cached (they live in system directories, not `~/.cache`).
+**Cause**: The browsers came from the cache, but the OS packages live in system folders and were not cached.
 
-**Fix**: Always run `npx playwright install-deps` on cache hit:
+**Fix**: Run `npx playwright install-deps` when the cache hit (the examples do).
 
-```yaml
-- name: Install Playwright OS dependencies
-  if: steps.playwright-cache.outputs.cache-hit == 'true'
-  run: npx playwright install-deps
-```
+### Tests pass locally but time out in CI
 
-### Tests pass locally but fail in CI with timeouts
+**Cause**: Runners have fewer cores and less memory than a development machine.
 
-**Cause**: CI runners have fewer CPU cores and less RAM than your dev machine. Default workers and timeouts are too aggressive.
-
-**Fix**: Reduce workers and increase timeouts for CI in your config:
+**Fix**: Fewer workers and longer timeouts in CI:
 
 ```ts
 // playwright.config.ts
@@ -561,43 +123,25 @@ export default defineConfig({
 });
 ```
 
-### Sharded reports are incomplete -- some shards missing from merged report
+If one setup step is flaky rather than everything being slow, look for a missing readiness wait: a test that counts or clicks before the page has finished starting is a race that only shows on slow runners.
 
-**Cause**: Using `actions/download-artifact@v4` without `merge-multiple: true`, or artifact names collide across shards.
+### Sharded reports are incomplete: some shards missing from the merged report
 
-**Fix**: Give each shard a unique artifact name and use `merge-multiple`:
+**Cause**: The artifact names collide between shards, or the download step lacks `merge-multiple: true`.
 
-```yaml
-# Upload in each shard job
-- uses: actions/upload-artifact@v4
-  with:
-    name: blob-report-${{ strategy.job-index }}
-    path: blob-report/
+**Fix**: A unique name per shard (`blob-report-${{ strategy.job-index }}`) and `pattern: blob-report-*` with `merge-multiple: true` in the download step, as in [playwright-sharded.yml](examples/github-actions/playwright-sharded.yml).
 
-# Download in merge job
-- uses: actions/download-artifact@v4
-  with:
-    path: all-blob-reports
-    pattern: blob-report-*
-    merge-multiple: true
-```
+### `webServer` fails: "port 3000 already in use"
 
-### `webServer` fails in CI: "port 3000 already in use"
+**Cause**: A process from an earlier step still holds the port.
 
-**Cause**: Previous run left a zombie process, or another job step is using the port.
+**Fix**: `reuseExistingServer: false` in CI, and free the port first: `lsof -ti:3000 | xargs kill -9 2>/dev/null || true`.
 
-**Fix**: Ensure `reuseExistingServer: false` in CI and add a pre-step to kill stale processes:
-
-```yaml
-- name: Kill stale processes
-  run: lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-```
-
-### GitHub annotations not appearing on PR
+### GitHub annotations do not appear on the pull request
 
 **Cause**: The `github` reporter is not configured.
 
-**Fix**: Add `github` reporter for CI runs:
+**Fix**:
 
 ```ts
 // playwright.config.ts

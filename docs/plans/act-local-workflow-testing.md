@@ -198,7 +198,7 @@ the workflows now, to be confirmed or dropped:
 - **`node.js.yml` builds twice**: `npm run build --if-present` runs `dist` and `web-ext build`, then `npm test` runs
   `dist` again inside `lint:webext`. Drop the separate `npm run build` step (decided): `npm test` already builds `dist` through `lint:webext`, and with one matrix entry there is no leg to choose.
 - **`e2e.yml` has `timeout-minutes: 10`** against 2.8 minutes locally. Use the time `act` reports (CI machines are
-  usually slower) to set it with margin, and keep the report upload `if: always()`.
+  usually slower) to set it with margin, and keep the report upload running when the tests fail (`if: !cancelled()`, so it also stops when the run is cancelled).
 - **`mutation.yml` caches under `reports/`**, which is ignored by git; check that `actions/cache/save` finds the file
   when the full run did not change it, and that a pull request with no source change does not fail for lack of one.
 - **Required checks** (a repository setting) must be named after the final job names, so settle the names here first.
@@ -319,7 +319,7 @@ E2E and mutation passed on every step except the artifact upload, which has two 
 
 - **`act` cannot run `upload-artifact` v7.** Its artifact server rejects a field the new version sends (`unknown
 field "mime_type"`) and the step fails after five retries (about 90 s). It is a limit of `act` 0.2.89, the latest
-  release, not a fault of the workflow. The two upload steps now skip under `act` (`if: ${{ always() && !env.ACT }}`,
+  release, not a fault of the workflow. The two upload steps now skip under `act` (`if: ${{ !cancelled() && !env.ACT }}`,
   with a comment); `act` sets `ACT`, and on GitHub the condition is the same as before.
 - **A flaky E2E test, seen once.** In the first of those runs `group-switching` ("activating a tab of another group
   …") failed once with "The second group got no native group" and passed on the retry that CI allows (`retries: 2`).

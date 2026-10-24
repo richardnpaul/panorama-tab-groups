@@ -1,0 +1,50 @@
+# Tests inside the Playwright image, so the browsers and OS packages are the ones used locally in Docker.
+# Use when: you need the same environment as a local Docker run, or the runner's packages cause trouble;
+# Avoid when: `ubuntu-latest` with `--with-deps` works (the usual case).
+# The tag must match the @playwright/test version in package-lock.json; the digest makes the image immutable.
+# Refresh both with: docker buildx imagetools inspect mcr.microsoft.com/playwright:<tag>
+# Every `uses:` is a full commit SHA with its version in the comment, so a moved tag cannot change
+# what runs. Dependabot (`package-ecosystem: github-actions`) keeps them current. GitHub sets
+# `CI=true` itself. Look up a SHA with:  git ls-remote https://github.com/<owner>/<repo> 'refs/tags/<tag>*'
+name: Playwright (Container)
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A newer push to a pull request replaces its run; runs on main always finish
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.0-noble@sha256:06a9939e57531807f8d5fd76ce44b53165ffb7d7501d87ab10e285c20b1e971f
+      options: --ipc=host # Chromium needs shared memory beyond Docker's small default
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Node and the browsers are in the image; no setup-node and no browser install
+      - run: npm ci
+
+      - name: Run Playwright tests
+        env:
+          HOME: /root # Firefox needs a home directory when the job runs as root
+        run: npx playwright test
+
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
