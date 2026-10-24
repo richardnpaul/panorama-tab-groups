@@ -25,16 +25,16 @@
 
 ## Build & Test Commands
 
-| Command                      | Purpose                                                                      |
-| ---------------------------- | ---------------------------------------------------------------------------- |
-| `npm run lint`               | ESLint + Prettier check + web-ext lint                                       |
-| `npm run format`             | Auto-fix Prettier + ESLint violations                                        |
-| `npm run build:xpi`          | Build Firefox XPI via web-ext                                                |
-| `npm run test:e2e`           | Playwright E2E (Chromium + Firefox)                                          |
-| `npm test`                   | Lint, then unit tests with the 100% coverage gate (CI primary command)       |
-| `npm run test:mutation`      | Stryker, only what changed since the last run (the CI run for pull requests) |
-| `npm run test:mutation:full` | Stryker on everything (the CI run for `main` and nightly)                    |
-| `npm run act:list`           | List the GitHub workflow jobs `act` can run locally (user-started only)      |
+| Command                      | Purpose                                                                                |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| `npm run lint`               | ESLint + Prettier check + web-ext lint                                                 |
+| `npm run format`             | Auto-fix Prettier + ESLint violations                                                  |
+| `npm run build:xpi`          | Build Firefox XPI via web-ext (from `dist-firefox/`, `dist/` minus the service worker) |
+| `npm run test:e2e`           | Playwright E2E (Chromium + Firefox)                                                    |
+| `npm test`                   | Lint, then unit tests with the 100% coverage gate (CI primary command)                 |
+| `npm run test:mutation`      | Stryker, only what changed since the last run (the CI run for pull requests)           |
+| `npm run test:mutation:full` | Stryker on everything (the CI run for `main` and nightly)                              |
+| `npm run act:list`           | List the GitHub workflow jobs `act` can run locally (user-started only)                |
 
 ## Architecture
 

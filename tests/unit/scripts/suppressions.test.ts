@@ -64,6 +64,7 @@ describe('scripts/lib/suppressions.js', () => {
         '!.eslintrc.js',
         'build',
         'dist',
+        'dist-firefox',
         'node_modules',
         'coverage',
         'coverage/',
@@ -84,6 +85,7 @@ describe('scripts/lib/suppressions.js', () => {
         'test-results',
         'coverage',
         'dist',
+        'dist-firefox',
         'reports',
       ]);
     });

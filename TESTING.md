@@ -45,7 +45,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 2. Navigate to `about:debugging`
 3. Click "This Firefox"
 4. Click "Load Temporary Add-on..."
-5. Run `npm run dist`, then navigate to the `dist/` folder and select `manifest.json`
+5. Run `npm run dist && npm run dist:firefox`, then navigate to the `dist-firefox/` folder and select `manifest.json`
 
 ## Method 3: Developer Mode (Best for debugging)
 
@@ -60,7 +60,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 
 1. Go to `about:debugging#/runtime/this-firefox`
 2. Click "Load Temporary Add-on..."
-3. Run `npm run dist`, then select `dist/manifest.json`
+3. Run `npm run dist && npm run dist:firefox`, then select `dist-firefox/manifest.json`
 
 ## What to Test
 
@@ -234,7 +234,7 @@ npx playwright test --project=chromium
 
 **Chromium compatibility notes:**
 
-- **`src/manifest.json`**: Uses `background.service_worker` for MV3 compatibility.
+- **`src/manifest.json`**: Has both `background.scripts` (Firefox) and `background.service_worker` (Chromium), so one `dist/` loads in both browsers, which is what the Playwright suite does. Firefox ignores `service_worker`, and `web-ext lint` reports that, so `npm run dist:firefox` copies `dist/` to `dist-firefox/` with the key left out. `web-ext lint`, `build`, `build:xpi` and `start` use `dist-firefox/`, so the XPI has the manifest Firefox wants.
 - **Polyfill**: `src/js/polyfill.ts` maps `browser` to `chrome` and mocks the Firefox-specific `sessions` API with storage-backed fallbacks when needed.
 
 **Firefox troubleshooting:**

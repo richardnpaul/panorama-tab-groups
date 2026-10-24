@@ -30,15 +30,25 @@ For deeper insight it's recommended to read the [Internationalization guide for 
 
 ## Pinned tools of the devcontainer
 
-The devcontainer pins what Dependabot does not update, and these are refreshed by hand:
+Everything outside npm is pinned by an immutable reference, so a moved tag cannot change what runs:
 
-- `act`: `ACT_VERSION` and `ACT_SHA256` in `.devcontainer/Dockerfile`, from the release's `checksums.txt`
-  (`act_Linux_x86_64.tar.gz`).
-- The runner image of `act`: the digest of `catthehacker/ubuntu:act-24.04` in `.actrc` (`docker pull` it and take
-  the digest it reports). The image is a community one and moves, which is why it is pinned.
-- The `docker-in-docker` feature: `npx @devcontainers/cli upgrade --workspace-folder .` rewrites
-  `.devcontainer/devcontainer-lock.json`.
-- `actionlint`: the `rev` in `.pre-commit-config.yaml` (`pre-commit autoupdate` updates it).
+- **Workflow actions** are pinned by commit SHA with the version as a trailing comment
+  (`uses: actions/checkout@<sha> # v7.0.1`), **pre-commit hooks** by commit with `# frozen: <tag>`, and the
+  **devcontainer base image** by digest. Dependabot (`github-actions`, `pre-commit` and `docker` in
+  `.github/dependabot.yml`) opens the pull requests that move them. To add an action, take a release at least two
+  weeks old, resolve its tag to a commit (`git ls-remote https://github.com/<owner>/<repo> 'refs/tags/<tag>*'`, and
+  use the `^{}` line for an annotated tag) and write the version in the comment.
+- A few things Dependabot does not update, refreshed by hand:
+  - `act`: `ACT_VERSION` and `ACT_SHA256` in `.devcontainer/Dockerfile`, from the release's `checksums.txt`
+    (`act_Linux_x86_64.tar.gz`).
+  - The runner image of `act`: the digest of `catthehacker/ubuntu:act-24.04` in `.actrc` (`docker pull` it and take
+    the digest it reports). The image is a community one and moves, which is why it is pinned.
+  - The `docker-in-docker` feature: `npx @devcontainers/cli upgrade --workspace-folder .` rewrites
+    `.devcontainer/devcontainer-lock.json`.
+  - The version of Playwright in `.devcontainer/Dockerfile` (`install-deps`), which must match `package.json`.
+- Not pinned, and why: the NodeSource setup script (`curl … | bash`) and the `nodejs` package it installs in the
+  Dockerfile, and `pip install pre-commit` inside `pre-commit/action`. Both come from a vendor's repository and would
+  need a mirror to be immutable.
 
 ## Dependency security
 

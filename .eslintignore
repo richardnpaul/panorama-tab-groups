@@ -1,6 +1,7 @@
 !.eslintrc.js
 build
 dist
+dist-firefox
 node_modules
 test-user-data*
 playwright-report

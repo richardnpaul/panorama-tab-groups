@@ -6,6 +6,7 @@ playwright-report/
 test-results/
 coverage/
 dist/
+dist-firefox/
 web-ext-artifacts/
 reports/
 .stryker-tmp/

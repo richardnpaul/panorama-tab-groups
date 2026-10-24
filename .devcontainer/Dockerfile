@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+FROM mcr.microsoft.com/devcontainers/base:ubuntu-24.04@sha256:d94c97dd9cacf183d0a6fd12a8e87b526e9e928307674ae9c94139139c0c6eae
 
 # Install Xfce desktop, TigerVNC, noVNC/websockify, and X11 utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -21,7 +21,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_26.x | bash - \
 # Uses install-deps (not install --with-deps) so no browser binaries are
 # downloaded into root's cache — binaries are installed per-user in
 # postCreateCommand instead.
-RUN npx -y playwright@1.59.1 install-deps firefox chromium
+RUN npx -y playwright@1.64.0 install-deps firefox chromium
 
 # act runs the GitHub workflows locally (see TESTING.md). The release is pinned
 # and checked against its published SHA-256; the Docker daemon it needs comes

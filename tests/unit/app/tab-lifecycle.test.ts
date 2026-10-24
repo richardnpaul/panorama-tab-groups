@@ -631,15 +631,28 @@ describe('app/tab-lifecycle.ts', () => {
       expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
     });
 
-    it('does nothing for a tab that has no group yet, and says so', async () => {
+    it('leaves a tab that has no group yet to tabCreated, and notes it without a warning', async () => {
       const env = await setUp({ tabs: [{ tab: details(5) }] });
 
       await env.lifecycle.tabActivated({ tabId: 5 });
 
       expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
-      expect(env.logger.warn).toHaveBeenCalledWith(
-        '[TabActivated] ⚠️ activeGroup is UNDEFINED - race condition detected!',
+      expect(env.logger.debug).toHaveBeenCalledWith(
+        '[TabActivated] Tab 5 has no group yet; tabCreated will show its group',
       );
+      expect(env.logger.warn).not.toHaveBeenCalled();
+      expect(env.logger.error).not.toHaveBeenCalled();
+    });
+
+    it('shows the group of a new tab that is activated before it has one, once tabCreated has given it one', async () => {
+      const env = await setUp({
+        tabs: [{ tab: details(5, { active: true }) }],
+      });
+
+      await env.lifecycle.tabActivated({ tabId: 5 });
+      await env.lifecycle.tabCreated(details(5, { active: true }));
+
+      expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
     });
 
     it('only shows the groups of the view tab, without changing the active group', async () => {

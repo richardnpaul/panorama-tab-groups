@@ -30,6 +30,7 @@ export default {
     'test-results',
     'coverage',
     'dist',
+    'dist-firefox',
     'reports',
   ],
 };

@@ -287,10 +287,11 @@ export function createTabLifecycle({
 
     const activeGroup = await groupState.getTabGroup(tabId);
     if (activeGroup === undefined) {
-      // tabCreated has not given the tab a group yet, and will update the
-      // visibility itself once it has
-      logger.warn(
-        '[TabActivated] ⚠️ activeGroup is UNDEFINED - race condition detected!',
+      // The browser can say a new tab was activated before it has a group.
+      // That is expected: tabCreated gives it one and shows it, so this is
+      // only noted
+      logger.debug(
+        `[TabActivated] Tab ${String(tabId)} has no group yet; tabCreated will show its group`,
       );
       return;
     }

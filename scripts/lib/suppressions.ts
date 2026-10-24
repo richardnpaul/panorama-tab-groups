@@ -29,6 +29,7 @@ export const ALLOWED_IGNORE_ENTRIES = [
   '!.eslintrc.js',
   'build',
   'dist',
+  'dist-firefox',
   'node_modules',
   'coverage',
   'coverage/',
@@ -48,6 +49,7 @@ export const ALLOWED_SANDBOX_IGNORES = [
   'test-results',
   'coverage',
   'dist',
+  'dist-firefox',
   'reports',
 ];
 

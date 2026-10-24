@@ -27,3 +27,18 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      github-actions:
+        patterns: ['*']
+
+  # The pre-commit hooks, whose `rev` is a commit
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: weekly
+
+  # The base image of the devcontainer, which is pinned by digest
+  - package-ecosystem: docker
+    directory: /.devcontainer
+    schedule:
+      interval: weekly

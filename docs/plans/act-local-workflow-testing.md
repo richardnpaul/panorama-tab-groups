@@ -286,10 +286,15 @@ B2, each item:
   runs all passed on 26.12.1 under `act`. Node 26 is released but was not yet an LTS line on 2026-10-23 (the Node
   index lists it with no LTS name), which matches the intent of testing the line that will become the next LTS.
 - **`permissions`** `contents: read` in `node.js.yml`: done.
-- **Action versions:** one version of each, the newest major already in use: `checkout@v6`, `setup-node@v6`,
-  `setup-python@v6`, `cache/*@v4`, `upload-artifact@v4`, `pre-commit/action@v3.0.1`. Newer majors exist (checkout 7,
-  setup-node 7, setup-python 7, cache 6, upload-artifact 7); they were not taken because no run could prove them,
-  and Dependabot proposes them. Pinning by commit SHA is not done.
+- **Action versions: updated and pinned by commit SHA** (a second pass, at the owner's request). Each action is at
+  the newest release at least 14 days old, with the commit SHA in `uses:` and the version as a trailing comment, which
+  Dependabot reads and keeps current: `checkout` v7.0.1, `setup-node` v7.1.0, `setup-python` v7.0.0, `cache/*` v6.1.0,
+  `upload-artifact` v7.0.2 and `pre-commit/action` v3.0.1 (the latest; the action is in maintenance only). The
+  `rev` of both hook repositories in `.pre-commit-config.yaml` is a commit too (`# frozen: v6.0.0` and
+  `# frozen: v1.7.12`, the convention of `pre-commit autoupdate --freeze`), and so is the base image of the
+  devcontainer (`@sha256:…`). Dependabot gained the `pre-commit` and `docker` (for `.devcontainer`) ecosystems, and
+  groups the action updates into one pull request. Every workflow was run again under `act` with the new majors
+  (see "Second pass" below).
 - **`concurrency`:** `node.js.yml`, `e2e.yml`, `pre-commit.yml` and `mutation.yml` group by workflow and ref and
   cancel only on `pull_request`, so a run on `main` (and the full mutation run whose report the cache keeps) always
   finishes.
@@ -305,6 +310,25 @@ B2, each item:
   documentation, not tried). Whether GitHub lets a pull request read the cache of a push to `main` is its own rule
   and still needs the draft pull request.
 - **Required checks:** the job names are `build (26.x)` (Node.js CI), `pre-commit`, `mutation` and `e2e`.
+
+### Second pass: pinned actions and the new majors
+
+All five workflows were run again under `act` with the pinned actions at their new majors (checkout 7, setup-node 7,
+setup-python 7, cache 6, upload-artifact 7). Audit (25 s), Node.js CI (30 s) and pre-commit (64 s) passed at once.
+E2E and mutation passed on every step except the artifact upload, which has two findings:
+
+- **`act` cannot run `upload-artifact` v7.** Its artifact server rejects a field the new version sends (`unknown
+field "mime_type"`) and the step fails after five retries (about 90 s). It is a limit of `act` 0.2.89, the latest
+  release, not a fault of the workflow. The two upload steps now skip under `act` (`if: ${{ always() && !env.ACT }}`,
+  with a comment); `act` sets `ACT`, and on GitHub the condition is the same as before.
+- **A flaky E2E test, seen once.** In the first of those runs `group-switching` ("activating a tab of another group
+  …") failed once with "The second group got no native group" and passed on the retry that CI allows (`retries: 2`).
+  It waits at most 5 s for the background to give a group a native group, and the run overlapped with other work in
+  the same container. It had not failed in about a dozen earlier runs. Left as it is; if it shows up on GitHub, the
+  wait should be longer or the step should wait for the event itself.
+
+After the change: E2E 64 passed and 8 skipped, job green (4 m 8 s); mutation pull request with a restored cache 43 s,
+score 100%, job green. The full mutation run (push) also saved its report with `actions/cache/save` v6.
 
 ### Not done, and needs the owner
 
