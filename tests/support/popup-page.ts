@@ -1,5 +1,5 @@
 /** The body of popup-view/index.html, which the popup is drawn in */
-export const POPUP_BODY = `
+const POPUP_BODY = `
 <div id="frame-shell" class="frame-shell">
   <main id="main-frame" class="frame">
     <header class="frame-header" data-nav-row></header>

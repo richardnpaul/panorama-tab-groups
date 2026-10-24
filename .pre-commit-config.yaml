@@ -30,12 +30,28 @@ repos:
         language: system
         types_or: [javascript, ts, json, css, html, markdown]
 
-      - id: eslint
-        name: eslint
-        entry: npx eslint
+      # `npm ci` stops when the lockfile and package.json disagree, which also
+      # stops the devcontainer from installing what the hooks below run
+      - id: lockfile-in-sync
+        name: lockfile in sync
+        entry: npm ci --dry-run --ignore-scripts
+        language: system
+        files: ^package(-lock)?\.json$
+        pass_filenames: false
+
+      - id: oxlint
+        name: oxlint
+        entry: npx oxlint
         language: system
         types: [file]
-        files: \.(js|mjs|ts|json)$
+        files: \.(js|mjs|cjs|ts)$
+
+      - id: knip
+        name: knip
+        entry: npx knip
+        language: system
+        pass_filenames: false
+        always_run: true
 
       - id: no-suppressions
         name: no suppressions

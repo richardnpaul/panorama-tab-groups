@@ -171,7 +171,10 @@ TypeScript except the three files of Decision 2, and the suppression guard now f
   was shown to fail the guard. Its test `include` is now `.ts` only. **Follow-up:** Vite prints a notice that a `.ts`
   config in a package without `"type": "module"` will not load with its future native loader. It is a warning today;
   the fixes are `vitest.config.mts` or a root `"type": "module"` (which brings `.eslintrc.cjs` with it), and both
-  change a name this plan fixed, so neither was made here.
+  change a name this plan fixed, so neither was made here. **Done since:** the root `package.json` has
+  `"type": "module"`, `.eslintrc.js` is `.eslintrc.cjs` (the entry in `ALLOWED_JAVASCRIPT_FILES` changed with it), and
+  `scripts/package.json`, which only existed for the guard, is gone. The notice no longer appears, and Playwright,
+  Stryker, `tsx` and `web-ext` were each run to check. `eslint-10-flat-config.md` replaces `.eslintrc.cjs` in turn.
 - **Phase 4.** `playwright.config.ts` holds only `defineConfig`; the fixtures and the Firefox proxy are in
   `tests/e2e/fixtures.ts`, split first in JavaScript with the suite green. The typing choices:
   - The Firefox extension id lives in a `WeakMap<BrowserContext, string>` rather than on the context object.

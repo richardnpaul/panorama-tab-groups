@@ -7,7 +7,12 @@ export default defineConfig({
     include: ['tests/unit/**/*.test.ts', 'tools/**/*.test.ts'],
     coverage: {
       provider: 'istanbul',
-      include: ['src/**/*.ts', 'scripts/**/*.ts', 'tools/**/*.js'],
+      include: [
+        'src/**/*.ts',
+        'scripts/**/*.ts',
+        'tools/**/*.js',
+        'tools/oxlint/**/*.ts',
+      ],
       reporter: ['text', 'lcov'],
       // The run fails below 100% on every metric
       thresholds: {

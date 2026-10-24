@@ -17,7 +17,7 @@ import { myFunction } from './myFunction.js';
 // ❌ WRONG — no default exports
 export default function () {}
 
-// ❌ WRONG — missing .js extension (ESLint error: import/extensions)
+// ❌ WRONG — missing .js extension (lint error: import/extensions)
 import { myFunction } from './myFunction';
 ```
 
@@ -122,15 +122,16 @@ Base class location: `src/js/_share/js/models/View.js`
 
 Run `npm run format` to auto-apply. Always run before `npm run lint`.
 
-## ESLint Rules (airbnb-base)
+## Lint Rules (oxlint, configured in `.oxlintrc.json`)
 
 Key rules that commonly trip up:
 
 - `import/extensions` — must include `.js` extension on all imports
-- `no-restricted-syntax` — prefer `for...of` with iterables, avoid `for...in`
-- `no-param-reassign` — do not reassign function parameters directly
+- `typescript/no-floating-promises`, `no-misused-promises` — every promise is awaited, returned or handled
+- `typescript/consistent-type-assertions` — no `as` assertions; narrow with the guards in `share/guards.ts`
 - `prefer-const` — use `const` unless the variable is reassigned
 - `no-shadow` — do not shadow outer scope variables
+- `panorama/no-browser-storage`, `no-restricted-globals` — only adapters and composition roots name the browser
 
 ## Anti-Patterns
 

@@ -1,0 +1,10 @@
+{
+  "$schema": "./node_modules/knip/schema.json",
+  "ignoreBinaries": ["act", "pre-commit", "pkill"],
+  "workspaces": {
+    ".": {
+      "entry": ["tests/unit/scripts/fixtures/*.ts"]
+    },
+    "tools/adbkit-stub": {}
+  }
+}

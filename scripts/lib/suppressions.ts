@@ -19,14 +19,15 @@ export const COMMENT_SUPPRESSIONS = [
   { kind: 'types-ignore', pattern: /@ts-[i]gnore/g },
   { kind: 'types-expect-error', pattern: /@ts-expect-[e]rror/g },
   { kind: 'types-nocheck', pattern: /@ts-no[c]heck/g },
-  { kind: 'lint', pattern: /eslint-[d]isable/g },
+  { kind: 'lint', pattern: /(?:es|ox)lint-[d]isable/g },
+  // Tags that tell knip an export is meant to be unused
+  { kind: 'knip-tag', pattern: /@(?:pu[b]lic|inte[r]nal|lint[i]gnore)\b/g },
 ];
 
 export const CODE_EXTENSIONS = ['.js', '.mjs', '.cjs', '.ts'];
 
 // Generated or tool output that is not source code
 export const ALLOWED_IGNORE_ENTRIES = [
-  '!.eslintrc.js',
   'build',
   'dist',
   'dist-firefox',
@@ -55,16 +56,54 @@ export const ALLOWED_SANDBOX_IGNORES = [
 
 // Read by tools that load only JavaScript; everything else is TypeScript
 export const ALLOWED_JAVASCRIPT_FILES = [
-  '.eslintrc.js',
   'stryker.config.mjs',
   'tools/adbkit-stub/index.js',
 ];
 export const JAVASCRIPT_EXTENSIONS = ['.js', '.mjs', '.cjs'];
 
-export const IGNORE_FILES = ['.eslintignore', '.prettierignore'];
+export const IGNORE_FILES = ['.prettierignore'];
 export const HOOK_CONFIG_FILE = '.pre-commit-config.yaml';
 export const VITEST_CONFIG_FILE = 'vitest.config.ts';
 export const STRYKER_CONFIG_FILE = 'stryker.config.mjs';
+export const OXLINT_CONFIG_FILE = '.oxlintrc.json';
+export const KNIP_CONFIG_FILE = 'knip.json';
+
+// What knip may be told to leave alone, and nothing else: system tools that are
+// not npm packages, and files that tests load by a path written as text
+export const ALLOWED_KNIP_BINARIES = ['act', 'pre-commit', 'pkill'];
+export const ALLOWED_KNIP_ENTRIES = ['tests/unit/scripts/fixtures/*.ts'];
+// Any of these, in any form, hides code from knip or narrows what it looks at
+export const FORBIDDEN_KNIP_KEYS = [
+  'ignore',
+  'ignoreFiles',
+  'ignoreExportsUsedInFile',
+  'ignoreMembers',
+  'ignoreDependencies',
+  'ignoreUnresolved',
+  'ignoreIssues',
+  'ignoreWorkspaces',
+  'exclude',
+  'include',
+  'rules',
+  'project',
+  'paths',
+];
+
+// What oxlint may skip: generated output and folders that start with a dot
+export const ALLOWED_OXLINT_IGNORES = [
+  '**/.*',
+  '**/.*/**',
+  'build/**',
+  'dist/**',
+  'dist-firefox/**',
+  'node_modules/**',
+  'test-user-data*/**',
+  'playwright-report/**',
+  'coverage/**',
+  'test-results/**',
+  'reports/**',
+  'web-ext-artifacts/**',
+];
 
 /** A property of something parsed from a file, when it is an object at all */
 const field = (value: unknown, key: string): unknown =>
@@ -129,6 +168,45 @@ export function listVitestViolations(config: unknown): string[] {
     (metric) => field(thresholds, metric) !== 100,
   ).map((metric) => `coverage.thresholds.${metric}`);
   return [...excluded, ...lowered];
+}
+
+export function listOxlintViolations(config: unknown): string[] {
+  const skipped = stringsOf(field(config, 'ignorePatterns'))
+    .filter((pattern) => !ALLOWED_OXLINT_IGNORES.includes(pattern))
+    .map((pattern) => `ignorePatterns:${pattern}`);
+  const untyped =
+    field(field(config, 'options'), 'typeAware') === true
+      ? []
+      : ['options.typeAware'];
+  return [...skipped, ...untyped];
+}
+
+const KNIP_LISTS: [key: string, allowed: string[]][] = [
+  ['ignoreBinaries', ALLOWED_KNIP_BINARIES],
+  ['entry', ALLOWED_KNIP_ENTRIES],
+];
+
+/** The ways one level of the knip config (the top, or one workspace) hides code */
+function listKnipLevelViolations(level: unknown, prefix: string): string[] {
+  const forbidden = FORBIDDEN_KNIP_KEYS.filter(
+    (key) => field(level, key) !== undefined,
+  ).map((key) => `${prefix}${key}`);
+  const listed = KNIP_LISTS.flatMap(([key, allowed]) =>
+    stringsOf(field(level, key))
+      .filter((entry) => !allowed.includes(entry))
+      .map((entry) => `${prefix}${key}:${entry}`),
+  );
+  return [...forbidden, ...listed];
+}
+
+export function listKnipViolations(config: unknown): string[] {
+  const workspaces = field(config, 'workspaces');
+  const nested = isRecord(workspaces)
+    ? Object.entries(workspaces).flatMap(([name, workspace]) =>
+        listKnipLevelViolations(workspace, `workspaces.${name}.`),
+      )
+    : [];
+  return [...listKnipLevelViolations(config, ''), ...nested];
 }
 
 export function listStrykerViolations(config: unknown): string[] {
@@ -197,6 +275,20 @@ export async function collectViolationCounts({
         addViolation(counts, `config|${file}|${what}`);
       });
     });
+
+  if (files.includes(KNIP_CONFIG_FILE)) {
+    const knip: unknown = JSON.parse(readText(KNIP_CONFIG_FILE));
+    listKnipViolations(knip).forEach((what) => {
+      addViolation(counts, `config|${KNIP_CONFIG_FILE}|${what}`);
+    });
+  }
+
+  if (files.includes(OXLINT_CONFIG_FILE)) {
+    const oxlint: unknown = JSON.parse(readText(OXLINT_CONFIG_FILE));
+    listOxlintViolations(oxlint).forEach((what) => {
+      addViolation(counts, `config|${OXLINT_CONFIG_FILE}|${what}`);
+    });
+  }
 
   if (files.includes(VITEST_CONFIG_FILE)) {
     listVitestViolations(await importConfig(VITEST_CONFIG_FILE)).forEach(

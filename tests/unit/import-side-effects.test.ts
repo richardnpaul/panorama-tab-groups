@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
-import { readdirSync } from 'node:fs';
-import { join, relative } from 'node:path';
+/// <reference types="vite/client" />
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // The scripts a page or the background loads; they start things on purpose
@@ -13,18 +12,13 @@ const ENTRY_POINTS = [
   'src/popup-view/index.ts',
 ];
 
-const modulesIn = (directory: string): string[] =>
-  readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    const path = join(directory, entry.name);
-    if (entry.isDirectory()) {
-      return modulesIn(path);
-    }
-    return path.endsWith('.ts') && !path.endsWith('.d.ts') ? [path] : [];
-  });
+// Every module under src, each as a function that imports it. The pattern is
+// read by Vite, which is what lets a path that varies be imported
+const IMPORTERS = import.meta.glob<unknown>('../../src/**/*.ts');
 
-const MODULES = modulesIn('src')
-  .map((path) => relative('.', path))
-  .filter((path) => !ENTRY_POINTS.includes(path));
+const MODULES = Object.keys(IMPORTERS)
+  .map((path) => path.replace('../../', ''))
+  .filter((path) => !path.endsWith('.d.ts') && !ENTRY_POINTS.includes(path));
 
 /** A browser that remembers every part of it that is touched */
 function watchedBrowser(touched: string[]): object {
@@ -58,7 +52,11 @@ describe('importing a module', () => {
     const touched: string[] = [];
     vi.stubGlobal('browser', watchedBrowser(touched));
 
-    await import(`../../${path.replace(/\.ts$/, '.js')}`);
+    const importer = IMPORTERS[`../../${path}`];
+    if (importer === undefined) {
+      throw new Error(`${path} is not among the modules found`);
+    }
+    await importer();
 
     expect(touched).toEqual([]);
   });

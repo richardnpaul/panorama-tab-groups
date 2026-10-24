@@ -2,12 +2,18 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   ALLOWED_IGNORE_ENTRIES,
   ALLOWED_JAVASCRIPT_FILES,
+  ALLOWED_KNIP_BINARIES,
+  ALLOWED_KNIP_ENTRIES,
+  ALLOWED_OXLINT_IGNORES,
   ALLOWED_SANDBOX_IGNORES,
   CODE_EXTENSIONS,
+  FORBIDDEN_KNIP_KEYS,
   COMMENT_SUPPRESSIONS,
   HOOK_CONFIG_FILE,
   IGNORE_FILES,
   JAVASCRIPT_EXTENSIONS,
+  KNIP_CONFIG_FILE,
+  OXLINT_CONFIG_FILE,
   STRYKER_CONFIG_FILE,
   VITEST_CONFIG_FILE,
   type Repository,
@@ -19,6 +25,8 @@ import {
   listDisallowedIgnoreEntries,
   listHookExcludes,
   listJavaScriptFiles,
+  listKnipViolations,
+  listOxlintViolations,
   listStrykerViolations,
   listTsconfigViolations,
   listVitestViolations,
@@ -37,6 +45,7 @@ const SAMPLES = {
   'types-ignore': phrase('//', ['@ts', 'ignore'].join('-')),
   'types-expect-error': phrase('//', ['@ts', 'expect', 'error'].join('-')),
   'types-nocheck': phrase('//', ['@ts', 'nocheck'].join('-')),
+  'knip-tag': phrase('/**', ['@', 'public'].join(''), '*/'),
   lint: phrase('//', ['eslint', 'disable', 'next', 'line'].join('-'), 'rule'),
 };
 
@@ -52,6 +61,7 @@ describe('scripts/lib/suppressions.js', () => {
         'types-expect-error',
         'types-nocheck',
         'lint',
+        'knip-tag',
       ]);
     });
 
@@ -61,7 +71,6 @@ describe('scripts/lib/suppressions.js', () => {
 
     it('allows only generated or tool output in ignore files', () => {
       expect(ALLOWED_IGNORE_ENTRIES).toEqual([
-        '!.eslintrc.js',
         'build',
         'dist',
         'dist-firefox',
@@ -91,10 +100,12 @@ describe('scripts/lib/suppressions.js', () => {
     });
 
     it('names the config files it inspects', () => {
-      expect(IGNORE_FILES).toEqual(['.eslintignore', '.prettierignore']);
+      expect(IGNORE_FILES).toEqual(['.prettierignore']);
       expect(HOOK_CONFIG_FILE).toBe('.pre-commit-config.yaml');
       expect(VITEST_CONFIG_FILE).toBe('vitest.config.ts');
       expect(STRYKER_CONFIG_FILE).toBe('stryker.config.mjs');
+      expect(OXLINT_CONFIG_FILE).toBe('.oxlintrc.json');
+      expect(KNIP_CONFIG_FILE).toBe('knip.json');
     });
   });
 
@@ -104,6 +115,31 @@ describe('scripts/lib/suppressions.js', () => {
         [kind]: 1,
       });
     });
+
+    it.each([
+      ['oxlint', phrase('//', ['oxlint', 'disable', 'next', 'line'].join('-'))],
+      ['eslint', phrase('//', ['eslint', 'disable', 'next', 'line'].join('-'))],
+    ])('detects a %s directive as a lint suppression', (_name, sample) => {
+      expect(countCommentSuppressions(sample)).toEqual({ lint: 1 });
+    });
+
+    it.each(['public', 'internal', 'lintignore'])(
+      'detects the knip tag @%s',
+      (tag) => {
+        expect(
+          countCommentSuppressions(phrase('/**', ['@', tag].join(''), '*/')),
+        ).toEqual({ 'knip-tag': 1 });
+      },
+    );
+
+    it.each(['publication', 'internally', 'lintignored', 'public', ''])(
+      'does not take @%s followed by more letters, or a bare word, for a knip tag',
+      (word) => {
+        const text = word === 'public' ? 'a public API' : `@${word}`;
+
+        expect(countCommentSuppressions(text)).toEqual({});
+      },
+    );
 
     it('returns an empty object for clean code', () => {
       expect(
@@ -177,7 +213,6 @@ describe('scripts/lib/suppressions.js', () => {
   describe('listJavaScriptFiles', () => {
     it('allows only the files that tools load as JavaScript', () => {
       expect(ALLOWED_JAVASCRIPT_FILES).toEqual([
-        '.eslintrc.js',
         'stryker.config.mjs',
         'tools/adbkit-stub/index.js',
       ]);
@@ -190,7 +225,8 @@ describe('scripts/lib/suppressions.js', () => {
       'tests/e2e/old.spec.js',
       'config.cjs',
       'tools/adbkit-stub/other.js',
-      'nested/.eslintrc.js',
+      '.eslintrc.cjs',
+      'tools/oxlint/plugin.js',
       'nested/stryker.config.mjs',
     ])('reports %s', (file) => {
       expect(listJavaScriptFiles([file])).toEqual([file]);
@@ -210,7 +246,7 @@ describe('scripts/lib/suppressions.js', () => {
 
     it('keeps the order of the files it reports', () => {
       expect(
-        listJavaScriptFiles(['b.js', '.eslintrc.js', 'a.mjs', 'c.ts']),
+        listJavaScriptFiles(['b.js', 'stryker.config.mjs', 'a.mjs', 'c.ts']),
       ).toEqual(['b.js', 'a.mjs']);
     });
   });
@@ -433,6 +469,144 @@ describe('scripts/lib/suppressions.js', () => {
       ).toEqual(['coverageAnalysis']);
     });
 
+    it('allows oxlint to skip only generated output and folders that start with a dot', () => {
+      expect(ALLOWED_OXLINT_IGNORES).toEqual([
+        '**/.*',
+        '**/.*/**',
+        'build/**',
+        'dist/**',
+        'dist-firefox/**',
+        'node_modules/**',
+        'test-user-data*/**',
+        'playwright-report/**',
+        'coverage/**',
+        'test-results/**',
+        'reports/**',
+        'web-ext-artifacts/**',
+      ]);
+    });
+
+    it('allows knip only what cannot be an npm package, and files loaded by path', () => {
+      expect(ALLOWED_KNIP_BINARIES).toEqual(['act', 'pre-commit', 'pkill']);
+      expect(ALLOWED_KNIP_ENTRIES).toEqual([
+        'tests/unit/scripts/fixtures/*.ts',
+      ]);
+      expect(FORBIDDEN_KNIP_KEYS).toEqual([
+        'ignore',
+        'ignoreFiles',
+        'ignoreExportsUsedInFile',
+        'ignoreMembers',
+        'ignoreDependencies',
+        'ignoreUnresolved',
+        'ignoreIssues',
+        'ignoreWorkspaces',
+        'exclude',
+        'include',
+        'rules',
+        'project',
+        'paths',
+      ]);
+    });
+
+    it('accepts a clean knip config, with or without workspaces', () => {
+      const clean = {
+        ignoreBinaries: ALLOWED_KNIP_BINARIES,
+      };
+
+      expect(listKnipViolations(clean)).toEqual([]);
+      expect(
+        listKnipViolations({
+          ...clean,
+          workspaces: {
+            '.': { entry: ALLOWED_KNIP_ENTRIES },
+            'tools/adbkit-stub': {},
+          },
+        }),
+      ).toEqual([]);
+      expect(listKnipViolations({})).toEqual([]);
+      expect(listKnipViolations(null)).toEqual([]);
+    });
+
+    it.each(FORBIDDEN_KNIP_KEYS)('flags knip being given %s', (key) => {
+      expect(listKnipViolations({ [key]: [] })).toEqual([key]);
+      expect(
+        listKnipViolations({ workspaces: { tools: { [key]: ['x'] } } }),
+      ).toEqual([`workspaces.tools.${key}`]);
+    });
+
+    it.each([
+      ['ignoreBinaries', 'tsx'],
+      ['entry', 'src/**/*.ts'],
+    ])('flags %s that names something not allowed (%s)', (key, entry) => {
+      expect(listKnipViolations({ [key]: [entry] })).toEqual([
+        `${key}:${entry}`,
+      ]);
+      expect(
+        listKnipViolations({ workspaces: { tools: { [key]: [entry] } } }),
+      ).toEqual([`workspaces.tools.${key}:${entry}`]);
+    });
+
+    it('ignores entries that are not text, and a workspaces key that is not an object', () => {
+      expect(listKnipViolations({ ignoreBinaries: [3, null, 'act'] })).toEqual(
+        [],
+      );
+      expect(listKnipViolations({ workspaces: 'all' })).toEqual([]);
+    });
+
+    it('lists the top level before the workspaces, forbidden keys before names', () => {
+      expect(
+        listKnipViolations({
+          ignoreBinaries: ['x'],
+          rules: {},
+          workspaces: { a: { ignore: ['y'] } },
+        }),
+      ).toEqual(['rules', 'ignoreBinaries:x', 'workspaces.a.ignore']);
+    });
+
+    it('accepts a clean oxlint config', () => {
+      expect(
+        listOxlintViolations({
+          ignorePatterns: ALLOWED_OXLINT_IGNORES,
+          options: { typeAware: true },
+        }),
+      ).toEqual([]);
+    });
+
+    it.each([
+      ['a source folder', 'src/legacy/**'],
+      ['a test folder', 'tests/**'],
+      ['everything', '**'],
+      ['a pattern that only looks like an allowed one', 'dist'],
+    ])('flags oxlint skipping %s', (_name, pattern) => {
+      expect(
+        listOxlintViolations({
+          ignorePatterns: [...ALLOWED_OXLINT_IGNORES, pattern],
+          options: { typeAware: true },
+        }),
+      ).toEqual([`ignorePatterns:${pattern}`]);
+    });
+
+    it.each([
+      ['switched off', { typeAware: false }],
+      ['missing', {}],
+      ['not a boolean', { typeAware: 'yes' }],
+    ])('flags the type-aware rules being %s', (_name, options) => {
+      expect(listOxlintViolations({ ignorePatterns: [], options })).toEqual([
+        'options.typeAware',
+      ]);
+    });
+
+    it('flags an oxlint config without the keys, and ignores entries that are not text', () => {
+      expect(listOxlintViolations({})).toEqual(['options.typeAware']);
+      expect(listOxlintViolations(null)).toEqual(['options.typeAware']);
+      expect(
+        listOxlintViolations({
+          ignorePatterns: [3, null, 'src/x/**'],
+          options: { typeAware: true },
+        }),
+      ).toEqual(['ignorePatterns:src/x/**']);
+    });
+
     it('accepts a clean Stryker config, and flags one without the keys', () => {
       expect(listStrykerViolations(CLEAN_STRYKER)).toEqual([]);
       expect(listStrykerViolations({})).toEqual([
@@ -453,7 +627,6 @@ describe('scripts/lib/suppressions.js', () => {
       'src/d.cjs': SAMPLES['coverage-c8'],
       'README.md': SAMPLES.lint,
       'src/data.json': SAMPLES.lint,
-      '.eslintignore': 'dist\nsrc/popup-view/*\n',
       '.prettierignore': 'src/x/*\n',
       '.pre-commit-config.yaml': '            src/popup-view/.*|\n',
       'tsconfig.json': '{ "exclude": ["src/x"] }',
@@ -469,7 +642,7 @@ describe('scripts/lib/suppressions.js', () => {
 
     it('counts a JavaScript file that should be TypeScript, without reading it', async () => {
       const counts = await collectViolationCounts({
-        files: ['src/js/new.js', '.eslintrc.js', 'src/b.ts'],
+        files: ['src/js/new.js', 'tools/adbkit-stub/index.js', 'src/b.ts'],
         readText: () => '',
         importConfig: noConfig,
       });
@@ -492,7 +665,6 @@ describe('scripts/lib/suppressions.js', () => {
         'comment|src/b.ts|types-ignore': 1,
         'comment|scripts/c.mjs|coverage-v8': 1,
         'comment|src/d.cjs|coverage-c8': 1,
-        'ignore-entry|.eslintignore|src/popup-view/*': 1,
         'ignore-entry|.prettierignore|src/x/*': 1,
         'hook-exclude|.pre-commit-config.yaml|src/popup-view/.*': 1,
         'config|tsconfig.json|exclude': 1,
@@ -568,6 +740,43 @@ describe('scripts/lib/suppressions.js', () => {
         'config|stryker.config.mjs|thresholds.break': 1,
         'config|stryker.config.mjs|coverageAnalysis': 1,
       });
+    });
+
+    it('inspects the oxlint config when present, as JSON that is not imported', async () => {
+      const importConfig = vi.fn<Repository['importConfig']>();
+
+      const counts = await collectViolationCounts({
+        files: [OXLINT_CONFIG_FILE],
+        readText: () =>
+          JSON.stringify({
+            ignorePatterns: ['src/legacy/**'],
+            options: { typeAware: false },
+          }),
+        importConfig,
+      });
+
+      expect(counts).toEqual({
+        'config|.oxlintrc.json|ignorePatterns:src/legacy/**': 1,
+        'config|.oxlintrc.json|options.typeAware': 1,
+      });
+      expect(importConfig).not.toHaveBeenCalled();
+    });
+
+    it('inspects the knip config when present, as JSON that is not imported', async () => {
+      const importConfig = vi.fn<Repository['importConfig']>();
+
+      const counts = await collectViolationCounts({
+        files: [KNIP_CONFIG_FILE],
+        readText: () =>
+          JSON.stringify({ ignore: ['src/**'], ignoreBinaries: ['tsx'] }),
+        importConfig,
+      });
+
+      expect(counts).toEqual({
+        'config|knip.json|ignore': 1,
+        'config|knip.json|ignoreBinaries:tsx': 1,
+      });
+      expect(importConfig).not.toHaveBeenCalled();
     });
 
     it('does not import configs that are missing', async () => {
