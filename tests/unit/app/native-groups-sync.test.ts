@@ -119,7 +119,7 @@ describe('app/native-groups-sync.ts', () => {
       expect(await env.nativeGroups.tabIdsIn(1000)).toEqual([10, 11]);
       expect(await env.migrationFlag.isComplete()).toBe(true);
       expect(env.logger.debug).toHaveBeenCalledWith(
-        '[Migration] Created native group 1000 for panorama group 1 with 2 tabs in window 1',
+        '[Migration] Created native group 1000 for group 1 with 2 tabs in window 1',
       );
     });
 

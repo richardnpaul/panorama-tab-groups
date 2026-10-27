@@ -3,7 +3,6 @@ import { createMemoryClock } from '../../../src/js/adapters/memory/clock.js';
 import { createMemoryGroupState } from '../../../src/js/adapters/memory/group-state.js';
 import { createMemoryNativeGroups } from '../../../src/js/adapters/memory/native-groups.js';
 import { createMemoryScheduler } from '../../../src/js/adapters/memory/scheduler.js';
-import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createBrowserEvents } from '../../../src/js/app/browser-events.js';
 import { createViewOpening } from '../../../src/js/app/view-opening.js';
 
@@ -13,7 +12,6 @@ function setUp({ useNative = true }: { useNative?: boolean } = {}) {
   const groupState = createMemoryGroupState();
   const nativeGroups = createMemoryNativeGroups([50], 1);
   nativeGroups.seed(50, 1, [10]);
-  const tabs = createMemoryTabs();
   const cleanup = vi.fn().mockResolvedValue(undefined);
   const logger = { debug: vi.fn(), warn: vi.fn(), error: vi.fn() };
   const viewOpening = createViewOpening({
@@ -25,17 +23,14 @@ function setUp({ useNative = true }: { useNative?: boolean } = {}) {
     events: createBrowserEvents({
       groupState,
       nativeGroups,
-      tabs,
       nativeGroupsSync: { cleanup },
       viewOpening,
       useNativeGroups: () => Promise.resolve(useNative),
       viewUrl: VIEW,
-      version: '2.5.0',
       logger,
     }),
     groupState,
     nativeGroups,
-    tabs,
     cleanup,
     viewOpening,
     logger,
@@ -56,7 +51,7 @@ describe('app/browser-events.ts', () => {
 
       expect(await env.groupState.getTabGroup(10)).toBe(-1);
       expect(env.logger.debug).toHaveBeenCalledWith(
-        'Tab 10 updated to panorama view, assigned groupId -1',
+        'Tab 10 updated to view, assigned groupId -1',
       );
     });
 
@@ -128,46 +123,6 @@ describe('app/browser-events.ts', () => {
       env.events.onTabRemoved(11);
 
       expect(env.viewOpening.current()).not.toBeNull();
-    });
-  });
-
-  describe('onInstalled', () => {
-    it('opens the release notes of the version after an update', async () => {
-      const env = setUp();
-
-      await env.events.onInstalled({ reason: 'update' });
-
-      expect(env.tabs.calls).toEqual([
-        'open https://github.com/projectdelphai/panorama-tab-groups/releases/tag/2.5.0',
-      ]);
-      expect((await env.tabs.get(9000)).active).toBe(true);
-    });
-
-    it.each([['install'], ['browser_update'], ['shared_module_update']])(
-      'opens nothing after the reason %s',
-      async (reason) => {
-        const env = setUp();
-
-        await env.events.onInstalled({ reason });
-
-        expect(env.tabs.calls).toEqual([]);
-      },
-    );
-
-    it('opens nothing for a temporary add-on', async () => {
-      const env = setUp();
-
-      await env.events.onInstalled({ reason: 'update', temporary: true });
-
-      expect(env.tabs.calls).toEqual([]);
-    });
-
-    it('opens the notes for an add-on that says it is not temporary', async () => {
-      const env = setUp();
-
-      await env.events.onInstalled({ reason: 'update', temporary: false });
-
-      expect(env.tabs.calls).toHaveLength(1);
     });
   });
 

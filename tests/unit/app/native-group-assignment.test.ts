@@ -86,7 +86,7 @@ describe('app/native-group-assignment.ts', () => {
     expect(env.logger.error).not.toHaveBeenCalled();
     expect(env.logger.warn).not.toHaveBeenCalled();
     expect(env.logger.debug).toHaveBeenCalledWith(
-      '[TabCreated] Created native group 1000 for panorama group 1 with 2 tabs in window 3',
+      '[TabCreated] Created native group 1000 for group 1 with 2 tabs in window 3',
     );
   });
 
@@ -168,7 +168,7 @@ describe('app/native-group-assignment.ts', () => {
     );
   });
 
-  it('does not group the Panorama view tab', async () => {
+  it('does not group the view tab', async () => {
     const env = await setUp([
       { tab: tab(1), group: 1 },
       { tab: tab(2, VIEW), group: -1 },

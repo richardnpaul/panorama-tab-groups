@@ -20,7 +20,6 @@ function fakeBrowser() {
     runtime: {
       onMessage: event(),
       onMessageExternal: event(),
-      onInstalled: event(),
     },
     contextMenus: { onClicked: event() },
   };
@@ -41,7 +40,6 @@ const listenerCount = (browser: FakeBrowser): number[] => [
   browser.storage.onChanged.addListener.mock.calls.length,
   browser.runtime.onMessage.addListener.mock.calls.length,
   browser.runtime.onMessageExternal.addListener.mock.calls.length,
-  browser.runtime.onInstalled.addListener.mock.calls.length,
   browser.contextMenus.onClicked.addListener.mock.calls.length,
 ];
 

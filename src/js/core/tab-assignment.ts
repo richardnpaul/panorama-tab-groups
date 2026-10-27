@@ -1,6 +1,6 @@
 import { getLowestPositiveGroupId } from './utils.js';
 
-/** The Panorama view tab the extension has just asked the browser to open */
+/** The viewer tab the extension has just asked the browser to open */
 export interface OpeningView {
   // Not known until the browser has opened the tab
   tabId: number | null;
@@ -16,10 +16,10 @@ export interface OpeningView {
 export const VIEW_TAB_WINDOW_MS = 100;
 
 /**
- * Whether a newly created tab is the Panorama view tab: it is the one that was
+ * Whether a newly created tab is the viewer tab: it is the one that was
  * asked for, it appeared in that window just after, or it shows the view page.
  */
-export function isPanoramaViewTab({
+export function isViewerTab({
   tab,
   viewUrl,
   opening,

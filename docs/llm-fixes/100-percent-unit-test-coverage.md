@@ -1,7 +1,7 @@
 # Finalizing 100% Unit Test Coverage
 
 **Date**: 2026-06-02
-**Objective**: Systematically resolve failing unit tests, expand test coverage for remaining files, and finalize 100% unit test coverage for the Panorama Tab Groups project without introducing any Playwright E2E regressions.
+**Objective**: Systematically resolve failing unit tests, expand test coverage for remaining files, and finalize 100% unit test coverage for the Tab Groups Viewer project without introducing any Playwright E2E regressions.
 
 ## Background
 

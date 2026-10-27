@@ -176,12 +176,10 @@ export function composeBackground(): Background {
   const events = createBrowserEvents({
     groupState,
     nativeGroups,
-    tabs,
     nativeGroupsSync,
     viewOpening,
     useNativeGroups,
     viewUrl,
-    version: browser.runtime.getManifest().version,
     logger,
   });
   const deleteGroup = createGroupDeletion({
@@ -221,7 +219,6 @@ export function composeBackground(): Background {
         triggerCommand,
         logger,
       }),
-      installed: events.onInstalled,
       storageChanged: events.onStorageChanged,
       nativeGroupRemoved: nativeGroupsSync.onRemoved,
       nativeGroupUpdated: nativeGroupsSync.onUpdated,

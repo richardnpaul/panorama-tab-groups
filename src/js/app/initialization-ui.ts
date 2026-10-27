@@ -4,7 +4,7 @@ import type { Messaging } from '../ports/messaging.js';
 import type { Notifications } from '../ports/notifications.js';
 import type { Toolbar } from '../ports/toolbar.js';
 
-const NOTIFICATION_ID = 'panorama-initializing';
+const NOTIFICATION_ID = 'viewer-initializing';
 
 export interface InitializationUiDeps {
   notifications: Notifications;
@@ -30,7 +30,7 @@ export function createInitializationUi({
 }: InitializationUiDeps): InitializationUi {
   let showing = false;
 
-  // The Panorama view may not be open, and then there is nobody to tell
+  // The view may not be open, and then there is nobody to tell
   const tellView = async (action: string): Promise<void> => {
     try {
       await messaging.send({ action });
@@ -49,7 +49,7 @@ export function createInitializationUi({
       showing = true;
 
       await notifications.show(NOTIFICATION_ID, {
-        title: 'Panorama Tab Groups',
+        title: 'Tab Groups Viewer',
         message: 'Restoring tab groups...',
         iconUrl: extension.urlOf('icons/logo/logo-128.png'),
       });

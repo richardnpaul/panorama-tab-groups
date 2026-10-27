@@ -2,7 +2,7 @@
 
 ## Issue Description
 
-During end-to-end testing, specifically for tests like "UI contains a Settings button that opens options", it was observed that the Panorama Tab Groups View tab (`view.html`) was incorrectly appearing inside a native tab group in Chromium, whereas it did not exhibit this behavior in Firefox. The Panorama View tab is intended to remain ungrouped (assigned a `groupId` of `-1`) and should not be displayed as a regular tab within the extension's UI or grouped natively by the browser.
+During end-to-end testing, specifically for tests like "UI contains a Settings button that opens options", it was observed that the Tab Groups Viewer View tab (`view.html`) was incorrectly appearing inside a native tab group in Chromium, whereas it did not exhibit this behavior in Firefox. The viewer tab is intended to remain ungrouped (assigned a `groupId` of `-1`) and should not be displayed as a regular tab within the extension's UI or grouped natively by the browser.
 
 ## Root Cause Analysis
 
@@ -61,4 +61,4 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 ```
 
-This ensures the Panorama View tab correctly ungroups itself consistently in Chromium, matching the expected behavior in Firefox.
+This ensures the viewer tab correctly ungroups itself consistently in Chromium, matching the expected behavior in Firefox.

@@ -1,4 +1,4 @@
-# Testing the Modernized Tab Groups Extension
+# Testing the Modernized Tab Groups Viewer Extension
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@
 ### Option A: Automatic Detection
 
 ```bash
-cd /home/richard/dev/third-party-code/Tab Groups-tab-groups
+cd $HOME/dev/third-party-code/tab-groups-viewer
 npm run start
 ```
 

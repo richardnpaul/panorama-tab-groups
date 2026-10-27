@@ -1,5 +1,5 @@
 /**
- * Constants for Panorama Tab Groups
+ * Constants for Tab Groups Viewer
  * Reserved group IDs and other application-wide constants
  */
 
@@ -7,8 +7,8 @@
  * Reserved Group IDs
  * Negative IDs are reserved for special purposes and should never be user-created
  */
-export const PANORAMA_VIEW_GROUP_ID = -1; // Panorama view tab itself
-export const UNGROUPED_GROUP_ID = -2; // Tabs not belonging to any panorama group
+export const VIEWER_GROUP_ID = -1; // viewer tab itself
+export const UNGROUPED_GROUP_ID = -2; // Tabs not belonging to any group
 
 /**
  * Special group name constants
@@ -26,7 +26,7 @@ export const SHOW_LOADING_UI_AFTER_MS = 1000; // Show loading UI after 1 second
  * Check if a group ID is a reserved system group
  */
 export function isReservedGroupId(groupId: unknown): boolean {
-  return groupId === PANORAMA_VIEW_GROUP_ID || groupId === UNGROUPED_GROUP_ID;
+  return groupId === VIEWER_GROUP_ID || groupId === UNGROUPED_GROUP_ID;
 }
 
 /**

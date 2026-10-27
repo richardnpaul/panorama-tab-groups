@@ -274,7 +274,7 @@ Decision 1E was taken at the owner's request: the project left ESLint for oxlint
   of ours uses it.)
 - **Configuration.** `.oxlintrc.json`, written by `@oxlint/migrate` from the ESLint 10 trial configuration and then
   edited: 240 rules (the 24 it skipped are in `CONTRIBUTION.md`), the `src/**` browser boundary as an override with a
-  later override that turns it off for the exempt files, `options.typeAware: true`, and `panorama/no-browser-storage`
+  later override that turns it off for the exempt files, `options.typeAware: true`, and `tgv/no-browser-storage`
   as a plugin. `.eslintrc.cjs` and `.eslintignore` are deleted. `eslint-disable` and `oxlint-disable` are both
   suppressions to the guard.
 - **The plugin is TypeScript.** `tools/oxlint/boundary-plugin.ts` is 38 lines, loaded by oxlint directly (Node 26 strips

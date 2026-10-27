@@ -14,7 +14,7 @@ export interface NativeGroupAssignmentDeps {
     NativeGroups,
     'createFromTabs' | 'setAppearance' | 'get' | 'removeTabs'
   >;
-  // The address of the Panorama view page
+  // The address of the view page
   viewUrl: string;
   logger: Pick<Logger, 'debug' | 'error' | 'warn'>;
 }
@@ -127,7 +127,7 @@ export function createNativeGroupAssignment({
         ),
       );
       logger.debug(
-        `[${label}] Created native group ${String(nativeGroupId)} for panorama group ${String(group.id)} with ${String(tabIds.length)} tabs in window ${String(windowId)}`,
+        `[${label}] Created native group ${String(nativeGroupId)} for group ${String(group.id)} with ${String(tabIds.length)} tabs in window ${String(windowId)}`,
       );
       return { kind: 'created', nativeGroupId };
     },

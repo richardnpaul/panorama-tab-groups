@@ -12,7 +12,7 @@ describe('adapters/browser/exclusive.ts', () => {
 
       await expect(exclusively(() => Promise.resolve(7))).resolves.toBe(7);
 
-      expect(fake.requests).toEqual(['panorama-sessions']);
+      expect(fake.requests).toEqual(['tgv-sessions']);
     });
 
     it('passes on a failure of the task', async () => {

@@ -3,9 +3,11 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-sudo mkdir -p /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache /home/vscode/.npm
-sudo chown -R vscode:vscode /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache /home/vscode/.npm
+# The repository, whatever the folder is called
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-cd /workspaces/panorama-tab-groups
+sudo mkdir -p "$PWD/node_modules" /home/vscode/.cache /home/vscode/.npm
+sudo chown -R vscode:vscode "$PWD/node_modules" /home/vscode/.cache /home/vscode/.npm
+
 npm ci
 npx playwright install firefox chromium

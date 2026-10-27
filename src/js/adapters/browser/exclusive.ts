@@ -6,7 +6,7 @@ export interface Locks {
   request: <T>(name: string, callback: () => Promise<T>) => Promise<T>;
 }
 
-const LOCK_NAME = 'panorama-sessions';
+const LOCK_NAME = 'tgv-sessions';
 
 /**
  * Tasks that read and write the same storage must take turns, and not only

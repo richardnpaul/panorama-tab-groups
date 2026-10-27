@@ -1,5 +1,5 @@
 /**
- * Menu Manager - Context menu management for Panorama Tab Groups
+ * Menu Manager - Context menu management for Tab Groups Viewer
  *
  * Handles creation, updating, and removal of context menu items
  * for sending tabs to different groups.

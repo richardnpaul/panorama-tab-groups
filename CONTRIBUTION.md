@@ -16,6 +16,15 @@ The translations are located in `/src/_locales/`. Beneath this directory each la
 
 For deeper insight it's recommended to read the [Internationalization guide for web extensions](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Internationalization).
 
+### Machine translations waiting for a native speaker
+
+These were written by machine when the add-on was renamed, so that they make sense, and have not been checked by a
+speaker of the language. Corrections are welcome.
+
+- `optionKeyboardShortcutsToggle` in `pl` ("Przełącz widok grup kart") and `tr_TR` ("Sekme Alanları Görünümünü Aç/Kapat",
+  which keeps that file's word "alan" for a group).
+- `ru` also still refers to the old name by meaning ("Открыть панораму"); that locale is due to be removed.
+
 ### Update translation
 
 1. Open the messages.json file for the target language.
@@ -45,7 +54,7 @@ so rules such as `no-floating-promises` and `no-unsafe-*` see the types. `npm ru
   strict and stylistic sets when the project left ESLint (`docs/plans/eslint-10-flat-config.md` has the reasons and the
   comparison). Later `overrides` win over earlier ones; the browser boundary is a rule switched on for `src/**/*.ts` and
   switched off again for the files that may name the browser.
-- **Our own rule** (`panorama/no-browser-storage`) is `tools/oxlint/boundary-plugin.ts`, loaded as a plugin. It is unit
+- **Our own rule** (`tgv/no-browser-storage`) is `tools/oxlint/boundary-plugin.ts`, loaded as a plugin. It is unit
   tested and mutation tested like the rest of the code.
 - **What the configuration is tested against:** `tests/unit/lint-config.test.ts` lints two fixtures of deliberate
   violations (`tests/unit/lint-fixtures/`) in a project of its own and expects the exact rules and lines. If you

@@ -39,7 +39,7 @@ describe('app/startup.ts', () => {
     await env.init();
 
     expect(env.order).toEqual([
-      'Initializing Panorama Tab View',
+      'Initializing Tab Groups Viewer',
       'recover',
       'setupWindows',
       'salvage',

@@ -1,5 +1,5 @@
 /**
- * Utility functions for Panorama Tab Groups
+ * Utility functions for Tab Groups Viewer
  * Pure functions with no state dependencies
  */
 import type { NativeGroupColor } from '../ports/native-groups.js';

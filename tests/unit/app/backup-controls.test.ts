@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createBackupControls } from '../../../src/js/app/backup-controls.js';
 
 const validBackup = JSON.stringify({
-  file: { type: 'panoramaView', version: 1 },
+  file: { type: 'tgvView', version: 1 },
   windows: [],
 });
 
@@ -33,7 +33,7 @@ describe('app/backup-controls.ts', () => {
 
       expect(service.open).toHaveBeenCalledTimes(1);
       expect(service.open).toHaveBeenCalledWith({
-        file: { type: 'panoramaView', version: 1 },
+        file: { type: 'tgvView', version: 1 },
         windows: [],
       });
       expect(notify).not.toHaveBeenCalled();

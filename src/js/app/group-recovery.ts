@@ -1,7 +1,7 @@
 import {
   INITIALIZATION_TIMEOUT_MS,
   isReservedGroupId,
-  PANORAMA_VIEW_GROUP_ID,
+  VIEWER_GROUP_ID,
   SHOW_LOADING_UI_AFTER_MS,
   UNGROUPED_GROUP_ID,
 } from '../core/constants.js';
@@ -219,7 +219,7 @@ export function createGroupRecovery({
           windowTabs.map(async ({ id }) => {
             const groupId = await groupState.getTabGroup(id);
             const known =
-              groupId === PANORAMA_VIEW_GROUP_ID ||
+              groupId === VIEWER_GROUP_ID ||
               groups.some((group) => group.id === groupId);
             if (!known) {
               await groupState.setTabGroup(id, activeGroup);

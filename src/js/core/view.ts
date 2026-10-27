@@ -1,7 +1,7 @@
 import type { TabSummary } from '../ports/tabs.js';
 
 /**
- * The tab to go back to when the Panorama view is left: the one used last
+ * The tab to go back to when the view is left: the one used last
  * before it. Of tabs used at the same moment, the first in the window.
  */
 export function mostRecentOtherTab(

@@ -33,6 +33,6 @@ const noBrowserStorage = {
 };
 
 export default {
-  meta: { name: 'panorama' },
+  meta: { name: 'tgv' },
   rules: { 'no-browser-storage': noBrowserStorage },
 };

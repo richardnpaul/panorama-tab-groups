@@ -1,6 +1,6 @@
 {
   "name": "tab-groups-viewer",
-  "version": "0.9.0",
+  "version": "0.1.0",
   "description": "Tab Groups Viewer",
   "type": "module",
   "scripts": {
@@ -42,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/richardnpaul/panorama-tab-groups.git"
+    "url": "git+https://github.com/richardnpaul/tab-groups-viewer.git"
   },
   "authors": [
     "Reuben Castelino",
@@ -50,9 +50,9 @@
   ],
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/richardnpaul/panorama-tab-groups/issues"
+    "url": "https://github.com/richardnpaul/tab-groups-viewer/issues"
   },
-  "homepage": "https://github.com/richardnpaul/panorama-tab-groups#readme",
+  "homepage": "https://github.com/richardnpaul/tab-groups-viewer#readme",
   "devDependencies": {
     "@devicefarmer/adbkit": "3.3.9",
     "@playwright/test": "1.64.0",

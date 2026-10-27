@@ -159,7 +159,7 @@ export function createBackupService({
     async save() {
       const windowIds = await windows.listIds();
       const backup: Backup = {
-        file: { type: 'panoramaView', version: 1 },
+        file: { type: 'tgvView', version: 1 },
         windows: await Promise.all(windowIds.map(snapshotOf)),
       };
 

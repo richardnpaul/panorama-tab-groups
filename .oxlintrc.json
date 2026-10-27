@@ -754,7 +754,7 @@
             "message": "The browser is reached through a port; only an adapter or a composition root names it (see .oxlintrc.json)"
           }
         ],
-        "panorama/no-browser-storage": "error"
+        "tgv/no-browser-storage": "error"
       }
     },
     {
@@ -772,7 +772,7 @@
       ],
       "rules": {
         "no-restricted-globals": "off",
-        "panorama/no-browser-storage": "off"
+        "tgv/no-browser-storage": "off"
       }
     }
   ],

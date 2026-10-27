@@ -36,7 +36,7 @@ const BUTTON_TITLES = [
 ] as const;
 
 /**
- * Show the Panorama view: all the groups of the window and the tabs in them,
+ * Show the view: all the groups of the window and the tabs in them,
  * ready for the user to move them about, and responding to what the browser
  * says of the tabs.
  */

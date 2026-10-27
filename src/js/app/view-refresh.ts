@@ -37,7 +37,7 @@ export function createViewRefresh({
     applyPopup,
 
     async refreshView() {
-      logger.debug('Refresh Panorama Tab View');
+      logger.debug('Refresh view');
       ordered = true;
       await applyPopup();
     },

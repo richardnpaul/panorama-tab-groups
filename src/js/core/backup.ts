@@ -34,7 +34,7 @@ export interface BackupWindow {
 }
 
 export interface Backup {
-  file: { type: 'panoramaView'; version: 1 };
+  file: { type: 'tgvView'; version: 1 };
   windows: BackupWindow[];
 }
 
@@ -117,13 +117,11 @@ function parseWindow(value: unknown): BackupWindow | undefined {
       };
 }
 
-function parsePanoramaBackup(
-  data: Record<string, unknown>,
-): Backup | undefined {
+function parseViewerBackup(data: Record<string, unknown>): Backup | undefined {
   const windows = parseAll(data.windows, parseWindow);
   return windows === undefined
     ? undefined
-    : { file: { type: 'panoramaView', version: 1 }, windows };
+    : { file: { type: 'tgvView', version: 1 }, windows };
 }
 
 // What JSON text says, or nothing if it is not JSON
@@ -222,7 +220,7 @@ function convertTabGroupsBackup(
   const windows = parseAll(data.windows, convertWindow);
   return windows === undefined
     ? undefined
-    : { file: { type: 'panoramaView', version: 1 }, windows };
+    : { file: { type: 'tgvView', version: 1 }, windows };
 }
 
 const isVersion = (version: unknown, ...names: string[]): boolean =>
@@ -231,9 +229,14 @@ const isVersion = (version: unknown, ...names: string[]): boolean =>
   names.includes(version[0]) &&
   version[1] === 1;
 
+// The names a backup can give itself: the second is what backups made before the
+// add-on was renamed say, still read and no longer written
+const READABLE_FILE_TYPES = ['tgvView', 'panoramaView'];
+
 /**
- * The backup in what was read from a file: one this extension saved, or one
- * from the Tab Groups add-on that it replaces. Nothing if it is neither.
+ * The backup in what was read from a file: one this extension saved (under its
+ * name now or before it was renamed), or one from the Tab Groups add-on that it
+ * replaces. Nothing if it is none of these.
  */
 export function parseBackup(text: string): Backup | undefined {
   const data = jsonOf(text);
@@ -243,10 +246,11 @@ export function parseBackup(text: string): Backup | undefined {
 
   if (
     isRecord(data.file) &&
-    data.file.type === 'panoramaView' &&
+    isString(data.file.type) &&
+    READABLE_FILE_TYPES.includes(data.file.type) &&
     data.file.version === 1
   ) {
-    return parsePanoramaBackup(data);
+    return parseViewerBackup(data);
   }
   return isVersion(data.version, 'tabGroups', 'sessionrestore')
     ? convertTabGroupsBackup(data)
@@ -274,5 +278,5 @@ const pad = (value: number): string => String(value).padStart(2, '0').slice(-2);
 export function backupFileName(date: Date): string {
   const day = `${pad(date.getFullYear())}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
   const time = `${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
-  return `panoramaView-backup-${day}-${time}.json`;
+  return `tgvView-backup-${day}-${time}.json`;
 }

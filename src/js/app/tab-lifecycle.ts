@@ -1,8 +1,8 @@
-import { PANORAMA_VIEW_GROUP_ID } from '../core/constants.js';
+import { VIEWER_GROUP_ID } from '../core/constants.js';
 import { nativeGroupIdOf } from '../core/groups.js';
 import {
   fallbackActiveGroup,
-  isPanoramaViewTab,
+  isViewerTab,
   type OpeningView,
 } from '../core/tab-assignment.js';
 import type { Clock } from '../ports/clock.js';
@@ -42,12 +42,12 @@ export interface TabLifecycleDeps {
   waitForInitialization: () => Promise<void>;
   // Whether a backup is being opened, whose tabs are not to be assigned
   isOpeningBackup: () => boolean;
-  // The Panorama view tab that was asked for and has not shown up yet
+  // The viewer tab that was asked for and has not shown up yet
   openingView: () => OpeningView | null;
   // The view tab shows up: stop waiting for it
   finishOpeningView: () => void;
   clock: Clock;
-  // The address of the Panorama view page
+  // The address of the view page
   viewUrl: string;
   logger: Pick<Logger, 'debug' | 'warn' | 'error'>;
 }
@@ -135,7 +135,7 @@ export function createTabLifecycle({
     if (nativeGroupId !== undefined && groupId === activeGroup) {
       await nativeGroups.addTabs([tab.id], nativeGroupId);
       logger.debug(
-        `Assigned tab ${String(tab.id)} to native group ${String(nativeGroupId)} (panorama group ${String(groupId)})`,
+        `Assigned tab ${String(tab.id)} to native group ${String(nativeGroupId)} (group ${String(groupId)})`,
       );
     } else {
       logger.debug(
@@ -198,7 +198,7 @@ export function createTabLifecycle({
         withNativeGroup(groups, activeGroup, existing),
       );
       logger.debug(
-        `Linked existing native group ${String(existing)} to panorama group ${String(activeGroup)}`,
+        `Linked existing native group ${String(existing)} to group ${String(activeGroup)}`,
       );
       return;
     }
@@ -228,17 +228,15 @@ export function createTabLifecycle({
     const now = clock.now();
     await waitForInitialization();
 
-    if (isPanoramaViewTab({ tab, viewUrl, opening, now })) {
+    if (isViewerTab({ tab, viewUrl, opening, now })) {
       finishOpeningView();
-      await groupState.setTabGroup(tab.id, PANORAMA_VIEW_GROUP_ID);
-      logger.debug(
-        `Created panorama view tab ${String(tab.id)}, assigned groupId -1`,
-      );
+      await groupState.setTabGroup(tab.id, VIEWER_GROUP_ID);
+      logger.debug(`Created viewer tab ${String(tab.id)}, assigned groupId -1`);
       return;
     }
 
     const groupId = await groupOfNewTab(tab);
-    if (groupId === PANORAMA_VIEW_GROUP_ID) {
+    if (groupId === VIEWER_GROUP_ID) {
       return;
     }
 
@@ -296,7 +294,7 @@ export function createTabLifecycle({
       return;
     }
 
-    if (activeGroup !== PANORAMA_VIEW_GROUP_ID) {
+    if (activeGroup !== VIEWER_GROUP_ID) {
       try {
         await groupState.setActiveGroup(tab.windowId, activeGroup);
       } catch (error) {

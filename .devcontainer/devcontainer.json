@@ -1,5 +1,5 @@
 {
-  "name": "panorama-tab-groups",
+  "name": "tab-groups-viewer",
   "build": {
     "dockerfile": "Dockerfile"
   },
@@ -13,17 +13,17 @@
   "runArgs": ["--shm-size=1g", "--security-opt", "seccomp=unconfined"],
   "mounts": [
     {
-      "source": "panorama-node-modules",
-      "target": "/workspaces/panorama-tab-groups/node_modules",
+      "source": "tgv-node-modules",
+      "target": "${containerWorkspaceFolder}/node_modules",
       "type": "volume"
     },
     {
-      "source": "panorama-playwright-browsers",
+      "source": "tgv-playwright-browsers",
       "target": "/home/vscode/.cache/ms-playwright",
       "type": "volume"
     },
     {
-      "source": "panorama-npm-cache",
+      "source": "tgv-npm-cache",
       "target": "/home/vscode/.npm",
       "type": "volume"
     },

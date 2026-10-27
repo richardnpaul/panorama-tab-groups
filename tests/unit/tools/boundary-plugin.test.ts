@@ -20,8 +20,8 @@ function visit(node: MemberNode): MemberNode[] {
 }
 
 describe('tools/oxlint/boundary-plugin.ts', () => {
-  it('is called panorama, which is the prefix of its rule in the configuration', () => {
-    expect(plugin.meta.name).toBe('panorama');
+  it('is called tgv, which is the prefix of its rule in the configuration', () => {
+    expect(plugin.meta.name).toBe('tgv');
     expect(Object.keys(plugin.rules)).toEqual(['no-browser-storage']);
   });
 

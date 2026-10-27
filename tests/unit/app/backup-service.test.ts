@@ -67,7 +67,7 @@ const backupWindow = (overrides: Partial<BackupWindow> = {}): BackupWindow => ({
 });
 
 const backupOf = (...windows: BackupWindow[]): Backup => ({
-  file: { type: 'panoramaView', version: 1 },
+  file: { type: 'tgvView', version: 1 },
   windows,
 });
 
@@ -120,10 +120,10 @@ describe('app/backup-service.ts', () => {
 
       expect(env.downloads.saved).toHaveLength(1);
       expect(env.downloads.saved[0]?.filename).toBe(
-        'panoramaView-backup-260506-070809.json',
+        'tgvView-backup-260506-070809.json',
       );
       expect(JSON.parse(env.downloads.saved[0]?.content ?? '')).toEqual({
-        file: { type: 'panoramaView', version: 1 },
+        file: { type: 'tgvView', version: 1 },
         windows: [
           {
             groups: [{ id: 1, name: 'Work', rect }],
@@ -221,7 +221,7 @@ describe('app/backup-service.ts', () => {
 
       const saved: unknown = JSON.parse(env.downloads.saved[0]?.content ?? '');
       expect(saved).toEqual({
-        file: { type: 'panoramaView', version: 1 },
+        file: { type: 'tgvView', version: 1 },
         windows: [{ groups: [], tabs: [] }],
       });
     });

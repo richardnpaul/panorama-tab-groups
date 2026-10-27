@@ -12,7 +12,7 @@ export interface ViewOpeningDeps {
   logger: Pick<Logger, 'debug' | 'warn'>;
 }
 
-/** A request for the Panorama view tab, as it is waited on */
+/** A request for the viewer tab, as it is waited on */
 export interface PendingView {
   /** Remember which tab the browser opened */
   opened: (tabId: number) => void;

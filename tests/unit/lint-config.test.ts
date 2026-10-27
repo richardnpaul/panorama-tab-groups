@@ -140,8 +140,8 @@ describe('the lint configuration', () => {
   it('finds what the general rules are there to find, in the source', () => {
     const boundary: Finding[] = [
       ['eslint(no-restricted-globals)', 7],
-      ['panorama(no-browser-storage)', 7],
-      ['panorama(no-browser-storage)', 18],
+      ['tgv(no-browser-storage)', 7],
+      ['tgv(no-browser-storage)', 18],
     ];
 
     expect(of('source')).toEqual(

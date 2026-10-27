@@ -156,7 +156,6 @@ describe('background/compose.ts', () => {
       'menuClicked',
       'handleMessage',
       'handleExternalMessage',
-      'installed',
       'storageChanged',
       'nativeGroupRemoved',
       'nativeGroupUpdated',
@@ -264,7 +263,7 @@ describe('background/compose.ts', () => {
     await vi.advanceTimersByTimeAsync(1000);
 
     expect(browser.notifications.create).toHaveBeenCalledWith(
-      'panorama-initializing',
+      'viewer-initializing',
       expect.objectContaining({ message: 'Restoring tab groups...' }),
     );
     expect(browser.runtime.sendMessage).toHaveBeenCalledWith({
@@ -275,7 +274,7 @@ describe('background/compose.ts', () => {
     await starting;
 
     expect(browser.notifications.clear).toHaveBeenCalledWith(
-      'panorama-initializing',
+      'viewer-initializing',
     );
   });
 

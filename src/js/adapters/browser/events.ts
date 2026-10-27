@@ -52,7 +52,6 @@ export interface EventsApi {
       boolean
     >;
     onMessageExternal: Emitter<[unknown]>;
-    onInstalled: Emitter<[{ reason: string; temporary?: boolean | undefined }]>;
   };
   contextMenus: {
     onClicked: Emitter<
@@ -81,7 +80,6 @@ export interface BackgroundHandlers {
   ) => Promise<void>;
   handleMessage: (message: unknown) => Promise<unknown>;
   handleExternalMessage: (message: unknown) => Promise<void>;
-  installed: BrowserEvents['onInstalled'];
   storageChanged: BrowserEvents['onStorageChanged'];
   nativeGroupRemoved: (group: NativeGroupEvent) => Promise<void>;
   nativeGroupUpdated: (group: NativeGroupEvent) => Promise<void>;
@@ -176,9 +174,6 @@ export function registerListeners(
   });
   api.runtime.onMessageExternal.addListener((message) => {
     run('runtime.onMessageExternal', handlers.handleExternalMessage(message));
-  });
-  api.runtime.onInstalled.addListener((details) => {
-    run('runtime.onInstalled', handlers.installed(details));
   });
 
   api.contextMenus.onClicked.addListener((info, tab) => {

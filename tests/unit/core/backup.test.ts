@@ -9,7 +9,7 @@ import {
 const rect = { x: 0.1, y: 0.2, w: 0.3, h: 0.4 };
 
 const ours = (windows: unknown[]) =>
-  JSON.stringify({ file: { type: 'panoramaView', version: 1 }, windows });
+  JSON.stringify({ file: { type: 'tgvView', version: 1 }, windows });
 
 const window = (overrides: Record<string, unknown> = {}) => ({
   groups: [{ id: 1, name: 'Work', rect }],
@@ -33,7 +33,7 @@ describe('core/backup.ts', () => {
   describe('parseBackup of a backup of this extension', () => {
     it('gives the windows with their groups, tabs, and where they were', () => {
       expect(parseBackup(ours([window()]))).toEqual({
-        file: { type: 'panoramaView', version: 1 },
+        file: { type: 'tgvView', version: 1 },
         windows: [
           {
             groups: [{ id: 1, name: 'Work', rect }],
@@ -259,14 +259,11 @@ describe('core/backup.ts', () => {
     });
 
     it.each([
-      [
-        'no windows',
-        JSON.stringify({ file: { type: 'panoramaView', version: 1 } }),
-      ],
+      ['no windows', JSON.stringify({ file: { type: 'tgvView', version: 1 } })],
       [
         'windows that are not a list',
         JSON.stringify({
-          file: { type: 'panoramaView', version: 1 },
+          file: { type: 'tgvView', version: 1 },
           windows: {},
         }),
       ],
@@ -274,10 +271,29 @@ describe('core/backup.ts', () => {
       expect(parseBackup(text)).toBeUndefined();
     });
 
+    it('reads a backup made before the rename and gives it the name it has now', () => {
+      const text = ours([window({})]).replace('tgvView', 'panoramaView');
+
+      expect(parseBackup(text)).toStrictEqual(parseBackup(ours([window({})])));
+      expect(parseBackup(text)?.file).toStrictEqual({
+        type: 'tgvView',
+        version: 1,
+      });
+    });
+
+    it('reads a backup of the earlier type only at the version it was written at', () => {
+      const text = ours([window({})])
+        .replace('tgvView', 'panoramaView')
+        .replace('"version":1', '"version":2');
+
+      expect(text).toContain('"version":2');
+      expect(parseBackup(text)).toBeUndefined();
+    });
+
     it.each([
       ['another type', { type: 'other', version: 1 }],
-      ['another version', { type: 'panoramaView', version: 2 }],
-      ['no version', { type: 'panoramaView' }],
+      ['another version', { type: 'tgvView', version: 2 }],
+      ['no version', { type: 'tgvView' }],
     ])('is nothing for a file of %s', (_name, file) => {
       expect(
         parseBackup(JSON.stringify({ file, windows: [] })),
@@ -341,7 +357,7 @@ describe('core/backup.ts', () => {
 
     it('converts the windows, groups and tabs', () => {
       expect(parseBackup(old([oldWindow()]))).toEqual({
-        file: { type: 'panoramaView', version: 1 },
+        file: { type: 'tgvView', version: 1 },
         windows: [
           {
             groups: [
@@ -650,13 +666,13 @@ describe('core/backup.ts', () => {
   describe('backupFileName', () => {
     it('is the date and time in local time, with two digits each', () => {
       expect(backupFileName(new Date(2026, 0, 5, 3, 4, 9))).toBe(
-        'panoramaView-backup-260105-030409.json',
+        'tgvView-backup-260105-030409.json',
       );
     });
 
     it('takes the last two digits of the year, and two digits for the rest', () => {
       expect(backupFileName(new Date(2005, 10, 25, 23, 59, 58))).toBe(
-        'panoramaView-backup-051125-235958.json',
+        'tgvView-backup-051125-235958.json',
       );
     });
   });

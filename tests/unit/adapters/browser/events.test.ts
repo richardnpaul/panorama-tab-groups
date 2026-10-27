@@ -51,7 +51,6 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
       boolean
     >(),
     external: emitter<[unknown]>(),
-    installed: emitter<[{ reason: string; temporary?: boolean }]>(),
     menuClicked:
       emitter<
         [
@@ -84,7 +83,6 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     runtime: {
       onMessage: events.message,
       onMessageExternal: events.external,
-      onInstalled: events.installed,
     },
     contextMenus: { onClicked: events.menuClicked },
   };
@@ -101,7 +99,6 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     menuClicked: vi.fn().mockResolvedValue(undefined),
     handleMessage: vi.fn().mockResolvedValue('answer'),
     handleExternalMessage: vi.fn().mockResolvedValue(undefined),
-    installed: vi.fn().mockResolvedValue(undefined),
     storageChanged: vi.fn().mockResolvedValue(undefined),
     nativeGroupRemoved: vi.fn().mockResolvedValue(undefined),
     nativeGroupUpdated: vi.fn().mockResolvedValue(undefined),
@@ -260,17 +257,6 @@ describe('adapters/browser/events.ts', () => {
     expect(handlers.storageChanged).toHaveBeenCalledWith(changes, 'sync');
   });
 
-  it('gives what the extension is told after install or update', () => {
-    const { events, handlers } = setUp();
-
-    events.installed.fire({ reason: 'update', temporary: false });
-
-    expect(handlers.installed).toHaveBeenCalledWith({
-      reason: 'update',
-      temporary: false,
-    });
-  });
-
   it('gives the menu click and the tab it was on', () => {
     const { events, handlers } = setUp();
 
@@ -370,7 +356,6 @@ describe('adapters/browser/events.ts', () => {
       events.groupUpdated.fire({ id: 1, windowId: 1 });
       events.storageChanged.fire({}, 'sync');
       events.external.fire('x');
-      events.installed.fire({ reason: 'update' });
       events.menuClicked.fire({ menuItemId: '1' }, undefined);
       await settle();
 
@@ -386,7 +371,6 @@ describe('adapters/browser/events.ts', () => {
         '[tabGroups.onUpdated] handler failed:',
         '[storage.onChanged] handler failed:',
         '[runtime.onMessageExternal] handler failed:',
-        '[runtime.onInstalled] handler failed:',
         '[contextMenus.onClicked] handler failed:',
       ]);
     });

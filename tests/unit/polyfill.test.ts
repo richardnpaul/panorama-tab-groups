@@ -67,7 +67,7 @@ describe('polyfill.ts', () => {
       await browser.sessions?.setTabValue?.(1, 'groupId', 'two');
       await browser.sessions?.getTabValue?.(1, 'groupId');
 
-      expect(fake.requests).toEqual(['panorama-sessions', 'panorama-sessions']);
+      expect(fake.requests).toEqual(['tgv-sessions', 'tgv-sessions']);
     });
 
     it('works without locks', async () => {

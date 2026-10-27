@@ -1,4 +1,4 @@
-/** A tab as the Panorama view shows it */
+/** A tab as the view shows it */
 export interface ViewTab {
   id: number;
   windowId: number;

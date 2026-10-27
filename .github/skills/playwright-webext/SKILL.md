@@ -1,6 +1,6 @@
 ---
 name: playwright-webext
-description: Playwright E2E testing patterns for the panorama-tab-groups Firefox/Chromium extension. Covers the custom Firefox fixture (createFirefoxPageProxy, RDP addon install via playwright-webextext, UUID extraction from prefs.js), fixture exports, how to add new tests, navigation URL patterns, and common pitfalls. Load before writing or modifying any test file.
+description: Playwright E2E testing patterns for the tab-groups-viewer Firefox/Chromium extension. Covers the custom Firefox fixture (createFirefoxPageProxy, RDP addon install via playwright-webextext, UUID extraction from prefs.js), fixture exports, how to add new tests, navigation URL patterns, and common pitfalls. Load before writing or modifying any test file.
 ---
 
 ## When to Use

@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFakeSessions } from '../../support/fake-sessions.js';
 
 const backupJson = JSON.stringify({
-  file: { type: 'panoramaView', version: 1 },
+  file: { type: 'tgvView', version: 1 },
   windows: [
     {
       groups: [{ id: 1, name: 'Work', rect: { x: 0, y: 0, w: 0.5, h: 0.5 } }],
@@ -225,7 +225,7 @@ describe('options/start.ts', () => {
         expect(blob).toBeInstanceOf(Blob);
         expect(blob instanceof Blob && blob.type).toBe('application/json');
         const text = blob instanceof Blob ? await blob.text() : '';
-        expect(text).toContain('"type": "panoramaView"');
+        expect(text).toContain('"type": "tgvView"');
         const options: unknown = browser.downloads.download.mock.calls[0]?.[0];
         expect(options).toMatchObject({
           url: 'blob:backup',
@@ -233,7 +233,7 @@ describe('options/start.ts', () => {
           saveAs: true,
         });
         expect(JSON.stringify(options)).toMatch(
-          /panoramaView-backup-\d{6}-\d{6}\.json/u,
+          /tgvView-backup-\d{6}-\d{6}\.json/u,
         );
       } finally {
         Reflect.deleteProperty(URL, 'createObjectURL');

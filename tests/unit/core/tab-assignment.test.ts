@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   fallbackActiveGroup,
-  isPanoramaViewTab,
+  isViewerTab,
   VIEW_TAB_WINDOW_MS,
 } from '../../../src/js/core/tab-assignment.js';
 
@@ -23,7 +23,7 @@ const check = (
     now?: number;
   } = {},
 ) =>
-  isPanoramaViewTab({
+  isViewerTab({
     tab: {
       id: 10,
       windowId: 1,
@@ -37,7 +37,7 @@ const check = (
   });
 
 describe('core/tab-assignment.ts', () => {
-  describe('isPanoramaViewTab', () => {
+  describe('isViewerTab', () => {
     it('is false for an ordinary tab when no view was asked for', () => {
       expect(check()).toBe(false);
     });

@@ -2,7 +2,7 @@ export type Safety = { safe: true } | { safe: false; reason: string };
 
 /**
  * Whether grouping would leave the window with no tab outside the group (the
- * browser may close a window whose only tab is grouped); the Panorama view
+ * browser may close a window whose only tab is grouped); the view
  * tab does not count as a tab.
  */
 export function checkWindowSurvives(

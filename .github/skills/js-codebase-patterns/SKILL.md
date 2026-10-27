@@ -1,6 +1,6 @@
 ---
 name: js-codebase-patterns
-description: JavaScript ES2022 codebase conventions for panorama-tab-groups. Covers module system (named exports, .js extensions), JSDoc requirements, StateManager usage (correct method names), View model pattern, reserved group IDs, Prettier/ESLint config, and anti-patterns. Always load before writing any code.
+description: JavaScript ES2022 codebase conventions for tab-groups-viewer. Covers module system (named exports, .js extensions), JSDoc requirements, StateManager usage (correct method names), View model pattern, reserved group IDs, Prettier/ESLint config, and anti-patterns. Always load before writing any code.
 ---
 
 ## When to Use
@@ -71,7 +71,7 @@ await stateManager.setGroups(windowId, groups);
 From `src/js/background/constants.js`. **Never use as real group IDs:**
 
 ```javascript
-const PANORAMA_VIEW_GROUP_ID = -1;
+const VIEWER_GROUP_ID = -1;
 const UNGROUPED_GROUP_ID = -2;
 
 // Use the helper to check:
@@ -131,7 +131,7 @@ Key rules that commonly trip up:
 - `typescript/consistent-type-assertions` — no `as` assertions; narrow with the guards in `share/guards.ts`
 - `prefer-const` — use `const` unless the variable is reassigned
 - `no-shadow` — do not shadow outer scope variables
-- `panorama/no-browser-storage`, `no-restricted-globals` — only adapters and composition roots name the browser
+- `tgv/no-browser-storage`, `no-restricted-globals` — only adapters and composition roots name the browser
 
 ## Anti-Patterns
 
@@ -152,5 +152,5 @@ const x: number = 5;
 let cachedWindowData = {}; // lost when service worker terminates
 
 // ❌ NO magic numbers — use constants.js
-if (groupId === -1) {} // use PANORAMA_VIEW_GROUP_ID
+if (groupId === -1) {} // use VIEWER_GROUP_ID
 ```

@@ -318,7 +318,7 @@ describe('options/page.ts', () => {
     });
 
     it.each([
-      ['view', { view: 'panorama' }],
+      ['view', { view: 'no-such-view' }],
       ['toolbarPosition', { toolbarPosition: 'middle' }],
     ])(
       'fails when there is no radio button for the stored %s',

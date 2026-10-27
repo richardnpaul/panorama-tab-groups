@@ -163,7 +163,7 @@ describe('app/tab-lifecycle.ts', () => {
       expect(order).toEqual(['waited', 'assigned']);
     });
 
-    describe('the Panorama view tab', () => {
+    describe('the view tab', () => {
       it.each([
         ['has its address', created(5, { url: VIEW })],
         [
@@ -180,7 +180,7 @@ describe('app/tab-lifecycle.ts', () => {
         expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
         expect(env.nativeGroups.calls).toEqual([]);
         expect(env.logger.debug).toHaveBeenCalledWith(
-          'Created panorama view tab 5, assigned groupId -1',
+          'Created viewer tab 5, assigned groupId -1',
         );
       });
 
@@ -494,7 +494,7 @@ describe('app/tab-lifecycle.ts', () => {
         expect(env.nativeGroups.calls).toEqual(['add 5 to 50']);
         expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
         expect(env.logger.debug).toHaveBeenCalledWith(
-          'Assigned tab 5 to native group 50 (panorama group 1)',
+          'Assigned tab 5 to native group 50 (group 1)',
         );
       });
 
@@ -735,7 +735,7 @@ describe('app/tab-lifecycle.ts', () => {
           (await env.groupState.getGroups(WINDOW))?.map((g) => g.nativeGroupId),
         ).toEqual([undefined, 71]);
         expect(env.logger.debug).toHaveBeenCalledWith(
-          'Linked existing native group 71 to panorama group 2',
+          'Linked existing native group 71 to group 2',
         );
         expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
       });

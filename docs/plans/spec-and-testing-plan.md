@@ -1,6 +1,6 @@
-# Testing Plan for Panorama Tab Groups
+# Testing Plan for Tab Groups Viewer
 
-Based on the extension specification, this is the plan for building comprehensive tests to verify this behavior using the existing Playwright configuration.
+Based on the extension specification, this is the plan for building comprehensive tests to verify this behaviour using the existing Playwright configuration.
 
 ## Phase 1: Unit Tests for Core Logic
 
@@ -22,7 +22,7 @@ Add comprehensive E2E tests in the `tests/` directory using the provided Chromiu
 
 - **E2E - State Persistence**:
   - Open multiple tabs, group them, close the browser context, and restore to verify state persistence across restarts.
-- **E2E - Panorama View Interactions**:
+- **E2E - Viewer Interactions**:
   - Load `view.html`.
   - Assert that Layout modes (Tiling vs Freeform) correctly arrange group DOM nodes.
   - Verify tab Search functionality filters tabs correctly.

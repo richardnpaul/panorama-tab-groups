@@ -15,7 +15,7 @@ export interface ViewToggleDeps {
 }
 
 /**
- * Open the Panorama view tab, or return to the last open tab if the view is
+ * Open the viewer tab, or return to the last open tab if the view is
  * the tab being looked at now.
  */
 export function createViewToggle({

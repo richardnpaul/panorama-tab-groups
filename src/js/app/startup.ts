@@ -30,7 +30,7 @@ export function createStartup({
   logger,
 }: StartupDeps): () => Promise<void> {
   return async function init() {
-    logger.debug('Initializing Panorama Tab View');
+    logger.debug('Initializing Tab Groups Viewer');
 
     // Events wait for this, so it comes first
     await recovery.initializeTabGroupAssignments();

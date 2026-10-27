@@ -37,8 +37,8 @@ describe('app/initialization-ui.ts', () => {
       await env.ui.show();
 
       expect(env.ui.isShowing()).toBe(true);
-      expect(env.notifications.shown.get('panorama-initializing')).toEqual({
-        title: 'Panorama Tab Groups',
+      expect(env.notifications.shown.get('viewer-initializing')).toEqual({
+        title: 'Tab Groups Viewer',
         message: 'Restoring tab groups...',
         iconUrl: 'moz-extension://id/icons/logo/logo-128.png',
       });

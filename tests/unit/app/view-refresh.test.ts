@@ -61,9 +61,7 @@ describe('app/view-refresh.ts', () => {
 
       expect(env.refresh.isOrdered()).toBe(true);
       expect(env.toolbar.popup).toBe('popup-view/index.html');
-      expect(env.logger.debug).toHaveBeenCalledWith(
-        'Refresh Panorama Tab View',
-      );
+      expect(env.logger.debug).toHaveBeenCalledWith('Refresh view');
     });
 
     it('is ordered even when the popup cannot be set', async () => {

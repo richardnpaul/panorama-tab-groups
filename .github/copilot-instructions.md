@@ -1,4 +1,4 @@
-# Panorama Tab Groups — Copilot Instructions
+# Tab Groups Viewer — Copilot Instructions
 
 ## Core Principles
 
@@ -81,7 +81,7 @@ browser.sessions.getWindowValue(windowId, 'groups'); // ❌
 
 **Reserved Group IDs** — never use as real group IDs (see `src/js/background/constants.js`):
 
-- `PANORAMA_VIEW_GROUP_ID = -1`
+- `VIEWER_GROUP_ID = -1`
 - `UNGROUPED_GROUP_ID = -2`
 
 ## Linting & Formatting
