@@ -68,6 +68,7 @@
     "oxlint": "1.89.0",
     "oxlint-tsgolint": "7.0.2005",
     "playwright": "1.64.0",
+    "playwright-webextext": "^0.0.5",
     "prettier": "^3.8.1",
     "tsx": "4.23.15",
     "typescript": "6.0.3",
@@ -77,9 +78,6 @@
   },
   "engines": {
     "node": ">=26"
-  },
-  "dependencies": {
-    "playwright-webextext": "^0.0.5"
   },
   "workspaces": [
     "tools/adbkit-stub"
