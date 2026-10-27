@@ -1,0 +1,72 @@
+name: Mutation tests
+
+permissions:
+  contents: read
+
+# Pull requests test only what changed since the last full run, which is kept
+# in the cache. `main` and the nightly run test everything, so the cache cannot
+# hide a survivor.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '41 3 * * *'
+  workflow_dispatch:
+
+# A pull request's run gives way to a newer push; the full runs, whose report
+# the cache keeps, always finish
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '26'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore the incremental report
+        if: github.event_name == 'pull_request'
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-incremental-${{ github.sha }}
+          restore-keys: stryker-incremental-
+
+      - name: Test the changes
+        if: github.event_name == 'pull_request'
+        run: npm run test:mutation
+
+      - name: Test everything
+        if: github.event_name != 'pull_request'
+        run: npm run test:mutation:full
+
+      - name: Keep the incremental report
+        if: github.event_name != 'pull_request'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: reports/stryker-incremental.json
+          key: stryker-incremental-${{ github.sha }}
+
+      # act's artifact server does not understand upload-artifact v7 (it rejects
+      # the `mime_type` field), so a local run skips the step; act sets ACT
+      - name: Upload the mutation report
+        if: ${{ !cancelled() && !env.ACT }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: mutation-report
+          path: reports/mutation/
+          retention-days: 5

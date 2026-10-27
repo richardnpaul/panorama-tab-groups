@@ -1,0 +1,52 @@
+declare const maybe: string | undefined;
+declare const anything: any;
+declare function load(): Promise<number>;
+declare const obj: { method(): number };
+
+export function floating(): void {
+  load();
+}
+export async function awaiting(): Promise<number> {
+  await 5;
+  return load();
+}
+export function misused(): void {
+  [1].forEach(async (n) => {
+    await load();
+    console.log(n);
+  });
+  if (load()) {
+    console.log('always');
+  }
+}
+export function unsafe(): number {
+  const a = anything.member;
+  const b = anything();
+  const c: string = anything;
+  return a + b + c.length;
+}
+export function conditions(value: string): string {
+  if (value) {
+    return `${value}${maybe}${1 + 1}${{}}`;
+  }
+  return maybe || 'x';
+}
+export function unbound(): () => number {
+  const method = obj.method;
+  return method;
+}
+export function voids(): void {
+  const x = console.log('a');
+  return x;
+}
+export function notNeeded(value: string): boolean {
+  return value === undefined || (value as string) === '';
+}
+export async function noAwait(): Promise<number> {
+  return 1;
+}
+export function throwsNonError(): never {
+  throw 'text';
+}
+export const sorted = [3, 1].sort();
+export const stringified = String({});

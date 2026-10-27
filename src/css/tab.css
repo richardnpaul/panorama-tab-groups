@@ -44,7 +44,7 @@
 .newtab .inner {
   border: rgba(12, 12, 13, 1) 2px dashed;
 
-  background-image: url(/icons/plus_dark.svg);
+  background-image: url(../icons/plus_dark.svg);
   background-repeat: no-repeat;
   background-size: 16px;
   background-position: center;
@@ -104,7 +104,7 @@
   right: 0;
   top: 0;
 
-  background-image: url(/icons/tab_close.svg);
+  background-image: url(../icons/tab_close.svg);
   background-repeat: no-repeat;
   background-size: 10px;
   background-position: center;

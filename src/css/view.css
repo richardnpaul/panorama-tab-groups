@@ -8,6 +8,7 @@ body {
 
   font-family: sans-serif;
   -moz-user-select: none;
+  user-select: none;
 }
 
 #groups {
@@ -47,19 +48,19 @@ body {
 }
 
 #newGroup {
-  background-image: url(/icons/plus_dark.svg);
+  background-image: url(../icons/plus_dark.svg);
 }
 
 #settings {
-  background-image: url(/icons/preferences_dark.svg);
+  background-image: url(../icons/preferences_dark.svg);
 }
 
 #freeform {
-  background-image: url(/icons/icon.svg);
+  background-image: url(../icons/icon.svg);
 }
 
 #tiling {
-  background-image: url(/icons/grid.svg);
+  background-image: url(../icons/grid.svg);
 }
 
 #pinnedTabs {

@@ -1,0 +1,21 @@
+import { x } from './nothing.js';
+import { isString } from '../share/guards.ts';
+import { isRecord } from '../share/guards.js';
+import { isString as again } from '../share/guards.js';
+import lodash from 'lodash';
+
+export const a: any = browser.storage;
+export function f(v: string | undefined) {
+  return v!;
+}
+for (const q of [1]) {
+  console.log(q);
+}
+var z = 1;
+export const b = (value: unknown) => (value as string).length + z;
+export async function g(value: string | undefined) {
+  if (value) { return value }
+  const sessions = (globalThis as { sessions?: string }).sessions;
+  return sessions == null ? 1 : value == 2;
+}
+export function h(this: unknown) { eval('1'); }

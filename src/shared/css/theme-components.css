@@ -45,8 +45,11 @@
   left: 8px;
   bottom: 0;
   z-index: 0;
+  -webkit-mask-position: center center;
   mask-position: center center;
+  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-size: 16px;
   mask-size: 16px;
 }
 
@@ -67,6 +70,7 @@
 
 .form-field--search::before {
   background: var(--input-placeholder-icon-color);
+  -webkit-mask-image: url(../icons/Search.svg);
   mask-image: url(../icons/Search.svg);
 }
 
@@ -97,8 +101,11 @@
   bottom: 0;
   left: 0;
   background: var(--button-ghost-icon-color);
+  -webkit-mask-position: center center;
   mask-position: center center;
+  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
+  -webkit-mask-size: 16px;
   mask-size: 16px;
 }
 
@@ -120,13 +127,16 @@
 }
 
 .button-ghost--settings::before {
+  -webkit-mask-image: url(../icons/Preferences.svg);
   mask-image: url(../icons/Preferences.svg);
 }
 
 .button-ghost--new::before {
+  -webkit-mask-image: url(../icons/New.svg);
   mask-image: url(../icons/New.svg);
 }
 
 .button-ghost--back::before {
+  -webkit-mask-image: url(../icons/Arrowhead_Left.svg);
   mask-image: url(../icons/Arrowhead_Left.svg);
 }

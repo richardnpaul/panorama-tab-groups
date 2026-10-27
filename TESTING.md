@@ -1,4 +1,4 @@
-# Testing the Modernized Panorama Tab Groups Extension
+# Testing the Modernized Tab Groups Viewer Extension
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@
 ### Option A: Automatic Detection
 
 ```bash
-cd /home/richard/dev/third-party-code/panorama-tab-groups
+cd $HOME/dev/third-party-code/tab-groups-viewer
 npm run start
 ```
 
@@ -45,7 +45,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 2. Navigate to `about:debugging`
 3. Click "This Firefox"
 4. Click "Load Temporary Add-on..."
-5. Navigate to the `src/` folder and select `manifest.json`
+5. Run `npm run dist && npm run dist:firefox`, then navigate to the `dist-firefox/` folder and select `manifest.json`
 
 ## Method 3: Developer Mode (Best for debugging)
 
@@ -60,7 +60,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 
 1. Go to `about:debugging#/runtime/this-firefox`
 2. Click "Load Temporary Add-on..."
-3. Select `src/manifest.json`
+3. Run `npm run dist && npm run dist:firefox`, then select `dist-firefox/manifest.json`
 
 ## What to Test
 
@@ -70,14 +70,14 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 2. **Popup View**: Click the extension icon to see popup
 3. **Tab Groups**: Create and manage tab groups
 4. **Keyboard Shortcuts**:
-   - `Ctrl+Shift+F`: Toggle Panorama View
+   - `Ctrl+Shift+F`: Toggle Tab Groups View
    - `Alt+W`: Next group
    - `Alt+Shift+W`: Previous group
 
-### Panorama View
+### Tab Groups View
 
 1. Click extension icon or use `Ctrl+Shift+F`
-2. Should open panorama view showing all tab groups
+2. Should open Tab Groups view showing all tab groups
 3. Test drag and drop functionality
 4. Test creating new groups
 5. Test moving tabs between groups
@@ -85,7 +85,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 ### Options Page
 
 1. Go to `about:addons`
-2. Find "Panorama Tab Groups"
+2. Find "Tab Groups"
 3. Click "Options"
 4. Test all settings:
    - View mode (Freeform vs Popup)
@@ -118,7 +118,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 ### Background Script Debugging
 
 - The background script logs will appear in the extension's console
-- Use `console.log()` statements in `js/background.js` for debugging
+- Use `console.log()` statements in `src/js/background/main.ts` or the `src/js/app/` service you are debugging for debugging
 
 ## Common Issues and Solutions
 
@@ -149,9 +149,9 @@ The extension requires Firefox 109+ for full Manifest V3 support.
 
 ```bash
 # Test with different Firefox versions
-web-ext run -s src --firefox=/path/to/firefox-esr
-web-ext run -s src --firefox=/path/to/firefox-beta
-web-ext run -s src --firefox=/path/to/firefox-nightly
+web-ext run -s dist --firefox=/path/to/firefox-esr
+web-ext run -s dist --firefox=/path/to/firefox-beta
+web-ext run -s dist --firefox=/path/to/firefox-nightly
 ```
 
 ## Performance Testing
@@ -171,7 +171,7 @@ web-ext run -s src --firefox=/path/to/firefox-nightly
 
 ### Automated Testing (Playwright)
 
-We use Playwright for end-to-end automated testing in both Chromium and Firefox. Firefox is the primary browser for extension behavior, and the repository includes a custom fixture in `playwright.config.js` to handle temporary addon install, UUID discovery, and `moz-extension://` navigation.
+We use Playwright for end-to-end automated testing in both Chromium and Firefox. Firefox is the primary browser for extension behaviour, and the repository includes custom fixtures in `tests/e2e/fixtures.ts` (configured by `playwright.config.ts`) to handle temporary addon install, UUID discovery, and `moz-extension://` navigation. The specs are TypeScript and are type-checked with the rest of the repository by `npm run typecheck`.
 
 ```bash
 # Run all end-to-end tests
@@ -193,14 +193,14 @@ npx playwright test --project=chromium
 **What is tested:**
 
 - **Extension bootstrap**: Verifies the extension loads and resolves a non-null runtime ID/UUID before navigation.
-- **Popup View**: Verifies the popup opens and reaches its ready UI state.
-- **Options Page**: Verifies the options page initializes its settings UI.
+- **Popup View**: Verifies the popup opens and reaches its ready UI state, and (`tests/e2e/popup.spec.ts`) lists the groups, makes and names a group, shows the tabs of a group, searches, moves the focus with the arrow keys and puts the groups in order by dragging.
+- **Options Page**: Verifies the options page initializes its settings UI, and (`tests/e2e/options-persistence.spec.ts`) that the theme, the toolbar position, the view and a shortcut turned off and on are still as chosen when the page is opened again.
 - **Firefox multi-page navigation**: Verifies Firefox can open a second extension page without regressing the custom `moz-extension://` proxy path.
 
 **Chromium compatibility notes:**
 
-- **`src/manifest.json`**: Uses `background.service_worker` for MV3 compatibility.
-- **Polyfill**: `src/js/polyfill.js` maps `browser` to `chrome` and mocks the Firefox-specific `sessions` API with storage-backed fallbacks when needed.
+- **`src/manifest.json`**: Has both `background.scripts` (Firefox) and `background.service_worker` (Chromium), so one `dist/` loads in both browsers, which is what the Playwright suite does. Firefox ignores `service_worker`, and `web-ext lint` reports that, so `npm run dist:firefox` copies `dist/` to `dist-firefox/` with the key left out. `web-ext lint`, `build`, `build:xpi` and `start` use `dist-firefox/`, so the XPI has the manifest Firefox wants.
+- **Polyfill**: `src/js/polyfill.ts` maps `browser` to `chrome` and mocks the Firefox-specific `sessions` API with storage-backed fallbacks when needed.
 
 **Firefox troubleshooting:**
 
@@ -208,6 +208,50 @@ npx playwright test --project=chromium
 - **`Extension ID for firefox was not resolved`**: Check the temporary addon install logs and confirm `browser_specific_settings.gecko.id` in `src/manifest.json` still matches the test fixture.
 - **`moz-extension://null/...` navigation**: This indicates UUID resolution failed before page navigation; inspect the Playwright report and `prefs.js` UUID registration.
 - **Headed launch fails due to `DISPLAY`/`WAYLAND_DISPLAY`**: Use the dev container desktop or rerun without `PLAYWRIGHT_FIREFOX_HEADED=1`.
+
+### Running the GitHub workflows locally (`act`)
+
+[`act`](https://github.com/nektos/act) runs the jobs of `.github/workflows/` in Docker containers in the devcontainer,
+so a broken workflow shows up before a push. The devcontainer gets its own Docker daemon from the `docker-in-docker`
+feature, which makes the container **privileged**: anything running in it, an AI agent's commands included, can do
+more than before. So `act` is only ever started by you, by hand; no hook, script or agent default runs it.
+
+The pinned pieces: the `act` binary (version and SHA-256 in `.devcontainer/Dockerfile`), the Docker feature (digest in
+`.devcontainer/devcontainer-lock.json`) and the runner image (digest in `.actrc`). The event files in
+`.github/act/events/` stand in for the events GitHub sends, so a workflow that tests `github.event_name` takes the same
+branch as on GitHub.
+
+```bash
+# List the jobs of every workflow (needs no Docker)
+npm run act:list
+
+# Run the workflows a push to main runs
+npm run act:run -- push -e .github/act/events/push-main.json
+
+# One workflow, as a pull request runs it (the incremental mutation run)
+act pull_request -W .github/workflows/mutation.yml -e .github/act/events/pull_request.json
+
+# The full mutation run of main, which saves its report to act's local cache
+act push -W .github/workflows/mutation.yml -e .github/act/events/push-main.json
+
+# The weekly audit and the nightly mutation run
+act workflow_dispatch -W .github/workflows/audit.yml
+act schedule -W .github/workflows/mutation.yml -e .github/act/events/schedule.json
+```
+
+`actionlint` checks the workflows on every commit that touches one (a pre-commit hook), with no Docker at all.
+
+What a green `act` run does and does not mean:
+
+| It can check                                                                          | It cannot check                                                            |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Workflow syntax, job graph, `needs`, `if` conditions                                  | Whether a cache saved by one run is found by the next (its cache is local) |
+| That every step's command works in a runner-like container                            | Branch protection and required status checks (repository settings)         |
+| Matrix expansion, environment, working directories                                    | `schedule` timing, permissions of the real `GITHUB_TOKEN`, rate limits     |
+| Behaviour per event (`push`, `pull_request`, `workflow_dispatch`) given an event file | Exactly what `ubuntu-latest` contains (the act image is an approximation)  |
+| Step durations, as a rough guide to `timeout-minutes`                                 | Marketplace actions that need GitHub's service (some artifact/cache calls) |
+
+A green `act` run is not a green GitHub run; the pull request is still the final check.
 
 ### Lint Everything
 
@@ -242,7 +286,7 @@ npm run build
 ## Auto Theme Feature Added
 
 **New Feature**: Added "Follow System" theme option
-**Behavior**: Automatically switches between light/dark based on browser/OS preference
+**Behaviour**: Automatically switches between light/dark based on browser/OS preference
 **Default**: New installations default to "Follow System"
 **Test**:
 

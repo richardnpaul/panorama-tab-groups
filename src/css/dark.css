@@ -16,19 +16,23 @@ body.theme-dark {
 }
 
 .theme-dark #newGroup {
-  background-image: url(/icons/plus_light.svg);
+  background-image: url(../icons/plus_light.svg);
 }
 
 .theme-dark #settings {
-  background-image: url(/icons/preferences_light.svg);
+  background-image: url(../icons/preferences_light.svg);
 }
 
 .theme-dark #freeform {
-  background-image: url(/icons/icon_light.svg);
+  background-image: url(../icons/icon_light.svg);
+}
+
+.theme-dark #freeform {
+  background-image: url(../icons/icon_light.svg);
 }
 
 .theme-dark #tiling {
-  background-image: url(/icons/grid_light.svg);
+  background-image: url(../icons/grid_light.svg);
 }
 
 .theme-dark #pinnedTabs {
@@ -62,7 +66,7 @@ body.theme-dark {
 }
 
 .theme-dark .group .header .close {
-  background-image: url(/icons/group_close_dark.svg);
+  background-image: url(../icons/group_close_dark.svg);
 }
 
 /* tabs */
@@ -81,7 +85,7 @@ body.theme-dark {
 .theme-dark .newtab .inner {
   border: rgba(249, 249, 250, 1) 2px dashed;
 
-  background-image: url(/icons/plus_light.svg);
+  background-image: url(../icons/plus_light.svg);
 
   opacity: 0.25;
 }

@@ -1,23 +1,29 @@
 {
-  "name": "panorama-tab-groups",
+  "name": "tab-groups-viewer",
   "build": {
     "dockerfile": "Dockerfile"
   },
   "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:4": {
+      "moby": false
+    }
+  },
+  "privileged": true,
   "runArgs": ["--shm-size=1g", "--security-opt", "seccomp=unconfined"],
   "mounts": [
     {
-      "source": "panorama-node-modules",
-      "target": "/workspaces/panorama-tab-groups/node_modules",
+      "source": "tgv-node-modules",
+      "target": "${containerWorkspaceFolder}/node_modules",
       "type": "volume"
     },
     {
-      "source": "panorama-playwright-browsers",
+      "source": "tgv-playwright-browsers",
       "target": "/home/vscode/.cache/ms-playwright",
       "type": "volume"
     },
     {
-      "source": "panorama-npm-cache",
+      "source": "tgv-npm-cache",
       "target": "/home/vscode/.npm",
       "type": "volume"
     },
@@ -25,8 +31,18 @@
       "source": "user-home-data",
       "target": "/home/vscode",
       "type": "volume"
+    },
+    {
+      "source": "claude-config-dir",
+      "target": "/home/vscode/.claude",
+      "type": "volume"
     }
   ],
+  "updateRemoteUserUID": true,
+  "containerEnv": {
+    "SHELL": "/bin/bash",
+    "CLAUDE_CONFIG_DIR": "/home/vscode/.claude"
+  },
   "remoteEnv": {
     "DISPLAY": ":1",
     "PLAYWRIGHT_FIREFOX_HEADED": "0"
@@ -42,14 +58,15 @@
       "onAutoForward": "notify"
     }
   },
-  "postCreateCommand": "sudo chown -R vscode:vscode /workspaces/panorama-tab-groups/node_modules /home/vscode/.cache/ms-playwright /home/vscode/.npm && npm ci && npx playwright install firefox chromium",
-  "postStartCommand": "bash .devcontainer/start-desktop.sh",
+  "postCreateCommand": "./.devcontainer/post-cmd.sh",
+  "postStartCommand": "./.devcontainer/post-cmd.sh && ./.devcontainer/start-desktop.sh",
   "customizations": {
     "vscode": {
       "extensions": [
-        "ms-playwright.playwright",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "anthropic.claude-code",
+        "oxc.oxc-vscode",
+        "esbenp.prettier-vscode",
+        "ms-playwright.playwright"
       ]
     }
   }

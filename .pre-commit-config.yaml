@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # frozen: v6.0.0
     hooks:
       - id: check-merge-conflict
       - id: check-illegal-windows-names
@@ -16,29 +16,46 @@ repos:
       - id: check-json
       - id: check-yaml
 
+  # Workflow syntax, expressions, inputs and shell quoting; no Docker needed
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # frozen: v1.7.12
+    hooks:
+      - id: actionlint
+
   - repo: local
     hooks:
       - id: prettier
         name: prettier
         entry: npx prettier --write --ignore-unknown
         language: system
-        types_or: [javascript, json, css, html, markdown]
-        exclude: |
-          (?x)^(
-            src/js/depends/dragscroll\.js|
-            src/popup-view/.*|
-            src/_shared/js/models/View\.js
-          )$
+        types_or: [javascript, ts, json, css, html, markdown]
 
-      - id: eslint
-        name: eslint
-        entry: npx eslint
+      # `npm ci` stops when the lockfile and package.json disagree, which also
+      # stops the devcontainer from installing what the hooks below run
+      - id: lockfile-in-sync
+        name: lockfile in sync
+        entry: npm ci --dry-run --ignore-scripts
+        language: system
+        files: ^package(-lock)?\.json$
+        pass_filenames: false
+
+      - id: oxlint
+        name: oxlint
+        entry: npx oxlint
         language: system
         types: [file]
-        files: \.(js|json)$
-        exclude: |
-          (?x)^(
-            src/js/depends/dragscroll\.js|
-            src/popup-view/.*|
-            src/_shared/js/models/View\.js
-          )$
+        files: \.(js|mjs|cjs|ts)$
+
+      - id: knip
+        name: knip
+        entry: npx knip
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      - id: no-suppressions
+        name: no suppressions
+        entry: npx tsx scripts/check-no-suppressions.ts
+        language: system
+        pass_filenames: false
+        always_run: true

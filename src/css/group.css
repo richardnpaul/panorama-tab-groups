@@ -105,7 +105,7 @@
 
   cursor: pointer;
 
-  background-image: url(/icons/group_close.svg);
+  background-image: url(../icons/group_close.svg);
   background-repeat: no-repeat;
   background-size: 12px;
   background-position: center;

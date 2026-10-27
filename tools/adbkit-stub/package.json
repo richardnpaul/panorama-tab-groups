@@ -1,0 +1,12 @@
+{
+  "name": "@devicefarmer/adbkit",
+  "version": "3.3.9",
+  "description": "Stub that satisfies web-ext's exact @devicefarmer/adbkit 3.3.9 dependency. The real package pulls in node-forge, which has no fixed release, and only web-ext's Android runner uses it.",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "license": "MPL-2.0"
+}

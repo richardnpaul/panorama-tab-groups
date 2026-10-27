@@ -1,4 +1,4 @@
-# Panorama Tab Groups — Copilot Instructions
+# Tab Groups Viewer — Copilot Instructions
 
 ## Core Principles
 
@@ -20,27 +20,31 @@
 - Vanilla JavaScript (ES2022 modules)
 - Firefox MV3 (primary), Chromium MV3 (experimental)
 - Playwright 1.59+ for E2E testing
-- ESLint (airbnb-base) + Prettier for linting/formatting
+- oxlint (type-aware, Airbnb-derived rules) + Prettier for linting/formatting
 - web-ext for building and packaging
 
 ## Build & Test Commands
 
-| Command             | Purpose                                |
-| ------------------- | -------------------------------------- |
-| `npm run lint`      | ESLint + Prettier check + web-ext lint |
-| `npm run format`    | Auto-fix Prettier + ESLint violations  |
-| `npm run build:xpi` | Build Firefox XPI via web-ext          |
-| `npm run test:e2e`  | Playwright E2E (Chromium + Firefox)    |
-| `npm test`          | Alias for lint (CI primary command)    |
+| Command                      | Purpose                                                                                |
+| ---------------------------- | -------------------------------------------------------------------------------------- |
+| `npm run lint`               | oxlint + knip + Prettier check + web-ext lint + typecheck + suppression guard          |
+| `npm run format`             | Auto-fix Prettier + oxlint violations                                                  |
+| `npm run build:xpi`          | Build Firefox XPI via web-ext (from `dist-firefox/`, `dist/` minus the service worker) |
+| `npm run test:e2e`           | Playwright E2E (Chromium + Firefox)                                                    |
+| `npm test`                   | Lint, then unit tests with the 100% coverage gate (CI primary command)                 |
+| `npm run test:mutation`      | Stryker, only what changed since the last run (the CI run for pull requests)           |
+| `npm run test:mutation:full` | Stryker on everything (the CI run for `main` and nightly)                              |
+| `npm run act:list`           | List the GitHub workflow jobs `act` can run locally (user-started only)                |
 
 ## Architecture
 
-- **`src/js/background.js`** — MV3 service worker entry; event-driven, ephemeral (state is lost on termination)
-- **`src/js/background/StateManager.js`** — Single source of truth for all extension state; wraps `browser.sessions` (per-window/tab, Firefox-only) and `browser.storage.local` (persistent, cross-browser)
-- **`src/js/background/constants.js`** — Reserved group IDs and application constants
-- **`src/js/view/`** — Freeform tab groups canvas view
-- **`src/popup-view/`** — Quick group switcher popup
-- **`src/js/_share/js/models/`** — Shared `View`, `Group`, `Tab` base models
+- **`src/js/background/main.ts`** — MV3 service worker entry (composition root only); event-driven, ephemeral (state is lost on termination). It builds `src/js/app/` services over the ports in `src/js/ports/` (`background/compose.ts`) and registers the listeners (`adapters/browser/events.ts`)
+- **`src/js/background/StateManager.ts`** — Single source of truth for all extension state; wraps `browser.sessions` (per-window/tab, Firefox-only) and `browser.storage.local` (persistent, cross-browser)
+- **The browser boundary** — outside `src/js/adapters/`, `src/js/polyfill.ts` and the composition roots listed in `.oxlintrc.json` (`background/{main,compose,StateManager,menu-manager}.ts` and the `start.ts` of each page), naming `browser`/`chrome` or reading `.storage`/`.sessions` is a lint error. Code reaches the browser through a port in `src/js/ports/`; the options page uses `OptionsStore` and `Shortcuts`
+- **`src/js/core/constants.ts`** — Reserved group IDs and application constants
+- **`src/js/view/`** — Freeform tab groups canvas view, built over the ports in `src/js/ports/` and `app/groups-store.ts`
+- **`src/popup-view/`** — Quick group switcher popup, built over the same ports and `app/popup-service.ts` (the pure logic is `core/popup.ts`)
+- **`src/js/migration-status/`** — Diagnostic page for the migration to native tab groups
 
 ## Code Conventions
 
@@ -48,7 +52,7 @@
 
 ```js
 import { StateManager } from './StateManager.js'; // ✅
-import { StateManager } from './StateManager'; // ❌ ESLint error
+import { StateManager } from './StateManager'; // ❌ lint error
 ```
 
 **Exports** — named exports only:
@@ -77,18 +81,20 @@ browser.sessions.getWindowValue(windowId, 'groups'); // ❌
 
 **Reserved Group IDs** — never use as real group IDs (see `src/js/background/constants.js`):
 
-- `PANORAMA_VIEW_GROUP_ID = -1`
+- `VIEWER_GROUP_ID = -1`
 - `UNGROUPED_GROUP_ID = -2`
 
 ## Linting & Formatting
 
-Config in `.eslintrc.js` (airbnb-base) and `.prettierrc` (single quotes, 80-char, trailing commas, `arrowParens: always`).
+Config in `.oxlintrc.json` (oxlint with its type-aware mode, rules carried over from airbnb-base and `typescript-eslint`) and `.prettierrc` (single quotes, 80-char, trailing commas, `arrowParens: always`).
 Run `npm run format` before committing. Run `npm run lint` to validate.
 
 ## Testing
 
-Playwright E2E only — no unit tests. Custom fixtures in `playwright.config.js` handle MV3 persistent context,
-Firefox RDP extension loading, and `moz-extension://` navigation quirks.
+Unit tests (Vitest, `tests/unit/`) run with a 100% coverage gate; Playwright E2E specs live in `tests/e2e/`.
+Custom fixtures in `tests/e2e/fixtures.ts` handle MV3 persistent context, Firefox RDP extension loading, and
+`moz-extension://` navigation quirks. Everything except `stryker.config.mjs` and
+`tools/adbkit-stub/index.js` is TypeScript, and the suppression guard fails on any other JavaScript file.
 See `#skill:playwright-webext` for details.
 
 ## Skills
