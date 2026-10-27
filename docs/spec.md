@@ -1,4 +1,4 @@
-# Full Specification for Tab Groups Tab Groups
+# Full Specification for Tab Groups
 
 This document serves as a detailed specification of the extension's current behavior based on the codebase.
 

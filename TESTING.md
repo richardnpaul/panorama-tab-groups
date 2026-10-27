@@ -1,4 +1,4 @@
-# Testing the Modernized Tab Groups Tab Groups Extension
+# Testing the Modernized Tab Groups Extension
 
 ## Prerequisites
 
@@ -85,7 +85,7 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 ### Options Page
 
 1. Go to `about:addons`
-2. Find "Tab Groups Tab Groups"
+2. Find "Tab Groups"
 3. Click "Options"
 4. Test all settings:
    - View mode (Freeform vs Popup)
