@@ -89,7 +89,8 @@ interface Options {
   tabGroups?: Record<number, number>;
   layoutMode?: LayoutMode | undefined;
   confirmed?: boolean;
-  pluralRule?: string;
+  // The language of the browser
+  locale?: string;
   // What the question before closing a group says, in all its forms
   question?: string;
 }
@@ -99,7 +100,7 @@ async function setUp({
   tabs: listed = [],
   tabGroups = {},
   confirmed = true,
-  pluralRule = '0',
+  locale = 'en',
   question,
   ...rest
 }: Options = {}) {
@@ -129,8 +130,8 @@ async function setUp({
   const logger = { debug: vi.fn(), warn: vi.fn(), error: vi.fn() };
   const getMessage = vi.fn(
     (name: string, substitutions?: readonly string[]) => {
-      if (name === 'pluralRule') {
-        return pluralRule;
+      if (name === '@@ui_locale') {
+        return locale;
       }
       if (name === 'closeGroupWarning' && question !== undefined) {
         return question;
@@ -367,8 +368,7 @@ describe('view/group-nodes.ts', () => {
 
     it('asks the form of the question that goes with the number of tabs', async () => {
       const env = await setUp({
-        pluralRule: '1',
-        question: 'Close the tab?|Close the tabs?',
+        question: 'one=Close the tab?|other=Close the tabs?',
       });
       const node = env.nodes.make(group(1));
       const content = part(node, '.content');
@@ -380,8 +380,11 @@ describe('view/group-nodes.ts', () => {
       expect(env.confirm).toHaveBeenCalledWith('Close the tabs?');
     });
 
-    it('asks an empty question where the message has no form for the number', async () => {
-      const env = await setUp({ pluralRule: '7', question: 'one|few' });
+    it('asks the form of the language of the browser for the number of tabs', async () => {
+      const env = await setUp({
+        locale: 'ru',
+        question: 'one=Закрыть?|few=Закрыть вкладки?|many=Закрыть вкладок?',
+      });
       const node = env.nodes.make(group(1));
       const content = part(node, '.content');
       [1, 2, 3, 4, 5].forEach(() => {
@@ -390,7 +393,7 @@ describe('view/group-nodes.ts', () => {
 
       await closeIt(env, node);
 
-      expect(env.confirm).toHaveBeenCalledWith('');
+      expect(env.confirm).toHaveBeenCalledWith('Закрыть вкладок?');
     });
 
     it('deletes it when the user agrees, and makes the first group of those left the active one', async () => {

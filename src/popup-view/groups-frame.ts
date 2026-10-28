@@ -129,12 +129,11 @@ export function createGroupsFrame({
         { class: 'list__link list__link--extend' },
         [
           newElement('span', {
-            content:
-              getPluralForm(
-                i18n,
-                tabCount,
-                i18n.getMessage('tabCount', [String(tabCount)]),
-              ) ?? '',
+            content: getPluralForm(
+              i18n,
+              tabCount,
+              i18n.getMessage('tabCount', [String(tabCount)]),
+            ),
           }),
         ],
       );
@@ -180,7 +179,7 @@ export function createGroupsFrame({
               tabCount,
               i18n.getMessage('closeGroupWarning', [String(tabCount)]),
             );
-            if (tabCount > 0 && !confirm(warning ?? '')) {
+            if (tabCount > 0 && !confirm(warning)) {
               return;
             }
             if (await service.removeGroup(group.id)) {

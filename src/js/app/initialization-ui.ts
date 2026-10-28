@@ -1,4 +1,5 @@
 import type { Extension } from '../ports/extension.js';
+import type { I18n } from '../ports/i18n.js';
 import type { Logger } from '../ports/logger.js';
 import type { Messaging } from '../ports/messaging.js';
 import type { Notifications } from '../ports/notifications.js';
@@ -11,6 +12,7 @@ export interface InitializationUiDeps {
   toolbar: Pick<Toolbar, 'setDefaultBadgeText' | 'setBadgeBackgroundColor'>;
   messaging: Messaging;
   extension: Pick<Extension, 'urlOf'>;
+  i18n: Pick<I18n, 'getMessage'>;
   logger: Pick<Logger, 'debug'>;
 }
 
@@ -26,6 +28,7 @@ export function createInitializationUi({
   toolbar,
   messaging,
   extension,
+  i18n,
   logger,
 }: InitializationUiDeps): InitializationUi {
   let showing = false;
@@ -49,8 +52,8 @@ export function createInitializationUi({
       showing = true;
 
       await notifications.show(NOTIFICATION_ID, {
-        title: 'Tab Groups Viewer',
-        message: 'Restoring tab groups...',
+        title: i18n.getMessage('extensionName'),
+        message: i18n.getMessage('initializationRestoring'),
         iconUrl: extension.urlOf('icons/logo/logo-128.png'),
       });
       await toolbar.setDefaultBadgeText('...');

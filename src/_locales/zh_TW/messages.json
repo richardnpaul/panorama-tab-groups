@@ -1,7 +1,4 @@
 {
-  "pluralRule": {
-    "message": "0"
-  },
   "newGroupButton": {
     "message": "新增組"
   },
@@ -78,7 +75,7 @@
     "message": "恢復"
   },
   "optionsBackupImportText": {
-    "message": "備份恢復會開啟新的視窗，不會開啟在現有的視窗。<br />可以恢復舊「 Tab Groups 」擴充套件的備份。"
+    "message": "備份恢復會開啟新的視窗，不會開啟在現有的視窗。\n可以恢復舊「 Tab Groups 」擴充套件的備份。"
   },
   "optionsBackupExport": {
     "message": "輸出"

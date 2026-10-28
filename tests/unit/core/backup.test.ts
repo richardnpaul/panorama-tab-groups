@@ -618,6 +618,8 @@ describe('core/backup.ts', () => {
   });
 
   describe('groupsToOpen', () => {
+    // How the language of the browser names a group that has no name
+    const named = (id: number): string => `Group ${String(id)}`;
     const base: BackupWindow = {
       groups: [],
       tabs: [],
@@ -637,12 +639,26 @@ describe('core/backup.ts', () => {
     it('is the groups the window has', () => {
       const groups = [{ id: 4, name: 'Four', rect }];
 
-      expect(groupsToOpen({ ...base, groups, tabs: [tab(9)] })).toBe(groups);
+      expect(groupsToOpen({ ...base, groups, tabs: [tab(9)] }, named)).toBe(
+        groups,
+      );
+    });
+
+    it('names each group as the caller names a new one', () => {
+      expect(
+        groupsToOpen(
+          { ...base, tabs: [tab(5)] },
+          (id) => `Gruppe ${String(id)}!`,
+        )[0]?.name,
+      ).toBe('Gruppe 5!');
     });
 
     it('is a group for each group the tabs were in, side by side', () => {
       expect(
-        groupsToOpen({ ...base, tabs: [tab(5), tab(7), tab(5), tab(0)] }),
+        groupsToOpen(
+          { ...base, tabs: [tab(5), tab(7), tab(5), tab(0)] },
+          named,
+        ),
       ).toEqual([
         { id: 5, name: 'Group 5', rect: { x: 0, y: 0, w: 1 / 3, h: 0.5 } },
         { id: 7, name: 'Group 7', rect: { x: 1 / 3, y: 0, w: 1 / 3, h: 0.5 } },
@@ -652,14 +668,14 @@ describe('core/backup.ts', () => {
 
     it('leaves out tabs that were in no group', () => {
       expect(
-        groupsToOpen({ ...base, tabs: [tab(undefined), tab(3)] }).map(
+        groupsToOpen({ ...base, tabs: [tab(undefined), tab(3)] }, named).map(
           (group) => group.id,
         ),
       ).toEqual([3]);
     });
 
     it('is nothing when there are no tabs either', () => {
-      expect(groupsToOpen(base)).toEqual([]);
+      expect(groupsToOpen(base, named)).toEqual([]);
     });
   });
 

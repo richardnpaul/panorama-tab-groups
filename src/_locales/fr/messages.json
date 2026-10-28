@@ -1,7 +1,4 @@
 {
-  "pluralRule": {
-    "message": "2"
-  },
   "newGroupButton": {
     "message": "Ajouter un nouveau groupe"
   },
@@ -24,7 +21,7 @@
     "message": "Fermer le groupe"
   },
   "closeGroupWarning": {
-    "message": "La fermeture de ce groupe fermera $1 onglet à l'intérieur de celui-ci. Êtes-vous sûr de vouloir faire ça ?|La fermeture de ce groupe fermera $1 onglets à l'intérieur de celui-ci. Êtes-vous sûr de vouloir faire ça ?"
+    "message": "one=La fermeture de ce groupe fermera $1 onglet à l'intérieur de celui-ci. Êtes-vous sûr de vouloir faire ça ?|other=La fermeture de ce groupe fermera $1 onglets à l'intérieur de celui-ci. Êtes-vous sûr de vouloir faire ça ?"
   },
   "closeTab": {
     "message": "Fermer l'onglet"
@@ -33,16 +30,13 @@
     "message": "Ouvrir un nouvel onglet"
   },
   "tabCount": {
-    "message": "$1 onglet|$1 onglets"
+    "message": "one=$1 onglet|other=$1 onglets"
   },
   "searchForTab_placeholder": {
     "message": "Rechercher un onglet..."
   },
   "searchForTab_noResults": {
     "message": "Aucun onglet trouvé"
-  },
-  "goBackToGroups": {
-    "message": "Retour aux groupes"
   },
   "optionKeyboardShortcuts": {
     "message": "Raccourcis clavier"
@@ -117,7 +111,7 @@
     "message": "Importation"
   },
   "optionsBackupImportText": {
-    "message": "Les sauvegardes importées s'ouvriront dans une nouvelle fenêtre, sans rien écraser.<br />Vous pouvez également importer des sauvegardes à partir de l'ancienne extension \"Tab Groups\"."
+    "message": "Les sauvegardes importées s'ouvriront dans une nouvelle fenêtre, sans rien écraser.\nVous pouvez également importer des sauvegardes à partir de l'ancienne extension \"Tab Groups\"."
   },
   "optionsBackupExport": {
     "message": "Exportation"
@@ -143,7 +137,7 @@
   "refreshGroups": {
     "message": "Actualiser les groupes"
   },
-  "sendTab": {
+  "sendTabToGroup": {
     "message": "Envoyer au groupe"
   }
 }

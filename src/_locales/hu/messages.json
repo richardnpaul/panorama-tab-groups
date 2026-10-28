@@ -1,7 +1,4 @@
 {
-  "pluralRule": {
-    "message": "1"
-  },
   "newGroupButton": {
     "message": "Új csoport hozzáadása"
   },
@@ -18,7 +15,7 @@
     "message": "Csoport bezárása"
   },
   "closeGroupWarning": {
-    "message": "A csoport bezárása a benne lévő $1 lapot is be fogja zárni. Biztos, hogy meg akarod ezt tenni?|A csoport bezárása a benne lévő $1 lapot is be fogja zárni. Biztos, hogy meg akarod ezt tenni?"
+    "message": "A csoport bezárása a benne lévő $1 lapot is be fogja zárni. Biztos, hogy meg akarod ezt tenni?"
   },
   "optionKeyboardShortcuts": {
     "message": "Billentyűparancsok"
@@ -78,7 +75,7 @@
     "message": "Importálás"
   },
   "optionsBackupImportText": {
-    "message": "Importált biztonsági mentések új ablakban nyílnak meg és nem írnak felül semmit.<br />A régi \"Tab Groups\" kiegészítőből is lehet biztonsági mentést importálni."
+    "message": "Importált biztonsági mentések új ablakban nyílnak meg és nem írnak felül semmit.\nA régi \"Tab Groups\" kiegészítőből is lehet biztonsági mentést importálni."
   },
   "optionsBackupExport": {
     "message": "Exportálás"

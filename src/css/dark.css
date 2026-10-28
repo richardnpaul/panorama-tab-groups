@@ -91,7 +91,7 @@ body.theme-dark {
 }
 
 .theme-dark .tab .favicon {
-  border-right-color: #38383d;
+  border-inline-end-color: #38383d;
   border-bottom-color: #38383d;
 
   background-color: #38383d;

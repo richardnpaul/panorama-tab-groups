@@ -12,6 +12,7 @@ import {
 import type { OpeningView } from '../../../src/js/core/tab-assignment.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
 import type { TabDetails } from '../../../src/js/ports/tabs.js';
+import { englishMessage } from '../../support/messages.js';
 
 const WINDOW = 1;
 const VIEW = 'moz-extension://id/view.html';
@@ -87,6 +88,7 @@ async function setUp(options: Options = {}) {
     groupState,
     nativeGroups,
     viewUrl: VIEW,
+    i18n: { getMessage: englishMessage },
     logger,
   });
   const toggleVisibleTabs = vi.fn().mockResolvedValue(undefined);

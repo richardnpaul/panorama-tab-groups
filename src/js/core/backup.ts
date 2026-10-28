@@ -257,8 +257,14 @@ export function parseBackup(text: string): Backup | undefined {
     : undefined;
 }
 
-/** The groups of a window to open: its own, or one for each group its tabs were in */
-export function groupsToOpen(window: BackupWindow): BackupGroup[] {
+/**
+ * The groups of a window to open: its own, or one for each group its tabs were in,
+ * named as a new group is
+ */
+export function groupsToOpen(
+  window: BackupWindow,
+  defaultName: (id: number) => string,
+): BackupGroup[] {
   if (window.groups.length > 0) {
     return window.groups;
   }
@@ -266,7 +272,7 @@ export function groupsToOpen(window: BackupWindow): BackupGroup[] {
   const ids = [...new Set(window.tabs.flatMap(({ groupId }) => groupId ?? []))];
   return ids.map((id, index) => ({
     id,
-    name: `Group ${String(id)}`,
+    name: defaultName(id),
     rect: { x: index / ids.length, y: 0, w: 1 / ids.length, h: 0.5 },
   }));
 }

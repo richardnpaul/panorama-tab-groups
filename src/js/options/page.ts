@@ -14,7 +14,6 @@ import {
 } from '../share/dom.js';
 import type { BackupHandlers } from './backup.js';
 import initNativeGroupsOption from './native-groups.js';
-import resetPTG from './reset.js';
 import {
   createShortcutHandlers,
   disableShortcutForm,
@@ -151,10 +150,6 @@ function attachEventHandlers(
   requireElementById(HTMLElement, 'saveBackupButton').addEventListener(
     'click',
     asListener(backup.saveBackup),
-  );
-  requireElementById(HTMLElement, 'resetAddon').addEventListener(
-    'click',
-    resetPTG,
   );
 }
 

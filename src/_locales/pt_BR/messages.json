@@ -1,7 +1,4 @@
 {
-  "pluralRule": {
-    "message": "2"
-  },
   "newGroupButton": {
     "message": "Adicionar novo grupo"
   },
@@ -18,7 +15,7 @@
     "message": "Fechar grupo"
   },
   "closeGroupWarning": {
-    "message": "Fechar este grupo também fechará a aba $1. Tem certeza que deseja fechá-lo?|Fechar este grupo também fechará as abas $1. Tem certeza que deseja fechá-lo?"
+    "message": "one=Fechar este grupo também fechará a aba $1. Tem certeza que deseja fechá-lo?|other=Fechar este grupo também fechará as abas $1. Tem certeza que deseja fechá-lo?"
   },
   "optionKeyboardShortcuts": {
     "message": "Atalhos de teclado"
@@ -84,7 +81,7 @@
     "message": "Importar"
   },
   "optionsBackupImportText": {
-    "message": "Cópias de segurança importadas abrirão em novas janelas e não substituirão nada.<br />Você também pode importar cópias de segurança da antiga extensão \"Grupos de Abas\"."
+    "message": "Cópias de segurança importadas abrirão em novas janelas e não substituirão nada.\nVocê também pode importar cópias de segurança da antiga extensão \"Grupos de Abas\"."
   },
   "optionsBackupExport": {
     "message": "Exportar"
@@ -110,7 +107,7 @@
   "refreshGroups": {
     "message": "Atualizar grupos"
   },
-  "sendTab": {
+  "sendTabToGroup": {
     "message": "Enviar para grupo"
   }
 }

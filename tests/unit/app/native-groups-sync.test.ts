@@ -8,6 +8,7 @@ import { createNativeGroupAssignment } from '../../../src/js/app/native-group-as
 import { createNativeGroupsSync } from '../../../src/js/app/native-groups-sync.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
 import type { TabDetails } from '../../../src/js/ports/tabs.js';
+import { englishMessage } from '../../support/messages.js';
 
 const VIEW = 'moz-extension://id/view.html';
 
@@ -61,6 +62,7 @@ function setUp({
     groupState,
     nativeGroups,
     viewUrl: VIEW,
+    i18n: { getMessage: englishMessage },
     logger,
   });
   return {

@@ -1,5 +1,5 @@
 import type { I18n } from '../ports/i18n.js';
-import { requireElement } from '../share/dom.js';
+import { requireElement, requireElementById } from '../share/dom.js';
 
 // [selector of the one element to translate, message name]
 const TEXTS: readonly (readonly [string, string])[] = [
@@ -14,6 +14,7 @@ const TEXTS: readonly (readonly [string, string])[] = [
   ['label[for="viewFreeform"] span', 'optionsViewFreeform'],
   ['label[for="viewPopup"] span', 'optionsViewPopup'],
   ['#optionsTheme h2', 'optionsTheme'],
+  ['label[for="themeAuto"] span', 'optionsThemeAuto'],
   ['label[for="themeLight"] span', 'optionsThemeLight'],
   ['label[for="themeDark"] span', 'optionsThemeDark'],
   ['#optionsToolbar h3', 'optionsToolbar'],
@@ -22,6 +23,8 @@ const TEXTS: readonly (readonly [string, string])[] = [
   ['label[for="toolbarPositionRight"] span', 'optionsToolbarPositionRight'],
   ['label[for="toolbarPositionBottom"] span', 'optionsToolbarPositionBottom'],
   ['label[for="toolbarPositionLeft"] span', 'optionsToolbarPositionLeft'],
+  ['#optionsNativeGroups h2', 'optionsNativeGroups'],
+  ['#optionsNativeGroups label span', 'optionsNativeGroupsUse'],
   ['#optionsBackup h2', 'optionsBackup'],
   ['#optionsBackup h3:nth-of-type(1)', 'optionsBackupImport'],
   ['#optionsBackup p:nth-of-type(1)', 'optionsBackupImportText'],
@@ -53,6 +56,26 @@ const BUTTON_TEXTS: readonly (readonly [string, string])[] = [
   ],
 ];
 
+// Where in a message the link goes, for the languages that put it elsewhere in the sentence
+const LINK_PLACE = '{link}';
+
+/** A sentence with a link in it, made of text and an element and not of markup */
+function setSentenceWithLink(
+  sentence: Element,
+  message: string,
+  link: HTMLAnchorElement,
+): void {
+  const place = message.indexOf(LINK_PLACE);
+  // A message without the place has the link after it
+  const before = place < 0 ? message : message.slice(0, place);
+  const after = place < 0 ? '' : message.slice(place + LINK_PLACE.length);
+  sentence.replaceChildren(
+    document.createTextNode(before),
+    link,
+    document.createTextNode(after),
+  );
+}
+
 export default function addTranslations(i18n: I18n): void {
   TEXTS.forEach(([selector, messageName]) => {
     requireElement(Element, selector).textContent =
@@ -62,6 +85,19 @@ export default function addTranslations(i18n: I18n): void {
   const link = requireElement(HTMLAnchorElement, '#optionKeyboardShortcuts a');
   link.href = i18n.getMessage('optionKeyboardShortcutsHelpLink');
   link.textContent = i18n.getMessage('optionKeyboardShortcutsHelpLinkText');
+
+  const manageLink = requireElementById(
+    HTMLAnchorElement,
+    'shortcutsManageLink',
+  );
+  manageLink.textContent = i18n.getMessage(
+    'optionKeyboardShortcutsManageLinkText',
+  );
+  setSentenceWithLink(
+    requireElementById(HTMLElement, 'shortcutsManage'),
+    i18n.getMessage('optionKeyboardShortcutsManage'),
+    manageLink,
+  );
 
   BUTTON_TEXTS.forEach(([selector, messageName]) => {
     const text = i18n.getMessage(messageName);

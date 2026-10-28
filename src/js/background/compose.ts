@@ -76,12 +76,14 @@ export function composeBackground(): Background {
   let openingBackup = false;
   const isOpeningBackup = () => openingBackup;
 
+  const i18n = createBrowserI18n(() => browser);
   const initialization = createInitialization({ clock, scheduler, logger });
   const ui = createInitializationUi({
     notifications: createBrowserNotifications(() => browser),
     toolbar,
     messaging: createBrowserMessaging(() => browser),
     extension,
+    i18n,
     logger,
   });
   const viewOpening = createViewOpening({ clock, scheduler, logger });
@@ -104,13 +106,14 @@ export function composeBackground(): Background {
     groupState,
     nativeGroups,
     viewUrl,
+    i18n,
     logger,
   });
 
   const windowGroups = createWindowGroups({
     groupState,
     windows,
-    i18n: createBrowserI18n(() => browser),
+    i18n,
     clock,
     toolbar: toolbarService,
     waitForInitialization: initialization.waitForInitialization,

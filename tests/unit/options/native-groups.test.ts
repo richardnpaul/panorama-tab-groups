@@ -6,6 +6,7 @@ import {
 } from '../../../src/js/core/options.js';
 import initNativeGroupsOption from '../../../src/js/options/native-groups.js';
 import type { Messaging } from '../../../src/js/ports/messaging.js';
+import { markedMessage } from '../../support/messages.js';
 import type { OptionsStore } from '../../../src/js/ports/options.js';
 import type { BrowserMode } from '../../../src/js/share/capabilities.js';
 
@@ -18,6 +19,7 @@ const fn = () => undefined;
 /** Start the option on a browser that can do what the mode needs */
 const initIn = (mode: BrowserMode) =>
   initNativeGroupsOption({
+    i18n: { getMessage: markedMessage },
     options: { load: loadOptions, save: set },
     messaging: { send: sendMessage },
     capabilities: {
@@ -80,32 +82,28 @@ describe('options/native-groups.ts', () => {
       disabled: false,
       className: 'info-text',
       opacity: '',
-      message:
-        'Use native browser tab groups for visual organization and collapsing.',
+      message: markedMessage('optionsNativeGroupsHybrid'),
     },
     {
       mode: 'collapse-only' as const,
       disabled: false,
       className: 'warning-text',
       opacity: '0.5',
-      message:
-        'Native tab groups are not supported in this browser version (requires Tab Hiding API).',
+      message: markedMessage('optionsNativeGroupsCollapseOnly'),
     },
     {
       mode: 'legacy' as const,
       disabled: true,
       className: 'warning-text',
       opacity: '0.5',
-      message:
-        'Native tab groups are not supported in this browser version. Please update to Firefox 139+ or use Chrome 89+.',
+      message: markedMessage('optionsNativeGroupsLegacy'),
     },
     {
       mode: 'unsupported' as const,
       disabled: true,
       className: 'warning-text',
       opacity: '0.5',
-      message:
-        'Your browser does not support the required APIs for tab groups.',
+      message: markedMessage('optionsNativeGroupsUnsupported'),
     },
   ])('in $mode mode', ({ mode, disabled, className, opacity, message }) => {
     it('shows the explanation for the mode', async () => {
@@ -305,7 +303,7 @@ describe('options/native-groups.ts', () => {
       toggle(true);
 
       expect(html('nativeGroupsFeedback')?.textContent).toBe(
-        'Native groups enabled. Migrating groups...',
+        markedMessage('optionsNativeGroupsEnabled'),
       );
       expect(html('nativeGroupsFeedback')?.style.display).toBe('block');
     });
@@ -316,7 +314,7 @@ describe('options/native-groups.ts', () => {
       toggle(false);
 
       expect(html('nativeGroupsFeedback')?.textContent).toBe(
-        'Native groups disabled. Cleaning up...',
+        markedMessage('optionsNativeGroupsDisabled'),
       );
     });
 

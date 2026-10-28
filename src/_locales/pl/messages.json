@@ -1,7 +1,4 @@
 {
-  "pluralRule": {
-    "message": "9"
-  },
   "newGroupButton": {
     "message": "Utwórz nową grupę"
   },
@@ -78,7 +75,7 @@
     "message": "Import"
   },
   "optionsBackupImportText": {
-    "message": "Zaimportowane grupy kart zostaną otwarte w nowych oknach i niczego nie nadpiszą.<br />Możesz również zaimportować dane ze starego rozszerzenia \"Grupy Kart\"."
+    "message": "Zaimportowane grupy kart zostaną otwarte w nowych oknach i niczego nie nadpiszą.\nMożesz również zaimportować dane ze starego rozszerzenia \"Grupy Kart\"."
   },
   "optionsBackupExport": {
     "message": "Eksport"

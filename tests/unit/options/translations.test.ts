@@ -26,6 +26,7 @@ const expectedTexts: readonly (readonly [string, string])[] = [
   ['label[for="viewFreeform"] span', 'optionsViewFreeform'],
   ['label[for="viewPopup"] span', 'optionsViewPopup'],
   ['#optionsTheme h2', 'optionsTheme'],
+  ['label[for="themeAuto"] span', 'optionsThemeAuto'],
   ['label[for="themeLight"] span', 'optionsThemeLight'],
   ['label[for="themeDark"] span', 'optionsThemeDark'],
   ['#optionsToolbar h3', 'optionsToolbar'],
@@ -34,6 +35,8 @@ const expectedTexts: readonly (readonly [string, string])[] = [
   ['label[for="toolbarPositionRight"] span', 'optionsToolbarPositionRight'],
   ['label[for="toolbarPositionBottom"] span', 'optionsToolbarPositionBottom'],
   ['label[for="toolbarPositionLeft"] span', 'optionsToolbarPositionLeft'],
+  ['#optionsNativeGroups h2', 'optionsNativeGroups'],
+  ['#optionsNativeGroups label span', 'optionsNativeGroupsUse'],
   ['#optionsBackup h2', 'optionsBackup'],
   ['#optionsBackup h3:nth-of-type(1)', 'optionsBackupImport'],
   ['#optionsBackup p:nth-of-type(1)', 'optionsBackupImportText'],
@@ -54,7 +57,7 @@ const expectedButtonTexts: readonly (readonly [string, string])[] = [
 
 describe('options/translations.ts', () => {
   beforeEach(() => {
-    getMessage.mockClear();
+    getMessage.mockReset().mockImplementation((name) => `msg:${name}`);
     document.body.innerHTML = pageBody;
   });
 
@@ -99,6 +102,81 @@ describe('options/translations.ts', () => {
     expect(link?.textContent).toBe('msg:optionKeyboardShortcutsHelpLinkText');
   });
 
+  describe('the sentence with a link in it', () => {
+    const sentence = () => document.getElementById('shortcutsManage');
+    const link = () =>
+      document.querySelector<HTMLAnchorElement>('#shortcutsManageLink');
+
+    const say = (manage: string) => {
+      getMessage.mockImplementation((name) =>
+        name === 'optionKeyboardShortcutsManage' ? manage : `msg:${name}`,
+      );
+    };
+
+    it('puts the link where the message has {link}', () => {
+      say('Look at {link} for more.');
+
+      addTranslations({ getMessage });
+
+      expect(sentence()?.textContent).toBe(
+        'Look at msg:optionKeyboardShortcutsManageLinkText for more.',
+      );
+      expect(sentence()?.childNodes).toHaveLength(3);
+      expect(link()?.textContent).toBe(
+        'msg:optionKeyboardShortcutsManageLinkText',
+      );
+    });
+
+    it('puts the link first where the language puts it first', () => {
+      say('{link} shows how.');
+
+      addTranslations({ getMessage });
+
+      expect(sentence()?.firstChild?.textContent).toBe('');
+      expect(sentence()?.childNodes[1]).toBe(link());
+      expect(sentence()?.lastChild?.textContent).toBe(' shows how.');
+    });
+
+    it('keeps the address of the link', () => {
+      say('See {link}.');
+      const address = link()?.getAttribute('href');
+
+      addTranslations({ getMessage });
+
+      expect(address).toContain('developer.mozilla.org');
+      expect(link()?.getAttribute('href')).toBe(address);
+    });
+
+    it('puts the link after the text where the message has no place for it', () => {
+      say('A message without a place.');
+
+      addTranslations({ getMessage });
+
+      expect(sentence()?.childNodes[0]?.textContent).toBe(
+        'A message without a place.',
+      );
+      expect(sentence()?.childNodes[1]).toBe(link());
+      expect(sentence()?.childNodes[2]?.textContent).toBe('');
+    });
+
+    it('does not read markup in the message as markup', () => {
+      say('<img src=x onerror=alert(1)> {link}');
+
+      addTranslations({ getMessage });
+
+      expect(sentence()?.querySelector('img')).toBeNull();
+      expect(sentence()?.textContent).toContain('<img src=x');
+    });
+
+    it('fails naming the link when the page lacks it', () => {
+      link()?.remove();
+
+      expect(() => {
+        addTranslations({ getMessage });
+      }).toThrow('Element not found: #shortcutsManageLink');
+    });
+  });
+
   it('asks for exactly the messages it displays', () => {
     addTranslations({ getMessage });
 
@@ -108,6 +186,8 @@ describe('options/translations.ts', () => {
       ...expectedButtonTexts.map(([, name]) => name),
       'optionKeyboardShortcutsHelpLink',
       'optionKeyboardShortcutsHelpLinkText',
+      'optionKeyboardShortcutsManage',
+      'optionKeyboardShortcutsManageLinkText',
     ].sort();
     expect(asked).toEqual(expected);
   });

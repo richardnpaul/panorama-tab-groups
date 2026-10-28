@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createBackupControls } from '../../../src/js/app/backup-controls.js';
+import { markedMessage } from '../../support/messages.js';
 
 const validBackup = JSON.stringify({
   file: { type: 'tgvView', version: 1 },
@@ -13,7 +14,11 @@ function setUp() {
   };
   const notify = vi.fn();
   return {
-    controls: createBackupControls({ service, notify }),
+    controls: createBackupControls({
+      service,
+      notify,
+      i18n: { getMessage: markedMessage },
+    }),
     service,
     notify,
   };
@@ -53,7 +58,9 @@ describe('app/backup-controls.ts', () => {
         await controls.openFile(chosen);
 
         expect(notify).toHaveBeenCalledTimes(1);
-        expect(notify).toHaveBeenCalledWith('Invalid file');
+        expect(notify).toHaveBeenCalledWith(
+          markedMessage('optionsBackupInvalidFile'),
+        );
         expect(service.open).not.toHaveBeenCalled();
       },
     );

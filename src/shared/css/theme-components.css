@@ -42,7 +42,7 @@
   width: 16px;
   position: absolute;
   top: 0;
-  left: 8px;
+  inset-inline-start: 8px;
   bottom: 0;
   z-index: 0;
   -webkit-mask-position: center center;
@@ -58,7 +58,7 @@
   width: 10px;
   position: absolute;
   top: 1px;
-  right: 8px;
+  inset-inline-end: 8px;
   bottom: 1px;
   z-index: 1;
   background: linear-gradient(
@@ -75,7 +75,7 @@
 }
 
 .form-field--search .form-field__input {
-  padding-left: 32px;
+  padding-inline-start: 32px;
 }
 
 /*
@@ -139,4 +139,10 @@
 .button-ghost--back::before {
   -webkit-mask-image: url(../icons/Arrowhead_Left.svg);
   mask-image: url(../icons/Arrowhead_Left.svg);
+}
+
+/* The arrows and the fade of the search field point the other way where text runs from the right */
+html[dir='rtl'] .button-ghost--back::before,
+html[dir='rtl'] .form-field::after {
+  transform: scaleX(-1);
 }

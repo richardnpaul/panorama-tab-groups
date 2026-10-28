@@ -65,8 +65,8 @@ body {
 
 #pinnedTabs {
   display: flex;
-  border-left: 1px solid #ccc;
-  margin-left: 4px;
+  border-inline-start: 1px solid #ccc;
+  margin-inline-start: 4px;
   padding: 0 4px;
 }
 
@@ -139,8 +139,8 @@ body {
 .toolbar-left #pinnedTabs {
   flex-direction: column;
   border-top: 1px solid #ccc;
-  border-left: none;
+  border-inline-start: none;
   margin-top: 4px;
-  margin-left: 0;
+  margin-inline-start: 0;
   padding: 4px 0;
 }

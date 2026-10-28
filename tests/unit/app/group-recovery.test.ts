@@ -15,6 +15,7 @@ import { createInitializationUi } from '../../../src/js/app/initialization-ui.js
 import { withUngroupedGroup } from '../../../src/js/app/with-ungrouped-group.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
 import type { TabDetails } from '../../../src/js/ports/tabs.js';
+import { englishMessage } from '../../support/messages.js';
 
 const group = (id: number): Group => ({
   id,
@@ -67,6 +68,7 @@ function setUp(): Env {
     toolbar: createMemoryToolbar(),
     messaging,
     extension: createMemoryExtension(),
+    i18n: { getMessage: englishMessage },
     logger,
   });
   return {

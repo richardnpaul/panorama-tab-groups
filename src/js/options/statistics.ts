@@ -27,7 +27,7 @@ export function createStatistics({
     const numActiveTabs = tabs.filter((tab) => !tab.discarded).length;
 
     requireElementById(HTMLElement, 'thumbnailCacheSize').replaceChildren(
-      document.createTextNode(formatByteSize(totalSize)),
+      document.createTextNode(formatByteSize(i18n, totalSize)),
     );
 
     requireElementById(HTMLElement, 'numberOfTabs').replaceChildren(

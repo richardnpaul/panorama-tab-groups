@@ -7,8 +7,10 @@ import { createStatistics } from '../../../src/js/options/statistics.js';
 import type { ViewState } from '../../../src/js/ports/view-state.js';
 import type { ViewTab } from '../../../src/js/ports/view-tabs.js';
 import { createFakeSessions } from '../../support/fake-sessions.js';
+import { englishMessage } from '../../support/messages.js';
 
-const getMessage = vi.fn<(messageName: string) => string>();
+const getMessage =
+  vi.fn<(messageName: string, substitutions?: readonly string[]) => string>();
 
 const text = (id: string) => document.getElementById(id)?.textContent;
 
@@ -46,7 +48,13 @@ function statisticsOf(
 
 describe('options/statistics.ts', () => {
   beforeEach(() => {
-    getMessage.mockReset().mockReturnValue('active');
+    getMessage
+      .mockReset()
+      .mockImplementation((name, substitutions) =>
+        name === 'optionsStatisticsNumberOfTabsActive'
+          ? 'active'
+          : englishMessage(name, substitutions),
+      );
     document.body.innerHTML = `
       <span id="thumbnailCacheSize">old size</span>
       <span id="numberOfTabs">old tabs</span>

@@ -17,8 +17,8 @@ import {
 import { requireElement } from '../../../src/js/share/dom.js';
 
 const MESSAGES: Record<string, string> = {
-  tabCount: '$1 tab|$1 tabs',
-  closeGroupWarning: 'Close $1 tab?|Close $1 tabs?',
+  tabCount: 'one=$1 tab|other=$1 tabs',
+  closeGroupWarning: 'one=Close $1 tab?|other=Close $1 tabs?',
   closeGroup: 'Close group',
   closeTab: 'Close tab',
   searchForTab_placeholder: 'Search for a tab...',
@@ -27,14 +27,26 @@ const MESSAGES: Record<string, string> = {
   newGroupButton: 'New group',
 };
 
-// The plural rule of the language the messages are in; English unless a test says otherwise
-let pluralRule = '1';
+// The language of the browser and the messages in it; English unless a test says otherwise
+const RUSSIAN: Record<string, string> = {
+  tabCount: 'one=$1 вкладка|few=$1 вкладки|many=$1 вкладок',
+  closeGroupWarning:
+    'one=Закрыть $1?|few=Закрыть $1 вкладки?|many=Закрыть $1 вкладок?',
+};
+let locale = 'en';
+let messages = MESSAGES;
 
 const i18n = {
   getMessage: (name: string, substitutions: readonly string[] = []) =>
-    name === 'pluralRule'
-      ? pluralRule
-      : (MESSAGES[name] ?? name).replaceAll('$1', substitutions[0] ?? ''),
+    name === '@@ui_locale'
+      ? locale
+      : (messages[name] ?? name).replaceAll('$1', substitutions[0] ?? ''),
+};
+
+/** The browser is set to Russian, which has a form of its own for 2 to 4 and one for 5 and more */
+const inRussian = (): void => {
+  locale = 'ru';
+  messages = { ...MESSAGES, ...RUSSIAN };
 };
 
 const tab = (id: number, title = `Title ${String(id)}`): ViewTab => ({
@@ -68,7 +80,8 @@ function setUp(
   },
 ) {
   setUpPopupPage();
-  pluralRule = '1';
+  locale = 'en';
+  messages = MESSAGES;
   const scheduler = createMemoryScheduler();
   const frame = createFrame({
     node: elementById('main-frame'),
@@ -288,17 +301,17 @@ describe('popup-view/groups-frame.ts', () => {
       expect(items()).toHaveLength(0);
     });
 
-    it('shows a count of tabs that has no form for the number as nothing', async () => {
+    it('shows the count of tabs in the form of the language, for the number', async () => {
       const many = [1, 2, 3, 4, 5].map((id) => tab(id));
       const env = setUp({ groups: [group(1, 'Many', many)], lastUsed: null });
-      pluralRule = '7';
+      inRussian();
 
       await env.render();
 
       expect(
         query(items()[0] ?? document.body, '.list__link--extend span')
           .textContent,
-      ).toBe('');
+      ).toBe('5 вкладок');
     });
 
     it('has the search field, the settings button and the button for a new group', async () => {
@@ -474,16 +487,16 @@ describe('popup-view/groups-frame.ts', () => {
       expect(env.confirm).toHaveBeenCalledWith('Close 1 tab?');
     });
 
-    it('asks with nothing when the message has no form for the number', async () => {
+    it('asks in the form of the language, for the number of tabs', async () => {
       const many = [1, 2, 3, 4, 5].map((id) => tab(id));
       const env = setUp({ groups: [group(1, 'Many', many)], lastUsed: null });
-      pluralRule = '7';
+      inRussian();
       await env.render();
 
       click(closeButtonOf(0));
       await flush();
 
-      expect(env.confirm).toHaveBeenCalledWith('');
+      expect(env.confirm).toHaveBeenCalledWith('Закрыть 5 вкладок?');
     });
 
     it('leaves the group when the user does not want it removed', async () => {

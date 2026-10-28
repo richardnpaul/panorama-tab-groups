@@ -38,9 +38,9 @@ body > * {
   height: 32px;
   position: fixed;
   top: 50%;
-  left: 50%;
+  inset-inline-start: 50%;
   margin-top: -16px;
-  margin-left: -16px;
+  margin-inline-start: -16px;
   animation: rotate360deg 1.5s linear infinite;
   background: var(--button-ghost-icon-color);
   -webkit-mask-image: url(../../shared/icons/Preferences.svg);
@@ -70,6 +70,11 @@ body > * {
 
 .frame-shell--aside-active {
   transform: translateX(-100vw);
+}
+
+/* The frames are laid out from the right, so the second one is reached by moving the other way */
+html[dir='rtl'] .frame-shell--aside-active {
+  transform: translateX(100vw);
 }
 
 .frame {
@@ -115,7 +120,7 @@ footer {
 footer .button-ghost {
   width: 100%;
   height: 40px;
-  padding-left: 40px;
+  padding-inline-start: 40px;
   border-radius: 0;
   border-top: 1px solid var(--separator-color);
   background: var(--footer-button-background);
@@ -192,7 +197,7 @@ footer .button-ghost::before {
 
 .list__close-wrapper .list__link {
   /* group name */
-  padding-left: 5px;
+  padding-inline-start: 5px;
 }
 
 .list__link span {
@@ -201,7 +206,7 @@ footer .button-ghost::before {
 }
 
 .list__item--drag .list__link {
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 
 .list__drag,
@@ -229,8 +234,8 @@ footer .button-ghost::before {
 }
 
 .list__drag {
-  padding-right: 5px;
-  padding-left: 13px;
+  padding-inline-end: 5px;
+  padding-inline-start: 13px;
   cursor: move;
   transition: opacity 0.1s linear;
   opacity: 0;
@@ -271,7 +276,7 @@ footer .button-ghost::before {
 .list__link--extend {
   flex: 0 0 30%;
   justify-content: space-between;
-  border-left: 1px solid var(--separator-color);
+  border-inline-start: 1px solid var(--separator-color);
 }
 
 .list__link--extend::after {
@@ -286,12 +291,17 @@ footer .button-ghost::before {
   mask-size: 16px;
 }
 
+/* An arrow that points on, points the other way where text runs from the right */
+html[dir='rtl'] .list__link--extend::after {
+  transform: scaleX(-1);
+}
+
 .list__link--extend:hover {
   background-color: var(--list-item-hover-background);
 }
 
 .tab__icon {
-  margin-right: 10px;
+  margin-inline-end: 10px;
 }
 
 .group-name {
@@ -318,7 +328,7 @@ footer .button-ghost::before {
   background: none;
   position: absolute;
   top: 0;
-  right: 0;
+  inset-inline-end: 0;
 }
 
 .keyboard-navigation .group-edit,

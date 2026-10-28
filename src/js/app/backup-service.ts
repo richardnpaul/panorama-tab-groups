@@ -8,6 +8,7 @@ import {
 import type { Clock } from '../ports/clock.js';
 import type { Downloads } from '../ports/downloads.js';
 import type { Group, GroupState } from '../ports/group-state.js';
+import type { I18n } from '../ports/i18n.js';
 import type { Logger } from '../ports/logger.js';
 import type { Messaging } from '../ports/messaging.js';
 import type { OptionsStore } from '../ports/options.js';
@@ -30,6 +31,8 @@ export interface BackupDeps {
   >;
   // To tell the background that the tabs about to be made are not new tabs
   messaging: Messaging;
+  // For the name of a group that a backup has none for
+  i18n: Pick<I18n, 'getMessage'>;
   options: Pick<OptionsStore, 'load'>;
   downloads: Downloads;
   clock: Clock;
@@ -50,6 +53,7 @@ export function createBackupService({
   tabs,
   groupState,
   messaging,
+  i18n,
   options,
   downloads,
   clock,
@@ -130,7 +134,10 @@ export function createBackupService({
   }
 
   async function openWindow(window: BackupWindow): Promise<void> {
-    const groups: Group[] = groupsToOpen(window).map((group) => ({
+    const groups: Group[] = groupsToOpen(
+      window,
+      (id) => `${i18n.getMessage('defaultGroupName')}${String(id)}`,
+    ).map((group) => ({
       id: group.id,
       name: group.name,
       containerId: 'firefox-default',

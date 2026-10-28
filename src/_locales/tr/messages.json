@@ -1,7 +1,4 @@
 {
-  "pluralRule": {
-    "message": "0"
-  },
   "newGroupButton": {
     "message": "Yeni alan ekle"
   },
@@ -18,7 +15,7 @@
     "message": "Alanı kapat"
   },
   "closeGroupWarning": {
-    "message": "Bu alanı kapatırsanız içindeki $1 sekme de kapanacak. Bunu yapmak istediğinize emin misiniz?|Bu alanı kapatırsanız içindeki $1 sekme de kapanacak. Bunu yapmak istediğinize emin misiniz?"
+    "message": "Bu alanı kapatırsanız içindeki $1 sekme de kapanacak. Bunu yapmak istediğinize emin misiniz?"
   },
   "optionKeyboardShortcuts": {
     "message": "Klavye Kısayolları"
@@ -78,7 +75,7 @@
     "message": "İçe Aktar"
   },
   "optionsBackupImportText": {
-    "message": "İçe aktarılan yedekler yeni pencerede açılır ve hiçbir sekmenin üstüne yazılmaz.<br />Eski \"Tab Groups\" eklentisinin yedeklerini de içer aktarabilirsiniz."
+    "message": "İçe aktarılan yedekler yeni pencerede açılır ve hiçbir sekmenin üstüne yazılmaz.\nEski \"Tab Groups\" eklentisinin yedeklerini de içer aktarabilirsiniz."
   },
   "optionsBackupExport": {
     "message": "Dışa Aktar"

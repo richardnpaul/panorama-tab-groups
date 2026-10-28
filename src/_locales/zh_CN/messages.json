@@ -1,7 +1,4 @@
 {
-  "pluralRule": {
-    "message": "0"
-  },
   "newGroupButton": {
     "message": "新增组"
   },
@@ -78,7 +75,7 @@
     "message": "恢复"
   },
   "optionsBackupImportText": {
-    "message": "备份恢复会开启新的视窗，不会开启在现有的视窗。<br />可以恢复旧 “Tab Groups” 扩展的备份。"
+    "message": "备份恢复会开启新的视窗，不会开启在现有的视窗。\n可以恢复旧 “Tab Groups” 扩展的备份。"
   },
   "optionsBackupExport": {
     "message": "输出"

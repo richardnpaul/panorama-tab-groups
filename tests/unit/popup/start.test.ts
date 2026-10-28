@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createFakeSessions } from '../../support/fake-sessions.js';
+import { markedMessage, textsOutsideMessages } from '../../support/messages.js';
 import { setUpPopupPage } from '../../support/popup-page.js';
 
 const WINDOW = 1;
@@ -25,10 +26,15 @@ const rawTab = (id: number, overrides: Record<string, unknown> = {}) => ({
 });
 
 async function load(
-  options: { stored?: Record<string, unknown>; page?: boolean } = {},
+  options: {
+    stored?: Record<string, unknown>;
+    page?: boolean;
+    // Names of groups and titles of tabs with no words in them, which are the user's and not the page's
+    plain?: boolean;
+  } = {},
 ) {
   vi.resetModules();
-  const { stored = {}, page = true } = options;
+  const { stored = {}, page = true, plain = false } = options;
   if (page) {
     setUpPopupPage();
   } else {
@@ -37,11 +43,16 @@ async function load(
 
   const sessions = createFakeSessions();
   await sessions.api.sessions.setWindowValue(WINDOW, 'groups', [
-    group(0, 'First'),
-    group(1, 'Second'),
+    group(0, plain ? '#0' : 'First'),
+    group(1, plain ? '#1' : 'Second'),
   ]);
   await sessions.api.sessions.setWindowValue(WINDOW, 'groupIndex', 2);
-  const tabs = [rawTab(1), rawTab(2), rawTab(3), rawTab(4, { pinned: true })];
+  const tabs = [
+    rawTab(1),
+    rawTab(2),
+    rawTab(3),
+    rawTab(4, { pinned: true }),
+  ].map((tab) => (plain ? { ...tab, title: `#${String(tab.id)}` } : tab));
   await Promise.all(
     [
       [1, 0],
@@ -58,7 +69,7 @@ async function load(
       sendMessage: vi.fn().mockResolvedValue({ success: true }),
       openOptionsPage: vi.fn().mockResolvedValue(undefined),
     },
-    i18n: { getMessage: vi.fn((name: string) => `[${name}]`) },
+    i18n: { getMessage: vi.fn((name: string) => markedMessage(name)) },
     storage: {
       sync: {
         get: vi.fn((defaults: object) =>
@@ -124,6 +135,8 @@ const groupNames = () =>
 
 describe('popup-view/start.ts', () => {
   afterEach(() => {
+    document.documentElement.removeAttribute('dir');
+    document.documentElement.removeAttribute('lang');
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.body.innerHTML = '';
@@ -143,6 +156,28 @@ describe('popup-view/start.ts', () => {
     );
   });
 
+  it('sets the direction and the language of the page from the browser', async () => {
+    const env = await load();
+    env.browser.i18n.getMessage.mockImplementation(
+      (name: string) =>
+        ({ '@@bidi_dir': 'rtl', '@@ui_locale': 'ar' })[name] ??
+        markedMessage(name),
+    );
+
+    await env.startPopup();
+
+    expect(document.documentElement.dir).toBe('rtl');
+    expect(document.documentElement.lang).toBe('ar');
+  });
+
+  it('shows no text that is not from a message', async () => {
+    const env = await load({ plain: true });
+
+    await env.startPopup();
+
+    expect(textsOutsideMessages(document.body)).toEqual([]);
+  });
+
   it('shows how many tabs each group has, without the pinned ones', async () => {
     const env = await load();
 
@@ -152,7 +187,7 @@ describe('popup-view/start.ts', () => {
       Array.from(
         document.querySelectorAll('#main-frame .list__link--extend span'),
       ).map((count) => count.textContent),
-    ).toEqual(['[tabCount]', '[tabCount]']);
+    ).toEqual([markedMessage('tabCount'), markedMessage('tabCount')]);
   });
 
   it('asks whether the system prefers the dark theme', async () => {

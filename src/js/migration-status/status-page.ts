@@ -1,4 +1,5 @@
 import type { Group, GroupState } from '../ports/group-state.js';
+import type { I18n } from '../ports/i18n.js';
 import type { Logger } from '../ports/logger.js';
 import type { Messaging } from '../ports/messaging.js';
 import type { MigrationFlag } from '../ports/migration-flag.js';
@@ -12,15 +13,20 @@ export const REFRESH_MS = 5000;
 
 export interface MigrationStatusDeps {
   nodes: {
+    heading: HTMLElement;
+    groupsHeading: HTMLElement;
     status: HTMLElement;
     groups: HTMLElement;
     runButton: HTMLButtonElement;
     resetButton: HTMLElement;
   };
+  // The page, for the title of its tab
+  page: { title: string };
   migrationFlag: Pick<MigrationFlag, 'isComplete'>;
   groupState: Pick<GroupState, 'getGroups'>;
   windows: Pick<Windows, 'currentWindowId'>;
   messaging: Messaging;
+  i18n: Pick<I18n, 'getMessage'>;
   scheduler: Pick<Scheduler, 'setTimeout'>;
   alert: (message: string) => void;
   confirm: (message: string) => boolean;
@@ -35,33 +41,52 @@ export interface MigrationStatusPage {
 /** What the background answered, as a sentence for the user */
 function outcomeOf(
   response: unknown,
-  success: string,
-  failure: string,
+  {
+    i18n,
+    success,
+    failure,
+  }: {
+    i18n: Pick<I18n, 'getMessage'>;
+    success: string;
+    failure: string;
+  },
 ): string {
   if (isRecord(response) && response.success === true) {
-    return success;
+    return i18n.getMessage(success);
   }
   const reason =
     isRecord(response) && isString(response.message)
       ? response.message
-      : 'No response';
-  return `${failure}: ${reason}`;
+      : i18n.getMessage('migrationNoResponse');
+  return i18n.getMessage(failure, [reason]);
 }
 
-function groupItem({ id, name, nativeGroupId }: Group): HTMLElement {
+function groupItem(
+  { id, name, nativeGroupId }: Group,
+  i18n: Pick<I18n, 'getMessage'>,
+): HTMLElement {
   const { className, status } =
     typeof nativeGroupId === 'number'
       ? {
           className: 'migrated',
-          status: `✓ Migrated (Native ID: ${String(nativeGroupId)})`,
+          status: i18n.getMessage('migrationGroupMigrated', [
+            String(nativeGroupId),
+          ]),
         }
-      : { className: 'not-migrated', status: '✗ Not Migrated' };
+      : {
+          className: 'not-migrated',
+          status: i18n.getMessage('migrationGroupNotMigrated'),
+        };
 
   return newElement('div', { class: `group-item ${className}` }, [
-    newElement('strong', { content: `Group ${String(id)}:` }),
+    newElement('strong', {
+      content: i18n.getMessage('migrationGroup', [String(id)]),
+    }),
     document.createTextNode(` ${name}`),
     newElement('br', {}),
-    newElement('small', { content: `Status: ${status}` }),
+    newElement('small', {
+      content: i18n.getMessage('migrationGroupStatus', [status]),
+    }),
   ]);
 }
 
@@ -71,10 +96,12 @@ function groupItem({ id, name, nativeGroupId }: Group): HTMLElement {
  */
 export function createMigrationStatusPage({
   nodes,
+  page,
   migrationFlag,
   groupState,
   windows,
   messaging,
+  i18n,
   scheduler,
   alert,
   confirm,
@@ -93,18 +120,15 @@ export function createMigrationStatusPage({
     };
     try {
       if (await migrationFlag.isComplete()) {
-        show(
-          'success',
-          '✓ Migration Complete - All groups have been migrated to hybrid system',
-        );
+        show('success', i18n.getMessage('migrationComplete'));
       } else {
-        show(
-          'warning',
-          '⚠ Migration Pending - Groups have not been migrated yet',
-        );
+        show('warning', i18n.getMessage('migrationPending'));
       }
     } catch (error) {
-      show('warning', `Error checking migration status: ${messageOf(error)}`);
+      show(
+        'warning',
+        i18n.getMessage('migrationStatusError', [messageOf(error)]),
+      );
     }
   };
 
@@ -113,12 +137,16 @@ export function createMigrationStatusPage({
       const groups =
         (await groupState.getGroups(await windows.currentWindowId())) ?? [];
       if (groups.length === 0) {
-        nodes.groups.textContent = 'No groups found in current window';
+        nodes.groups.textContent = i18n.getMessage('migrationNoGroups');
         return;
       }
-      nodes.groups.replaceChildren(...groups.map(groupItem));
+      nodes.groups.replaceChildren(
+        ...groups.map((group) => groupItem(group, i18n)),
+      );
     } catch (error) {
-      nodes.groups.textContent = `Error loading groups: ${messageOf(error)}`;
+      nodes.groups.textContent = i18n.getMessage('migrationGroupsError', [
+        messageOf(error),
+      ]);
     }
   };
 
@@ -129,40 +157,38 @@ export function createMigrationStatusPage({
 
   async function runMigration(): Promise<void> {
     nodes.runButton.disabled = true;
-    nodes.runButton.textContent = 'Running migration...';
+    nodes.runButton.textContent = i18n.getMessage('migrationRunning');
     try {
       alert(
-        outcomeOf(
-          await messaging.send({ action: 'migrateToHybridGroups' }),
-          'Migration completed successfully!',
-          'Migration failed',
-        ),
+        outcomeOf(await messaging.send({ action: 'migrateToHybridGroups' }), {
+          i18n,
+          success: 'migrationSucceeded',
+          failure: 'migrationFailed',
+        }),
       );
     } catch (error) {
-      alert(`Migration error: ${messageOf(error)}`);
+      alert(i18n.getMessage('migrationRunError', [messageOf(error)]));
     } finally {
       nodes.runButton.disabled = false;
-      nodes.runButton.textContent = 'Run Migration Now';
+      nodes.runButton.textContent = i18n.getMessage('migrationRun');
       await refresh();
     }
   }
 
   async function resetMigration(): Promise<void> {
-    if (
-      !confirm('Reset migration flag? This will allow migration to run again.')
-    ) {
+    if (!confirm(i18n.getMessage('migrationResetConfirm'))) {
       return;
     }
     try {
       alert(
-        outcomeOf(
-          await messaging.send({ action: 'resetMigration' }),
-          'Migration flag reset successfully!',
-          'Reset failed',
-        ),
+        outcomeOf(await messaging.send({ action: 'resetMigration' }), {
+          i18n,
+          success: 'migrationResetSucceeded',
+          failure: 'migrationResetFailed',
+        }),
       );
     } catch (error) {
-      alert(`Reset error: ${messageOf(error)}`);
+      alert(i18n.getMessage('migrationResetError', [messageOf(error)]));
     }
     await showStatus();
   }
@@ -176,6 +202,17 @@ export function createMigrationStatusPage({
 
   return {
     async start() {
+      // What the page says before it knows anything, in the language of the browser
+      page.title = i18n.getMessage('migrationTitle');
+      nodes.heading.textContent = i18n.getMessage('migrationTitle');
+      nodes.groupsHeading.textContent = i18n.getMessage(
+        'migrationCurrentGroups',
+      );
+      nodes.status.textContent = i18n.getMessage('migrationChecking');
+      nodes.groups.textContent = i18n.getMessage('migrationLoadingGroups');
+      nodes.runButton.textContent = i18n.getMessage('migrationRun');
+      nodes.resetButton.textContent = i18n.getMessage('migrationReset');
+
       nodes.runButton.addEventListener('click', () => {
         report(runMigration());
       });

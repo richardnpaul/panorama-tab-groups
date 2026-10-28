@@ -4,6 +4,7 @@ import { createMemoryMessaging } from '../../../src/js/adapters/memory/messaging
 import { createMemoryNotifications } from '../../../src/js/adapters/memory/notifications.js';
 import { createMemoryToolbar } from '../../../src/js/adapters/memory/toolbar.js';
 import { createInitializationUi } from '../../../src/js/app/initialization-ui.js';
+import { englishMessage } from '../../support/messages.js';
 
 function setUp() {
   const notifications = createMemoryNotifications();
@@ -16,6 +17,7 @@ function setUp() {
       toolbar,
       messaging,
       extension: createMemoryExtension(),
+      i18n: { getMessage: englishMessage },
       logger,
     }),
     notifications,

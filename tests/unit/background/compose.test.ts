@@ -97,7 +97,13 @@ function fakeBrowser(tabs: FakeTab[], { withTabGroups = true } = {}) {
       remove: vi.fn().mockResolvedValue(undefined),
       removeAll: vi.fn().mockResolvedValue(undefined),
     },
-    i18n: { getMessage: vi.fn(() => 'Group ') },
+    i18n: {
+      getMessage: vi.fn((name: string) =>
+        name === 'initializationRestoring'
+          ? 'Restoring tab groups...'
+          : 'Group ',
+      ),
+    },
     notifications: {
       create: vi.fn().mockResolvedValue('id'),
       clear: vi.fn().mockResolvedValue(true),

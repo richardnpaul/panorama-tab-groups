@@ -21,21 +21,40 @@ For deeper insight it's recommended to read the [Internationalization guide for 
 These were written by machine when the add-on was renamed, so that they make sense, and have not been checked by a
 speaker of the language. Corrections are welcome.
 
-- `optionKeyboardShortcutsToggle` in `pl` ("Przełącz widok grup kart") and `tr_TR` ("Sekme Alanları Görünümünü Aç/Kapat",
+- `optionKeyboardShortcutsToggle` in `pl` ("Przełącz widok grup kart") and `tr` ("Sekme Alanları Görünümünü Aç/Kapat",
   which keeps that file's word "alan" for a group).
 - `ru` also still refers to the old name by meaning ("Открыть панораму"); that locale is due to be removed.
 
 ### Update translation
 
-1. Open the messages.json file for the target language.
-1. Alter the `message` text for the translation to update.
+1. Open the `messages.json` file for the target language.
+1. Alter the `message` text for the translation to update, or add the messages the language lacks (`npm run report:locales` says how many each language lacks).
+1. Keep what the code puts in: `$1` (a number or a name given by the program), `{link}` (where the link goes in the sentence of `optionKeyboardShortcutsManage`) and the labels of a message with forms (below). A message holds no markup; `\n` is a line break.
+1. Run `npm run test:unit`. `tests/unit/locales.test.ts` checks the file, and when a language now lacks fewer messages it asks you to lower its number in `tests/unit/locale-gaps.json`, so that the number only goes down.
+
+### Messages with forms
+
+A message that depends on a count has one form for each form the language has, written as `form=text` and separated by `|`:
+
+```json
+"tabCount": { "message": "one=$1 tab|other=$1 tabs" }
+```
+
+The forms are the ones of the [Unicode CLDR plural rules](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html) for the language: `zero`, `one`, `two`, `few`, `many` and `other`. English and German have `one` and `other`; Russian and Polish have `one`, `few` and `many`; Arabic has all six. `other` is used for a count that has no form of its own. A language that says the same for every count (Japanese, Chinese, Korean) writes the text alone, with no labels. The test says which forms a message lacks for the counts 0 to 1000.
 
 ### Add language
 
-1. Create a directory with the short language code. Allowed are identifiers like `de_DE` or `de`, where the latter is the fallback.
-1. Copy the `messages.json` file from the directory `en` in the new directory.
-1. Replace all `message`s.
-1. For `pluralRule` please see [this definition](https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_and_Plurals#List_of_Plural_Rules). Current implemented rules are 0, 1, 2, 7 and 9 within [the utility function `getPluralForm()`](src/js/share/utils.js);
+1. Create a directory named like the language of the browser it is for: the language alone (`de`, `fr`, `tr`), and a region only where the languages differ (`pt_BR`, `zh_CN`, `zh_TW`). A name with a region that the browser does not report, as `fr_FR` and `tr_TR` were, is never loaded: those two and `el_GR` showed English to every Greek, French and Turkish user until they were renamed. `tests/e2e/locales.spec.ts` starts Chromium in the language of every folder and fails for one it does not load.
+1. Copy the `messages.json` file from the directory `en` into it, and replace all `message`s.
+1. Add the language to `tests/unit/locale-gaps.json` with the number of messages it still lacks (0 when it has them all).
+1. Run `npm test`, and `npx playwright test locales --project=chromium`: it keeps a picture of the options page, the view and the popup in the language (attachments of the test), so that a reviewer can look at it without speaking it. A language that runs from the right (Arabic, Hebrew) is put on the page the right way round by itself; look at the pictures for what does not turn.
+1. Say in the pull request who read the translation. A language is not merged on a machine draft alone; one that is listed below as waiting has the explicit consent of the owner.
+
+What `npm test` checks of every language: valid JSON; no message that English lacks; the same placeholders as English in each message; no markup; a form for every count; a name that looks like a language. Pull requests show what each language lacks on the page of the run (`npm run report:locales` prints it).
+
+### Texts in the code
+
+Every text a person reads comes from `messages.json`; a test (`tests/unit/literal-texts.test.ts`) fails on a text written in the code, and the tests of each page fail on a text that is on the page and not from a message. A new text needs a new English message, which every language then lacks (raise their numbers in `tests/unit/locale-gaps.json`, as the test says). The names of groups and tabs are the user's own and are not messages.
 
 ## After pulling or switching branches
 

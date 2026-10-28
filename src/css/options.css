@@ -20,7 +20,7 @@ h2 {
 
 .input-radio-image {
   display: inline-block;
-  padding-right: 10px;
+  padding-inline-end: 10px;
   position: relative;
   text-align: center;
   height: 40px;
@@ -80,6 +80,11 @@ h2 {
   outline-color: #0a84ff;
 }
 
+/* A message may hold a line break, which is a break in the text and not a tag */
+#optionsBackup p {
+  white-space: pre-line;
+}
+
 #optionsNativeGroups {
   margin: 2em 0;
 }
@@ -89,7 +94,8 @@ h2 {
 }
 
 #nativeGroupsWarning {
-  margin: 0.5em 0 0 1.5em;
+  margin: 0.5em 0 0;
+  margin-inline-start: 1.5em;
   font-size: 0.9em;
 }
 

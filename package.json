@@ -38,7 +38,8 @@
     "audit:check": "npm audit --audit-level=low",
     "typecheck": "tsc --noEmit",
     "act:list": "act -l",
-    "act:run": "act"
+    "act:run": "act",
+    "report:locales": "tsx scripts/locale-report.ts"
   },
   "repository": {
     "type": "git",

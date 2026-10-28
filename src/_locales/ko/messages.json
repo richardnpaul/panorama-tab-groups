@@ -15,7 +15,7 @@
     "message": "그룹 닫기"
   },
   "closeGroupWarning": {
-    "message": "이 탭 그룹을 닫을 경우 $1 tab$2 개의 탭들을 닫게 됩니다. 정말로 닫으시겠습니까?"
+    "message": "이 탭 그룹을 닫을 경우 $1개의 탭들을 닫게 됩니다. 정말로 닫으시겠습니까?"
   },
   "optionKeyboardShortcuts": {
     "message": "키보드 단축키"
@@ -75,7 +75,7 @@
     "message": "들여오기"
   },
   "optionsBackupImportText": {
-    "message": "들여온 백업파일은 현재의 탭그룹들을 덮어쓰지 않으며 새 창에 열립니다.<br />또한 구 \"Tab Groups\" 확장기능에서 백업파일을 들여올 수도 있습니다."
+    "message": "들여온 백업파일은 현재의 탭그룹들을 덮어쓰지 않으며 새 창에 열립니다.\n또한 구 \"Tab Groups\" 확장기능에서 백업파일을 들여올 수도 있습니다."
   },
   "optionsBackupExport": {
     "message": "내보내기"

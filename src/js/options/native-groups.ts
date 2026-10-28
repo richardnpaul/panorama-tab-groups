@@ -3,6 +3,7 @@
  * Manages the toggle for using native browser tab groups
  */
 
+import type { I18n } from '../ports/i18n.js';
 import type { Messaging } from '../ports/messaging.js';
 import type { OptionsStore } from '../ports/options.js';
 import {
@@ -13,6 +14,7 @@ import {
 import { requireElementById } from '../share/dom.js';
 
 export interface NativeGroupsOptionPorts {
+  i18n: Pick<I18n, 'getMessage'>;
   options: OptionsStore;
   messaging: Messaging;
   /** What the browser the page runs in can do */
@@ -25,6 +27,7 @@ interface ModeDisplay {
   disabled: boolean;
   // null keeps the stored option
   checked: boolean | null;
+  // The name of the message that says what the browser can do
   message: string;
   className: string;
   dimmed: boolean;
@@ -35,8 +38,7 @@ const MODE_DISPLAY: Record<BrowserMode, ModeDisplay> = {
   hybrid: {
     disabled: false,
     checked: null,
-    message:
-      'Use native browser tab groups for visual organization and collapsing.',
+    message: 'optionsNativeGroupsHybrid',
     className: 'info-text',
     dimmed: false,
   },
@@ -44,8 +46,7 @@ const MODE_DISPLAY: Record<BrowserMode, ModeDisplay> = {
   'collapse-only': {
     disabled: false,
     checked: true,
-    message:
-      'Native tab groups are not supported in this browser version (requires Tab Hiding API).',
+    message: 'optionsNativeGroupsCollapseOnly',
     className: 'warning-text',
     dimmed: true,
   },
@@ -53,8 +54,7 @@ const MODE_DISPLAY: Record<BrowserMode, ModeDisplay> = {
   legacy: {
     disabled: true,
     checked: false,
-    message:
-      'Native tab groups are not supported in this browser version. Please update to Firefox 139+ or use Chrome 89+.',
+    message: 'optionsNativeGroupsLegacy',
     className: 'warning-text',
     dimmed: true,
   },
@@ -62,7 +62,7 @@ const MODE_DISPLAY: Record<BrowserMode, ModeDisplay> = {
   unsupported: {
     disabled: true,
     checked: false,
-    message: 'Your browser does not support the required APIs for tab groups.',
+    message: 'optionsNativeGroupsUnsupported',
     className: 'warning-text',
     dimmed: true,
   },
@@ -82,14 +82,17 @@ async function persist(
   });
 }
 
-function showFeedback(newValue: boolean): void {
+function showFeedback(
+  { i18n }: Pick<NativeGroupsOptionPorts, 'i18n'>,
+  newValue: boolean,
+): void {
   const feedback = document.getElementById('nativeGroupsFeedback');
   if (feedback === null) {
     return;
   }
-  feedback.textContent = newValue
-    ? 'Native groups enabled. Migrating groups...'
-    : 'Native groups disabled. Cleaning up...';
+  feedback.textContent = i18n.getMessage(
+    newValue ? 'optionsNativeGroupsEnabled' : 'optionsNativeGroupsDisabled',
+  );
   feedback.style.display = 'block';
 
   setTimeout(() => {
@@ -104,7 +107,7 @@ function saveNativeGroupsOption(
   persist(ports, newValue).catch((error: unknown) => {
     console.error('[Options] Failed to update native groups:', error);
   });
-  showFeedback(newValue);
+  showFeedback(ports, newValue);
 }
 
 /**
@@ -126,7 +129,7 @@ export default async function initNativeGroupsOption(
 
   checkbox.checked = display.checked ?? options.useNativeGroups;
   checkbox.disabled = display.disabled;
-  warningText.textContent = display.message;
+  warningText.textContent = ports.i18n.getMessage(display.message);
   warningText.className = display.className;
   if (display.dimmed) {
     container.style.opacity = '0.5';

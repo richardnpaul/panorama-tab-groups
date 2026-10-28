@@ -1,3 +1,4 @@
+import { applyLanguage } from '../js/share/direction.js';
 import { createAppearanceSettings } from '../js/adapters/browser/appearance-settings.js';
 import { createBrowserExtension } from '../js/adapters/browser/extension.js';
 import { createBrowserI18n } from '../js/adapters/browser/i18n.js';
@@ -23,6 +24,8 @@ import { createTabList } from './tab-list.js';
  * the tabs of each group.
  */
 export async function startPopup(): Promise<void> {
+  const i18n = createBrowserI18n(() => browser);
+  applyLanguage(i18n, document.documentElement);
   await applyAppearance({
     body: document.body,
     systemPrefersDark: window.matchMedia('(prefers-color-scheme: dark)'),
@@ -30,7 +33,6 @@ export async function startPopup(): Promise<void> {
   });
 
   const logger = console;
-  const i18n = createBrowserI18n(() => browser);
   const viewTabs = createBrowserViewTabs(() => browser);
   const windowId = await createBrowserWindows(() => browser).currentWindowId();
 

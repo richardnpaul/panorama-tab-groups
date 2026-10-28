@@ -11,6 +11,7 @@ import { systemClock } from '../adapters/system/clock.js';
 import { createBackupControls } from '../app/backup-controls.js';
 import { createBackupService } from '../app/backup-service.js';
 import { stateManager } from '../background/StateManager.js';
+import { applyLanguage } from '../share/direction.js';
 import { detectCapabilities } from '../share/capabilities.js';
 import { createBackupHandlers } from './backup.js';
 import { createOptionsPage } from './page.js';
@@ -21,16 +22,21 @@ const objectUrlFor = (content: string): string =>
 
 /** Show the options page, built out of the browser it runs in */
 export async function startOptions(): Promise<void> {
+  const i18n = createBrowserI18n(() => browser);
+  applyLanguage(i18n, document.documentElement);
+
   const options = createBrowserOptions(() => browser);
   const messaging = createBrowserMessaging(() => browser);
 
   const backup = createBackupHandlers(
     createBackupControls({
+      i18n,
       service: createBackupService({
         windows: createBrowserWindows(() => browser),
         tabs: createBrowserTabs(() => browser),
         groupState: stateManager,
         messaging,
+        i18n,
         options,
         downloads: createBrowserDownloads(() => browser, objectUrlFor),
         clock: systemClock,
@@ -46,7 +52,7 @@ export async function startOptions(): Promise<void> {
     options,
     shortcuts: createBrowserShortcuts(() => browser),
     messaging,
-    i18n: createBrowserI18n(() => browser),
+    i18n,
     viewTabs: createBrowserViewTabs(() => browser),
     viewState: createBrowserViewState(() => browser),
     capabilities: detectCapabilities(browser),
