@@ -1,6 +1,6 @@
 // The languages the extension is to be translated into: every folder of translations that
 // Lazarus Form Recovery (https://github.com/richardnpaul/lazarus-form-recovery, `public/_locales`
-// at commit 6565085fd6dc77c81cc9810d96b40466bdb470be) carries, as docs/languages.md says, and `tl` and
+// at commit 6565085fd6dc77c81cc9810d96b40466bdb470be) carries, as docs/plans/languages.md says, and `tl` and
 // `nn`, which are languages of Firefox that it lacks. `ru` is the exception, and is not listed: see
 // "The aim" in that document.
 
@@ -132,7 +132,7 @@ export const REGIONAL_ENGLISH: readonly string[] = [
 
 /**
  * Languages that were drafted (by a model) and have not been read by a speaker of the language. They are
- * in the extension, as the owner decided (docs/languages.md); a language leaves this list when a
+ * in the extension, as the owner decided (docs/plans/languages.md); a language leaves this list when a
  * speaker has read it.
  */
 export const DRAFT_LOCALES: readonly string[] = [

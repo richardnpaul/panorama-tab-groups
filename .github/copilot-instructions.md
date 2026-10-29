@@ -93,8 +93,8 @@ Run `npm run format` before committing. Run `npm run lint` to validate.
 
 Unit tests (Vitest, `tests/unit/`) run with a 100% coverage gate; Playwright E2E specs live in `tests/e2e/`.
 Custom fixtures in `tests/e2e/fixtures.ts` handle MV3 persistent context, Firefox RDP extension loading, and
-`moz-extension://` navigation quirks. Everything except `stryker.config.mjs` and
-`tools/adbkit-stub/index.js` is TypeScript, and the suppression guard fails on any other JavaScript file.
+`moz-extension://` navigation quirks. Everything except `stryker.config.mjs`,
+`tools/adbkit-stub/index.js` and `tools/deepmerge-patched/index.js` is TypeScript, and the suppression guard fails on any other JavaScript file.
 See `#skill:playwright-webext` for details.
 
 ## Skills

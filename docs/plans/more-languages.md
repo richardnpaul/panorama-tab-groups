@@ -3,7 +3,7 @@
 > **Status: all five phases are done** on the branch `feature/more-languages`. Phase 4 was done on 2026-10-28 and 2026-10-29: the
 > owner waived the need for reviewers, 64 languages were added as drafts (Batches A and B), and the messages the 11 older
 > languages lacked were written. Batch C (31 folders no browser can ask for) is left. See "Result" and
-> [`docs/languages.md`](../languages.md). The table below is the state before the work.
+> [`docs/plans/languages.md`](languages.md). The table below is the state before the work.
 
 ## Overview
 
@@ -78,7 +78,7 @@ Other findings:
   own (`@@ui_locale`, which a real Chromium gave as `de`, `pt_BR`, `zh_TW` for the language it was started in; it
   was `getUILanguage()` that said `en-US` throughout).
 - **Decision 1, which languages: every language that Lazarus Form Recovery has** (110 folders, without `ru`), so that the two
-  extensions have the same reach. [`docs/languages.md`](../languages.md) holds the list, the table, and what was found about which
+  extensions have the same reach. [`docs/plans/languages.md`](languages.md) holds the list, the table, and what was found about which
   folders a browser takes: of the 110 translation folders of the aim (`tl` and `nn` added, `pt` retired), 32 are taken by no
   language of Chromium 156 or Firefox 159, so the order mattered (Batch A, B, C there). The proposal of a first batch below was
   superseded by that order. Batches A and B are done; Batch C is not.
@@ -210,14 +210,14 @@ Done on `feature/more-languages`; nothing is committed.
 ### Phase 4: what was left, and a proposal (superseded)
 
 _Written before the languages were added: the proposal of Arabic, Hebrew, Japanese, Italian and Dutch as a first batch was
-overtaken by the order in `docs/languages.md`, and the drafts it speaks of were written (see below)._
+overtaken by the order in `docs/plans/languages.md`, and the drafts it speaks of were written (see below)._
 
 ### Phase 4, the aim set and Batches A and B (2026-10-28)
 
 The owner asked for support as extensive as Lazarus Form Recovery's, waived Decision 2, deleted `ru`, asked for `tl` and `nn`, for a check for
 copies of English before any language, and for both browsers to be checked. Done:
 
-- [`docs/languages.md`](../languages.md): the aim and the owner's decisions, how a browser chooses a folder (asked of Chromium 156 and Firefox 157, in
+- [`docs/plans/languages.md`](languages.md): the aim and the owner's decisions, how a browser chooses a folder (asked of Chromium 156 and Firefox 157, in
   tests), a table of all 111 folders (language, direction, plural forms, the languages of Chromium and of Firefox that take it, status), what each
   repository does that the other does not, learnings for this one, suggestions for Lazarus (not sent). `tests/unit/target-locales.test.ts` fails when the
   table and the code disagree.

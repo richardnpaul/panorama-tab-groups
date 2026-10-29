@@ -1,6 +1,6 @@
 // The languages that a browser can be set to, which is what picks a folder of `_locales`:
 // the folder named like the language, and failing that the one named like the language alone.
-// What reaches whom is in docs/languages.md.
+// What reaches whom is in docs/plans/languages.md.
 
 /** The languages of the interface of Chromium 156 (its `locales/*.pak`); `tests/e2e/chromium-locale-folders.spec.ts` checks the list against the browser */
 export const CHROMIUM_LANGUAGES: readonly string[] = [

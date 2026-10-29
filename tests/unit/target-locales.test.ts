@@ -13,10 +13,10 @@ import {
   reachableFolders,
 } from '../support/ui-languages.js';
 
-// docs/languages.md says which languages the extension is to have and which languages of a browser take
+// docs/plans/languages.md says which languages the extension is to have and which languages of a browser take
 // each. The table of that document is checked here against the code, so that it is kept true.
 
-/** The folders of the aim that no language of Chromium 156 or Firefox 159 takes: docs/languages.md says so; all but `en_AU` are Batch C */
+/** The folders of the aim that no language of Chromium 156 or Firefox 159 takes: docs/plans/languages.md says so; all but `en_AU` are Batch C */
 const UNTAKEN: string[] = [
   'ak',
   'bm',
@@ -61,7 +61,7 @@ interface Row {
 
 /** The rows of the table of languages: a folder in code marks, the two browsers' languages, and the status */
 function tableRows(): Row[] {
-  const lines = readFileSync('docs/languages.md', 'utf8').split('\n');
+  const lines = readFileSync('docs/plans/languages.md', 'utf8').split('\n');
   const cells = (line: string): string[] =>
     line
       .split('|')
@@ -135,7 +135,7 @@ describe('reachableFolders', () => {
   });
 });
 
-describe('the languages that are the aim (docs/languages.md)', () => {
+describe('the languages that are the aim (docs/plans/languages.md)', () => {
   it('has each folder once, written like the folder of a language', () => {
     expect(new Set(TARGET_LOCALES).size).toBe(TARGET_LOCALES.length);
     TARGET_LOCALES.forEach((folder) => {
@@ -143,7 +143,7 @@ describe('the languages that are the aim (docs/languages.md)', () => {
     });
   });
 
-  it('does not have Russian, which is left out (docs/languages.md)', () => {
+  it('does not have Russian, which is left out (docs/plans/languages.md)', () => {
     expect(TARGET_LOCALES).not.toContain('ru');
     expect(existsSync('src/_locales/ru')).toBe(false);
   });

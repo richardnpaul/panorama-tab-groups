@@ -22,7 +22,7 @@ These were written by machine, so that they make sense, and have not been checke
 welcome. Three sets:
 
 - **The drafts:** 64 languages that were added as drafts on 2026-10-28 (`DRAFT_LOCALES` in `tests/support/target-locales.ts`; the table in
-  [`docs/languages.md`](docs/languages.md) says "draft"). A speaker who has read one takes it out of that list.
+  [`docs/plans/languages.md`](docs/plans/languages.md) says "draft"). A speaker who has read one takes it out of that list.
 - **The older languages, filled on 2026-10-29:** the 44 to 58 messages each of `de el es fr hu ko pl pt_BR tr zh_CN zh_TW` lacked were
   written by machine (`git log` of each `messages.json` says which), as was `closeGroupWarning` of `hu`, `pl` and `tr`, which now has forms.
   The messages that were there before are as they were.
@@ -50,9 +50,9 @@ The forms are the ones of the [Unicode CLDR plural rules](https://www.unicode.or
 
 ### Add language
 
-Which languages are wanted, and which folder name a browser takes for each, is in [`docs/languages.md`](docs/languages.md): start from its table.
+Which languages are wanted, and which folder name a browser takes for each, is in [`docs/plans/languages.md`](docs/plans/languages.md): start from its table.
 
-1. Create a directory named like the language of the browser it is for: the language alone (`de`, `fr`, `tr`), and a region only where the languages differ (`pt_BR`, `zh_CN`, `zh_TW`). A name with a region that the browser does not report, as `fr_FR` and `tr_TR` were, is never loaded: those two and `el_GR` showed English to every Greek, French and Turkish user until they were renamed. `tests/e2e/locales.spec.ts` starts Chromium in the language of every folder and fails for one it does not load, and `tests/e2e/firefox-locale-folders.spec.ts` does the same for Firefox (it downloads the language packs it needs). A folder that no language of any browser takes is never seen: `docs/languages.md` says which those are.
+1. Create a directory named like the language of the browser it is for: the language alone (`de`, `fr`, `tr`), and a region only where the languages differ (`pt_BR`, `zh_CN`, `zh_TW`). A name with a region that the browser does not report, as `fr_FR` and `tr_TR` were, is never loaded: those two and `el_GR` showed English to every Greek, French and Turkish user until they were renamed. `tests/e2e/locales.spec.ts` starts Chromium in the language of every folder and fails for one it does not load, and `tests/e2e/firefox-locale-folders.spec.ts` does the same for Firefox (it downloads the language packs it needs). A folder that no language of any browser takes is never seen: `docs/plans/languages.md` says which those are.
 1. Copy the `messages.json` file from the directory `en` into it, and replace all `message`s.
 1. Add the language to `tests/unit/locale-gaps.json` with the number of messages it still lacks (0 when it has them all), and to `tests/unit/locale-copies.json` with the number of its messages that are the same as English (`npm run report:locales` prints it; the add-on's name, the link and the units of size do not count). Look at each copy: a word that is the same in the language (`Import`, `Status`) is fine, a sentence is not.
 1. Run `npm test`, and `npx playwright test locales --project=chromium`: it keeps a picture of the options page, the view and the popup in the language (attachments of the test), so that a reviewer can look at it without speaking it. A language that runs from the right (Arabic, Hebrew) is put on the page the right way round by itself; look at the pictures for what does not turn.
@@ -139,6 +139,13 @@ Everything outside npm is pinned by an immutable reference, so a moved tag canno
 `npm run audit:check` (`npm audit --audit-level=low`) must report no vulnerabilities. It is a blocking step in the Node.js CI workflow and also runs weekly in the `Dependency audit` workflow, so new advisories show up without a code change. Dependabot opens weekly update pull requests.
 
 Fix findings with `npm audit fix`. Never use `npm audit fix --force`: it can downgrade a direct dependency across major versions (for `web-ext` it proposes 5.1.0).
+
+### The `deepmerge` replacement
+
+`web-ext` depends on `addons-linter`, which pins `deepmerge` to `4.3.1` exactly. Every released `deepmerge` (up to `4.3.1`, the latest) is flagged by [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4): `mergeObject()` writes the keys of its inputs onto its result, so an object with its own `__proto__` property (as `JSON.parse` makes) sets the prototype of the result. No fixed release exists, and `npm audit fix --force` offers only `web-ext@3.2.1`, a downgrade of seven major versions. `addons-linter` is a development tool (it lints the built extension) and nothing of it ships, but the audit gate is kept at `low`, so `tools/deepmerge-patched` is an npm workspace package with the same name and the version `addons-linter` pins. It is `deepmerge` 4.3.1 (MIT) with every property of the result defined on it, so no key can reach its prototype, and without the check for React elements. `tools/deepmerge-patched/index.test.ts` has the proof for the advisory.
+
+- If `addons-linter` changes the `deepmerge` version it pins, update the version in `tools/deepmerge-patched/package.json` to match. A unit test fails until you do, and otherwise npm would install the published package again.
+- Once `deepmerge` has a release that fixes the advisory (or `addons-linter` stops using it), remove the replacement: delete `tools/deepmerge-patched` (and its entry in `ALLOWED_JAVASCRIPT_FILES` in `scripts/lib/suppressions.ts` and in `mutate` in `stryker.config.mjs`), the `workspaces` entry in `package.json`, the entry in `knip.json` and `tests/unit/tools/deepmerge-workspace.test.ts`, then run `npm install`.
 
 ### The `@devicefarmer/adbkit` stub
 

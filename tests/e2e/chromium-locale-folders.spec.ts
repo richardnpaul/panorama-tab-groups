@@ -8,7 +8,7 @@ import { CHROMIUM_LANGUAGES, folderFor } from '../support/ui-languages.js';
 
 // Which folder of `_locales` Chromium takes for the language it is set to. A folder that no language
 // takes is not an error: the extension starts, and shows English (`el_GR` and `fr_FR` did that to
-// every Greek and French user of this add-on until they were renamed). docs/languages.md has what
+// every Greek and French user of this add-on until they were renamed). docs/plans/languages.md has what
 // was found, and what it means for the languages that are to be added.
 
 /** The folder of the extension that Chromium takes when it is set to the language, or `default` */
@@ -73,7 +73,7 @@ function chromiumLanguages(): string[] {
 test.describe('Folders of translations that Chromium takes', () => {
   test.skip(
     ({ browserName }) => browserName !== 'chromium',
-    'Firefox is not asked here: see docs/languages.md',
+    'Firefox is not asked here: see docs/plans/languages.md',
   );
   test.setTimeout(10 * 60 * 1000);
 

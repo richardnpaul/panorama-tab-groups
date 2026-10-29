@@ -1,8 +1,8 @@
 # Languages
 
 This is the record of which languages Tab Groups Viewer is to speak, how a browser chooses one, what was added, and what is done to
-keep every language whole. The plan that made the code ready for it is [`plans/more-languages.md`](plans/more-languages.md); how to
-add or correct a language is in [`CONTRIBUTION.md`](../CONTRIBUTION.md).
+keep every language whole. The plan that made the code ready for it is [`plans/more-languages.md`](more-languages.md); how to
+add or correct a language is in [`CONTRIBUTION.md`](../../CONTRIBUTION.md).
 
 ## The aim, and what the owner decided
 
@@ -60,12 +60,12 @@ Samsung Internet, a fork of Firefox, Firefox for Android) is to be looked at fir
 A browser is set to one language, and takes the folder of `_locales` named like it (`pt-BR` is `pt_BR`), else the folder named like the
 language alone (`pt`), else English. A folder that no language takes is never shown to anyone. Both browsers were asked, in tests:
 
-- **Chromium 156** ([`tests/e2e/chromium-locale-folders.spec.ts`](../tests/e2e/chromium-locale-folders.spec.ts)): started in each of the 55 languages
+- **Chromium 156** ([`tests/e2e/chromium-locale-folders.spec.ts`](../../tests/e2e/chromium-locale-folders.spec.ts)): started in each of the 55 languages
   of its own interface, with an extension that has every target folder, it took the folder the rule says, for all 55. With only a folder for
   the language alone, `pt-BR`, `pt-PT`, `es-419` and `zh-CN` take it; **with only `zh_CN`, `zh-TW` takes English**, so Chromium does not
   fall to another region of the language. **Norwegian is `nb` to Chromium: a folder `no` is taken by nobody**, though `--lang=no` forced on
   the command line does find it, so a check that forces the tag passes folders that no user will ever get.
-- **Firefox 157** ([`tests/e2e/firefox-locale-folders.spec.ts`](../tests/e2e/firefox-locale-folders.spec.ts)): Firefox is set to a language by its language
+- **Firefox 157** ([`tests/e2e/firefox-locale-folders.spec.ts`](../../tests/e2e/firefox-locale-folders.spec.ts)): Firefox is set to a language by its language
   pack, so the spec downloads the packs it needs (signed by Mozilla, for the installed version, kept in `node_modules/.cache`). **A pack
   that is not signed is refused whatever the preferences say** (tried with a made-up pack and with a real one with its signature removed), so
   the packs cannot be faked. Firefox takes the same two steps as Chromium and **one more: a folder of another region of the language**

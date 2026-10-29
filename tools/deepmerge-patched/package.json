@@ -1,0 +1,12 @@
+{
+  "name": "deepmerge",
+  "version": "4.3.1",
+  "description": "Replaces deepmerge 4.3.1 for addons-linter, which pins it exactly. Published deepmerge lets mergeObject() set the prototype of its result (GHSA-gcqx-w48m-w2h4) and has no fixed release.",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "license": "MIT"
+}
