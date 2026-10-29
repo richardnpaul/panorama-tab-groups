@@ -35,7 +35,8 @@ export interface TabLifecycleDeps {
   tabs: Pick<Tabs, 'get'>;
   nativeGroups: Pick<NativeGroups, 'addTabs' | 'listIdsInWindow' | 'tabIdsIn'>;
   assignment: NativeGroupAssignment;
-  toggleVisibleTabs: (activeGroup: number) => Promise<void>;
+  // Shows the tabs of the group in the window, and hides the rest
+  toggleVisibleTabs: (activeGroup: number, windowId: number) => Promise<void>;
   // Whether native tab groups are available and switched on
   useNativeGroups: () => Promise<boolean>;
   // Settles once the extension has finished starting up
@@ -252,7 +253,7 @@ export function createTabLifecycle({
 
     // The view must give way to a new tab that is active, native groups or not
     if (tab.active === true || outcome === 'show-group') {
-      await toggleVisibleTabs(groupId);
+      await toggleVisibleTabs(groupId, tab.windowId);
     }
   }
 
@@ -278,7 +279,15 @@ export function createTabLifecycle({
   async function tabActivated({ tabId }: { tabId: number }): Promise<void> {
     await waitForInitialization();
 
-    const tab = await tabs.get(tabId);
+    // The tab may be closed already: closing the one in front brings the next to the front, and
+    // that one may be on its way out too, as when a group is deleted
+    const tab = await tabs.get(tabId).catch(() => undefined);
+    if (tab === undefined) {
+      logger.debug(
+        `[TabActivated] Tab ${String(tabId)} was closed before it could be looked at`,
+      );
+      return;
+    }
     if (tab.pinned) {
       return;
     }
@@ -310,7 +319,7 @@ export function createTabLifecycle({
       }
     }
 
-    await toggleVisibleTabs(activeGroup);
+    await toggleVisibleTabs(activeGroup, tab.windowId);
   }
 
   return { tabCreated, tabAttached, tabDetached, tabActivated };

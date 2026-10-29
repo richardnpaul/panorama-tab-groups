@@ -10,7 +10,14 @@ import type { Tabs } from '../ports/tabs.js';
 import type { Windows } from '../ports/windows.js';
 
 export interface VisibilityDeps {
-  tabs: Pick<Tabs, 'listInCurrentWindow' | 'activate' | 'hide' | 'show'>;
+  tabs: Pick<
+    Tabs,
+    | 'listInCurrentWindow'
+    | 'listSummariesInWindow'
+    | 'activate'
+    | 'hide'
+    | 'show'
+  >;
   windows: Pick<Windows, 'currentWindowId' | 'lastFocusedWindowId'>;
   groupState: Pick<GroupState, 'getTabGroup' | 'getGroups'>;
   nativeGroups: NativeGroups;
@@ -28,10 +35,14 @@ export interface VisibilityService {
   /**
    * Show the tabs of the active group and hide the others, keeping the native
    * tab groups in step. `noTabSelected` also activates one of the shown tabs.
+   * It is done for the window that was said, as groups are of a window: an
+   * event of a tab says which, and one that is not said works on the window
+   * the user is in.
    */
   toggleVisibleTabs: (
     activeGroup: unknown,
     noTabSelected?: boolean,
+    forWindow?: number,
   ) => Promise<void>;
 }
 
@@ -67,7 +78,7 @@ export function createVisibilityService({
     action.catch(() => undefined);
 
   return {
-    async toggleVisibleTabs(activeGroup, noTabSelected = false) {
+    async toggleVisibleTabs(activeGroup, noTabSelected, forWindow) {
       const check = checkActiveGroup(activeGroup);
       if (!check.valid) {
         // Switching to no group would hide every tab
@@ -83,8 +94,11 @@ export function createVisibilityService({
         return;
       }
 
-      const windowTabs = await tabs.listInCurrentWindow();
-      const windowId = await windows.currentWindowId();
+      const windowId = forWindow ?? (await windows.currentWindowId());
+      const windowTabs =
+        forWindow === undefined
+          ? await tabs.listInCurrentWindow()
+          : await tabs.listSummariesInWindow(forWindow);
       const groupedTabs = await Promise.all(windowTabs.map(withGroup));
       const groups = (await useNativeGroups())
         ? ((await groupState.getGroups(windowId)) ?? [])
@@ -92,7 +106,7 @@ export function createVisibilityService({
 
       const plan = planVisibility({
         activeGroup: check.activeGroup,
-        noTabSelected,
+        noTabSelected: noTabSelected ?? false,
         tabs: groupedTabs.filter((tab) => tab !== undefined),
         groups,
         canHideTabs,
@@ -129,7 +143,7 @@ export function createVisibilityService({
 
       if (plan.updateTitle) {
         await toolbar.updateActionTitle(
-          await windows.lastFocusedWindowId(),
+          forWindow ?? (await windows.lastFocusedWindowId()),
           check.activeGroup,
         );
       }

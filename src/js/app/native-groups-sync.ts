@@ -8,7 +8,10 @@ import type { Windows } from '../ports/windows.js';
 import type { NativeGroupAssignment } from './native-group-assignment.js';
 
 export interface NativeGroupsSyncDeps {
-  groupState: Pick<GroupState, 'getGroups' | 'setGroups' | 'getActiveGroup'>;
+  groupState: Pick<
+    GroupState,
+    'getGroups' | 'setGroups' | 'getActiveGroup' | 'getTabGroup'
+  >;
   tabs: Pick<Tabs, 'listInWindow'>;
   windows: Pick<Windows, 'listIds'>;
   nativeGroups: Pick<NativeGroups, 'get' | 'removeTabs'>;
@@ -25,6 +28,13 @@ export interface NativeGroupEvent {
 }
 
 export interface NativeGroupsSync {
+  /**
+   * After the browser started again, the native groups have new ids and the groups
+   * refer to the old ones: a group whose tabs are not in the native group it refers to
+   * is linked to the one its tabs are in, if they are all in one, and forgets the
+   * reference if not (it is made again when it is needed).
+   */
+  relink: () => Promise<void>;
   /**
    * Give the groups of existing users native tab groups, once. Gives false if
    * it failed, and then it is tried again next time.
@@ -119,6 +129,59 @@ export function createNativeGroupsSync({
     await groupState.setGroups(windowId, valid);
   }
 
+  async function relinkWindow(windowId: number): Promise<void> {
+    const groups = await groupState.getGroups(windowId);
+    if (groups === undefined) {
+      return;
+    }
+    const placed = await Promise.all(
+      (await tabs.listInWindow(windowId)).map(
+        async ({ id, browserGroupId }) => ({
+          browserGroupId,
+          group: await groupState.getTabGroup(id),
+        }),
+      ),
+    );
+    // The native groups that the tabs of a group are in
+    const nativeIdsOf = (groupId: number): number[] => [
+      ...new Set(
+        placed.flatMap((tab) =>
+          tab.group === groupId &&
+          tab.browserGroupId !== undefined &&
+          tab.browserGroupId > 0
+            ? [tab.browserGroupId]
+            : [],
+        ),
+      ),
+    ];
+
+    const linked = groups.map((group) => {
+      const reference = group.nativeGroupId;
+      if (typeof reference !== 'number') {
+        return group;
+      }
+      const ids = nativeIdsOf(group.id);
+      if (ids.includes(reference)) {
+        return group;
+      }
+      const [only] = ids;
+      return ids.length === 1 && only !== undefined
+        ? { ...group, nativeGroupId: only }
+        : withoutNativeGroup(group);
+    });
+    if (linked.some((group, index) => group !== groups[index])) {
+      await groupState.setGroups(windowId, linked);
+    }
+  }
+
+  async function relink(): Promise<void> {
+    try {
+      await Promise.all((await windows.listIds()).map(relinkWindow));
+    } catch (error) {
+      logger.warn('Linking the groups to the native groups failed:', error);
+    }
+  }
+
   async function migrate(): Promise<boolean> {
     try {
       if (await migrationFlag.isComplete()) {
@@ -206,6 +269,7 @@ export function createNativeGroupsSync({
   }
 
   return {
+    relink,
     migrate,
     cleanup,
 

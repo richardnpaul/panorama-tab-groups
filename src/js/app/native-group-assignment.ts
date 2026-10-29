@@ -113,7 +113,7 @@ export function createNativeGroupAssignment({
         return { kind: 'aborted' };
       }
 
-      const nativeGroupId = await nativeGroups.createFromTabs(tabIds);
+      const nativeGroupId = await nativeGroups.createFromTabs(tabIds, windowId);
       await nativeGroups.setAppearance(nativeGroupId, {
         title:
           group.name === ''

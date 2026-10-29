@@ -73,7 +73,11 @@ export const KNIP_CONFIG_FILE = 'knip.json';
 // What knip may be told to leave alone, and nothing else: system tools that are
 // not npm packages, and files that tests load by a path written as text
 export const ALLOWED_KNIP_BINARIES = ['act', 'pre-commit', 'pkill'];
-export const ALLOWED_KNIP_ENTRIES = ['tests/unit/scripts/fixtures/*.ts'];
+export const ALLOWED_KNIP_ENTRIES = [
+  'tests/unit/scripts/fixtures/*.ts',
+  // Compiled for the browser by the lab of the end-to-end tests, not imported
+  'tests/e2e/lab/probe.ts',
+];
 // Any of these, in any form, hides code from knip or narrows what it looks at
 export const FORBIDDEN_KNIP_KEYS = [
   'ignore',

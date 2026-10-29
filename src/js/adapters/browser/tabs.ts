@@ -1,4 +1,9 @@
-import type { TabDetails, Tabs, TabSnapshot } from '../../ports/tabs.js';
+import type {
+  TabDetails,
+  Tabs,
+  TabSnapshot,
+  TabSummary,
+} from '../../ports/tabs.js';
 
 interface QueriedTab {
   id?: number | undefined;
@@ -76,6 +81,13 @@ async function createdTabId(
 const idsOf = (tabs: readonly QueriedTab[]): number[] =>
   tabs.flatMap(({ id }) => (id === undefined ? [] : [id]));
 
+const summariesOf = (tabs: readonly QueriedTab[]): TabSummary[] =>
+  tabs.flatMap(({ id, pinned, lastAccessed }) =>
+    id === undefined
+      ? []
+      : [{ id, pinned: pinned === true, lastAccessed: lastAccessed ?? 0 }],
+  );
+
 export function createBrowserTabs(getApi: () => TabsApi): Tabs {
   const queryCurrentWindow = () => getApi().tabs.query({ currentWindow: true });
 
@@ -85,12 +97,11 @@ export function createBrowserTabs(getApi: () => TabsApi): Tabs {
     },
 
     async listInCurrentWindow() {
-      const tabs = await queryCurrentWindow();
-      return tabs.flatMap(({ id, pinned, lastAccessed }) =>
-        id === undefined
-          ? []
-          : [{ id, pinned: pinned === true, lastAccessed: lastAccessed ?? 0 }],
-      );
+      return summariesOf(await queryCurrentWindow());
+    },
+
+    async listSummariesInWindow(windowId) {
+      return summariesOf(await getApi().tabs.query({ windowId }));
     },
 
     async get(tabId) {

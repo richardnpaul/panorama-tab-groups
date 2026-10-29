@@ -24,7 +24,10 @@ export interface TabMovesDeps {
   menus: Pick<Menus, 'removeAll'>;
   // Make the menu items for the groups of the window again
   createMenuList: () => Promise<void>;
-  toggleVisibleTabs: (activeGroup: number | undefined) => Promise<void>;
+  toggleVisibleTabs: (
+    activeGroup: number | undefined,
+    windowId: number,
+  ) => Promise<void>;
   // Whether native tab groups are available and switched on
   useNativeGroups: () => Promise<boolean>;
   logger: Pick<Logger, 'debug' | 'warn'>;
@@ -56,7 +59,8 @@ export function createTabMoves({
   logger,
 }: TabMovesDeps): TabMoves {
   // Only the active group has its tabs in a native group: the others have
-  // theirs hidden, which would clash
+  // theirs hidden, which would clash. A group that has none takes its tab out
+  // of the one it was in, or the tab would be in a group of another.
   async function moveToNativeGroup(
     tabId: number,
     groupId: number,
@@ -67,10 +71,7 @@ export function createTabMoves({
     const nativeGroupId = nativeGroupIdOf(
       groups?.find(({ id }) => id === groupId),
     );
-    if (nativeGroupId === undefined) {
-      return;
-    }
-    if (groupId === activeGroup) {
+    if (nativeGroupId !== undefined && groupId === activeGroup) {
       await nativeGroups.addTabs([tabId], nativeGroupId);
     } else {
       await nativeGroups.removeTabs([tabId]);
@@ -92,7 +93,7 @@ export function createTabMoves({
     }
 
     await tabs.moveToEnd(tabId);
-    await toggleVisibleTabs(activeGroup);
+    await toggleVisibleTabs(activeGroup, windowId);
   }
 
   // One after the other, so the tabs end up in the order they were in

@@ -31,15 +31,20 @@ function fakeBrowser(
     tabs: { group: () => undefined },
     ...overrides,
   };
-  const get = vi.fn((keys: Options) =>
+  const get = vi.fn((keys: Options | string) =>
     Promise.resolve(
       structuredClone(
-        Object.fromEntries(
-          Object.entries(keys).map(([key, fallback]) => [
-            key,
-            key in data ? data[key] : fallback,
-          ]),
-        ),
+        typeof keys === 'string'
+          ? // A name alone gives what is stored under it, and nothing when nothing is
+            Object.fromEntries(
+              Object.entries(data).filter(([key]) => key === keys),
+            )
+          : Object.fromEntries(
+              Object.entries(keys).map(([key, fallback]) => [
+                key,
+                key in data ? data[key] : fallback,
+              ]),
+            ),
       ),
     ),
   );

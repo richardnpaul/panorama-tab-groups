@@ -104,7 +104,11 @@ const saveBackup = vi.fn<() => Promise<void>>();
 
 function portsOfPage(): OptionsPagePorts {
   return {
-    options: { load: loadOptions, save: () => Promise.resolve() },
+    options: {
+      load: loadOptions,
+      save: () => Promise.resolve(),
+      isSet: () => Promise.resolve(true),
+    },
     shortcuts: {
       getAll: getAllShortcuts,
       update: () => Promise.resolve(),

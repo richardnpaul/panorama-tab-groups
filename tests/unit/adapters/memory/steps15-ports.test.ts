@@ -68,11 +68,11 @@ describe('adapters/memory/native-groups.ts (membership)', () => {
     expect(await groups.tabIdsIn(2)).toEqual([4]);
   });
 
-  it('creates groups with counting ids in the window it was made for', async () => {
+  it('creates groups with counting ids in the window it is asked for', async () => {
     const groups = createMemoryNativeGroups([], 7);
 
-    const first = await groups.createFromTabs([1, 2]);
-    const second = await groups.createFromTabs([3]);
+    const first = await groups.createFromTabs([1, 2], 7);
+    const second = await groups.createFromTabs([3], 7);
 
     expect(second).toBe(first + 1);
     expect(await groups.tabIdsIn(first)).toEqual([1, 2]);
@@ -85,7 +85,7 @@ describe('adapters/memory/native-groups.ts (membership)', () => {
     const groups = createMemoryNativeGroups();
     groups.seed(1, 7, [1, 2]);
 
-    const created = await groups.createFromTabs([2]);
+    const created = await groups.createFromTabs([2], 7);
 
     expect(await groups.tabIdsIn(1)).toEqual([1]);
     expect(await groups.tabIdsIn(created)).toEqual([2]);
@@ -95,8 +95,8 @@ describe('adapters/memory/native-groups.ts (membership)', () => {
     const groups = createMemoryNativeGroups([], 7);
     groups.moveNextGroupToWindow(8);
 
-    const odd = await groups.createFromTabs([1]);
-    const normal = await groups.createFromTabs([2]);
+    const odd = await groups.createFromTabs([1], 7);
+    const normal = await groups.createFromTabs([2], 7);
 
     expect((await groups.get(odd)).windowId).toBe(8);
     expect((await groups.get(normal)).windowId).toBe(7);

@@ -90,6 +90,193 @@ const nativeIds = async (env: Env, windowId = 1) =>
   (await env.groupState.getGroups(windowId))?.map((g) => g.nativeGroupId);
 
 describe('app/native-groups-sync.ts', () => {
+  describe('relink', () => {
+    /** Groups of window 1 with the native group each refers to, and the tabs in them as the browser has them */
+    async function afterRestart(
+      groups: Group[],
+      tabs: { id: number; group: number; native?: number }[],
+    ) {
+      const env = setUp({ windowIds: [1, 2] });
+      await env.groupState.setGroups(1, groups);
+      env.tabs.setDetails(tabs.map(({ id, native }) => tab(id, 1, native)));
+      await Promise.all(
+        tabs.map(({ id, group: groupId }) =>
+          env.groupState.setTabGroup(id, groupId),
+        ),
+      );
+      return env;
+    }
+
+    it('keeps the reference of a group whose tabs are in the native group it refers to', async () => {
+      const env = await afterRestart(
+        [group(1, 50)],
+        [
+          { id: 10, group: 1, native: 50 },
+          { id: 11, group: 1, native: 50 },
+        ],
+      );
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([50]);
+    });
+
+    it('links a group to the new native group its tabs are in, where the id it had is gone', async () => {
+      const env = await afterRestart(
+        [group(1, 50)],
+        [
+          { id: 10, group: 1, native: 77 },
+          { id: 11, group: 1, native: 77 },
+        ],
+      );
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([77]);
+    });
+
+    it('links a group to the native group of the tabs it has in one, though some are in none', async () => {
+      const env = await afterRestart(
+        [group(1, 50)],
+        [
+          { id: 10, group: 1, native: 77 },
+          { id: 11, group: 1 },
+          { id: 12, group: 1, native: -1 },
+        ],
+      );
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([77]);
+    });
+
+    it('forgets the reference of a group whose tabs are in no native group', async () => {
+      const env = await afterRestart(
+        [group(1, 50)],
+        [
+          { id: 10, group: 1 },
+          { id: 11, group: 1, native: -1 },
+        ],
+      );
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([undefined]);
+      expect((await env.groupState.getGroups(1))?.[0]).not.toHaveProperty(
+        'nativeGroupId',
+      );
+    });
+
+    it('forgets the reference of a group whose tabs are in several native groups, which it cannot choose between', async () => {
+      const env = await afterRestart(
+        [group(1, 50)],
+        [
+          { id: 10, group: 1, native: 77 },
+          { id: 11, group: 1, native: 78 },
+        ],
+      );
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([undefined]);
+    });
+
+    it('does not take a native group with the id 0 for one, as the clean-up does not', async () => {
+      const env = await afterRestart(
+        [group(1, 50)],
+        [{ id: 10, group: 1, native: 0 }],
+      );
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([undefined]);
+    });
+
+    it('forgets the reference of a group that has no tabs', async () => {
+      const env = await afterRestart([group(1, 50)], []);
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([undefined]);
+    });
+
+    it('forgets the reference that points to a native group that the tabs of another group are in', async () => {
+      const env = await afterRestart(
+        [group(1, 50), group(2)],
+        [
+          { id: 10, group: 2, native: 50 },
+          { id: 11, group: 1 },
+        ],
+      );
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([undefined, undefined]);
+    });
+
+    it('leaves a group that refers to none, and the group that never has one, as they are', async () => {
+      const env = await afterRestart(
+        [group(1), group(2, null)],
+        [{ id: 10, group: 1, native: 77 }],
+      );
+
+      await env.sync.relink();
+
+      expect(await nativeIds(env)).toEqual([undefined, null]);
+    });
+
+    it('writes nothing when nothing changed', async () => {
+      const env = await afterRestart(
+        [group(1, 50)],
+        [{ id: 10, group: 1, native: 50 }],
+      );
+      const setGroups = vi.spyOn(env.groupState, 'setGroups');
+
+      await env.sync.relink();
+
+      expect(setGroups).not.toHaveBeenCalled();
+    });
+
+    it('does nothing for a window that has no groups stored', async () => {
+      const env = setUp({ windowIds: [1, 2] });
+
+      await expect(env.sync.relink()).resolves.toBeUndefined();
+
+      expect(env.logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does every window, each by its own tabs', async () => {
+      const env = setUp({ windowIds: [1, 2] });
+      await env.groupState.setGroups(1, [group(1, 50)]);
+      await env.groupState.setGroups(2, [group(1, 50)]);
+      env.tabs.setDetails([tab(10, 1, 70), tab(20, 2, 80)]);
+      await env.groupState.setTabGroup(10, 1);
+      await env.groupState.setTabGroup(20, 1);
+
+      await env.sync.relink();
+
+      expect(
+        [
+          await env.groupState.getGroups(1),
+          await env.groupState.getGroups(2),
+        ].map((groups) => groups?.[0]?.nativeGroupId),
+      ).toEqual([70, 80]);
+    });
+
+    it('reports what went wrong and goes on, as the start-up must', async () => {
+      const env = setUp();
+      const failure = new Error('no storage');
+      env.windows.listIds = () => Promise.reject(failure);
+
+      await expect(env.sync.relink()).resolves.toBeUndefined();
+
+      expect(env.logger.warn).toHaveBeenCalledWith(
+        'Linking the groups to the native groups failed:',
+        failure,
+      );
+    });
+  });
+
   describe('migrate', () => {
     it('does nothing when it was done before', async () => {
       const env = setUp({ complete: true });

@@ -20,7 +20,11 @@ const fn = () => undefined;
 const initIn = (mode: BrowserMode) =>
   initNativeGroupsOption({
     i18n: { getMessage: markedMessage },
-    options: { load: loadOptions, save: set },
+    options: {
+      load: loadOptions,
+      save: set,
+      isSet: () => Promise.resolve(true),
+    },
     messaging: { send: sendMessage },
     capabilities: {
       hasTabHide: mode === 'hybrid' || mode === 'legacy',

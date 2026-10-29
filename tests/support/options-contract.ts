@@ -45,6 +45,24 @@ export function describeOptionsStoreContract(
       });
     });
 
+    it('says an option was never stored, though load gives its default', async () => {
+      await expect(store.isSet('theme')).resolves.toBe(false);
+      await expect(store.isSet('useNativeGroups')).resolves.toBe(false);
+    });
+
+    it('says an option was stored once it has been saved, and the others not', async () => {
+      await store.save({ theme: 'dark' });
+
+      await expect(store.isSet('theme')).resolves.toBe(true);
+      await expect(store.isSet('view')).resolves.toBe(false);
+    });
+
+    it('says an option was stored when storage held it already, even as the default', async () => {
+      store = create({ useNativeGroups: defaults.useNativeGroups });
+
+      await expect(store.isSet('useNativeGroups')).resolves.toBe(true);
+    });
+
     it('keeps what is saved and leaves the other options as they were', async () => {
       store = create({ view: 'freeform' });
 

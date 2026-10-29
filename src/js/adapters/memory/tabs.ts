@@ -55,6 +55,14 @@ export function createMemoryTabs(
     openWindowId: 1,
     listIdsInCurrentWindow: () => Promise.resolve(tabs.map(({ id }) => id)),
     listInCurrentWindow: () => Promise.resolve(tabs.map((tab) => ({ ...tab }))),
+    listSummariesInWindow: (windowId) =>
+      Promise.resolve(
+        inWindow(windowId).map(({ id, pinned }) => ({
+          id,
+          pinned,
+          lastAccessed: lastAccessed.get(id) ?? 0,
+        })),
+      ),
     get(tabId) {
       const found = details.find(({ id }) => id === tabId);
       return found === undefined

@@ -92,6 +92,24 @@ describe('app/native-group-assignment.ts', () => {
     );
   });
 
+  it('asks for the group in the window of the tabs, so that the browser does not make it in the window that has the focus and move the tabs there', async () => {
+    const env = await setUp([
+      { tab: tab(1), group: 1 },
+      { tab: tab(3), group: 1 },
+    ]);
+    const create = vi.spyOn(env.nativeGroups, 'createFromTabs');
+
+    await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(1, 'Work'),
+      groups: env.groups,
+      label: 'Migration',
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith([1, 3], WINDOW);
+  });
+
   it('gives the native group the name and colour of the group', async () => {
     const env = await setUp([
       { tab: tab(1), group: 1 },
@@ -281,7 +299,8 @@ describe('app/native-group-assignment.ts', () => {
       windows: env.windows,
       groupState: env.groupState,
       nativeGroups: {
-        createFromTabs: (ids) => env.nativeGroups.createFromTabs(ids),
+        createFromTabs: (ids, windowId) =>
+          env.nativeGroups.createFromTabs(ids, windowId),
         setAppearance: (id, look) => env.nativeGroups.setAppearance(id, look),
         get: (id) => env.nativeGroups.get(id),
         removeTabs: () => Promise.reject(failure),
@@ -334,7 +353,8 @@ describe('app/native-group-assignment.ts', () => {
       windows: env.windows,
       groupState: env.groupState,
       nativeGroups: {
-        createFromTabs: (ids) => env.nativeGroups.createFromTabs(ids),
+        createFromTabs: (ids, windowId) =>
+          env.nativeGroups.createFromTabs(ids, windowId),
         setAppearance: (id, look) => env.nativeGroups.setAppearance(id, look),
         get: () => Promise.reject(failure),
         removeTabs: (ids) => env.nativeGroups.removeTabs(ids),
