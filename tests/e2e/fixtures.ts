@@ -146,6 +146,16 @@ function createFirefoxPageProxy(activePage: Page, extensionId: string): Page {
                 let mockTabs = JSON.parse(localStorage.getItem('mockTabs') || '[{"id":101,"windowId":1,"pinned":false,"lastAccessed":0,"active":true,"title":"Tab 1","url":"https://example.com"},{"id":102,"windowId":1,"pinned":false,"lastAccessed":0,"active":false,"title":"Tab 2","url":"https://google.com"}]');
                 let mockTabIdCounter = parseInt(localStorage.getItem('mockTabIdCounter') || '103', 10);
 
+                // Like the real API, a change is told to the listeners of the page that made it
+                const changeListeners = [];
+                const told = (areaName, data) => {
+                  const changes = {};
+                  for (const [key, newValue] of Object.entries(data)) {
+                    changes[key] = { newValue };
+                  }
+                  changeListeners.forEach((listener) => listener(changes, areaName));
+                };
+
                 window.browser = {
                   runtime: {
                     getURL: (p) => 'moz-extension://' + extId + '/' + p,
@@ -170,6 +180,7 @@ function createFirefoxPageProxy(activePage: Page, extensionId: string): Page {
                         for (const [key, val] of Object.entries(data)) {
                           localStorage.setItem('sync_' + key, JSON.stringify(val));
                         }
+                        told('sync', data);
                       },
                       clear: async () => localStorage.clear()
                     },
@@ -187,10 +198,11 @@ function createFirefoxPageProxy(activePage: Page, extensionId: string): Page {
                         for (const [key, val] of Object.entries(data)) {
                           localStorage.setItem('local_' + key, JSON.stringify(val));
                         }
+                        told('local', data);
                       },
                       clear: async () => localStorage.clear()
                     },
-                    onChanged: { addListener: () => {} }
+                    onChanged: { addListener: (listener) => { changeListeners.push(listener); } }
                   },
                   windows: {
                     getCurrent: async () => {
