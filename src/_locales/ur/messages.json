@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "نیا گروپ شامل کریں"
+  },
+  "freeformButton": {
+    "message": "آزاد ترتیب"
+  },
+  "tilingButton": {
+    "message": "خودکار (ٹائلنگ) ترتیب"
+  },
+  "settingsButton": {
+    "message": "ترتیبات"
+  },
+  "defaultGroupName": {
+    "message": "گروپ"
+  },
+  "dragGroup": {
+    "message": "گروپ کھینچیں"
+  },
+  "closeGroup": {
+    "message": "گروپ بند کریں"
+  },
+  "closeGroupWarning": {
+    "message": "one=اس گروپ کو بند کرنے سے اس کے اندر موجود $1 ٹیب بند ہو جائے گا۔ کیا آپ واقعی ایسا کرنا چاہتے ہیں؟|other=اس گروپ کو بند کرنے سے اس کے اندر موجود $1 ٹیبز بند ہو جائیں گے۔ کیا آپ واقعی ایسا کرنا چاہتے ہیں؟"
+  },
+  "editGroup": {
+    "message": "گروپ میں ترمیم کریں"
+  },
+  "closeTab": {
+    "message": "ٹیب بند کریں"
+  },
+  "openNewTab": {
+    "message": "نیا ٹیب کھولیں"
+  },
+  "tabCount": {
+    "message": "one=$1 ٹیب|other=$1 ٹیبز"
+  },
+  "searchForTab_placeholder": {
+    "message": "ٹیب تلاش کریں..."
+  },
+  "searchForTab_noResults": {
+    "message": "کوئی ٹیب نہیں ملا"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "کی بورڈ شارٹ کٹس"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "شارٹ کٹ آپشن کی ساخت یہاں بیان کی گئی ہے۔"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "اپ ڈیٹ کریں"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "ری سیٹ کریں"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "غیر فعال کریں"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "فعال کریں"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ٹیب گروپس کا منظر تبدیل کریں"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "اگلا ٹیب گروپ فعال کریں"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "پچھلا ٹیب گروپ فعال کریں"
+  },
+  "optionsView": {
+    "message": "منظر"
+  },
+  "optionsViewFreeform": {
+    "message": "آزاد (کلاسک)"
+  },
+  "optionsViewPopup": {
+    "message": "پاپ اپ"
+  },
+  "optionsTheme": {
+    "message": "تھیم"
+  },
+  "optionsThemeLight": {
+    "message": "ہلکی"
+  },
+  "optionsThemeDark": {
+    "message": "گہری"
+  },
+  "optionsToolbar": {
+    "message": "ٹول بار"
+  },
+  "optionsToolbarPosition": {
+    "message": "مقام"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "اوپر"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "دائیں"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "نیچے"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "بائیں"
+  },
+  "optionsBackup": {
+    "message": "بیک اپ"
+  },
+  "optionsBackupImport": {
+    "message": "درآمد کریں"
+  },
+  "optionsBackupImportText": {
+    "message": "درآمد کیے گئے بیک اپ نئی ونڈوز میں کھلیں گے اور کسی چیز کو اوور رائٹ نہیں کریں گے۔\nآپ پرانے \"Tab Groups\" ایڈ آن کے بیک اپ بھی درآمد کر سکتے ہیں۔"
+  },
+  "optionsBackupExport": {
+    "message": "برآمد کریں"
+  },
+  "optionsBackupExportText": {
+    "message": "جب Firefox میں سیشنز کا مناسب انتظام ممکن ہو جائے تو یہ حصہ غیر ضروری ہو سکتا ہے۔"
+  },
+  "optionsBackupExportButton": {
+    "message": "بیک اپ محفوظ کریں"
+  },
+  "optionsStatistics": {
+    "message": "اعداد و شمار"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ٹیبز کی تعداد:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (فعال: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "تھمب نیل کیش کا سائز:"
+  },
+  "refreshGroups": {
+    "message": "گروپس ریفریش کریں"
+  },
+  "sendTabToGroup": {
+    "message": "ٹیب کو گروپ میں بھیجیں"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "صارفین Firefox میں about:addons پر \"ایکسٹینشن شارٹ کٹس کا نظم کریں\" آپشن کے ذریعے بھی شارٹ کٹس اپ ڈیٹ کر سکتے ہیں، جیسا کہ {link} دکھایا گیا ہے۔"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "مثالی ویڈیو میں"
+  },
+  "optionsThemeAuto": {
+    "message": "سسٹم کی پیروی کریں"
+  },
+  "optionsNativeGroups": {
+    "message": "براؤزر کے اپنے گروپس"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "براؤزر کے اپنے ٹیب گروپس استعمال کریں"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "بصری ترتیب اور سمیٹنے کے لیے براؤزر کے اپنے ٹیب گروپس استعمال کریں۔"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "اس براؤزر ورژن میں اپنے ٹیب گروپس معاون نہیں ہیں (ٹیب چھپانے والا API درکار ہے)۔"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "اس براؤزر ورژن میں اپنے ٹیب گروپس معاون نہیں ہیں۔ براہ کرم Firefox 139+ پر اپ ڈیٹ کریں یا Chrome 89+ استعمال کریں۔"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "آپ کا براؤزر ٹیب گروپس کے لیے درکار APIs کی معاونت نہیں کرتا۔"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "براؤزر کے اپنے گروپس فعال ہو گئے۔ گروپس منتقل کیے جا رہے ہیں..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "براؤزر کے اپنے گروپس غیر فعال ہو گئے۔ صفائی کی جا رہی ہے..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "غلط فائل"
+  },
+  "byteSizeBytes": {
+    "message": "$1 بائٹس"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ٹیب گروپس بحال کیے جا رہے ہیں..."
+  },
+  "migrationTitle": {
+    "message": "ہائبرڈ ٹیب گروپس کی منتقلی"
+  },
+  "migrationChecking": {
+    "message": "منتقلی کی حالت جانچی جا رہی ہے..."
+  },
+  "migrationRun": {
+    "message": "منتقلی ابھی چلائیں"
+  },
+  "migrationReset": {
+    "message": "منتقلی کا فلیگ ری سیٹ کریں"
+  },
+  "migrationCurrentGroups": {
+    "message": "موجودہ گروپس"
+  },
+  "migrationLoadingGroups": {
+    "message": "گروپس لوڈ ہو رہے ہیں..."
+  },
+  "migrationComplete": {
+    "message": "✓ منتقلی مکمل - تمام گروپس ہائبرڈ نظام میں منتقل ہو گئے ہیں"
+  },
+  "migrationPending": {
+    "message": "⚠ منتقلی زیر التوا - گروپس ابھی منتقل نہیں ہوئے"
+  },
+  "migrationStatusError": {
+    "message": "منتقلی کی حالت جانچنے میں خرابی: $1"
+  },
+  "migrationNoGroups": {
+    "message": "موجودہ ونڈو میں کوئی گروپ نہیں ملا"
+  },
+  "migrationGroupsError": {
+    "message": "گروپس لوڈ کرنے میں خرابی: $1"
+  },
+  "migrationRunning": {
+    "message": "منتقلی جاری ہے..."
+  },
+  "migrationSucceeded": {
+    "message": "منتقلی کامیابی سے مکمل ہو گئی!"
+  },
+  "migrationFailed": {
+    "message": "منتقلی ناکام ہو گئی: $1"
+  },
+  "migrationNoResponse": {
+    "message": "کوئی جواب نہیں"
+  },
+  "migrationRunError": {
+    "message": "منتقلی کی خرابی: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "منتقلی کا فلیگ ری سیٹ کریں؟ اس سے منتقلی دوبارہ چلائی جا سکے گی۔"
+  },
+  "migrationResetSucceeded": {
+    "message": "منتقلی کا فلیگ کامیابی سے ری سیٹ ہو گیا!"
+  },
+  "migrationResetFailed": {
+    "message": "ری سیٹ ناکام ہو گیا: $1"
+  },
+  "migrationResetError": {
+    "message": "ری سیٹ کی خرابی: $1"
+  },
+  "migrationGroup": {
+    "message": "گروپ $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ منتقل ہو گیا (اپنی شناخت: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ منتقل نہیں ہوا"
+  },
+  "migrationGroupStatus": {
+    "message": "حالت: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ٹیب گروپس کا منظر"
+  }
+}

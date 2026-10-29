@@ -18,6 +18,58 @@ export const sidewaysOverflow = (page: Page): Promise<number> =>
       document.documentElement.clientWidth,
   );
 
+/**
+ * The pairs of texts on the page that are written over each other: the text of one is where the text of
+ * another is, which is what a label does that is longer than the room it was given. The part of a text that
+ * is on a line is what is measured, and a hidden text or a pair that only touch is not counted.
+ */
+export const overlappingTexts = (page: Page): Promise<string[]> =>
+  page.evaluate(() => {
+    const found: { text: string; box: DOMRect }[] = [];
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+    );
+    for (
+      let node = walker.nextNode();
+      node !== null;
+      node = walker.nextNode()
+    ) {
+      const text = (node.textContent ?? '').trim();
+      const element = node.parentElement;
+      const style = element === null ? undefined : getComputedStyle(element);
+      const shown =
+        text !== '' &&
+        style !== undefined &&
+        style.visibility !== 'hidden' &&
+        style.display !== 'none';
+      if (shown) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const box of range.getClientRects()) {
+          if (box.width > 1 && box.height > 1) {
+            found.push({ text, box });
+          }
+        }
+      }
+    }
+    const overlaps: string[] = [];
+    found.forEach((first, index) => {
+      found.slice(index + 1).forEach((second) => {
+        const across =
+          Math.min(first.box.right, second.box.right) -
+          Math.max(first.box.left, second.box.left);
+        const down =
+          Math.min(first.box.bottom, second.box.bottom) -
+          Math.max(first.box.top, second.box.top);
+        if (across > 2 && down > 2 && first.text !== second.text) {
+          overlaps.push(`${first.text} | ${second.text}`);
+        }
+      });
+    });
+    return overlaps;
+  });
+
 /** Make a group in the popup, which asks for its name in the second frame */
 async function makeGroup(page: Page, name: string): Promise<void> {
   await page.locator('#main-frame .button-ghost--new').click();

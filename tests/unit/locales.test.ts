@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { pluralCategory, pluralForms } from '../../src/js/core/plural.js';
 import { isRecord, isNumber, isString } from '../../src/js/share/guards.js';
+import { copiesOfEnglish } from '../../scripts/lib/locale-report.js';
 import { localeFolders, readLocale } from '../support/locales.js';
 
 const folders = localeFolders();
@@ -40,6 +41,15 @@ const allowedGaps: unknown = JSON.parse(
   readFileSync('tests/unit/locale-gaps.json', 'utf8'),
 );
 
+/**
+ * How many messages each folder may have that are the same as English without being among those that
+ * rightly are (`KEPT_AS_IS`): a copy that was not translated, or a word that is the same in the language
+ * (`Position`, `Import`). It can only get smaller, like the gaps, and a new language says what it has.
+ */
+const allowedCopies: unknown = JSON.parse(
+  readFileSync('tests/unit/locale-copies.json', 'utf8'),
+);
+
 describe('locales', () => {
   it('has English, which the manifest names as the default', () => {
     const manifest: unknown = JSON.parse(
@@ -55,7 +65,7 @@ describe('locales', () => {
     (folder) => {
       // Whether a browser loads the folder is tested in a real one, in locales.spec.ts: a
       // folder with a region it does not report was never loaded, as el_GR, fr_FR and tr_TR
-      expect(folder).toMatch(/^[a-z]{2,3}(_[A-Z]{2})?$/u);
+      expect(folder).toMatch(/^[a-z]{2,3}(_[A-Z]{2}|_[0-9]{3})?$/u);
     },
   );
 
@@ -153,6 +163,28 @@ describe('locales', () => {
 
         expect(isNumber(allowed)).toBe(true);
         expect(missingFrom(folder)).toBe(allowed);
+      },
+    );
+  });
+
+  describe('what each language has copied from English', () => {
+    it('is written down for every language, and for no other', () => {
+      expect(
+        isRecord(allowedCopies) && Object.keys(allowedCopies).sort(),
+      ).toEqual(translations);
+    });
+
+    it.each(translations)(
+      '%s has as many messages that are the same as English as is written down: no more, and no fewer',
+      (folder) => {
+        const allowed = isRecord(allowedCopies)
+          ? allowedCopies[folder]
+          : undefined;
+
+        expect(isNumber(allowed)).toBe(true);
+        expect(copiesOfEnglish(english, readLocale(folder))).toHaveLength(
+          Number(allowed),
+        );
       },
     );
   });

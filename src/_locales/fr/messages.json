@@ -23,6 +23,9 @@
   "closeGroupWarning": {
     "message": "one=La fermeture de ce groupe fermera $1 onglet à l'intérieur de celui-ci. Êtes-vous sûr de vouloir faire ça ?|other=La fermeture de ce groupe fermera $1 onglets à l'intérieur de celui-ci. Êtes-vous sûr de vouloir faire ça ?"
   },
+  "editGroup": {
+    "message": "Modifier le groupe"
+  },
   "closeTab": {
     "message": "Fermer l'onglet"
   },
@@ -128,8 +131,8 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "Nombre d'onglets :"
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "Actif :"
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Actif : $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "Taille du cache des miniatures :"
@@ -139,5 +142,134 @@
   },
   "sendTabToGroup": {
     "message": "Envoyer au groupe"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Les utilisateurs peuvent aussi modifier les raccourcis via l'option « Gérer les raccourcis des extensions » de about:addons dans Firefox, comme le montre {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "la vidéo d'exemple"
+  },
+  "optionsThemeAuto": {
+    "message": "Suivre le système"
+  },
+  "optionsNativeGroups": {
+    "message": "Groupes natifs du navigateur"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Utiliser les groupes d'onglets natifs du navigateur"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Utiliser les groupes d'onglets natifs du navigateur pour l'organisation visuelle et le repli."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Les groupes d'onglets natifs ne sont pas pris en charge par cette version du navigateur (l'API de masquage des onglets est requise)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Les groupes d'onglets natifs ne sont pas pris en charge par cette version du navigateur. Veuillez passer à Firefox 139+ ou utiliser Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Votre navigateur ne prend pas en charge les API nécessaires aux groupes d'onglets."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Groupes natifs activés. Migration des groupes..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Groupes natifs désactivés. Nettoyage..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Fichier non valide"
+  },
+  "byteSizeBytes": {
+    "message": "$1 octets"
+  },
+  "byteSizeKiB": {
+    "message": "$1 Kio"
+  },
+  "byteSizeMiB": {
+    "message": "$1 Mio"
+  },
+  "byteSizeGiB": {
+    "message": "$1 Gio"
+  },
+  "initializationRestoring": {
+    "message": "Restauration des groupes d'onglets..."
+  },
+  "migrationTitle": {
+    "message": "Migration des groupes d'onglets hybrides"
+  },
+  "migrationChecking": {
+    "message": "Vérification de l'état de la migration..."
+  },
+  "migrationRun": {
+    "message": "Lancer la migration maintenant"
+  },
+  "migrationReset": {
+    "message": "Réinitialiser l'indicateur de migration"
+  },
+  "migrationCurrentGroups": {
+    "message": "Groupes actuels"
+  },
+  "migrationLoadingGroups": {
+    "message": "Chargement des groupes..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migration terminée - Tous les groupes ont été migrés vers le système hybride"
+  },
+  "migrationPending": {
+    "message": "⚠ Migration en attente - Les groupes n'ont pas encore été migrés"
+  },
+  "migrationStatusError": {
+    "message": "Erreur lors de la vérification de l'état de la migration : $1"
+  },
+  "migrationNoGroups": {
+    "message": "Aucun groupe trouvé dans la fenêtre actuelle"
+  },
+  "migrationGroupsError": {
+    "message": "Erreur lors du chargement des groupes : $1"
+  },
+  "migrationRunning": {
+    "message": "Migration en cours..."
+  },
+  "migrationSucceeded": {
+    "message": "Migration terminée avec succès !"
+  },
+  "migrationFailed": {
+    "message": "Échec de la migration : $1"
+  },
+  "migrationNoResponse": {
+    "message": "Aucune réponse"
+  },
+  "migrationRunError": {
+    "message": "Erreur de migration : $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Réinitialiser l'indicateur de migration ? Cela permettra de relancer la migration."
+  },
+  "migrationResetSucceeded": {
+    "message": "Indicateur de migration réinitialisé avec succès !"
+  },
+  "migrationResetFailed": {
+    "message": "Échec de la réinitialisation : $1"
+  },
+  "migrationResetError": {
+    "message": "Erreur de réinitialisation : $1"
+  },
+  "migrationGroup": {
+    "message": "Groupe $1 :"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migré (ID natif : $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Non migré"
+  },
+  "migrationGroupStatus": {
+    "message": "État : $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vue des groupes d'onglets"
   }
 }

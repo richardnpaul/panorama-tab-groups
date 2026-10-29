@@ -23,3 +23,7 @@ export function applyLanguage(
     root.lang = locale;
   }
 }
+
+/** Whether the page was told that its text runs from the right (see `applyLanguage`) */
+export const runsFromTheRight = (page: { documentElement: Root }): boolean =>
+  page.documentElement.dir === 'rtl';

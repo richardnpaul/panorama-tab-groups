@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Adaugă un grup nou"
+  },
+  "freeformButton": {
+    "message": "Aranjare liberă"
+  },
+  "tilingButton": {
+    "message": "Aranjare automată (în mozaic)"
+  },
+  "settingsButton": {
+    "message": "Setări"
+  },
+  "defaultGroupName": {
+    "message": "Grp."
+  },
+  "dragGroup": {
+    "message": "Trage grupul"
+  },
+  "closeGroup": {
+    "message": "Închide grupul"
+  },
+  "closeGroupWarning": {
+    "message": "one=Închiderea acestui grup va închide fila $1 din el. Ești sigur că vrei să faci asta?|few=Închiderea acestui grup va închide cele $1 file din el. Ești sigur că vrei să faci asta?|other=Închiderea acestui grup va închide cele $1 de file din el. Ești sigur că vrei să faci asta?"
+  },
+  "editGroup": {
+    "message": "Editează grupul"
+  },
+  "closeTab": {
+    "message": "Închide fila"
+  },
+  "openNewTab": {
+    "message": "Deschide o filă nouă"
+  },
+  "tabCount": {
+    "message": "one=$1 filă|few=$1 file|other=$1 de file"
+  },
+  "searchForTab_placeholder": {
+    "message": "Caută o filă..."
+  },
+  "searchForTab_noResults": {
+    "message": "Nu s-a găsit nicio filă"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Comenzi rapide de la tastatură"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Formatul opțiunii pentru comenzile rapide este descris aici."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Actualizează"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Resetează"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Dezactivează"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Activează"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Comută vizualizarea grupurilor de file"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Activează grupul de file următor"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Activează grupul de file anterior"
+  },
+  "optionsView": {
+    "message": "Vizualizare"
+  },
+  "optionsViewFreeform": {
+    "message": "Liberă (clasică)"
+  },
+  "optionsViewPopup": {
+    "message": "Fereastră pop-up"
+  },
+  "optionsTheme": {
+    "message": "Temă"
+  },
+  "optionsThemeLight": {
+    "message": "deschisă"
+  },
+  "optionsThemeDark": {
+    "message": "întunecată"
+  },
+  "optionsToolbar": {
+    "message": "Bară de instrumente"
+  },
+  "optionsToolbarPosition": {
+    "message": "Poziție"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "sus"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "dreapta"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "jos"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "stânga"
+  },
+  "optionsBackup": {
+    "message": "Copie de siguranță"
+  },
+  "optionsBackupImport": {
+    "message": "Importă"
+  },
+  "optionsBackupImportText": {
+    "message": "Copiile de siguranță importate se vor deschide în ferestre noi și nu vor suprascrie nimic.\nPoți importa și copii de siguranță din vechiul supliment „Tab Groups”."
+  },
+  "optionsBackupExport": {
+    "message": "Exportă"
+  },
+  "optionsBackupExportText": {
+    "message": "Această secțiune ar putea deveni inutilă când va fi posibilă o gestionare corectă a sesiunilor în Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Salvează copia de siguranță"
+  },
+  "optionsStatistics": {
+    "message": "Statistici"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Număr de file:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Active: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Dimensiunea memoriei cache pentru miniaturi:"
+  },
+  "refreshGroups": {
+    "message": "Reîmprospătează grupurile"
+  },
+  "sendTabToGroup": {
+    "message": "Trimite fila într-un grup"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Utilizatorii pot actualiza comenzile rapide și prin opțiunea „Gestionează comenzile rapide ale extensiilor” de la about:addons în Firefox, după cum se vede {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "în videoclipul exemplu"
+  },
+  "optionsThemeAuto": {
+    "message": "Urmează sistemul"
+  },
+  "optionsNativeGroups": {
+    "message": "Grupurile native ale browserului"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Folosește grupurile de file native ale browserului"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Folosește grupurile de file native ale browserului pentru organizare vizuală și restrângere."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Grupurile de file native nu sunt acceptate în această versiune de browser (necesită API-ul de ascundere a filelor)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Grupurile de file native nu sunt acceptate în această versiune de browser. Actualizează la Firefox 139+ sau folosește Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Browserul tău nu acceptă API-urile necesare pentru grupurile de file."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grupurile native au fost activate. Se migrează grupurile..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grupurile native au fost dezactivate. Se curăță..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Fișier nevalid"
+  },
+  "byteSizeBytes": {
+    "message": "$1 octeți"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Se restaurează grupurile de file..."
+  },
+  "migrationTitle": {
+    "message": "Migrarea grupurilor de file hibride"
+  },
+  "migrationChecking": {
+    "message": "Se verifică starea migrării..."
+  },
+  "migrationRun": {
+    "message": "Rulează migrarea acum"
+  },
+  "migrationReset": {
+    "message": "Resetează indicatorul de migrare"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grupuri curente"
+  },
+  "migrationLoadingGroups": {
+    "message": "Se încarcă grupurile..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migrare finalizată - Toate grupurile au fost migrate în sistemul hibrid"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrare în așteptare - Grupurile nu au fost încă migrate"
+  },
+  "migrationStatusError": {
+    "message": "Eroare la verificarea stării migrării: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Nu s-a găsit niciun grup în fereastra curentă"
+  },
+  "migrationGroupsError": {
+    "message": "Eroare la încărcarea grupurilor: $1"
+  },
+  "migrationRunning": {
+    "message": "Se rulează migrarea..."
+  },
+  "migrationSucceeded": {
+    "message": "Migrarea s-a finalizat cu succes!"
+  },
+  "migrationFailed": {
+    "message": "Migrarea a eșuat: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Niciun răspuns"
+  },
+  "migrationRunError": {
+    "message": "Eroare de migrare: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Resetezi indicatorul de migrare? Astfel, migrarea poate fi rulată din nou."
+  },
+  "migrationResetSucceeded": {
+    "message": "Indicatorul de migrare a fost resetat cu succes!"
+  },
+  "migrationResetFailed": {
+    "message": "Resetarea a eșuat: $1"
+  },
+  "migrationResetError": {
+    "message": "Eroare de resetare: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupul $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrat (ID nativ: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Nemigrat"
+  },
+  "migrationGroupStatus": {
+    "message": "Stare: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vizualizarea grupurilor de file"
+  }
+}

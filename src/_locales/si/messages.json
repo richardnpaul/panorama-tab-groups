@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "නව කණ්ඩායමක් එක් කරන්න"
+  },
+  "freeformButton": {
+    "message": "නිදහස් පිරිසැලසුම"
+  },
+  "tilingButton": {
+    "message": "ස්වයංක්‍රීය (ටයිල්) පිරිසැලසුම"
+  },
+  "settingsButton": {
+    "message": "සැකසුම්"
+  },
+  "defaultGroupName": {
+    "message": "කණ්ඩායම"
+  },
+  "dragGroup": {
+    "message": "කණ්ඩායම ඇදගන්න"
+  },
+  "closeGroup": {
+    "message": "කණ්ඩායම වසන්න"
+  },
+  "closeGroupWarning": {
+    "message": "one=මෙම කණ්ඩායම වැසීමෙන් එහි ඇති ටැබ් $1 වැසෙනු ඇත. ඔබට මෙය කිරීමට අවශ්‍ය බව විශ්වාසද?|other=මෙම කණ්ඩායම වැසීමෙන් එහි ඇති ටැබ් $1 වැසෙනු ඇත. ඔබට මෙය කිරීමට අවශ්‍ය බව විශ්වාසද?"
+  },
+  "editGroup": {
+    "message": "කණ්ඩායම සංස්කරණය කරන්න"
+  },
+  "closeTab": {
+    "message": "ටැබය වසන්න"
+  },
+  "openNewTab": {
+    "message": "නව ටැබයක් විවෘත කරන්න"
+  },
+  "tabCount": {
+    "message": "one=ටැබ් $1|other=ටැබ් $1"
+  },
+  "searchForTab_placeholder": {
+    "message": "ටැබයක් සොයන්න..."
+  },
+  "searchForTab_noResults": {
+    "message": "ටැබ් කිසිවක් හමු නොවීය"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "යතුරුපුවරු කෙටිමං"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "කෙටිමං විකල්පයේ ආකෘතිය මෙහි විස්තර කර ඇත."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "යාවත්කාලීන කරන්න"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "යළි සකසන්න"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "අබල කරන්න"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "සබල කරන්න"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ටැබ් කණ්ඩායම් දසුන මාරු කරන්න"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "ඊළඟ ටැබ් කණ්ඩායම සක්‍රිය කරන්න"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "පෙර ටැබ් කණ්ඩායම සක්‍රිය කරන්න"
+  },
+  "optionsView": {
+    "message": "දසුන"
+  },
+  "optionsViewFreeform": {
+    "message": "නිදහස් (සම්භාව්‍ය)"
+  },
+  "optionsViewPopup": {
+    "message": "උත්පතන"
+  },
+  "optionsTheme": {
+    "message": "තේමාව"
+  },
+  "optionsThemeLight": {
+    "message": "ලා"
+  },
+  "optionsThemeDark": {
+    "message": "තද"
+  },
+  "optionsToolbar": {
+    "message": "මෙවලම් තීරුව"
+  },
+  "optionsToolbarPosition": {
+    "message": "ස්ථානය"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ඉහළ"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "දකුණ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "පහළ"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "වම"
+  },
+  "optionsBackup": {
+    "message": "උපස්ථය"
+  },
+  "optionsBackupImport": {
+    "message": "ආයාත කරන්න"
+  },
+  "optionsBackupImportText": {
+    "message": "ආයාත කළ උපස්ථ නව කවුළුවල විවෘත වන අතර කිසිවක් උඩින් ලියන්නේ නැත.\nඔබට පැරණි \"Tab Groups\" ඇඩෝනයේ උපස්ථද ආයාත කළ හැක."
+  },
+  "optionsBackupExport": {
+    "message": "නිර්යාත කරන්න"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox හි නිසි සැසි කළමනාකරණය කළ හැකි වූ විට මෙම කොටස අනවශ්‍ය විය හැක."
+  },
+  "optionsBackupExportButton": {
+    "message": "උපස්ථය සුරකින්න"
+  },
+  "optionsStatistics": {
+    "message": "සංඛ්‍යාලේඛන"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ටැබ් ගණන:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (සක්‍රිය: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "සිඟිති රූ හැඹිලි ප්‍රමාණය:"
+  },
+  "refreshGroups": {
+    "message": "කණ්ඩායම් නැවුම් කරන්න"
+  },
+  "sendTabToGroup": {
+    "message": "ටැබය කණ්ඩායමකට යවන්න"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "පරිශීලකයින්ට Firefox හි about:addons හි ඇති \"දිගු කෙටිමං කළමනාකරණය\" විකල්පය හරහාද කෙටිමං යාවත්කාලීන කළ හැක, {link} පෙන්වා ඇති පරිදි."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "නිදර්ශන වීඩියෝවෙහි"
+  },
+  "optionsThemeAuto": {
+    "message": "පද්ධතිය අනුගමනය කරන්න"
+  },
+  "optionsNativeGroups": {
+    "message": "බ්‍රවුසරයේ ස්වකීය කණ්ඩායම්"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "බ්‍රවුසරයේ ස්වකීය ටැබ් කණ්ඩායම් භාවිත කරන්න"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "දෘශ්‍ය සංවිධානය සහ හකුළුවීම සඳහා බ්‍රවුසරයේ ස්වකීය ටැබ් කණ්ඩායම් භාවිත කරන්න."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "මෙම බ්‍රවුසර අනුවාදයේ ස්වකීය ටැබ් කණ්ඩායම් සඳහා සහාය නොමැත (ටැබ් සැඟවීමේ API අවශ්‍යයි)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "මෙම බ්‍රවුසර අනුවාදයේ ස්වකීය ටැබ් කණ්ඩායම් සඳහා සහාය නොමැත. කරුණාකර Firefox 139+ වෙත යාවත්කාලීන කරන්න හෝ Chrome 89+ භාවිත කරන්න."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "ඔබගේ බ්‍රවුසරය ටැබ් කණ්ඩායම් සඳහා අවශ්‍ය API වලට සහාය නොදක්වයි."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "ස්වකීය කණ්ඩායම් සබල කළා. කණ්ඩායම් සංක්‍රමණය වෙමින්..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "ස්වකීය කණ්ඩායම් අබල කළා. පිරිසිදු කරමින්..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "වලංගු නොවන ගොනුව"
+  },
+  "byteSizeBytes": {
+    "message": "බයිට් $1"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ටැබ් කණ්ඩායම් ප්‍රතිෂ්ඨාපනය වෙමින්..."
+  },
+  "migrationTitle": {
+    "message": "දෙමුහුන් ටැබ් කණ්ඩායම් සංක්‍රමණය"
+  },
+  "migrationChecking": {
+    "message": "සංක්‍රමණ තත්ත්වය පරීක්ෂා කරමින්..."
+  },
+  "migrationRun": {
+    "message": "සංක්‍රමණය දැන් ක්‍රියාත්මක කරන්න"
+  },
+  "migrationReset": {
+    "message": "සංක්‍රමණ ධජය යළි සකසන්න"
+  },
+  "migrationCurrentGroups": {
+    "message": "වත්මන් කණ්ඩායම්"
+  },
+  "migrationLoadingGroups": {
+    "message": "කණ්ඩායම් පූරණය වෙමින්..."
+  },
+  "migrationComplete": {
+    "message": "✓ සංක්‍රමණය සම්පූර්ණයි - සියලු කණ්ඩායම් දෙමුහුන් පද්ධතියට සංක්‍රමණය වී ඇත"
+  },
+  "migrationPending": {
+    "message": "⚠ සංක්‍රමණය පොරොත්තුවෙන් - කණ්ඩායම් තවම සංක්‍රමණය වී නැත"
+  },
+  "migrationStatusError": {
+    "message": "සංක්‍රමණ තත්ත්වය පරීක්ෂා කිරීමේ දෝෂය: $1"
+  },
+  "migrationNoGroups": {
+    "message": "වත්මන් කවුළුවේ කණ්ඩායම් හමු නොවීය"
+  },
+  "migrationGroupsError": {
+    "message": "කණ්ඩායම් පූරණය කිරීමේ දෝෂය: $1"
+  },
+  "migrationRunning": {
+    "message": "සංක්‍රමණය ක්‍රියාත්මක වෙමින්..."
+  },
+  "migrationSucceeded": {
+    "message": "සංක්‍රමණය සාර්ථකව සම්පූර්ණ විය!"
+  },
+  "migrationFailed": {
+    "message": "සංක්‍රමණය අසාර්ථක විය: $1"
+  },
+  "migrationNoResponse": {
+    "message": "ප්‍රතිචාරයක් නැත"
+  },
+  "migrationRunError": {
+    "message": "සංක්‍රමණ දෝෂය: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "සංක්‍රමණ ධජය යළි සකසන්නද? මෙය සංක්‍රමණය නැවත ක්‍රියාත්මක කිරීමට ඉඩ දෙයි."
+  },
+  "migrationResetSucceeded": {
+    "message": "සංක්‍රමණ ධජය සාර්ථකව යළි සකසන ලදී!"
+  },
+  "migrationResetFailed": {
+    "message": "යළි සැකසීම අසාර්ථක විය: $1"
+  },
+  "migrationResetError": {
+    "message": "යළි සැකසීමේ දෝෂය: $1"
+  },
+  "migrationGroup": {
+    "message": "කණ්ඩායම $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ සංක්‍රමණය විය (ස්වකීය ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ සංක්‍රමණය වී නැත"
+  },
+  "migrationGroupStatus": {
+    "message": "තත්ත්වය: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ටැබ් කණ්ඩායම් දසුන"
+  }
+}

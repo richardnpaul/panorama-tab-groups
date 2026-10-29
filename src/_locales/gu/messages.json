@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "નવું જૂથ ઉમેરો"
+  },
+  "freeformButton": {
+    "message": "મુક્ત ગોઠવણી"
+  },
+  "tilingButton": {
+    "message": "આપમેળે (ટાઇલિંગ) ગોઠવણી"
+  },
+  "settingsButton": {
+    "message": "સેટિંગ્સ"
+  },
+  "defaultGroupName": {
+    "message": "જૂથ"
+  },
+  "dragGroup": {
+    "message": "જૂથ ખેંચો"
+  },
+  "closeGroup": {
+    "message": "જૂથ બંધ કરો"
+  },
+  "closeGroupWarning": {
+    "message": "one=આ જૂથ બંધ કરવાથી તેની અંદરનું $1 ટેબ બંધ થઈ જશે. શું તમને ખાતરી છે કે તમે આ કરવા માંગો છો?|other=આ જૂથ બંધ કરવાથી તેની અંદરના $1 ટેબ બંધ થઈ જશે. શું તમને ખાતરી છે કે તમે આ કરવા માંગો છો?"
+  },
+  "editGroup": {
+    "message": "જૂથ સંપાદિત કરો"
+  },
+  "closeTab": {
+    "message": "ટેબ બંધ કરો"
+  },
+  "openNewTab": {
+    "message": "નવું ટેબ ખોલો"
+  },
+  "tabCount": {
+    "message": "one=$1 ટેબ|other=$1 ટેબ"
+  },
+  "searchForTab_placeholder": {
+    "message": "ટેબ શોધો..."
+  },
+  "searchForTab_noResults": {
+    "message": "કોઈ ટેબ મળ્યા નથી"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "કીબોર્ડ શૉર્ટકટ"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "શૉર્ટકટ વિકલ્પનું ફોર્મેટ અહીં વિગતવાર આપેલ છે."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "અપડેટ કરો"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "રીસેટ કરો"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "અક્ષમ કરો"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "સક્ષમ કરો"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ટેબ જૂથ દૃશ્ય ટૉગલ કરો"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "આગલું ટેબ જૂથ સક્રિય કરો"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "પાછલું ટેબ જૂથ સક્રિય કરો"
+  },
+  "optionsView": {
+    "message": "દૃશ્ય"
+  },
+  "optionsViewFreeform": {
+    "message": "મુક્ત (ક્લાસિક)"
+  },
+  "optionsViewPopup": {
+    "message": "પૉપઅપ"
+  },
+  "optionsTheme": {
+    "message": "થીમ"
+  },
+  "optionsThemeLight": {
+    "message": "આછી"
+  },
+  "optionsThemeDark": {
+    "message": "ઘેરી"
+  },
+  "optionsToolbar": {
+    "message": "ટૂલબાર"
+  },
+  "optionsToolbarPosition": {
+    "message": "સ્થાન"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ઉપર"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "જમણે"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "નીચે"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ડાબે"
+  },
+  "optionsBackup": {
+    "message": "બેકઅપ"
+  },
+  "optionsBackupImport": {
+    "message": "આયાત કરો"
+  },
+  "optionsBackupImportText": {
+    "message": "આયાત કરેલા બેકઅપ નવી વિન્ડોમાં ખુલશે અને કંઈ પણ ઓવરરાઇટ કરશે નહીં.\nતમે જૂના \"Tab Groups\" ઍડ-ઑનના બેકઅપ પણ આયાત કરી શકો છો."
+  },
+  "optionsBackupExport": {
+    "message": "નિકાસ કરો"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox માં યોગ્ય સત્ર વ્યવસ્થાપન શક્ય બને ત્યારે આ વિભાગ બિનજરૂરી બની શકે છે."
+  },
+  "optionsBackupExportButton": {
+    "message": "બેકઅપ સાચવો"
+  },
+  "optionsStatistics": {
+    "message": "આંકડા"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ટેબની સંખ્યા:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (સક્રિય: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "થંબનેલ કૅશનું કદ:"
+  },
+  "refreshGroups": {
+    "message": "જૂથ તાજા કરો"
+  },
+  "sendTabToGroup": {
+    "message": "ટેબ જૂથમાં મોકલો"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "વપરાશકર્તાઓ Firefox માં about:addons પર \"ઍક્સ્ટેન્શન શૉર્ટકટ સંચાલિત કરો\" વિકલ્પ દ્વારા પણ શૉર્ટકટ અપડેટ કરી શકે છે, જેમ કે {link} જોવા મળે છે."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "ઉદાહરણ વિડિઓમાં"
+  },
+  "optionsThemeAuto": {
+    "message": "સિસ્ટમને અનુસરો"
+  },
+  "optionsNativeGroups": {
+    "message": "બ્રાઉઝરના મૂળ જૂથો"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "બ્રાઉઝરના મૂળ ટેબ જૂથોનો ઉપયોગ કરો"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "દૃશ્ય ગોઠવણી અને સમેટવા માટે બ્રાઉઝરના મૂળ ટેબ જૂથોનો ઉપયોગ કરો."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "આ બ્રાઉઝર સંસ્કરણમાં મૂળ ટેબ જૂથો સપોર્ટેડ નથી (ટેબ છુપાવવાનું API જરૂરી છે)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "આ બ્રાઉઝર સંસ્કરણમાં મૂળ ટેબ જૂથો સપોર્ટેડ નથી. કૃપા કરીને Firefox 139+ પર અપડેટ કરો અથવા Chrome 89+ વાપરો."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "તમારું બ્રાઉઝર ટેબ જૂથો માટે જરૂરી API ને સપોર્ટ કરતું નથી."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "મૂળ જૂથો સક્ષમ કર્યા. જૂથોનું સ્થળાંતર થઈ રહ્યું છે..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "મૂળ જૂથો અક્ષમ કર્યા. સાફસફાઈ થઈ રહી છે..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "અમાન્ય ફાઇલ"
+  },
+  "byteSizeBytes": {
+    "message": "$1 બાઇટ"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ટેબ જૂથો પુનઃસ્થાપિત થઈ રહ્યા છે..."
+  },
+  "migrationTitle": {
+    "message": "હાઇબ્રિડ ટેબ જૂથોનું સ્થળાંતર"
+  },
+  "migrationChecking": {
+    "message": "સ્થળાંતરની સ્થિતિ તપાસી રહ્યા છે..."
+  },
+  "migrationRun": {
+    "message": "હમણાં સ્થળાંતર ચલાવો"
+  },
+  "migrationReset": {
+    "message": "સ્થળાંતર ફ્લેગ રીસેટ કરો"
+  },
+  "migrationCurrentGroups": {
+    "message": "વર્તમાન જૂથો"
+  },
+  "migrationLoadingGroups": {
+    "message": "જૂથો લોડ થઈ રહ્યા છે..."
+  },
+  "migrationComplete": {
+    "message": "✓ સ્થળાંતર પૂર્ણ - બધા જૂથો હાઇબ્રિડ સિસ્ટમમાં ખસેડાયા છે"
+  },
+  "migrationPending": {
+    "message": "⚠ સ્થળાંતર બાકી - જૂથો હજી ખસેડાયા નથી"
+  },
+  "migrationStatusError": {
+    "message": "સ્થળાંતરની સ્થિતિ તપાસવામાં ભૂલ: $1"
+  },
+  "migrationNoGroups": {
+    "message": "વર્તમાન વિન્ડોમાં કોઈ જૂથ મળ્યું નથી"
+  },
+  "migrationGroupsError": {
+    "message": "જૂથો લોડ કરવામાં ભૂલ: $1"
+  },
+  "migrationRunning": {
+    "message": "સ્થળાંતર ચાલી રહ્યું છે..."
+  },
+  "migrationSucceeded": {
+    "message": "સ્થળાંતર સફળતાપૂર્વક પૂર્ણ થયું!"
+  },
+  "migrationFailed": {
+    "message": "સ્થળાંતર નિષ્ફળ: $1"
+  },
+  "migrationNoResponse": {
+    "message": "કોઈ પ્રતિસાદ નથી"
+  },
+  "migrationRunError": {
+    "message": "સ્થળાંતર ભૂલ: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "સ્થળાંતર ફ્લેગ રીસેટ કરવો છે? આથી સ્થળાંતર ફરી ચલાવી શકાશે."
+  },
+  "migrationResetSucceeded": {
+    "message": "સ્થળાંતર ફ્લેગ સફળતાપૂર્વક રીસેટ થયો!"
+  },
+  "migrationResetFailed": {
+    "message": "રીસેટ નિષ્ફળ: $1"
+  },
+  "migrationResetError": {
+    "message": "રીસેટ ભૂલ: $1"
+  },
+  "migrationGroup": {
+    "message": "જૂથ $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ ખસેડાયું (મૂળ ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ ખસેડાયું નથી"
+  },
+  "migrationGroupStatus": {
+    "message": "સ્થિતિ: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ટેબ જૂથ દૃશ્ય"
+  }
+}

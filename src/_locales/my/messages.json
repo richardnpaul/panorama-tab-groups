@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "အုပ်စုအသစ် ထည့်ရန်"
+  },
+  "freeformButton": {
+    "message": "လွတ်လပ်စွာ စီစဉ်ခြင်း"
+  },
+  "tilingButton": {
+    "message": "အလိုအလျောက် (အကွက်ခင်း) စီစဉ်ခြင်း"
+  },
+  "settingsButton": {
+    "message": "ဆက်တင်များ"
+  },
+  "defaultGroupName": {
+    "message": "အုပ်စု"
+  },
+  "dragGroup": {
+    "message": "အုပ်စုကို ဆွဲရန်"
+  },
+  "closeGroup": {
+    "message": "အုပ်စုကို ပိတ်ရန်"
+  },
+  "closeGroupWarning": {
+    "message": "ဤအုပ်စုကို ပိတ်လိုက်ပါက ၎င်းအတွင်းရှိ တက်ဘ် $1 ခုကို ပိတ်သွားပါမည်။ ဤသို့ လုပ်ဆောင်ရန် သေချာပါသလား။"
+  },
+  "editGroup": {
+    "message": "အုပ်စုကို တည်းဖြတ်ရန်"
+  },
+  "closeTab": {
+    "message": "တက်ဘ်ကို ပိတ်ရန်"
+  },
+  "openNewTab": {
+    "message": "တက်ဘ်အသစ် ဖွင့်ရန်"
+  },
+  "tabCount": {
+    "message": "တက်ဘ် $1 ခု"
+  },
+  "searchForTab_placeholder": {
+    "message": "တက်ဘ်ကို ရှာရန်..."
+  },
+  "searchForTab_noResults": {
+    "message": "တက်ဘ် မတွေ့ပါ"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "ကီးဘုတ် ဖြတ်လမ်းများ"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "ဖြတ်လမ်းရွေးချယ်မှု၏ ပုံစံကို ဤနေရာတွင် ဖော်ပြထားသည်။"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "မွမ်းမံရန်"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "ပြန်လည်သတ်မှတ်ရန်"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "ပိတ်ရန်"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "ဖွင့်ရန်"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "တက်ဘ်အုပ်စု မြင်ကွင်းကို ပြောင်းရန်"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "နောက်တက်ဘ်အုပ်စုကို အသက်သွင်းရန်"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "ယခင်တက်ဘ်အုပ်စုကို အသက်သွင်းရန်"
+  },
+  "optionsView": {
+    "message": "မြင်ကွင်း"
+  },
+  "optionsViewFreeform": {
+    "message": "လွတ်လပ် (ရိုးရာ)"
+  },
+  "optionsViewPopup": {
+    "message": "ပေါ့ပ်အပ်"
+  },
+  "optionsTheme": {
+    "message": "အသွင်အပြင်"
+  },
+  "optionsThemeLight": {
+    "message": "အလင်း"
+  },
+  "optionsThemeDark": {
+    "message": "အမှောင်"
+  },
+  "optionsToolbar": {
+    "message": "ကိရိယာဘား"
+  },
+  "optionsToolbarPosition": {
+    "message": "တည်နေရာ"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "အပေါ်"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ညာ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "အောက်"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ဘယ်"
+  },
+  "optionsBackup": {
+    "message": "အရန်ကူးခြင်း"
+  },
+  "optionsBackupImport": {
+    "message": "တင်သွင်းရန်"
+  },
+  "optionsBackupImportText": {
+    "message": "တင်သွင်းထားသော အရန်ကူးများကို ဝင်းဒိုးအသစ်များတွင် ဖွင့်မည်ဖြစ်ပြီး မည်သည့်အရာကိုမျှ ထပ်ရေးမည်မဟုတ်ပါ။\nအဟောင်း \"Tab Groups\" အပ်ဒွန်မှ အရန်ကူးများကိုလည်း တင်သွင်းနိုင်သည်။"
+  },
+  "optionsBackupExport": {
+    "message": "တင်ပို့ရန်"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox တွင် စက်ရှင်စီမံခန့်ခွဲမှု ကောင်းမွန်စွာ လုပ်ဆောင်နိုင်လာသောအခါ ဤအပိုင်း မလိုတော့နိုင်ပါ။"
+  },
+  "optionsBackupExportButton": {
+    "message": "အရန်ကူးကို သိမ်းရန်"
+  },
+  "optionsStatistics": {
+    "message": "ကိန်းဂဏန်းအချက်အလက်"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "တက်ဘ်အရေအတွက်-"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (အသက်ဝင်သော- $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "ပုံသေးကက်ရှ်အရွယ်အစား-"
+  },
+  "refreshGroups": {
+    "message": "အုပ်စုများကို ပြန်လည်လန်းဆန်းရန်"
+  },
+  "sendTabToGroup": {
+    "message": "တက်ဘ်ကို အုပ်စုသို့ ပို့ရန်"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "အသုံးပြုသူများသည် Firefox ရှိ about:addons တွင် \"တိုးချဲ့မှု ဖြတ်လမ်းများ စီမံရန်\" ရွေးချယ်မှုဖြင့်လည်း ဖြတ်လမ်းများကို မွမ်းမံနိုင်ပါသည်၊ {link} ပြထားသည့်အတိုင်း။"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "နမူနာဗီဒီယိုတွင်"
+  },
+  "optionsThemeAuto": {
+    "message": "စနစ်အတိုင်း လိုက်နာရန်"
+  },
+  "optionsNativeGroups": {
+    "message": "ဘရောက်ဇာ၏ မူလအုပ်စုများ"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ဘရောက်ဇာ၏ မူလတက်ဘ်အုပ်စုများကို အသုံးပြုရန်"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "မြင်သာစွာ စီစဉ်ရန်နှင့် ခေါက်သိမ်းရန်အတွက် ဘရောက်ဇာ၏ မူလတက်ဘ်အုပ်စုများကို အသုံးပြုပါ။"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "ဤဘရောက်ဇာဗားရှင်းတွင် မူလတက်ဘ်အုပ်စုများကို မပံ့ပိုးပါ (တက်ဘ်ဖျောက်သည့် API လိုအပ်သည်)။"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "ဤဘရောက်ဇာဗားရှင်းတွင် မူလတက်ဘ်အုပ်စုများကို မပံ့ပိုးပါ။ Firefox 139+ သို့ မွမ်းမံပါ သို့မဟုတ် Chrome 89+ ကို အသုံးပြုပါ။"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "သင့်ဘရောက်ဇာသည် တက်ဘ်အုပ်စုများအတွက် လိုအပ်သော API များကို မပံ့ပိုးပါ။"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "မူလအုပ်စုများကို ဖွင့်ထားသည်။ အုပ်စုများကို ရွှေ့ပြောင်းနေသည်..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "မူလအုပ်စုများကို ပိတ်ထားသည်။ ရှင်းလင်းနေသည်..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "မမှန်ကန်သော ဖိုင်"
+  },
+  "byteSizeBytes": {
+    "message": "ဘိုက် $1"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "တက်ဘ်အုပ်စုများကို ပြန်လည်ရယူနေသည်..."
+  },
+  "migrationTitle": {
+    "message": "ပေါင်းစပ်တက်ဘ်အုပ်စုများ ရွှေ့ပြောင်းခြင်း"
+  },
+  "migrationChecking": {
+    "message": "ရွှေ့ပြောင်းမှုအခြေအနေကို စစ်ဆေးနေသည်..."
+  },
+  "migrationRun": {
+    "message": "ယခု ရွှေ့ပြောင်းမှုကို လုပ်ဆောင်ရန်"
+  },
+  "migrationReset": {
+    "message": "ရွှေ့ပြောင်းမှုအလံကို ပြန်လည်သတ်မှတ်ရန်"
+  },
+  "migrationCurrentGroups": {
+    "message": "လက်ရှိအုပ်စုများ"
+  },
+  "migrationLoadingGroups": {
+    "message": "အုပ်စုများကို ဖွင့်နေသည်..."
+  },
+  "migrationComplete": {
+    "message": "✓ ရွှေ့ပြောင်းမှု ပြီးဆုံးပြီ - အုပ်စုအားလုံးကို ပေါင်းစပ်စနစ်သို့ ရွှေ့ပြောင်းပြီးပါပြီ"
+  },
+  "migrationPending": {
+    "message": "⚠ ရွှေ့ပြောင်းမှု ဆိုင်းငံ့ထားသည် - အုပ်စုများကို မရွှေ့ရသေးပါ"
+  },
+  "migrationStatusError": {
+    "message": "ရွှေ့ပြောင်းမှုအခြေအနေ စစ်ဆေးရာတွင် အမှား- $1"
+  },
+  "migrationNoGroups": {
+    "message": "လက်ရှိဝင်းဒိုးတွင် အုပ်စု မတွေ့ပါ"
+  },
+  "migrationGroupsError": {
+    "message": "အုပ်စုများ ဖွင့်ရာတွင် အမှား- $1"
+  },
+  "migrationRunning": {
+    "message": "ရွှေ့ပြောင်းမှုကို လုပ်ဆောင်နေသည်..."
+  },
+  "migrationSucceeded": {
+    "message": "ရွှေ့ပြောင်းမှု အောင်မြင်စွာ ပြီးဆုံးပါပြီ။"
+  },
+  "migrationFailed": {
+    "message": "ရွှေ့ပြောင်းမှု မအောင်မြင်ပါ- $1"
+  },
+  "migrationNoResponse": {
+    "message": "တုံ့ပြန်မှု မရှိပါ"
+  },
+  "migrationRunError": {
+    "message": "ရွှေ့ပြောင်းမှု အမှား- $1"
+  },
+  "migrationResetConfirm": {
+    "message": "ရွှေ့ပြောင်းမှုအလံကို ပြန်လည်သတ်မှတ်မလား။ ဤသို့ပြုလုပ်ခြင်းဖြင့် ရွှေ့ပြောင်းမှုကို ထပ်မံလုပ်ဆောင်နိုင်ပါမည်။"
+  },
+  "migrationResetSucceeded": {
+    "message": "ရွှေ့ပြောင်းမှုအလံကို အောင်မြင်စွာ ပြန်လည်သတ်မှတ်ပြီးပါပြီ။"
+  },
+  "migrationResetFailed": {
+    "message": "ပြန်လည်သတ်မှတ်ခြင်း မအောင်မြင်ပါ- $1"
+  },
+  "migrationResetError": {
+    "message": "ပြန်လည်သတ်မှတ်ရာတွင် အမှား- $1"
+  },
+  "migrationGroup": {
+    "message": "အုပ်စု $1-"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ ရွှေ့ပြောင်းပြီး (မူလ ID- $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ မရွှေ့ရသေးပါ"
+  },
+  "migrationGroupStatus": {
+    "message": "အခြေအနေ- $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "တက်ဘ်အုပ်စုများ မြင်ကွင်း"
+  }
+}

@@ -2,6 +2,12 @@
   "newGroupButton": {
     "message": "새 그룹 추가"
   },
+  "freeformButton": {
+    "message": "자유 배치"
+  },
+  "tilingButton": {
+    "message": "자동 배치 (타일식)"
+  },
   "settingsButton": {
     "message": "설정"
   },
@@ -16,6 +22,24 @@
   },
   "closeGroupWarning": {
     "message": "이 탭 그룹을 닫을 경우 $1개의 탭들을 닫게 됩니다. 정말로 닫으시겠습니까?"
+  },
+  "editGroup": {
+    "message": "그룹 편집"
+  },
+  "closeTab": {
+    "message": "탭 닫기"
+  },
+  "openNewTab": {
+    "message": "새 탭 열기"
+  },
+  "tabCount": {
+    "message": "$1개의 탭"
+  },
+  "searchForTab_placeholder": {
+    "message": "탭 검색..."
+  },
+  "searchForTab_noResults": {
+    "message": "탭을 찾을 수 없습니다"
   },
   "optionKeyboardShortcuts": {
     "message": "키보드 단축키"
@@ -32,6 +56,12 @@
   "optionKeyboardShortcutsButtonsReset": {
     "message": "리셋"
   },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "사용 안 함"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "사용"
+  },
   "optionKeyboardShortcutsToggle": {
     "message": "Tab Groups View 토글"
   },
@@ -40,6 +70,15 @@
   },
   "optionKeyboardShortcutsPreviousGroup": {
     "message": "이전 탭 그룹을 활성화"
+  },
+  "optionsView": {
+    "message": "보기"
+  },
+  "optionsViewFreeform": {
+    "message": "자유 배치 (클래식)"
+  },
+  "optionsViewPopup": {
+    "message": "팝업"
   },
   "optionsTheme": {
     "message": "테마"
@@ -92,10 +131,145 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "탭들의 갯수:"
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "활성화됨:"
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (활성화됨: $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "썸네일 캐시 크기:"
+  },
+  "refreshGroups": {
+    "message": "그룹 새로 고침"
+  },
+  "sendTabToGroup": {
+    "message": "탭을 그룹으로 보내기"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Firefox의 about:addons에 있는 \"확장 기능 단축키 관리\" 옵션으로도 단축키를 변경할 수 있습니다. {link} 보이는 것과 같습니다."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "예시 영상에서"
+  },
+  "optionsThemeAuto": {
+    "message": "시스템 설정 따르기"
+  },
+  "optionsNativeGroups": {
+    "message": "브라우저 기본 그룹"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "브라우저 기본 탭 그룹 사용"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "시각적 정리와 접기에 브라우저 기본 탭 그룹을 사용합니다."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "이 브라우저 버전에서는 기본 탭 그룹이 지원되지 않습니다 (탭 숨기기 API 필요)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "이 브라우저 버전에서는 기본 탭 그룹이 지원되지 않습니다. Firefox 139 이상으로 업데이트하거나 Chrome 89 이상을 사용하세요."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "사용 중인 브라우저가 탭 그룹에 필요한 API를 지원하지 않습니다."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "기본 그룹을 사용합니다. 그룹을 이전하는 중..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "기본 그룹을 사용하지 않습니다. 정리하는 중..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "올바르지 않은 파일"
+  },
+  "byteSizeBytes": {
+    "message": "$1바이트"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "탭 그룹을 복원하는 중..."
+  },
+  "migrationTitle": {
+    "message": "하이브리드 탭 그룹 이전"
+  },
+  "migrationChecking": {
+    "message": "이전 상태를 확인하는 중..."
+  },
+  "migrationRun": {
+    "message": "지금 이전 실행"
+  },
+  "migrationReset": {
+    "message": "이전 플래그 초기화"
+  },
+  "migrationCurrentGroups": {
+    "message": "현재 그룹"
+  },
+  "migrationLoadingGroups": {
+    "message": "그룹을 불러오는 중..."
+  },
+  "migrationComplete": {
+    "message": "✓ 이전 완료 - 모든 그룹이 하이브리드 시스템으로 이전되었습니다"
+  },
+  "migrationPending": {
+    "message": "⚠ 이전 대기 중 - 그룹이 아직 이전되지 않았습니다"
+  },
+  "migrationStatusError": {
+    "message": "이전 상태 확인 중 오류: $1"
+  },
+  "migrationNoGroups": {
+    "message": "현재 창에서 그룹을 찾을 수 없습니다"
+  },
+  "migrationGroupsError": {
+    "message": "그룹을 불러오는 중 오류: $1"
+  },
+  "migrationRunning": {
+    "message": "이전을 실행하는 중..."
+  },
+  "migrationSucceeded": {
+    "message": "이전이 완료되었습니다!"
+  },
+  "migrationFailed": {
+    "message": "이전 실패: $1"
+  },
+  "migrationNoResponse": {
+    "message": "응답 없음"
+  },
+  "migrationRunError": {
+    "message": "이전 오류: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "이전 플래그를 초기화할까요? 초기화하면 이전을 다시 실행할 수 있습니다."
+  },
+  "migrationResetSucceeded": {
+    "message": "이전 플래그를 초기화했습니다!"
+  },
+  "migrationResetFailed": {
+    "message": "초기화 실패: $1"
+  },
+  "migrationResetError": {
+    "message": "초기화 오류: $1"
+  },
+  "migrationGroup": {
+    "message": "그룹 $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ 이전됨 (기본 ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ 이전되지 않음"
+  },
+  "migrationGroupStatus": {
+    "message": "상태: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "탭 그룹 보기"
   }
 }

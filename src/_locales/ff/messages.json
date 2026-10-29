@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Ɓeydu fedde keso"
+  },
+  "freeformButton": {
+    "message": "Hakkunde bilaadi"
+  },
+  "tilingButton": {
+    "message": "Hakkunde jey-hoore (tiillaaji)"
+  },
+  "settingsButton": {
+    "message": "Teelte"
+  },
+  "defaultGroupName": {
+    "message": "Fed."
+  },
+  "dragGroup": {
+    "message": "Ɗaaɓ fedde"
+  },
+  "closeGroup": {
+    "message": "Uddu fedde"
+  },
+  "closeGroupWarning": {
+    "message": "one=Udditugo ndee fedde ana uddan tab $1 ka nder mayre. Aɗa tabitii a yiɗi waɗugo ɗuum?|other=Udditugo ndee fedde ana uddan tabs $1 ka nder mayre. Aɗa tabitii a yiɗi waɗugo ɗuum?"
+  },
+  "editGroup": {
+    "message": "Wo'ee fedde"
+  },
+  "closeTab": {
+    "message": "Uddu tab"
+  },
+  "openNewTab": {
+    "message": "Uddit tab keso"
+  },
+  "tabCount": {
+    "message": "one=tab $1|other=tabs $1"
+  },
+  "searchForTab_placeholder": {
+    "message": "Ɗaɓɓutu tab..."
+  },
+  "searchForTab_noResults": {
+    "message": "Tabs ngalaa tawaa"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Gaaɗe tablaaji"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Fomaat sarɗi gaaɗe ɗum winndaama ɗoo."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Hesɗitin"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Hiisaako"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Daaɗu"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Sañcu"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Sawtu mo'ol feddeeji tab"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Sañcu fedde tab nde jokkata"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Sañcu fedde tab nde adii"
+  },
+  "optionsView": {
+    "message": "Mo'ol"
+  },
+  "optionsViewFreeform": {
+    "message": "Bilaadi (ɗum ɓooyɗum)"
+  },
+  "optionsViewPopup": {
+    "message": "Foppa"
+  },
+  "optionsTheme": {
+    "message": "Tem"
+  },
+  "optionsThemeLight": {
+    "message": "caɓɓam"
+  },
+  "optionsThemeDark": {
+    "message": "ɓaleeri"
+  },
+  "optionsToolbar": {
+    "message": "Baar kuuje"
+  },
+  "optionsToolbarPosition": {
+    "message": "Nokku"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "sakkitiri"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "nano"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "les"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "hoore nano"
+  },
+  "optionsBackup": {
+    "message": "Kopi gooduɗo"
+  },
+  "optionsBackupImport": {
+    "message": "Ɓesdu"
+  },
+  "optionsBackupImportText": {
+    "message": "Kopiiji goonguɗi ɗi ɓesdaaɗi ana ɗiɗaa nder henndooji kesi, ɗi ngaɗataa nanndi e fuu.\nA waawi ɓesdugo kopiiji goonguɗi diga ɗum ɓooyɗum \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "Wurtin"
+  },
+  "optionsBackupExportText": {
+    "message": "Ndee fedde hoolaaɗe waawi wonugo ngalaa sarɗi tuma gila ɗum waawi tokkugo sessions nder Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Hisnu kopi gooduɗo"
+  },
+  "optionsStatistics": {
+    "message": "Limtol"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Limgal tabs:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Ɗi kuutiniroowo: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Mawnugol cache thumbnail:"
+  },
+  "refreshGroups": {
+    "message": "Hesɗitin feddeeji"
+  },
+  "sendTabToGroup": {
+    "message": "Neldu tab e fedde"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Huutinirooɓe ana mbaawi hesɗitingo gaaɗe nder Firefox e kuutiniral \"Hakku gaaɗe fowtooje\" nder about:addons, no {link} yi'ata."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "nder widoo misaalu"
+  },
+  "optionsThemeAuto": {
+    "message": "Jokku sistem"
+  },
+  "optionsNativeGroups": {
+    "message": "Feddeeji bilaadi lowre"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Huutinir feddeeji tab bilaadi lowre"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Huutinir feddeeji tab bilaadi lowre ngam nuunɗal e murtugo."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Feddeeji tab bilaadi ngalaa wallitaaɗe nder ndee versiyoŋ lowre (ana yiɗi API suuɗugo tabs)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Feddeeji tab bilaadi ngalaa wallitaaɗe nder ndee versiyoŋ lowre. Tiiɗnu e Firefox 139+ malla huutinir Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Lowre maaɗa wallataa API ɗi sarɗi ngam feddeeji tab."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Feddeeji bilaadi sañcaama. Ana ɗon nuddata feddeeji..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Feddeeji bilaadi daaɗaama. Ana ɗon laawol..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Fayl ngalaa"
+  },
+  "byteSizeBytes": {
+    "message": "$1 baytiiji"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Ana ɗon hoosoo feddeeji tab..."
+  },
+  "migrationTitle": {
+    "message": "Nuddugo feddeeji tab hibrid"
+  },
+  "migrationChecking": {
+    "message": "Ana ɗon ƴeewtoo no nuddugo woni..."
+  },
+  "migrationRun": {
+    "message": "Fuɗɗo nuddugo jooni"
+  },
+  "migrationReset": {
+    "message": "Hiisaa tuuta nuddugo"
+  },
+  "migrationCurrentGroups": {
+    "message": "Feddeeji jooni"
+  },
+  "migrationLoadingGroups": {
+    "message": "Ana ɗon loowa feddeeji..."
+  },
+  "migrationComplete": {
+    "message": "✓ Nuddugo timmii - Feddeeji fuu nuddaama e sistem hibrid"
+  },
+  "migrationPending": {
+    "message": "⚠ Nuddugo ana reeni - Feddeeji nuddaaka tawo"
+  },
+  "migrationStatusError": {
+    "message": "Fitina ƴeewtugo no nuddugo woni: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Fedde ngalaa tawaa nder henndu jooni"
+  },
+  "migrationGroupsError": {
+    "message": "Fitina loowugo feddeeji: $1"
+  },
+  "migrationRunning": {
+    "message": "Ana ɗon nuddoo..."
+  },
+  "migrationSucceeded": {
+    "message": "Nuddugo timmii no haani!"
+  },
+  "migrationFailed": {
+    "message": "Nuddugo hoyaay: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Jaabawol alaa"
+  },
+  "migrationRunError": {
+    "message": "Fitina nuddugo: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Hiisugo tuuta nuddugo? Ɗuum ana accan nuddugo fuɗɗitaago."
+  },
+  "migrationResetSucceeded": {
+    "message": "Tuuta nuddugo hiisaama no haani!"
+  },
+  "migrationResetFailed": {
+    "message": "Hiisugo hoyaay: $1"
+  },
+  "migrationResetError": {
+    "message": "Fitina hiisugo: $1"
+  },
+  "migrationGroup": {
+    "message": "Fedde $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Nuddaama (ID bilaadi: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Nuddaaka"
+  },
+  "migrationGroupStatus": {
+    "message": "Nokkuure: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Mo'ol feddeeji tab"
+  }
+}

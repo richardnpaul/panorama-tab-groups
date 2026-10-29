@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Cuir grúpa nua leis"
+  },
+  "freeformButton": {
+    "message": "Leagan amach saor"
+  },
+  "tilingButton": {
+    "message": "Leagan amach uathoibríoch (leacáin)"
+  },
+  "settingsButton": {
+    "message": "Socruithe"
+  },
+  "defaultGroupName": {
+    "message": "Grúpa"
+  },
+  "dragGroup": {
+    "message": "Tarraing an grúpa"
+  },
+  "closeGroup": {
+    "message": "Dún an grúpa"
+  },
+  "closeGroupWarning": {
+    "message": "one=Má dhúnann tú an grúpa seo, dúnfar an $1 chluaisín atá ann. An bhfuil tú cinnte gur mhaith leat é sin a dhéanamh?|two=Má dhúnann tú an grúpa seo, dúnfar an $1 chluaisín atá ann. An bhfuil tú cinnte gur mhaith leat é sin a dhéanamh?|few=Má dhúnann tú an grúpa seo, dúnfar na $1 chluaisín atá ann. An bhfuil tú cinnte gur mhaith leat é sin a dhéanamh?|many=Má dhúnann tú an grúpa seo, dúnfar na $1 gcluaisín atá ann. An bhfuil tú cinnte gur mhaith leat é sin a dhéanamh?|other=Má dhúnann tú an grúpa seo, dúnfar na $1 cluaisín atá ann. An bhfuil tú cinnte gur mhaith leat é sin a dhéanamh?"
+  },
+  "editGroup": {
+    "message": "Cuir an grúpa in eagar"
+  },
+  "closeTab": {
+    "message": "Dún an cluaisín"
+  },
+  "openNewTab": {
+    "message": "Oscail cluaisín nua"
+  },
+  "tabCount": {
+    "message": "one=$1 chluaisín|two=$1 chluaisín|few=$1 chluaisín|many=$1 gcluaisín|other=$1 cluaisín"
+  },
+  "searchForTab_placeholder": {
+    "message": "Cuardaigh cluaisín..."
+  },
+  "searchForTab_noResults": {
+    "message": "Níor aimsíodh aon chluaisín"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Aicearraí méarchláir"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Tá formáid an rogha aicearra mínithe anseo."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Nuashonraigh"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Athshocraigh"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Díchumasaigh"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Cumasaigh"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Scoránaigh amharc na ngrúpaí cluaisíní"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Gníomhachtaigh an chéad ghrúpa cluaisíní eile"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Gníomhachtaigh an grúpa cluaisíní roimhe seo"
+  },
+  "optionsView": {
+    "message": "Amharc"
+  },
+  "optionsViewFreeform": {
+    "message": "Saor (clasaiceach)"
+  },
+  "optionsViewPopup": {
+    "message": "Preabfhuinneog"
+  },
+  "optionsTheme": {
+    "message": "Téama"
+  },
+  "optionsThemeLight": {
+    "message": "geal"
+  },
+  "optionsThemeDark": {
+    "message": "dorcha"
+  },
+  "optionsToolbar": {
+    "message": "Barra uirlisí"
+  },
+  "optionsToolbarPosition": {
+    "message": "Suíomh"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "barr"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "deis"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "bun"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "clé"
+  },
+  "optionsBackup": {
+    "message": "Cúltaca"
+  },
+  "optionsBackupImport": {
+    "message": "Iompórtáil"
+  },
+  "optionsBackupImportText": {
+    "message": "Osclóidh cúltacaí allmhairithe i bhfuinneoga nua agus ní scríobhfaidh siad thar rud ar bith.\nIs féidir leat cúltacaí a iompórtáil ón seanfhorlíonadh \"Tab Groups\" freisin."
+  },
+  "optionsBackupExport": {
+    "message": "Easpórtáil"
+  },
+  "optionsBackupExportText": {
+    "message": "B'fhéidir nach mbeidh gá leis an gcuid seo nuair a bheidh bainistiú ceart seisiún indéanta i Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Sábháil an cúltaca"
+  },
+  "optionsStatistics": {
+    "message": "Staitisticí"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Líon na gcluaisíní:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Gníomhach: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Méid taisce na mionsamhlacha:"
+  },
+  "refreshGroups": {
+    "message": "Athnuaigh na grúpaí"
+  },
+  "sendTabToGroup": {
+    "message": "Seol an cluaisín chuig grúpa"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Is féidir le húsáideoirí aicearraí a nuashonrú freisin tríd an rogha \"Bainistigh Aicearraí Breiseán\" ag about:addons i Firefox, mar atá le feiceáil {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "sa fhíseán samplach"
+  },
+  "optionsThemeAuto": {
+    "message": "Lean an córas"
+  },
+  "optionsNativeGroups": {
+    "message": "Grúpaí dúchasacha an bhrabhsálaí"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Úsáid grúpaí cluaisíní dúchasacha an bhrabhsálaí"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Úsáid grúpaí cluaisíní dúchasacha an bhrabhsálaí le haghaidh eagrúchán amhairc agus laghdú."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Ní thacaítear le grúpaí cluaisíní dúchasacha sa leagan brabhsálaí seo (teastaíonn API folaithe cluaisíní)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Ní thacaítear le grúpaí cluaisíní dúchasacha sa leagan brabhsálaí seo. Nuashonraigh go Firefox 139+ nó úsáid Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Ní thacaíonn do bhrabhsálaí leis na APInna a theastaíonn do ghrúpaí cluaisíní."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grúpaí dúchasacha cumasaithe. Grúpaí á n-aistriú..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grúpaí dúchasacha díchumasaithe. Á ghlanadh..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Comhad neamhbhailí"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bheart"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Grúpaí cluaisíní á gcur ar ais..."
+  },
+  "migrationTitle": {
+    "message": "Aistriú ar ghrúpaí cluaisíní hibrideacha"
+  },
+  "migrationChecking": {
+    "message": "Stádas an aistrithe á sheiceáil..."
+  },
+  "migrationRun": {
+    "message": "Rith an t-aistriú anois"
+  },
+  "migrationReset": {
+    "message": "Athshocraigh bratach an aistrithe"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grúpaí reatha"
+  },
+  "migrationLoadingGroups": {
+    "message": "Grúpaí á luchtú..."
+  },
+  "migrationComplete": {
+    "message": "✓ Aistriú críochnaithe - Aistríodh gach grúpa chuig an gcóras hibrideach"
+  },
+  "migrationPending": {
+    "message": "⚠ Aistriú ar feitheamh - Níor aistríodh na grúpaí go fóill"
+  },
+  "migrationStatusError": {
+    "message": "Earráid agus stádas an aistrithe á sheiceáil: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Níor aimsíodh aon ghrúpa sa fhuinneog reatha"
+  },
+  "migrationGroupsError": {
+    "message": "Earráid agus grúpaí á luchtú: $1"
+  },
+  "migrationRunning": {
+    "message": "An t-aistriú á rith..."
+  },
+  "migrationSucceeded": {
+    "message": "Críochnaíodh an t-aistriú go rathúil!"
+  },
+  "migrationFailed": {
+    "message": "Theip ar an aistriú: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Gan freagra"
+  },
+  "migrationRunError": {
+    "message": "Earráid aistrithe: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Athshocraigh bratach an aistrithe? Ligfidh sé seo don aistriú rith arís."
+  },
+  "migrationResetSucceeded": {
+    "message": "Athshocraíodh bratach an aistrithe go rathúil!"
+  },
+  "migrationResetFailed": {
+    "message": "Theip ar an athshocrú: $1"
+  },
+  "migrationResetError": {
+    "message": "Earráid athshocraithe: $1"
+  },
+  "migrationGroup": {
+    "message": "Grúpa $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Aistrithe (ID dúchasach: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Gan aistriú"
+  },
+  "migrationGroupStatus": {
+    "message": "Stádas: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Amharc na ngrúpaí cluaisíní"
+  }
+}

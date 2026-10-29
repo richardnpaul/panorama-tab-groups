@@ -131,8 +131,8 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "Number of Tabs:"
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "Active:"
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Active: $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "Thumbnail Cache Size:"

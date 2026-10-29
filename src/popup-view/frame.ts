@@ -1,4 +1,5 @@
-import { isNavKey, navigate } from '../js/core/popup.js';
+import { isBackKey, isNavKey, navigate } from '../js/core/popup.js';
+import { runsFromTheRight } from '../js/share/direction.js';
 import type { Scheduler } from '../js/ports/scheduler.js';
 
 // What can have the focus in a row of a frame
@@ -22,8 +23,8 @@ export interface FrameDeps {
   scheduler: Pick<Scheduler, 'setTimeout'>;
   /** A frame at the side slides in over the main one */
   isAside: boolean;
-  /** The left arrow was pressed on the first thing of a row */
-  onLeftAtStart?: () => void;
+  /** The arrow that points back (the left one, the right one where text runs from the right) was pressed on the first thing of a row */
+  onBackAtStart?: () => void;
 }
 
 export interface Frame {
@@ -54,7 +55,7 @@ export function createFrame({
   body,
   scheduler,
   isAside,
-  onLeftAtStart,
+  onBackAtStart,
 }: FrameDeps): Frame {
   const header = section(node, '.frame-header');
   const content = section(node, '.frame-content');
@@ -80,8 +81,9 @@ export function createFrame({
       return;
     }
 
-    if (key === 'ArrowLeft' && column === 0 && onLeftAtStart !== undefined) {
-      onLeftAtStart();
+    const rtl = runsFromTheRight(node.ownerDocument);
+    if (isBackKey(key, rtl) && column === 0 && onBackAtStart !== undefined) {
+      onBackAtStart();
       return;
     }
 
@@ -91,6 +93,7 @@ export function createFrame({
       key,
       items.map((each) => each.length),
       { row: rows.indexOf(row), column, wanted },
+      rtl,
     );
     if (next !== null) {
       wanted = next.wanted;

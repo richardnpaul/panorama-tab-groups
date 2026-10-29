@@ -408,6 +408,30 @@ describe('popup-view/groups-frame.ts', () => {
       expect(reachedFrame).not.toHaveBeenCalled();
     });
 
+    it('are shown by the left arrow, and not the right, where text runs from the right', async () => {
+      document.documentElement.dir = 'rtl';
+      try {
+        const env = setUp();
+        await env.render();
+        const extend = query(
+          items()[0] ?? document.body,
+          '.list__link--extend',
+        );
+
+        extend.dispatchEvent(
+          new KeyboardEvent('keyup', { key: 'ArrowRight', bubbles: true }),
+        );
+        expect(env.openDetail).not.toHaveBeenCalled();
+
+        extend.dispatchEvent(
+          new KeyboardEvent('keyup', { key: 'ArrowLeft', bubbles: true }),
+        );
+        expect(env.openDetail).toHaveBeenCalledWith(1, false);
+      } finally {
+        document.documentElement.dir = 'ltr';
+      }
+    });
+
     it('are not shown by other keys', async () => {
       const env = setUp();
       await env.render();

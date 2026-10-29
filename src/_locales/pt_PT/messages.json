@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Adicionar novo grupo"
+  },
+  "freeformButton": {
+    "message": "Disposição livre"
+  },
+  "tilingButton": {
+    "message": "Disposição automática (em mosaico)"
+  },
+  "settingsButton": {
+    "message": "Definições"
+  },
+  "defaultGroupName": {
+    "message": "Grp"
+  },
+  "dragGroup": {
+    "message": "Arrastar grupo"
+  },
+  "closeGroup": {
+    "message": "Fechar grupo"
+  },
+  "closeGroupWarning": {
+    "message": "one=Ao fechar este grupo, o separador $1 que contém também será fechado. Tem a certeza de que quer fazê-lo?|other=Ao fechar este grupo, os $1 separadores que contém também serão fechados. Tem a certeza de que quer fazê-lo?"
+  },
+  "editGroup": {
+    "message": "Editar grupo"
+  },
+  "closeTab": {
+    "message": "Fechar separador"
+  },
+  "openNewTab": {
+    "message": "Abrir novo separador"
+  },
+  "tabCount": {
+    "message": "one=$1 separador|other=$1 separadores"
+  },
+  "searchForTab_placeholder": {
+    "message": "Pesquisar um separador..."
+  },
+  "searchForTab_noResults": {
+    "message": "Nenhum separador encontrado"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Atalhos de teclado"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "O formato da opção de atalho está descrito aqui."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Atualizar"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Repor"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Desativar"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Ativar"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Alternar a vista de grupos de separadores"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Ativar o grupo de separadores seguinte"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Ativar o grupo de separadores anterior"
+  },
+  "optionsView": {
+    "message": "Vista"
+  },
+  "optionsViewFreeform": {
+    "message": "Livre (clássica)"
+  },
+  "optionsViewPopup": {
+    "message": "Janela instantânea"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "claro"
+  },
+  "optionsThemeDark": {
+    "message": "escuro"
+  },
+  "optionsToolbar": {
+    "message": "Barra de ferramentas"
+  },
+  "optionsToolbarPosition": {
+    "message": "Posição"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "em cima"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "à direita"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "em baixo"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "à esquerda"
+  },
+  "optionsBackup": {
+    "message": "Cópia de segurança"
+  },
+  "optionsBackupImport": {
+    "message": "Importar"
+  },
+  "optionsBackupImportText": {
+    "message": "As cópias de segurança importadas abrem em novas janelas e não substituem nada.\nTambém pode importar cópias de segurança do antigo suplemento «Tab Groups»."
+  },
+  "optionsBackupExport": {
+    "message": "Exportar"
+  },
+  "optionsBackupExportText": {
+    "message": "Esta secção pode tornar-se desnecessária quando for possível uma gestão de sessões adequada no Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Guardar cópia de segurança"
+  },
+  "optionsStatistics": {
+    "message": "Estatísticas"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Número de separadores:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Ativos: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Tamanho da cache de miniaturas:"
+  },
+  "refreshGroups": {
+    "message": "Atualizar grupos"
+  },
+  "sendTabToGroup": {
+    "message": "Enviar separador para um grupo"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Os utilizadores também podem atualizar os atalhos através da opção «Gerir atalhos de extensões» em about:addons no Firefox, como se vê {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "no vídeo de exemplo"
+  },
+  "optionsThemeAuto": {
+    "message": "Seguir o sistema"
+  },
+  "optionsNativeGroups": {
+    "message": "Grupos nativos do navegador"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Utilizar os grupos de separadores nativos do navegador"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Utilizar os grupos de separadores nativos do navegador para organização visual e para os fechar."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Os grupos de separadores nativos não são suportados nesta versão do navegador (requer a API de ocultação de separadores)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Os grupos de separadores nativos não são suportados nesta versão do navegador. Atualize para o Firefox 139+ ou utilize o Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "O seu navegador não suporta as APIs necessárias para os grupos de separadores."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grupos nativos ativados. A migrar os grupos..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grupos nativos desativados. A limpar..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ficheiro inválido"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bytes"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "A restaurar os grupos de separadores..."
+  },
+  "migrationTitle": {
+    "message": "Migração de grupos de separadores híbridos"
+  },
+  "migrationChecking": {
+    "message": "A verificar o estado da migração..."
+  },
+  "migrationRun": {
+    "message": "Executar a migração agora"
+  },
+  "migrationReset": {
+    "message": "Repor o indicador de migração"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grupos atuais"
+  },
+  "migrationLoadingGroups": {
+    "message": "A carregar grupos..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migração concluída - Todos os grupos foram migrados para o sistema híbrido"
+  },
+  "migrationPending": {
+    "message": "⚠ Migração pendente - Os grupos ainda não foram migrados"
+  },
+  "migrationStatusError": {
+    "message": "Erro ao verificar o estado da migração: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Nenhum grupo encontrado na janela atual"
+  },
+  "migrationGroupsError": {
+    "message": "Erro ao carregar grupos: $1"
+  },
+  "migrationRunning": {
+    "message": "A executar a migração..."
+  },
+  "migrationSucceeded": {
+    "message": "Migração concluída com sucesso!"
+  },
+  "migrationFailed": {
+    "message": "A migração falhou: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Sem resposta"
+  },
+  "migrationRunError": {
+    "message": "Erro de migração: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Repor o indicador de migração? Isto permitirá que a migração seja executada novamente."
+  },
+  "migrationResetSucceeded": {
+    "message": "Indicador de migração reposto com sucesso!"
+  },
+  "migrationResetFailed": {
+    "message": "A reposição falhou: $1"
+  },
+  "migrationResetError": {
+    "message": "Erro de reposição: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupo $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrado (ID nativo: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Não migrado"
+  },
+  "migrationGroupStatus": {
+    "message": "Estado: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vista de grupos de separadores"
+  }
+}

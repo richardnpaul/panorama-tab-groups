@@ -2,6 +2,12 @@
   "newGroupButton": {
     "message": "Adicionar novo grupo"
   },
+  "freeformButton": {
+    "message": "Disposição livre"
+  },
+  "tilingButton": {
+    "message": "Disposição automática (em mosaico)"
+  },
   "settingsButton": {
     "message": "Configurações"
   },
@@ -16,6 +22,24 @@
   },
   "closeGroupWarning": {
     "message": "one=Fechar este grupo também fechará a aba $1. Tem certeza que deseja fechá-lo?|other=Fechar este grupo também fechará as abas $1. Tem certeza que deseja fechá-lo?"
+  },
+  "editGroup": {
+    "message": "Editar grupo"
+  },
+  "closeTab": {
+    "message": "Fechar aba"
+  },
+  "openNewTab": {
+    "message": "Abrir nova aba"
+  },
+  "tabCount": {
+    "message": "one=$1 aba|other=$1 abas"
+  },
+  "searchForTab_placeholder": {
+    "message": "Pesquisar uma aba..."
+  },
+  "searchForTab_noResults": {
+    "message": "Nenhuma aba encontrada"
   },
   "optionKeyboardShortcuts": {
     "message": "Atalhos de teclado"
@@ -46,6 +70,15 @@
   },
   "optionKeyboardShortcutsPreviousGroup": {
     "message": "Ativar o Grupo de Abas anterior"
+  },
+  "optionsView": {
+    "message": "Visualização"
+  },
+  "optionsViewFreeform": {
+    "message": "Livre (clássica)"
+  },
+  "optionsViewPopup": {
+    "message": "Janela pop-up"
   },
   "optionsTheme": {
     "message": "Tema"
@@ -98,8 +131,8 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "Número de abas:"
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "Ativas:"
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Ativas: $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "Espaço em disco das minuaturas:"
@@ -109,5 +142,134 @@
   },
   "sendTabToGroup": {
     "message": "Enviar para grupo"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Os usuários também podem atualizar os atalhos pela opção \"Gerenciar atalhos de extensões\" em about:addons no Firefox, como mostrado {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "no vídeo de exemplo"
+  },
+  "optionsThemeAuto": {
+    "message": "Seguir o sistema"
+  },
+  "optionsNativeGroups": {
+    "message": "Grupos nativos do navegador"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Usar os grupos de abas nativos do navegador"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Usar os grupos de abas nativos do navegador para organização visual e recolhimento."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Os grupos de abas nativos não são compatíveis com esta versão do navegador (requer a API para ocultar abas)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Os grupos de abas nativos não são compatíveis com esta versão do navegador. Atualize para o Firefox 139+ ou use o Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Seu navegador não é compatível com as APIs necessárias para os grupos de abas."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grupos nativos ativados. Migrando grupos..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grupos nativos desativados. Limpando..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Arquivo inválido"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bytes"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Restaurando grupos de abas..."
+  },
+  "migrationTitle": {
+    "message": "Migração de grupos de abas híbridos"
+  },
+  "migrationChecking": {
+    "message": "Verificando o status da migração..."
+  },
+  "migrationRun": {
+    "message": "Executar migração agora"
+  },
+  "migrationReset": {
+    "message": "Redefinir o sinalizador de migração"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grupos atuais"
+  },
+  "migrationLoadingGroups": {
+    "message": "Carregando grupos..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migração concluída - Todos os grupos foram migrados para o sistema híbrido"
+  },
+  "migrationPending": {
+    "message": "⚠ Migração pendente - Os grupos ainda não foram migrados"
+  },
+  "migrationStatusError": {
+    "message": "Erro ao verificar o status da migração: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Nenhum grupo encontrado na janela atual"
+  },
+  "migrationGroupsError": {
+    "message": "Erro ao carregar os grupos: $1"
+  },
+  "migrationRunning": {
+    "message": "Executando migração..."
+  },
+  "migrationSucceeded": {
+    "message": "Migração concluída com sucesso!"
+  },
+  "migrationFailed": {
+    "message": "A migração falhou: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Sem resposta"
+  },
+  "migrationRunError": {
+    "message": "Erro de migração: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Redefinir o sinalizador de migração? Isso permitirá que a migração seja executada novamente."
+  },
+  "migrationResetSucceeded": {
+    "message": "Sinalizador de migração redefinido com sucesso!"
+  },
+  "migrationResetFailed": {
+    "message": "A redefinição falhou: $1"
+  },
+  "migrationResetError": {
+    "message": "Erro de redefinição: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupo $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrado (ID nativo: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Não migrado"
+  },
+  "migrationGroupStatus": {
+    "message": "Status: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Visualização de grupos de abas"
   }
 }

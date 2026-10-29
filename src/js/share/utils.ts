@@ -61,6 +61,12 @@ function formatNumber(
   }
 }
 
+/** A whole number as the language of the browser writes it (its digits and its grouping) */
+export const formatCount = (
+  i18n: Pick<I18n, 'getMessage'>,
+  value: number,
+): string => formatNumber(i18n, value, 0);
+
 // The sizes, smallest first: the message that names the unit, and what a byte count is divided by
 const SMALLER_SIZES = [
   { below: 1024, name: 'byteSizeBytes', divisor: 1, digits: 0 },

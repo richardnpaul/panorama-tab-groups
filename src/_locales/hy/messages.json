@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Ավելացնել նոր խումբ"
+  },
+  "freeformButton": {
+    "message": "Ազատ դասավորություն"
+  },
+  "tilingButton": {
+    "message": "Ավտոմատ (սալիկային) դասավորություն"
+  },
+  "settingsButton": {
+    "message": "Կարգավորումներ"
+  },
+  "defaultGroupName": {
+    "message": "Խմբ."
+  },
+  "dragGroup": {
+    "message": "Քաշել խումբը"
+  },
+  "closeGroup": {
+    "message": "Փակել խումբը"
+  },
+  "closeGroupWarning": {
+    "message": "one=Այս խումբը փակելիս կփակվի դրանում գտնվող $1 ներդիրը: Վստա՞հ եք, որ ցանկանում եք դա անել:|other=Այս խումբը փակելիս կփակվեն դրանում գտնվող $1 ներդիրները: Վստա՞հ եք, որ ցանկանում եք դա անել:"
+  },
+  "editGroup": {
+    "message": "Խմբագրել խումբը"
+  },
+  "closeTab": {
+    "message": "Փակել ներդիրը"
+  },
+  "openNewTab": {
+    "message": "Բացել նոր ներդիր"
+  },
+  "tabCount": {
+    "message": "one=$1 ներդիր|other=$1 ներդիր"
+  },
+  "searchForTab_placeholder": {
+    "message": "Որոնել ներդիր..."
+  },
+  "searchForTab_noResults": {
+    "message": "Ներդիրներ չեն գտնվել"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Ստեղնաշարի դյուրանցումներ"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Դյուրանցման ընտրանու ձևաչափը նկարագրված է այստեղ:"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Թարմացնել"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Վերակայել"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Անջատել"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Միացնել"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Փոխարկել ներդիրների խմբերի տեսքը"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Ակտիվացնել ներդիրների հաջորդ խումբը"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Ակտիվացնել ներդիրների նախորդ խումբը"
+  },
+  "optionsView": {
+    "message": "Տեսք"
+  },
+  "optionsViewFreeform": {
+    "message": "Ազատ (դասական)"
+  },
+  "optionsViewPopup": {
+    "message": "Թռուցիկ պատուհան"
+  },
+  "optionsTheme": {
+    "message": "Ոճ"
+  },
+  "optionsThemeLight": {
+    "message": "բաց"
+  },
+  "optionsThemeDark": {
+    "message": "մուգ"
+  },
+  "optionsToolbar": {
+    "message": "Գործիքագոտի"
+  },
+  "optionsToolbarPosition": {
+    "message": "Դիրք"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "վերևում"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "աջում"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ներքևում"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ձախում"
+  },
+  "optionsBackup": {
+    "message": "Պահուստավորում"
+  },
+  "optionsBackupImport": {
+    "message": "Ներմուծել"
+  },
+  "optionsBackupImportText": {
+    "message": "Ներմուծված պահուստային պատճենները կբացվեն նոր պատուհաններում և ոչինչ չեն վերագրի:\nԴուք կարող եք ներմուծել նաև հին «Tab Groups» հավելման պահուստային պատճենները:"
+  },
+  "optionsBackupExport": {
+    "message": "Արտահանել"
+  },
+  "optionsBackupExportText": {
+    "message": "Այս բաժինը կարող է ավելորդ դառնալ, երբ Firefox-ում հնարավոր լինի սեսիաների պատշաճ կառավարում:"
+  },
+  "optionsBackupExportButton": {
+    "message": "Պահել պահուստային պատճենը"
+  },
+  "optionsStatistics": {
+    "message": "Վիճակագրություն"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Ներդիրների քանակը՝"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Ակտիվ՝ $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Մանրապատկերների քեշի չափը՝"
+  },
+  "refreshGroups": {
+    "message": "Թարմացնել խմբերը"
+  },
+  "sendTabToGroup": {
+    "message": "Ուղարկել ներդիրը խմբին"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Օգտատերերը կարող են դյուրանցումները թարմացնել նաև Firefox-ի about:addons էջի «Կառավարել ընդլայնումների դյուրանցումները» ընտրանիով, ինչպես երևում է {link}:"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "օրինակ տեսահոլովակում"
+  },
+  "optionsThemeAuto": {
+    "message": "Հետևել համակարգին"
+  },
+  "optionsNativeGroups": {
+    "message": "Դիտարկչի սեփական խմբեր"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Օգտագործել դիտարկչի սեփական ներդիրների խմբերը"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Օգտագործել դիտարկչի սեփական ներդիրների խմբերը տեսողական կազմակերպման և ծալման համար:"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Սեփական ներդիրների խմբերը չեն աջակցվում դիտարկչի այս տարբերակում (պահանջվում է ներդիրները թաքցնելու API):"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Սեփական ներդիրների խմբերը չեն աջակցվում դիտարկչի այս տարբերակում: Թարմացրեք մինչև Firefox 139+ կամ օգտագործեք Chrome 89+:"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Ձեր դիտարկիչը չի աջակցում ներդիրների խմբերի համար անհրաժեշտ API-ները:"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Սեփական խմբերը միացված են: Խմբերը տեղափոխվում են..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Սեփական խմբերն անջատված են: Մաքրվում է..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Անվավեր ֆայլ"
+  },
+  "byteSizeBytes": {
+    "message": "$1 բայթ"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Ներդիրների խմբերը վերականգնվում են..."
+  },
+  "migrationTitle": {
+    "message": "Հիբրիդ ներդիրների խմբերի տեղափոխում"
+  },
+  "migrationChecking": {
+    "message": "Տեղափոխման վիճակը ստուգվում է..."
+  },
+  "migrationRun": {
+    "message": "Գործարկել տեղափոխումը հիմա"
+  },
+  "migrationReset": {
+    "message": "Վերակայել տեղափոխման դրոշակը"
+  },
+  "migrationCurrentGroups": {
+    "message": "Ընթացիկ խմբեր"
+  },
+  "migrationLoadingGroups": {
+    "message": "Խմբերը բեռնվում են..."
+  },
+  "migrationComplete": {
+    "message": "✓ Տեղափոխումն ավարտված է - Բոլոր խմբերը տեղափոխվել են հիբրիդ համակարգ"
+  },
+  "migrationPending": {
+    "message": "⚠ Տեղափոխումը սպասման մեջ է - Խմբերը դեռ չեն տեղափոխվել"
+  },
+  "migrationStatusError": {
+    "message": "Սխալ տեղափոխման վիճակը ստուգելիս՝ $1"
+  },
+  "migrationNoGroups": {
+    "message": "Ընթացիկ պատուհանում խմբեր չեն գտնվել"
+  },
+  "migrationGroupsError": {
+    "message": "Սխալ խմբերը բեռնելիս՝ $1"
+  },
+  "migrationRunning": {
+    "message": "Տեղափոխումը կատարվում է..."
+  },
+  "migrationSucceeded": {
+    "message": "Տեղափոխումը հաջողությամբ ավարտվեց:"
+  },
+  "migrationFailed": {
+    "message": "Տեղափոխումը ձախողվեց՝ $1"
+  },
+  "migrationNoResponse": {
+    "message": "Պատասխան չկա"
+  },
+  "migrationRunError": {
+    "message": "Տեղափոխման սխալ՝ $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Վերակայե՞լ տեղափոխման դրոշակը: Սա թույլ կտա տեղափոխումը նորից գործարկել:"
+  },
+  "migrationResetSucceeded": {
+    "message": "Տեղափոխման դրոշակը հաջողությամբ վերակայվեց:"
+  },
+  "migrationResetFailed": {
+    "message": "Վերակայումը ձախողվեց՝ $1"
+  },
+  "migrationResetError": {
+    "message": "Վերակայման սխալ՝ $1"
+  },
+  "migrationGroup": {
+    "message": "Խումբ $1՝"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Տեղափոխված է (սեփական ID՝ $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Տեղափոխված չէ"
+  },
+  "migrationGroupStatus": {
+    "message": "Վիճակ՝ $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Ներդիրների խմբերի տեսք"
+  }
+}

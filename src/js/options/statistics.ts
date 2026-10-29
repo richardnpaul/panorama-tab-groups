@@ -2,7 +2,7 @@ import type { I18n } from '../ports/i18n.js';
 import type { ViewState } from '../ports/view-state.js';
 import type { ViewTabs } from '../ports/view-tabs.js';
 import { requireElementById } from '../share/dom.js';
-import { formatByteSize } from '../share/utils.js';
+import { formatByteSize, formatCount } from '../share/utils.js';
 
 export interface StatisticsPorts {
   viewTabs: Pick<ViewTabs, 'listAll'>;
@@ -32,9 +32,10 @@ export function createStatistics({
 
     requireElementById(HTMLElement, 'numberOfTabs').replaceChildren(
       document.createTextNode(
-        `${String(tabs.length)} (${i18n.getMessage(
-          'optionsStatisticsNumberOfTabsActive',
-        )} ${String(numActiveTabs)})`,
+        i18n.getMessage('optionsStatisticsNumberOfTabsAndActive', [
+          formatCount(i18n, tabs.length),
+          formatCount(i18n, numActiveTabs),
+        ]),
       ),
     );
   };

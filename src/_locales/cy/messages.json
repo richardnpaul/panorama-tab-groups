@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Ychwanegu grŵp newydd"
+  },
+  "freeformButton": {
+    "message": "Cynllun rhydd"
+  },
+  "tilingButton": {
+    "message": "Cynllun awtomatig (teilio)"
+  },
+  "settingsButton": {
+    "message": "Gosodiadau"
+  },
+  "defaultGroupName": {
+    "message": "Grŵp"
+  },
+  "dragGroup": {
+    "message": "Llusgo grŵp"
+  },
+  "closeGroup": {
+    "message": "Cau grŵp"
+  },
+  "closeGroupWarning": {
+    "message": "zero=Bydd cau'r grŵp hwn yn cau'r $1 tab ynddo. Ydych chi'n siŵr eich bod am wneud hyn?|one=Bydd cau'r grŵp hwn yn cau'r $1 tab ynddo. Ydych chi'n siŵr eich bod am wneud hyn?|two=Bydd cau'r grŵp hwn yn cau'r $1 dab ynddo. Ydych chi'n siŵr eich bod am wneud hyn?|few=Bydd cau'r grŵp hwn yn cau'r $1 tab ynddo. Ydych chi'n siŵr eich bod am wneud hyn?|many=Bydd cau'r grŵp hwn yn cau'r $1 thab ynddo. Ydych chi'n siŵr eich bod am wneud hyn?|other=Bydd cau'r grŵp hwn yn cau'r $1 tab ynddo. Ydych chi'n siŵr eich bod am wneud hyn?"
+  },
+  "editGroup": {
+    "message": "Golygu grŵp"
+  },
+  "closeTab": {
+    "message": "Cau tab"
+  },
+  "openNewTab": {
+    "message": "Agor tab newydd"
+  },
+  "tabCount": {
+    "message": "zero=$1 tab|one=$1 tab|two=$1 dab|few=$1 tab|many=$1 thab|other=$1 tab"
+  },
+  "searchForTab_placeholder": {
+    "message": "Chwilio am dab..."
+  },
+  "searchForTab_noResults": {
+    "message": "Heb ganfod unrhyw dabiau"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Llwybrau byr bysellfwrdd"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Mae fformat yr opsiwn llwybr byr wedi'i esbonio yma."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Diweddaru"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Ailosod"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Analluogi"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Galluogi"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Toglo golwg grwpiau tabiau"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Gweithredu'r grŵp tabiau nesaf"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Gweithredu'r grŵp tabiau blaenorol"
+  },
+  "optionsView": {
+    "message": "Golwg"
+  },
+  "optionsViewFreeform": {
+    "message": "Rhydd (clasurol)"
+  },
+  "optionsViewPopup": {
+    "message": "Naid-ffenestr"
+  },
+  "optionsTheme": {
+    "message": "Thema"
+  },
+  "optionsThemeLight": {
+    "message": "golau"
+  },
+  "optionsThemeDark": {
+    "message": "tywyll"
+  },
+  "optionsToolbar": {
+    "message": "Bar offer"
+  },
+  "optionsToolbarPosition": {
+    "message": "Safle"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "brig"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "dde"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "gwaelod"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "chwith"
+  },
+  "optionsBackup": {
+    "message": "Copi wrth gefn"
+  },
+  "optionsBackupImport": {
+    "message": "Mewnforio"
+  },
+  "optionsBackupImportText": {
+    "message": "Bydd copïau wrth gefn a fewnforir yn agor mewn ffenestri newydd heb drosysgrifo unrhyw beth.\nGallwch hefyd fewnforio copïau wrth gefn o'r ychwanegyn \"Tab Groups\" hen."
+  },
+  "optionsBackupExport": {
+    "message": "Allforio"
+  },
+  "optionsBackupExportText": {
+    "message": "Efallai na fydd angen yr adran hon pan fydd rheoli sesiynau priodol yn bosib yn Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Cadw copi wrth gefn"
+  },
+  "optionsStatistics": {
+    "message": "Ystadegau"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Nifer y tabiau:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Gweithredol: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Maint storfa mân-luniau:"
+  },
+  "refreshGroups": {
+    "message": "Adnewyddu grwpiau"
+  },
+  "sendTabToGroup": {
+    "message": "Anfon tab i grŵp"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Gall defnyddwyr hefyd ddiweddaru llwybrau byr drwy'r opsiwn \"Rheoli Llwybrau Byr Estyniadau\" yn about:addons yn Firefox, fel y gwelir {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "yn y fideo enghreifftiol"
+  },
+  "optionsThemeAuto": {
+    "message": "Dilyn y system"
+  },
+  "optionsNativeGroups": {
+    "message": "Grwpiau brodorol y porwr"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Defnyddio grwpiau tabiau brodorol y porwr"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Defnyddio grwpiau tabiau brodorol y porwr ar gyfer trefnu gweledol a chwympo."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Nid yw grwpiau tabiau brodorol yn cael eu cynnal yn y fersiwn hon o'r porwr (mae angen yr API cuddio tabiau)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Nid yw grwpiau tabiau brodorol yn cael eu cynnal yn y fersiwn hon o'r porwr. Diweddarwch i Firefox 139+ neu defnyddiwch Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Nid yw eich porwr yn cynnal yr APIau sydd eu hangen ar gyfer grwpiau tabiau."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grwpiau brodorol wedi'u galluogi. Yn mudo grwpiau..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grwpiau brodorol wedi'u hanalluogi. Yn glanhau..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ffeil annilys"
+  },
+  "byteSizeBytes": {
+    "message": "$1 beit"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Yn adfer grwpiau tabiau..."
+  },
+  "migrationTitle": {
+    "message": "Mudo Grwpiau Tabiau Hybrid"
+  },
+  "migrationChecking": {
+    "message": "Yn gwirio statws y mudo..."
+  },
+  "migrationRun": {
+    "message": "Rhedeg y mudo nawr"
+  },
+  "migrationReset": {
+    "message": "Ailosod baner y mudo"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grwpiau cyfredol"
+  },
+  "migrationLoadingGroups": {
+    "message": "Yn llwytho grwpiau..."
+  },
+  "migrationComplete": {
+    "message": "✓ Mudo wedi'i gwblhau - Mae pob grŵp wedi'i fudo i'r system hybrid"
+  },
+  "migrationPending": {
+    "message": "⚠ Mudo ar y gweill - Nid yw'r grwpiau wedi'u mudo eto"
+  },
+  "migrationStatusError": {
+    "message": "Gwall wrth wirio statws y mudo: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Heb ganfod grwpiau yn y ffenestr gyfredol"
+  },
+  "migrationGroupsError": {
+    "message": "Gwall wrth lwytho grwpiau: $1"
+  },
+  "migrationRunning": {
+    "message": "Yn rhedeg y mudo..."
+  },
+  "migrationSucceeded": {
+    "message": "Mudo wedi'i gwblhau'n llwyddiannus!"
+  },
+  "migrationFailed": {
+    "message": "Methodd y mudo: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Dim ymateb"
+  },
+  "migrationRunError": {
+    "message": "Gwall mudo: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Ailosod baner y mudo? Bydd hyn yn caniatáu i'r mudo redeg eto."
+  },
+  "migrationResetSucceeded": {
+    "message": "Baner y mudo wedi'i hailosod yn llwyddiannus!"
+  },
+  "migrationResetFailed": {
+    "message": "Methodd yr ailosod: $1"
+  },
+  "migrationResetError": {
+    "message": "Gwall ailosod: $1"
+  },
+  "migrationGroup": {
+    "message": "Grŵp $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Wedi'i fudo (ID brodorol: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Heb ei fudo"
+  },
+  "migrationGroupStatus": {
+    "message": "Statws: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Golwg Grwpiau Tabiau"
+  }
+}

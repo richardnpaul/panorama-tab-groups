@@ -2,6 +2,12 @@
   "newGroupButton": {
     "message": "新增組"
   },
+  "freeformButton": {
+    "message": "自由排列"
+  },
+  "tilingButton": {
+    "message": "自動排列（並排）"
+  },
   "settingsButton": {
     "message": "設定"
   },
@@ -16,6 +22,24 @@
   },
   "closeGroupWarning": {
     "message": "$1 個標籤頁在本標籤頁組會關閉。您確定嗎？"
+  },
+  "editGroup": {
+    "message": "編輯組"
+  },
+  "closeTab": {
+    "message": "關閉標籤頁"
+  },
+  "openNewTab": {
+    "message": "開啟新標籤頁"
+  },
+  "tabCount": {
+    "message": "$1 個標籤頁"
+  },
+  "searchForTab_placeholder": {
+    "message": "搜尋標籤頁..."
+  },
+  "searchForTab_noResults": {
+    "message": "找不到標籤頁"
   },
   "optionKeyboardShortcuts": {
     "message": "鍵盤快捷鍵"
@@ -32,6 +56,12 @@
   "optionKeyboardShortcutsButtonsReset": {
     "message": "重設"
   },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "停用"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "啟用"
+  },
   "optionKeyboardShortcutsToggle": {
     "message": "打開或關閉 Tab Groups View"
   },
@@ -40,6 +70,15 @@
   },
   "optionKeyboardShortcutsPreviousGroup": {
     "message": "上一個標籤頁組"
+  },
+  "optionsView": {
+    "message": "檢視"
+  },
+  "optionsViewFreeform": {
+    "message": "自由（經典）"
+  },
+  "optionsViewPopup": {
+    "message": "彈出視窗"
   },
   "optionsTheme": {
     "message": "主題"
@@ -92,10 +131,145 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "標籤頁的數量："
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "活躍的標籤頁："
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (活躍的標籤頁： $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "小視圖高速緩存的大小："
+  },
+  "refreshGroups": {
+    "message": "重新整理組"
+  },
+  "sendTabToGroup": {
+    "message": "將標籤頁傳送到組"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "使用者也可以透過 Firefox 中 about:addons 頁面的「管理擴充套件快速鍵」選項來更新快速鍵，如{link}所示。"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "範例影片中"
+  },
+  "optionsThemeAuto": {
+    "message": "跟隨系統"
+  },
+  "optionsNativeGroups": {
+    "message": "瀏覽器原生組"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "使用瀏覽器原生標籤頁組"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "使用瀏覽器原生標籤頁組進行視覺化整理和摺疊。"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "此瀏覽器版本不支援原生標籤頁組（需要標籤頁隱藏 API）。"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "此瀏覽器版本不支援原生標籤頁組。請更新到 Firefox 139+ 或使用 Chrome 89+。"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "您的瀏覽器不支援標籤頁組所需的 API。"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "已啟用原生組。正在遷移組..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "已停用原生組。正在清理..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "無效的檔案"
+  },
+  "byteSizeBytes": {
+    "message": "$1 位元組"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "正在還原標籤頁組..."
+  },
+  "migrationTitle": {
+    "message": "混合標籤頁組遷移"
+  },
+  "migrationChecking": {
+    "message": "正在檢查遷移狀態..."
+  },
+  "migrationRun": {
+    "message": "立即執行遷移"
+  },
+  "migrationReset": {
+    "message": "重設遷移旗標"
+  },
+  "migrationCurrentGroups": {
+    "message": "目前的組"
+  },
+  "migrationLoadingGroups": {
+    "message": "正在載入組..."
+  },
+  "migrationComplete": {
+    "message": "✓ 遷移完成 - 所有組已遷移到混合系統"
+  },
+  "migrationPending": {
+    "message": "⚠ 遷移待處理 - 組尚未遷移"
+  },
+  "migrationStatusError": {
+    "message": "檢查遷移狀態時發生錯誤：$1"
+  },
+  "migrationNoGroups": {
+    "message": "在目前視窗中找不到組"
+  },
+  "migrationGroupsError": {
+    "message": "載入組時發生錯誤：$1"
+  },
+  "migrationRunning": {
+    "message": "正在執行遷移..."
+  },
+  "migrationSucceeded": {
+    "message": "遷移已成功完成！"
+  },
+  "migrationFailed": {
+    "message": "遷移失敗：$1"
+  },
+  "migrationNoResponse": {
+    "message": "無回應"
+  },
+  "migrationRunError": {
+    "message": "遷移發生錯誤：$1"
+  },
+  "migrationResetConfirm": {
+    "message": "要重設遷移旗標嗎？這將允許再次執行遷移。"
+  },
+  "migrationResetSucceeded": {
+    "message": "遷移旗標已成功重設！"
+  },
+  "migrationResetFailed": {
+    "message": "重設失敗：$1"
+  },
+  "migrationResetError": {
+    "message": "重設發生錯誤：$1"
+  },
+  "migrationGroup": {
+    "message": "組 $1："
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ 已遷移（原生 ID：$1）"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ 未遷移"
+  },
+  "migrationGroupStatus": {
+    "message": "狀態：$1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "標籤頁組檢視"
   }
 }

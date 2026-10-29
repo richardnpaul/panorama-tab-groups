@@ -23,12 +23,11 @@ h2 {
   padding-inline-end: 10px;
   position: relative;
   text-align: center;
-  height: 40px;
-  width: 40px;
-}
-
-.input-radio-image label {
-  height: 60px;
+  /* The label under the picture is as high as its text, which may be more than a line in a language that is longer */
+  vertical-align: top;
+  min-height: 40px;
+  /* ... and as wide as its text, which a word of another language may make more than the picture */
+  min-width: 40px;
 }
 
 .input-radio-image label::before,
@@ -38,7 +37,10 @@ h2 {
 }
 
 #optionsView .input-radio-image,
-#optionsView .input-radio-image label,
+#optionsView .input-radio-image label {
+  min-width: 76px;
+}
+
 #optionsView .input-radio-image label::before,
 #optionsView .input-radio-image label img,
 #optionsView .input-radio-image input {

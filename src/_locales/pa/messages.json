@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "ਨਵਾਂ ਗਰੁੱਪ ਜੋੜੋ"
+  },
+  "freeformButton": {
+    "message": "ਖੁੱਲ੍ਹੀ ਤਰਤੀਬ"
+  },
+  "tilingButton": {
+    "message": "ਆਟੋਮੈਟਿਕ (ਟਾਈਲਿੰਗ) ਤਰਤੀਬ"
+  },
+  "settingsButton": {
+    "message": "ਸੈਟਿੰਗਾਂ"
+  },
+  "defaultGroupName": {
+    "message": "ਗਰੁੱਪ"
+  },
+  "dragGroup": {
+    "message": "ਗਰੁੱਪ ਨੂੰ ਖਿੱਚੋ"
+  },
+  "closeGroup": {
+    "message": "ਗਰੁੱਪ ਬੰਦ ਕਰੋ"
+  },
+  "closeGroupWarning": {
+    "message": "one=ਇਸ ਗਰੁੱਪ ਨੂੰ ਬੰਦ ਕਰਨ ਨਾਲ ਇਸ ਵਿਚਲੀ $1 ਟੈਬ ਬੰਦ ਹੋ ਜਾਵੇਗੀ। ਕੀ ਤੁਸੀਂ ਸੱਚਮੁੱਚ ਇਹ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?|other=ਇਸ ਗਰੁੱਪ ਨੂੰ ਬੰਦ ਕਰਨ ਨਾਲ ਇਸ ਵਿਚਲੀਆਂ $1 ਟੈਬਾਂ ਬੰਦ ਹੋ ਜਾਣਗੀਆਂ। ਕੀ ਤੁਸੀਂ ਸੱਚਮੁੱਚ ਇਹ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"
+  },
+  "editGroup": {
+    "message": "ਗਰੁੱਪ ਨੂੰ ਸੋਧੋ"
+  },
+  "closeTab": {
+    "message": "ਟੈਬ ਬੰਦ ਕਰੋ"
+  },
+  "openNewTab": {
+    "message": "ਨਵੀਂ ਟੈਬ ਖੋਲ੍ਹੋ"
+  },
+  "tabCount": {
+    "message": "one=$1 ਟੈਬ|other=$1 ਟੈਬਾਂ"
+  },
+  "searchForTab_placeholder": {
+    "message": "ਟੈਬ ਖੋਜੋ..."
+  },
+  "searchForTab_noResults": {
+    "message": "ਕੋਈ ਟੈਬ ਨਹੀਂ ਮਿਲੀ"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "ਕੀਬੋਰਡ ਸ਼ਾਰਟਕੱਟ"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "ਸ਼ਾਰਟਕੱਟ ਚੋਣ ਦਾ ਫਾਰਮੈਟ ਇੱਥੇ ਦੱਸਿਆ ਗਿਆ ਹੈ।"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "ਅੱਪਡੇਟ ਕਰੋ"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "ਮੁੜ-ਸੈੱਟ ਕਰੋ"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "ਅਸਮਰੱਥ ਕਰੋ"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "ਸਮਰੱਥ ਕਰੋ"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ਟੈਬ ਗਰੁੱਪ ਝਲਕ ਬਦਲੋ"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "ਅਗਲਾ ਟੈਬ ਗਰੁੱਪ ਸਰਗਰਮ ਕਰੋ"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "ਪਿਛਲਾ ਟੈਬ ਗਰੁੱਪ ਸਰਗਰਮ ਕਰੋ"
+  },
+  "optionsView": {
+    "message": "ਝਲਕ"
+  },
+  "optionsViewFreeform": {
+    "message": "ਖੁੱਲ੍ਹੀ (ਕਲਾਸਿਕ)"
+  },
+  "optionsViewPopup": {
+    "message": "ਪੌਪਅੱਪ"
+  },
+  "optionsTheme": {
+    "message": "ਥੀਮ"
+  },
+  "optionsThemeLight": {
+    "message": "ਹਲਕਾ"
+  },
+  "optionsThemeDark": {
+    "message": "ਗੂੜ੍ਹਾ"
+  },
+  "optionsToolbar": {
+    "message": "ਟੂਲਬਾਰ"
+  },
+  "optionsToolbarPosition": {
+    "message": "ਸਥਿਤੀ"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ਉੱਤੇ"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ਸੱਜੇ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ਹੇਠਾਂ"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ਖੱਬੇ"
+  },
+  "optionsBackup": {
+    "message": "ਬੈਕਅੱਪ"
+  },
+  "optionsBackupImport": {
+    "message": "ਇੰਪੋਰਟ ਕਰੋ"
+  },
+  "optionsBackupImportText": {
+    "message": "ਇੰਪੋਰਟ ਕੀਤੇ ਬੈਕਅੱਪ ਨਵੀਆਂ ਵਿੰਡੋਆਂ ਵਿੱਚ ਖੁੱਲ੍ਹਣਗੇ ਅਤੇ ਕਿਸੇ ਚੀਜ਼ ਉੱਤੇ ਦੁਬਾਰਾ ਨਹੀਂ ਲਿਖਣਗੇ।\nਤੁਸੀਂ ਪੁਰਾਣੇ \"Tab Groups\" ਐਡ-ਆਨ ਤੋਂ ਵੀ ਬੈਕਅੱਪ ਇੰਪੋਰਟ ਕਰ ਸਕਦੇ ਹੋ।"
+  },
+  "optionsBackupExport": {
+    "message": "ਐਕਸਪੋਰਟ ਕਰੋ"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox ਵਿੱਚ ਸੈਸ਼ਨਾਂ ਦਾ ਸਹੀ ਪ੍ਰਬੰਧ ਸੰਭਵ ਹੋਣ ਉੱਤੇ ਇਹ ਭਾਗ ਗੈਰ-ਜ਼ਰੂਰੀ ਹੋ ਸਕਦਾ ਹੈ।"
+  },
+  "optionsBackupExportButton": {
+    "message": "ਬੈਕਅੱਪ ਸੰਭਾਲੋ"
+  },
+  "optionsStatistics": {
+    "message": "ਅੰਕੜੇ"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ਟੈਬਾਂ ਦੀ ਗਿਣਤੀ:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (ਸਰਗਰਮ: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "ਥੰਬਨੇਲ ਕੈਸ਼ ਦਾ ਆਕਾਰ:"
+  },
+  "refreshGroups": {
+    "message": "ਗਰੁੱਪ ਤਾਜ਼ਾ ਕਰੋ"
+  },
+  "sendTabToGroup": {
+    "message": "ਟੈਬ ਨੂੰ ਗਰੁੱਪ ਵਿੱਚ ਭੇਜੋ"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "ਵਰਤੋਂਕਾਰ Firefox ਵਿੱਚ about:addons ਉੱਤੇ \"ਐਕਸਟੈਂਸ਼ਨ ਸ਼ਾਰਟਕੱਟ ਪ੍ਰਬੰਧਿਤ ਕਰੋ\" ਚੋਣ ਰਾਹੀਂ ਵੀ ਸ਼ਾਰਟਕੱਟ ਅੱਪਡੇਟ ਕਰ ਸਕਦੇ ਹਨ, ਜਿਵੇਂ {link} ਦਿਖਾਇਆ ਗਿਆ ਹੈ।"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "ਮਿਸਾਲ ਵਾਲੀ ਵੀਡੀਓ ਵਿੱਚ"
+  },
+  "optionsThemeAuto": {
+    "message": "ਸਿਸਟਮ ਦੀ ਪਾਲਣਾ ਕਰੋ"
+  },
+  "optionsNativeGroups": {
+    "message": "ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਆਪਣੇ ਗਰੁੱਪ"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਆਪਣੇ ਟੈਬ ਗਰੁੱਪ ਵਰਤੋ"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "ਦ੍ਰਿਸ਼ਟੀਗਤ ਤਰਤੀਬ ਅਤੇ ਸਮੇਟਣ ਲਈ ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਆਪਣੇ ਟੈਬ ਗਰੁੱਪ ਵਰਤੋ।"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਵਰਜਨ ਵਿੱਚ ਆਪਣੇ ਟੈਬ ਗਰੁੱਪ ਸਮਰਥਿਤ ਨਹੀਂ ਹਨ (ਟੈਬ ਲੁਕਾਉਣ ਵਾਲਾ API ਚਾਹੀਦਾ ਹੈ)।"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਵਰਜਨ ਵਿੱਚ ਆਪਣੇ ਟੈਬ ਗਰੁੱਪ ਸਮਰਥਿਤ ਨਹੀਂ ਹਨ। ਕਿਰਪਾ ਕਰਕੇ Firefox 139+ ਉੱਤੇ ਅੱਪਡੇਟ ਕਰੋ ਜਾਂ Chrome 89+ ਵਰਤੋ।"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "ਤੁਹਾਡਾ ਬ੍ਰਾਊਜ਼ਰ ਟੈਬ ਗਰੁੱਪਾਂ ਲਈ ਲੋੜੀਂਦੇ API ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦਾ।"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "ਆਪਣੇ ਗਰੁੱਪ ਸਮਰੱਥ ਕੀਤੇ ਗਏ। ਗਰੁੱਪ ਤਬਦੀਲ ਕੀਤੇ ਜਾ ਰਹੇ ਹਨ..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "ਆਪਣੇ ਗਰੁੱਪ ਅਸਮਰੱਥ ਕੀਤੇ ਗਏ। ਸਫ਼ਾਈ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "ਗਲਤ ਫ਼ਾਈਲ"
+  },
+  "byteSizeBytes": {
+    "message": "$1 ਬਾਈਟ"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ਟੈਬ ਗਰੁੱਪ ਬਹਾਲ ਕੀਤੇ ਜਾ ਰਹੇ ਹਨ..."
+  },
+  "migrationTitle": {
+    "message": "ਹਾਈਬ੍ਰਿਡ ਟੈਬ ਗਰੁੱਪਾਂ ਦੀ ਤਬਦੀਲੀ"
+  },
+  "migrationChecking": {
+    "message": "ਤਬਦੀਲੀ ਦੀ ਸਥਿਤੀ ਜਾਂਚੀ ਜਾ ਰਹੀ ਹੈ..."
+  },
+  "migrationRun": {
+    "message": "ਹੁਣੇ ਤਬਦੀਲੀ ਚਲਾਓ"
+  },
+  "migrationReset": {
+    "message": "ਤਬਦੀਲੀ ਦਾ ਫਲੈਗ ਮੁੜ-ਸੈੱਟ ਕਰੋ"
+  },
+  "migrationCurrentGroups": {
+    "message": "ਮੌਜੂਦਾ ਗਰੁੱਪ"
+  },
+  "migrationLoadingGroups": {
+    "message": "ਗਰੁੱਪ ਲੋਡ ਕੀਤੇ ਜਾ ਰਹੇ ਹਨ..."
+  },
+  "migrationComplete": {
+    "message": "✓ ਤਬਦੀਲੀ ਪੂਰੀ ਹੋਈ - ਸਾਰੇ ਗਰੁੱਪ ਹਾਈਬ੍ਰਿਡ ਸਿਸਟਮ ਵਿੱਚ ਤਬਦੀਲ ਹੋ ਗਏ ਹਨ"
+  },
+  "migrationPending": {
+    "message": "⚠ ਤਬਦੀਲੀ ਬਕਾਇਆ ਹੈ - ਗਰੁੱਪ ਹਾਲੇ ਤਬਦੀਲ ਨਹੀਂ ਹੋਏ"
+  },
+  "migrationStatusError": {
+    "message": "ਤਬਦੀਲੀ ਦੀ ਸਥਿਤੀ ਜਾਂਚਣ ਵਿੱਚ ਗਲਤੀ: $1"
+  },
+  "migrationNoGroups": {
+    "message": "ਮੌਜੂਦਾ ਵਿੰਡੋ ਵਿੱਚ ਕੋਈ ਗਰੁੱਪ ਨਹੀਂ ਮਿਲਿਆ"
+  },
+  "migrationGroupsError": {
+    "message": "ਗਰੁੱਪ ਲੋਡ ਕਰਨ ਵਿੱਚ ਗਲਤੀ: $1"
+  },
+  "migrationRunning": {
+    "message": "ਤਬਦੀਲੀ ਚੱਲ ਰਹੀ ਹੈ..."
+  },
+  "migrationSucceeded": {
+    "message": "ਤਬਦੀਲੀ ਸਫ਼ਲਤਾ ਨਾਲ ਪੂਰੀ ਹੋਈ!"
+  },
+  "migrationFailed": {
+    "message": "ਤਬਦੀਲੀ ਅਸਫ਼ਲ ਰਹੀ: $1"
+  },
+  "migrationNoResponse": {
+    "message": "ਕੋਈ ਜਵਾਬ ਨਹੀਂ"
+  },
+  "migrationRunError": {
+    "message": "ਤਬਦੀਲੀ ਦੀ ਗਲਤੀ: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "ਕੀ ਤਬਦੀਲੀ ਦਾ ਫਲੈਗ ਮੁੜ-ਸੈੱਟ ਕਰਨਾ ਹੈ? ਇਸ ਨਾਲ ਤਬਦੀਲੀ ਦੁਬਾਰਾ ਚਲਾਈ ਜਾ ਸਕੇਗੀ।"
+  },
+  "migrationResetSucceeded": {
+    "message": "ਤਬਦੀਲੀ ਦਾ ਫਲੈਗ ਸਫ਼ਲਤਾ ਨਾਲ ਮੁੜ-ਸੈੱਟ ਹੋਇਆ!"
+  },
+  "migrationResetFailed": {
+    "message": "ਮੁੜ-ਸੈੱਟ ਅਸਫ਼ਲ ਰਿਹਾ: $1"
+  },
+  "migrationResetError": {
+    "message": "ਮੁੜ-ਸੈੱਟ ਦੀ ਗਲਤੀ: $1"
+  },
+  "migrationGroup": {
+    "message": "ਗਰੁੱਪ $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ ਤਬਦੀਲ ਹੋਇਆ (ਆਪਣੀ ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ ਤਬਦੀਲ ਨਹੀਂ ਹੋਇਆ"
+  },
+  "migrationGroupStatus": {
+    "message": "ਸਥਿਤੀ: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ਟੈਬ ਗਰੁੱਪਾਂ ਦੀ ਝਲਕ"
+  }
+}

@@ -194,7 +194,7 @@ describe('options/start.ts', () => {
 
     await vi.waitFor(() => {
       expect(element('#numberOfTabs').textContent).toBe(
-        `2 (${markedMessage('optionsStatisticsNumberOfTabsActive')} 1)`,
+        markedMessage('optionsStatisticsNumberOfTabsAndActive', ['2', '1']),
       );
     });
     expect(element('#thumbnailCacheSize').textContent).toBe(

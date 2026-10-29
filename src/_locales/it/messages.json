@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Aggiungi nuovo gruppo"
+  },
+  "freeformButton": {
+    "message": "Disposizione libera"
+  },
+  "tilingButton": {
+    "message": "Disposizione automatica (affiancata)"
+  },
+  "settingsButton": {
+    "message": "Impostazioni"
+  },
+  "defaultGroupName": {
+    "message": "Gr."
+  },
+  "dragGroup": {
+    "message": "Trascina gruppo"
+  },
+  "closeGroup": {
+    "message": "Chiudi gruppo"
+  },
+  "closeGroupWarning": {
+    "message": "one=La chiusura di questo gruppo chiuderà la scheda $1 al suo interno. Continuare?|other=La chiusura di questo gruppo chiuderà le $1 schede al suo interno. Continuare?"
+  },
+  "editGroup": {
+    "message": "Modifica gruppo"
+  },
+  "closeTab": {
+    "message": "Chiudi scheda"
+  },
+  "openNewTab": {
+    "message": "Apri nuova scheda"
+  },
+  "tabCount": {
+    "message": "one=$1 scheda|other=$1 schede"
+  },
+  "searchForTab_placeholder": {
+    "message": "Cerca una scheda..."
+  },
+  "searchForTab_noResults": {
+    "message": "Nessuna scheda trovata"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Scorciatoie da tastiera"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Il formato dell'opzione per le scorciatoie è descritto qui."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Aggiorna"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Reimposta"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Disattiva"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Attiva"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Mostra/nascondi la vista dei gruppi di schede"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Attiva il gruppo di schede successivo"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Attiva il gruppo di schede precedente"
+  },
+  "optionsView": {
+    "message": "Vista"
+  },
+  "optionsViewFreeform": {
+    "message": "Libera (classica)"
+  },
+  "optionsViewPopup": {
+    "message": "Finestra a comparsa"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "chiaro"
+  },
+  "optionsThemeDark": {
+    "message": "scuro"
+  },
+  "optionsToolbar": {
+    "message": "Barra degli strumenti"
+  },
+  "optionsToolbarPosition": {
+    "message": "Posizione"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "in alto"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "a destra"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "in basso"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "a sinistra"
+  },
+  "optionsBackup": {
+    "message": "Backup"
+  },
+  "optionsBackupImport": {
+    "message": "Importa"
+  },
+  "optionsBackupImportText": {
+    "message": "I backup importati si apriranno in nuove finestre e non sovrascriveranno nulla.\nPuoi importare anche i backup del vecchio componente aggiuntivo \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "Esporta"
+  },
+  "optionsBackupExportText": {
+    "message": "Questa sezione potrebbe diventare superflua quando in Firefox sarà possibile una corretta gestione delle sessioni."
+  },
+  "optionsBackupExportButton": {
+    "message": "Salva backup"
+  },
+  "optionsStatistics": {
+    "message": "Statistiche"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Numero di schede:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Attive: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Dimensione della cache delle miniature:"
+  },
+  "refreshGroups": {
+    "message": "Aggiorna gruppi"
+  },
+  "sendTabToGroup": {
+    "message": "Invia scheda al gruppo"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Gli utenti possono aggiornare le scorciatoie anche tramite l'opzione \"Gestisci scorciatoie delle estensioni\" in about:addons di Firefox, come si vede {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "nel video di esempio"
+  },
+  "optionsThemeAuto": {
+    "message": "Segui il sistema"
+  },
+  "optionsNativeGroups": {
+    "message": "Gruppi nativi del browser"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Usa i gruppi di schede nativi del browser"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Usa i gruppi di schede nativi del browser per l'organizzazione visiva e la compressione."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "I gruppi di schede nativi non sono supportati in questa versione del browser (richiede l'API per nascondere le schede)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "I gruppi di schede nativi non sono supportati in questa versione del browser. Aggiorna a Firefox 139+ o usa Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Il tuo browser non supporta le API necessarie per i gruppi di schede."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Gruppi nativi attivati. Migrazione dei gruppi in corso..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Gruppi nativi disattivati. Pulizia in corso..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "File non valido"
+  },
+  "byteSizeBytes": {
+    "message": "$1 byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Ripristino dei gruppi di schede..."
+  },
+  "migrationTitle": {
+    "message": "Migrazione dei gruppi di schede ibridi"
+  },
+  "migrationChecking": {
+    "message": "Controllo dello stato della migrazione..."
+  },
+  "migrationRun": {
+    "message": "Esegui la migrazione ora"
+  },
+  "migrationReset": {
+    "message": "Reimposta il flag di migrazione"
+  },
+  "migrationCurrentGroups": {
+    "message": "Gruppi attuali"
+  },
+  "migrationLoadingGroups": {
+    "message": "Caricamento dei gruppi..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migrazione completata - Tutti i gruppi sono stati migrati al sistema ibrido"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrazione in sospeso - I gruppi non sono ancora stati migrati"
+  },
+  "migrationStatusError": {
+    "message": "Errore nel controllo dello stato della migrazione: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Nessun gruppo trovato nella finestra attuale"
+  },
+  "migrationGroupsError": {
+    "message": "Errore nel caricamento dei gruppi: $1"
+  },
+  "migrationRunning": {
+    "message": "Migrazione in corso..."
+  },
+  "migrationSucceeded": {
+    "message": "Migrazione completata con successo!"
+  },
+  "migrationFailed": {
+    "message": "Migrazione non riuscita: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Nessuna risposta"
+  },
+  "migrationRunError": {
+    "message": "Errore di migrazione: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Reimpostare il flag di migrazione? Questo permetterà di eseguire di nuovo la migrazione."
+  },
+  "migrationResetSucceeded": {
+    "message": "Flag di migrazione reimpostato con successo!"
+  },
+  "migrationResetFailed": {
+    "message": "Reimpostazione non riuscita: $1"
+  },
+  "migrationResetError": {
+    "message": "Errore di reimpostazione: $1"
+  },
+  "migrationGroup": {
+    "message": "Gruppo $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrato (ID nativo: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Non migrato"
+  },
+  "migrationGroupStatus": {
+    "message": "Stato: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vista dei gruppi di schede"
+  }
+}

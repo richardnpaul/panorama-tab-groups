@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "አዲስ ቡድን ያክሉ"
+  },
+  "freeformButton": {
+    "message": "ነፃ አደራደር"
+  },
+  "tilingButton": {
+    "message": "ራስ-ሰር (ንጣፍ) አደራደር"
+  },
+  "settingsButton": {
+    "message": "ቅንብሮች"
+  },
+  "defaultGroupName": {
+    "message": "ቡድን"
+  },
+  "dragGroup": {
+    "message": "ቡድን ይጎትቱ"
+  },
+  "closeGroup": {
+    "message": "ቡድን ዝጋ"
+  },
+  "closeGroupWarning": {
+    "message": "one=ይህን ቡድን መዝጋት በውስጡ ያለውን $1 ትር ይዘጋል። እርግጠኛ ነዎት ይህን ማድረግ ይፈልጋሉ?|other=ይህን ቡድን መዝጋት በውስጡ ያሉትን $1 ትሮች ይዘጋል። እርግጠኛ ነዎት ይህን ማድረግ ይፈልጋሉ?"
+  },
+  "editGroup": {
+    "message": "ቡድን አርትዕ"
+  },
+  "closeTab": {
+    "message": "ትር ዝጋ"
+  },
+  "openNewTab": {
+    "message": "አዲስ ትር ክፈት"
+  },
+  "tabCount": {
+    "message": "one=$1 ትር|other=$1 ትሮች"
+  },
+  "searchForTab_placeholder": {
+    "message": "ትር ይፈልጉ..."
+  },
+  "searchForTab_noResults": {
+    "message": "ምንም ትሮች አልተገኙም"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "የቁልፍ ሰሌዳ አቋራጮች"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "የአቋራጭ አማራጩ ቅርጸት እዚህ ተብራርቷል።"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "አዘምን"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "ዳግም አስጀምር"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "አሰናክል"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "አንቃ"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "የትር ቡድኖች እይታን ቀያይር"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "ቀጣዩን የትር ቡድን አንቃ"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "ቀዳሚውን የትር ቡድን አንቃ"
+  },
+  "optionsView": {
+    "message": "እይታ"
+  },
+  "optionsViewFreeform": {
+    "message": "ነፃ (ክላሲክ)"
+  },
+  "optionsViewPopup": {
+    "message": "ብቅ-ባይ"
+  },
+  "optionsTheme": {
+    "message": "ገጽታ"
+  },
+  "optionsThemeLight": {
+    "message": "ብርሃን"
+  },
+  "optionsThemeDark": {
+    "message": "ጨለማ"
+  },
+  "optionsToolbar": {
+    "message": "የመሣሪያ አሞሌ"
+  },
+  "optionsToolbarPosition": {
+    "message": "አቀማመጥ"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ላይ"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ቀኝ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ታች"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ግራ"
+  },
+  "optionsBackup": {
+    "message": "ምትኬ"
+  },
+  "optionsBackupImport": {
+    "message": "አስመጣ"
+  },
+  "optionsBackupImportText": {
+    "message": "የመጡ ምትኬዎች በአዲስ መስኮቶች ይከፈታሉ እና ምንም አይተኩም።\nከድሮው \"Tab Groups\" ተጨማሪ ምትኬዎችንም ማስመጣት ይችላሉ።"
+  },
+  "optionsBackupExport": {
+    "message": "ላክ"
+  },
+  "optionsBackupExportText": {
+    "message": "በFirefox ውስጥ ትክክለኛ የክፍለ ጊዜ አስተዳደር ሲቻል ይህ ክፍል አላስፈላጊ ሊሆን ይችላል።"
+  },
+  "optionsBackupExportButton": {
+    "message": "ምትኬ አስቀምጥ"
+  },
+  "optionsStatistics": {
+    "message": "ስታቲስቲክስ"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "የትሮች ብዛት፦"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (ንቁ፦ $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "የድንክዬ መሸጎጫ መጠን፦"
+  },
+  "refreshGroups": {
+    "message": "ቡድኖችን አድስ"
+  },
+  "sendTabToGroup": {
+    "message": "ትርን ወደ ቡድን ላክ"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "ተጠቃሚዎች በFirefox ውስጥ በabout:addons ላይ ባለው \"የቅጥያ አቋራጮችን አስተዳድር\" አማራጭ በኩልም አቋራጮችን ማዘመን ይችላሉ፣ {link} እንደሚታየው።"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "በምሳሌ ቪዲዮው ውስጥ"
+  },
+  "optionsThemeAuto": {
+    "message": "ሲስተሙን ተከተል"
+  },
+  "optionsNativeGroups": {
+    "message": "የአሳሹ ቤተኛ ቡድኖች"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "የአሳሹን ቤተኛ የትር ቡድኖች ተጠቀም"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "ለእይታ አደረጃጀት እና ለማጠፍ የአሳሹን ቤተኛ የትር ቡድኖች ተጠቀም።"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "ቤተኛ የትር ቡድኖች በዚህ የአሳሽ ስሪት አይደገፉም (የትር መደበቂያ API ያስፈልጋል)።"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "ቤተኛ የትር ቡድኖች በዚህ የአሳሽ ስሪት አይደገፉም። እባክዎ ወደ Firefox 139+ ያዘምኑ ወይም Chrome 89+ ይጠቀሙ።"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "አሳሽዎ ለትር ቡድኖች የሚያስፈልጉትን APIዎች አይደግፍም።"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "ቤተኛ ቡድኖች ነቅተዋል። ቡድኖች በመሸጋገር ላይ ናቸው..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "ቤተኛ ቡድኖች ተሰናክለዋል። በማጽዳት ላይ..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "ልክ ያልሆነ ፋይል"
+  },
+  "byteSizeBytes": {
+    "message": "$1 ባይት"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "የትር ቡድኖችን በመመለስ ላይ..."
+  },
+  "migrationTitle": {
+    "message": "የድቅል የትር ቡድኖች ፍልሰት"
+  },
+  "migrationChecking": {
+    "message": "የፍልሰት ሁኔታን በመፈተሽ ላይ..."
+  },
+  "migrationRun": {
+    "message": "ፍልሰቱን አሁን አሂድ"
+  },
+  "migrationReset": {
+    "message": "የፍልሰት ባንዲራን ዳግም አስጀምር"
+  },
+  "migrationCurrentGroups": {
+    "message": "የአሁኑ ቡድኖች"
+  },
+  "migrationLoadingGroups": {
+    "message": "ቡድኖችን በመጫን ላይ..."
+  },
+  "migrationComplete": {
+    "message": "✓ ፍልሰት ተጠናቋል - ሁሉም ቡድኖች ወደ ድቅል ሥርዓት ተሸጋግረዋል"
+  },
+  "migrationPending": {
+    "message": "⚠ ፍልሰት በመጠባበቅ ላይ - ቡድኖች እስካሁን አልተሸጋገሩም"
+  },
+  "migrationStatusError": {
+    "message": "የፍልሰት ሁኔታን በመፈተሽ ላይ ስህተት፦ $1"
+  },
+  "migrationNoGroups": {
+    "message": "በአሁኑ መስኮት ውስጥ ምንም ቡድኖች አልተገኙም"
+  },
+  "migrationGroupsError": {
+    "message": "ቡድኖችን በመጫን ላይ ስህተት፦ $1"
+  },
+  "migrationRunning": {
+    "message": "ፍልሰት በመካሄድ ላይ..."
+  },
+  "migrationSucceeded": {
+    "message": "ፍልሰቱ በተሳካ ሁኔታ ተጠናቋል!"
+  },
+  "migrationFailed": {
+    "message": "ፍልሰቱ አልተሳካም፦ $1"
+  },
+  "migrationNoResponse": {
+    "message": "ምላሽ የለም"
+  },
+  "migrationRunError": {
+    "message": "የፍልሰት ስህተት፦ $1"
+  },
+  "migrationResetConfirm": {
+    "message": "የፍልሰት ባንዲራን ዳግም ማስጀመር ይፈልጋሉ? ይህ ፍልሰቱ እንደገና እንዲሄድ ያስችላል።"
+  },
+  "migrationResetSucceeded": {
+    "message": "የፍልሰት ባንዲራ በተሳካ ሁኔታ ዳግም ተጀምሯል!"
+  },
+  "migrationResetFailed": {
+    "message": "ዳግም ማስጀመር አልተሳካም፦ $1"
+  },
+  "migrationResetError": {
+    "message": "የዳግም ማስጀመር ስህተት፦ $1"
+  },
+  "migrationGroup": {
+    "message": "ቡድን $1፦"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ ተሸጋግሯል (ቤተኛ መታወቂያ፦ $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ አልተሸጋገረም"
+  },
+  "migrationGroupStatus": {
+    "message": "ሁኔታ፦ $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "የትር ቡድኖች እይታ"
+  }
+}

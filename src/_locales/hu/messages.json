@@ -2,6 +2,12 @@
   "newGroupButton": {
     "message": "Új csoport hozzáadása"
   },
+  "freeformButton": {
+    "message": "Szabad elrendezés"
+  },
+  "tilingButton": {
+    "message": "Automatikus elrendezés (csempék)"
+  },
   "settingsButton": {
     "message": "Beállítások"
   },
@@ -15,7 +21,25 @@
     "message": "Csoport bezárása"
   },
   "closeGroupWarning": {
-    "message": "A csoport bezárása a benne lévő $1 lapot is be fogja zárni. Biztos, hogy meg akarod ezt tenni?"
+    "message": "one=A csoport bezárása a benne lévő $1 lapot is bezárja. Biztosan ezt szeretné?|other=A csoport bezárása a benne lévő $1 lapot is bezárja. Biztosan ezt szeretné?"
+  },
+  "editGroup": {
+    "message": "Csoport szerkesztése"
+  },
+  "closeTab": {
+    "message": "Lap bezárása"
+  },
+  "openNewTab": {
+    "message": "Új lap megnyitása"
+  },
+  "tabCount": {
+    "message": "one=$1 lap|other=$1 lap"
+  },
+  "searchForTab_placeholder": {
+    "message": "Keresés a lapok között..."
+  },
+  "searchForTab_noResults": {
+    "message": "Nem található lap"
   },
   "optionKeyboardShortcuts": {
     "message": "Billentyűparancsok"
@@ -32,6 +56,12 @@
   "optionKeyboardShortcutsButtonsReset": {
     "message": "Visszaállítás"
   },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Letiltás"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Engedélyezés"
+  },
   "optionKeyboardShortcutsToggle": {
     "message": "Tab Groups View ki/be kapcsolása"
   },
@@ -40,6 +70,15 @@
   },
   "optionKeyboardShortcutsPreviousGroup": {
     "message": "Előző Lapcsoport aktiválása"
+  },
+  "optionsView": {
+    "message": "Nézet"
+  },
+  "optionsViewFreeform": {
+    "message": "Szabad (klasszikus)"
+  },
+  "optionsViewPopup": {
+    "message": "Felugró ablak"
   },
   "optionsTheme": {
     "message": "Téma"
@@ -92,10 +131,145 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "Lapok Száma:"
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "Aktív:"
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktív: $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "Indexkép Gyorsítótár Mérete:"
+  },
+  "refreshGroups": {
+    "message": "Csoportok frissítése"
+  },
+  "sendTabToGroup": {
+    "message": "Lap küldése csoportba"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "A felhasználók a gyorsbillentyűket a Firefox about:addons oldalán a „Bővítmények gyorsbillentyűinek kezelése” lehetőséggel is módosíthatják, ahogy {link} látható."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "a bemutató videóban"
+  },
+  "optionsThemeAuto": {
+    "message": "Rendszer követése"
+  },
+  "optionsNativeGroups": {
+    "message": "A böngésző natív csoportjai"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "A böngésző natív lapcsoportjainak használata"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "A böngésző natív lapcsoportjainak használata a vizuális rendezéshez és az összecsukáshoz."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "A natív lapcsoportok nem támogatottak a böngésző ezen verziójában (a lapok elrejtésére szolgáló API szükséges)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "A natív lapcsoportok nem támogatottak a böngésző ezen verziójában. Frissítsen Firefox 139+ verzióra, vagy használjon Chrome 89+ verziót."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "A böngészője nem támogatja a lapcsoportokhoz szükséges API-kat."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "A natív csoportok engedélyezve. Csoportok átvitele..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "A natív csoportok letiltva. Takarítás..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Érvénytelen fájl"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bájt"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Lapcsoportok visszaállítása..."
+  },
+  "migrationTitle": {
+    "message": "Hibrid lapcsoportok átvitele"
+  },
+  "migrationChecking": {
+    "message": "Az átvitel állapotának ellenőrzése..."
+  },
+  "migrationRun": {
+    "message": "Átvitel indítása most"
+  },
+  "migrationReset": {
+    "message": "Átvitelijelző visszaállítása"
+  },
+  "migrationCurrentGroups": {
+    "message": "Jelenlegi csoportok"
+  },
+  "migrationLoadingGroups": {
+    "message": "Csoportok betöltése..."
+  },
+  "migrationComplete": {
+    "message": "✓ Az átvitel kész - Minden csoport átkerült a hibrid rendszerbe"
+  },
+  "migrationPending": {
+    "message": "⚠ Az átvitel függőben van - A csoportok még nem kerültek át"
+  },
+  "migrationStatusError": {
+    "message": "Hiba az átvitel állapotának ellenőrzésekor: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Nem található csoport a jelenlegi ablakban"
+  },
+  "migrationGroupsError": {
+    "message": "Hiba a csoportok betöltésekor: $1"
+  },
+  "migrationRunning": {
+    "message": "Átvitel folyamatban..."
+  },
+  "migrationSucceeded": {
+    "message": "Az átvitel sikeresen befejeződött!"
+  },
+  "migrationFailed": {
+    "message": "Az átvitel sikertelen: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Nincs válasz"
+  },
+  "migrationRunError": {
+    "message": "Átviteli hiba: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Visszaállítja az átvitelijelzőt? Ezzel az átvitel újra futtatható."
+  },
+  "migrationResetSucceeded": {
+    "message": "Az átvitelijelző sikeresen visszaállítva!"
+  },
+  "migrationResetFailed": {
+    "message": "A visszaállítás sikertelen: $1"
+  },
+  "migrationResetError": {
+    "message": "Visszaállítási hiba: $1"
+  },
+  "migrationGroup": {
+    "message": "$1. csoport:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Átvitt (natív azonosító: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Nem átvitt"
+  },
+  "migrationGroupStatus": {
+    "message": "Állapot: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Lapcsoportok nézete"
   }
 }

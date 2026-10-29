@@ -1,7 +1,9 @@
 # Implementation Plan: Support Many More Languages
 
-> **Status: Phases 1, 2, 3 and 5 are done** on the branch `feature/more-languages`; Phase 4 (new languages) is
-> prepared and **waits for the owner and for reviewers**: see "Result". The table below is the state before the work.
+> **Status: all five phases are done** on the branch `feature/more-languages`. Phase 4 was done on 2026-10-28 and 2026-10-29: the
+> owner waived the need for reviewers, 64 languages were added as drafts (Batches A and B), and the messages the 11 older
+> languages lacked were written. Batch C (31 folders no browser can ask for) is left. See "Result" and
+> [`docs/languages.md`](../languages.md). The table below is the state before the work.
 
 ## Overview
 
@@ -51,7 +53,7 @@ Other findings:
 
 ## Decisions for the owner
 
-**Taken for the work that is done** (each can be changed; what Phase 4 waits for is marked):
+**Taken for the work that is done** (each can be changed; where a decision was changed later, the later one is said):
 
 1. **Which languages, and in what order?** Candidates by size of the Firefox user base and the cost of the script:
    Japanese, Italian, Dutch, Swedish, Czech, Ukrainian, Indonesian, Vietnamese, Thai, Arabic and Hebrew (right-to-left,
@@ -69,12 +71,17 @@ Other findings:
 
 - **Decision 2, where translations come from:** (a) community pull requests, with (c) a machine draft allowed only when
   it is listed as waiting for a native speaker (`CONTRIBUTION.md`, as for `pl` and `tr` earlier) and a reviewer is named
-  in the pull request. **Still open for Phase 4: no reviewers exist yet, so no new language was added.**
+  in the pull request. **Waived by the owner on 2026-10-28:** a language may be added without a reader; one that nobody
+  has read is a draft (`DRAFT_LOCALES`), and 64 were added on that footing.
 - **Decision 3, plural rules: switched to `Intl.PluralRules`, once.** The messages carry labelled forms
   (`one=$1 tab|other=$1 tabs`, the CLDR names), `pluralRule` is gone from every file, and the language is the browser's
   own (`@@ui_locale`, which a real Chromium gave as `de`, `pt_BR`, `zh_TW` for the language it was started in; it
   was `getUILanguage()` that said `en-US` throughout).
-- **Decision 1, which languages:** not decided; see Phase 4 below for a proposal of a first batch that tests the code.
+- **Decision 1, which languages: every language that Lazarus Form Recovery has** (110 folders, without `ru`), so that the two
+  extensions have the same reach. [`docs/languages.md`](../languages.md) holds the list, the table, and what was found about which
+  folders a browser takes: of the 110 translation folders of the aim (`tl` and `nn` added, `pt` retired), 32 are taken by no
+  language of Chromium 156 or Firefox 159, so the order mattered (Batch A, B, C there). The proposal of a first batch below was
+  superseded by that order. Batches A and B are done; Batch C is not.
 - **Decision 4, the store listings:** out of scope here.
 - **The folders `el_GR`, `fr_FR`, `tr_TR` were renamed `el`, `fr`, `tr`, and `es_AR` was removed** (see "Found", below).
 - **"Reset PTG" was deleted** with its stub (`options/reset.ts`): it only showed "Not implemented yet", and "PTG" is the
@@ -139,11 +146,11 @@ mutation tested as in the earlier plans.
 ## Success Criteria
 
 - [x] No user-visible English outside `messages.json`; a test enforces it
-- [x] A locale check in CI; **every released locale has every message** is _not_ met: the check holds each language to
-      a number of missing messages that can only fall (13 languages lack 43 to 58 of 91)
+- [x] A locale check in CI, and **every locale has every message** (met on 2026-10-29: the 64 new languages were written
+      whole, and the 11 older ones were filled; `tests/unit/locale-gaps.json` is 0 for all and holds them there)
 - [x] Plural forms correct for every language shipped, tested (counts 0 to 1000, in every message, in every language)
 - [x] Right-to-left pages render mirrored and without overflow (tested in a real Chromium with an Arabic pseudo-locale)
-- [ ] At least the first batch of new languages is in, each reviewed and screenshotted: **waits for reviewers**
+- [x] At least the first batch of new languages is in, screenshotted (Batches A and B, 64 languages, as drafts: **no speaker has read them**, which is the part that is not met)
 - [x] `CONTRIBUTION.md` explains how to add a language
 
 ## Skills, agents and rules for this work
@@ -200,10 +207,54 @@ Done on `feature/more-languages`; nothing is committed.
 - **Checks.** `npm test`: 3,027 tests, 100% on every metric, 0 lint findings; the mutation run 100%; the E2E suite
   100 passed and 44 skipped (the Chromium-only locale and pseudo-locale cases under Firefox, and the 8 that were skipped before).
 
-### Phase 4: what is left, and a proposal
+### Phase 4: what was left, and a proposal (superseded)
 
-Nothing in the code stops a language from being added: a folder, an entry in `locale-gaps.json`, and the pictures the E2E keeps.
-What it waits for is a person who reads the language. A first batch that also exercises the code would be **Arabic** and
-**Hebrew** (right to left; Arabic has all six plural forms), **Japanese** (no plural forms, wide characters), **Italian** and
-**Dutch** (the common case). Machine drafts of those, with the owner's consent and listed as waiting, are a few hours of work
-once the owner says so; the 91 messages are the work, and the locales have 43 to 58 of them missing today.
+_Written before the languages were added: the proposal of Arabic, Hebrew, Japanese, Italian and Dutch as a first batch was
+overtaken by the order in `docs/languages.md`, and the drafts it speaks of were written (see below)._
+
+### Phase 4, the aim set and Batches A and B (2026-10-28)
+
+The owner asked for support as extensive as Lazarus Form Recovery's, waived Decision 2, deleted `ru`, asked for `tl` and `nn`, for a check for
+copies of English before any language, and for both browsers to be checked. Done:
+
+- [`docs/languages.md`](../languages.md): the aim and the owner's decisions, how a browser chooses a folder (asked of Chromium 156 and Firefox 157, in
+  tests), a table of all 111 folders (language, direction, plural forms, the languages of Chromium and of Firefox that take it, status), what each
+  repository does that the other does not, learnings for this one, suggestions for Lazarus (not sent). `tests/unit/target-locales.test.ts` fails when the
+  table and the code disagree.
+- **A check for copies of English** (`copiesOfEnglish` in `scripts/lib/locale-report.ts`, the column "Same as English" of `npm run report:locales`, and
+  `tests/unit/locale-copies.json`, a number for each language that may only go down).
+- **64 languages added as drafts, nobody has read them:** Batch A, the 36 languages of both browsers (`af ar bg bn ca cs da et fa fi gu he hi hr id it ja kn
+lt lv mr ms nb nl pt_PT ro sk sl sr sv ta te th uk ur vi`), and Batch B, the 28 of one browser (`am az bs cy es_419 eu ff fil ga gl gn hy is ka kk km mk
+ml my ne nn pa si sq sw tl uz xh`). `pt` (Brazilian Portuguese, a copy of `pt_BR`) was retired for `pt_PT`; the regional Englishes inherit `en`.
+  Written by Claude from the 91 English messages; the least certain are `ff`, `gn`, `xh`, `my`, `km`, `si`, `am`, `ne`, `pa`, `ka`, `hy`.
+- `tests/e2e/chromium-locale-folders.spec.ts` (each of Chromium's 55 languages takes the folder the rule says; the region-to-language step; `no` is never
+  taken), `tests/e2e/firefox-locale-folders.spec.ts` (Firefox set by real language packs, signed, downloaded once: the rule, the third step to another
+  region of the language, and every folder of `src/_locales` taken in its own language), `tests/e2e/locales.spec.ts` (every folder in Chromium, now with
+  `dir=rtl` expected for `ar`, `fa`, `he`, `ur`).
+- **Found:** a pack that Mozilla has not signed is refused whatever the preferences, so Firefox cannot be set to a made-up language; Firefox takes a
+  folder of another region of the language (Chromium does not); Mozilla's list of primary builds has 11 languages for which Firefox 159 has no pack; 32 of
+  the 110 languages of the aim are taken by no language of either browser (31 are Batch C, which is not written, and `en_AU` inherits `en`); Firefox's
+  `tl` and `nn-NO` had no folder; this repository's older languages had 0 to 3 messages equal to English.
+- **Not done, for the owner:** Batch C (31 folders no stock browser can ask for); a speaker's reading of any draft; whether other browsers (Edge, Opera,
+  Samsung Internet) are to be asked; Firefox pages in each language are not rendered in a test (the E2E setup serves them with a stand-in, so only the folder
+  that Firefox takes is checked).
+
+### Follow-up of 2026-10-29
+
+From a review of the work above:
+
+- **Right-to-left keyboard navigation in the popup.** The arrows were fixed to the left and the right, while the page turns round:
+  in right to left the chevron points left and the detail frame comes in from the left. Now the arrow that points on opens the
+  tabs of a group and moves along a row, and the one that points back goes back, in either direction (`isForwardKey`, `isBackKey`
+  in `core/popup.ts`; `onLeftAtStart` is `onBackAtStart`). Tested in unit tests and in the pseudo-locale E2E, in both directions
+  (shown to fail without the change). **Not changed:** the freeform view of the add-on (`view/controller.ts`) moves between tabs
+  with the left and right arrow in the order of the groups on a canvas that is not mirrored (the stated exception of the CSS test).
+- **The count of tabs** in the statistics is written with the digits and grouping of the language and with one message,
+  `optionsStatisticsNumberOfTabsAndActive` (`$1 (Active: $2)`, which replaces `optionsStatisticsNumberOfTabsActive` in every
+  language, the punctuation and the word order now being the language's own).
+- **The 11 older languages were filled** (`de el es fr hu ko pl pt_BR tr zh_CN zh_TW`): the 44 to 58 messages each lacked, written by Claude
+  and **not read by a speaker** (`CONTRIBUTION.md` lists them). `closeGroupWarning` of `hu`, `pl` and `tr` was plain text and
+  now has the forms of the language. The gaps are 0 for all.
+- **The locale probes** use one `probeExtension` and remove their temporary profiles, servers and extensions in `finally`.
+- `CONTRIBUTION.md` no longer names Russian in its example of forms, and says what the whole numbers of Czech, Polish and Ukrainian
+  need (the review said Polish has four forms; for a count it has three, `other` being for fractions, and `other` is the fallback anyway).

@@ -2,6 +2,12 @@
   "newGroupButton": {
     "message": "Neue Gruppe hinzufügen"
   },
+  "freeformButton": {
+    "message": "Freie Anordnung"
+  },
+  "tilingButton": {
+    "message": "Automatische Anordnung (Kacheln)"
+  },
   "settingsButton": {
     "message": "Einstellungen"
   },
@@ -16,6 +22,9 @@
   },
   "closeGroupWarning": {
     "message": "one=Sie sind dabei, mit dieser Gruppe $1 Tab zu schließen. Soll dieser Vorgang wirklich fortgesetzt werden?|other=Sie sind dabei, mit dieser Gruppe $1 Tabs zu schließen. Soll dieser Vorgang wirklich fortgesetzt werden?"
+  },
+  "editGroup": {
+    "message": "Gruppe bearbeiten"
   },
   "closeTab": {
     "message": "Tab schließen"
@@ -122,10 +131,145 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "Anzahl der Tabs:"
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "Aktive:"
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktive: $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "Cache-Größe der Vorschaubilder:"
+  },
+  "refreshGroups": {
+    "message": "Gruppen aktualisieren"
+  },
+  "sendTabToGroup": {
+    "message": "Tab an Gruppe senden"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Tastenkombinationen lassen sich auch über die Option „Erweiterungstastenkombinationen verwalten“ unter about:addons in Firefox ändern, wie {link} zu sehen ist."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "im Beispielvideo"
+  },
+  "optionsThemeAuto": {
+    "message": "Dem System folgen"
+  },
+  "optionsNativeGroups": {
+    "message": "Native Browsergruppen"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Native Tab-Gruppen des Browsers verwenden"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Native Tab-Gruppen des Browsers für die visuelle Organisation und das Einklappen verwenden."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Native Tab-Gruppen werden in dieser Browserversion nicht unterstützt (die Schnittstelle zum Ausblenden von Tabs ist erforderlich)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Native Tab-Gruppen werden in dieser Browserversion nicht unterstützt. Bitte auf Firefox 139+ aktualisieren oder Chrome 89+ verwenden."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Der Browser unterstützt die für Tab-Gruppen erforderlichen Schnittstellen nicht."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Native Gruppen aktiviert. Gruppen werden migriert..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Native Gruppen deaktiviert. Es wird aufgeräumt..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ungültige Datei"
+  },
+  "byteSizeBytes": {
+    "message": "$1 Bytes"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Tab-Gruppen werden wiederhergestellt..."
+  },
+  "migrationTitle": {
+    "message": "Migration hybrider Tab-Gruppen"
+  },
+  "migrationChecking": {
+    "message": "Migrationsstatus wird geprüft..."
+  },
+  "migrationRun": {
+    "message": "Migration jetzt ausführen"
+  },
+  "migrationReset": {
+    "message": "Migrationsmarkierung zurücksetzen"
+  },
+  "migrationCurrentGroups": {
+    "message": "Aktuelle Gruppen"
+  },
+  "migrationLoadingGroups": {
+    "message": "Gruppen werden geladen..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migration abgeschlossen - Alle Gruppen wurden in das Hybridsystem migriert"
+  },
+  "migrationPending": {
+    "message": "⚠ Migration ausstehend - Die Gruppen wurden noch nicht migriert"
+  },
+  "migrationStatusError": {
+    "message": "Fehler beim Prüfen des Migrationsstatus: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Im aktuellen Fenster wurden keine Gruppen gefunden"
+  },
+  "migrationGroupsError": {
+    "message": "Fehler beim Laden der Gruppen: $1"
+  },
+  "migrationRunning": {
+    "message": "Migration läuft..."
+  },
+  "migrationSucceeded": {
+    "message": "Migration erfolgreich abgeschlossen!"
+  },
+  "migrationFailed": {
+    "message": "Migration fehlgeschlagen: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Keine Antwort"
+  },
+  "migrationRunError": {
+    "message": "Migrationsfehler: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Migrationsmarkierung zurücksetzen? Dadurch kann die Migration erneut ausgeführt werden."
+  },
+  "migrationResetSucceeded": {
+    "message": "Migrationsmarkierung erfolgreich zurückgesetzt!"
+  },
+  "migrationResetFailed": {
+    "message": "Zurücksetzen fehlgeschlagen: $1"
+  },
+  "migrationResetError": {
+    "message": "Fehler beim Zurücksetzen: $1"
+  },
+  "migrationGroup": {
+    "message": "Gruppe $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migriert (native ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Nicht migriert"
+  },
+  "migrationGroupStatus": {
+    "message": "Status: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Tab-Gruppen-Ansicht"
   }
 }

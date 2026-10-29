@@ -2,6 +2,12 @@
   "newGroupButton": {
     "message": "Agregar un grupo nuevo"
   },
+  "freeformButton": {
+    "message": "Distribución libre"
+  },
+  "tilingButton": {
+    "message": "Distribución automática (en mosaico)"
+  },
   "settingsButton": {
     "message": "Configuración"
   },
@@ -16,6 +22,24 @@
   },
   "closeGroupWarning": {
     "message": "one=Al cerrar este grupo estas cerrando $1 pestaña que esta adentro. ¿Estás seguro que querés hacer esto?|other=Al cerrar este grupo estás cerrando $1 pestañas que están adentro. ¿Estás seguro que queres hacer esto?"
+  },
+  "editGroup": {
+    "message": "Editar grupo"
+  },
+  "closeTab": {
+    "message": "Cerrar pestaña"
+  },
+  "openNewTab": {
+    "message": "Abrir pestaña nueva"
+  },
+  "tabCount": {
+    "message": "one=$1 pestaña|other=$1 pestañas"
+  },
+  "searchForTab_placeholder": {
+    "message": "Buscar una pestaña..."
+  },
+  "searchForTab_noResults": {
+    "message": "No se encontraron pestañas"
   },
   "optionKeyboardShortcuts": {
     "message": "Atajos de Teclado"
@@ -32,6 +56,12 @@
   "optionKeyboardShortcutsButtonsReset": {
     "message": "Restaurar"
   },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Desactivar"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Activar"
+  },
   "optionKeyboardShortcutsToggle": {
     "message": "Alternar Tab Groups View"
   },
@@ -40,6 +70,15 @@
   },
   "optionKeyboardShortcutsPreviousGroup": {
     "message": "Activar el Grupo de Pestañas anterior"
+  },
+  "optionsView": {
+    "message": "Vista"
+  },
+  "optionsViewFreeform": {
+    "message": "Libre (clásica)"
+  },
+  "optionsViewPopup": {
+    "message": "Ventana emergente"
   },
   "optionsTheme": {
     "message": "Tema"
@@ -92,10 +131,145 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "Numero de Pestañas:"
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "Activas:"
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Activas: $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "Tamaño del Cache de Miniaturas:"
+  },
+  "refreshGroups": {
+    "message": "Actualizar grupos"
+  },
+  "sendTabToGroup": {
+    "message": "Enviar pestaña a un grupo"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Los usuarios también pueden actualizar los atajos desde la opción «Administrar atajos de extensiones» en about:addons de Firefox, como se ve {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "en el vídeo de ejemplo"
+  },
+  "optionsThemeAuto": {
+    "message": "Seguir el sistema"
+  },
+  "optionsNativeGroups": {
+    "message": "Grupos nativos del navegador"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Usar los grupos de pestañas nativos del navegador"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Usar los grupos de pestañas nativos del navegador para la organización visual y el plegado."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Los grupos de pestañas nativos no son compatibles con esta versión del navegador (requiere la API para ocultar pestañas)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Los grupos de pestañas nativos no son compatibles con esta versión del navegador. Actualiza a Firefox 139+ o usa Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Tu navegador no admite las API necesarias para los grupos de pestañas."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grupos nativos activados. Migrando grupos..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grupos nativos desactivados. Limpiando..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Archivo no válido"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bytes"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Restaurando grupos de pestañas..."
+  },
+  "migrationTitle": {
+    "message": "Migración de grupos de pestañas híbridos"
+  },
+  "migrationChecking": {
+    "message": "Comprobando el estado de la migración..."
+  },
+  "migrationRun": {
+    "message": "Ejecutar migración ahora"
+  },
+  "migrationReset": {
+    "message": "Restablecer el indicador de migración"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grupos actuales"
+  },
+  "migrationLoadingGroups": {
+    "message": "Cargando grupos..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migración completada - Todos los grupos se han migrado al sistema híbrido"
+  },
+  "migrationPending": {
+    "message": "⚠ Migración pendiente - Los grupos aún no se han migrado"
+  },
+  "migrationStatusError": {
+    "message": "Error al comprobar el estado de la migración: $1"
+  },
+  "migrationNoGroups": {
+    "message": "No se encontraron grupos en la ventana actual"
+  },
+  "migrationGroupsError": {
+    "message": "Error al cargar los grupos: $1"
+  },
+  "migrationRunning": {
+    "message": "Ejecutando migración..."
+  },
+  "migrationSucceeded": {
+    "message": "¡La migración se completó correctamente!"
+  },
+  "migrationFailed": {
+    "message": "La migración falló: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Sin respuesta"
+  },
+  "migrationRunError": {
+    "message": "Error de migración: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "¿Restablecer el indicador de migración? Esto permitirá que la migración se ejecute de nuevo."
+  },
+  "migrationResetSucceeded": {
+    "message": "¡El indicador de migración se restableció correctamente!"
+  },
+  "migrationResetFailed": {
+    "message": "El restablecimiento falló: $1"
+  },
+  "migrationResetError": {
+    "message": "Error de restablecimiento: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupo $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrado (ID nativo: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ No migrado"
+  },
+  "migrationGroupStatus": {
+    "message": "Estado: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vista de grupos de pestañas"
   }
 }

@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "নতুন গ্রুপ যোগ করুন"
+  },
+  "freeformButton": {
+    "message": "মুক্ত বিন্যাস"
+  },
+  "tilingButton": {
+    "message": "স্বয়ংক্রিয় (টাইলিং) বিন্যাস"
+  },
+  "settingsButton": {
+    "message": "সেটিংস"
+  },
+  "defaultGroupName": {
+    "message": "গ্রুপ"
+  },
+  "dragGroup": {
+    "message": "গ্রুপ টেনে আনুন"
+  },
+  "closeGroup": {
+    "message": "গ্রুপ বন্ধ করুন"
+  },
+  "closeGroupWarning": {
+    "message": "one=এই গ্রুপটি বন্ধ করলে এর ভেতরের $1টি ট্যাব বন্ধ হয়ে যাবে। আপনি কি নিশ্চিত যে এটি করতে চান?|other=এই গ্রুপটি বন্ধ করলে এর ভেতরের $1টি ট্যাব বন্ধ হয়ে যাবে। আপনি কি নিশ্চিত যে এটি করতে চান?"
+  },
+  "editGroup": {
+    "message": "গ্রুপ সম্পাদনা করুন"
+  },
+  "closeTab": {
+    "message": "ট্যাব বন্ধ করুন"
+  },
+  "openNewTab": {
+    "message": "নতুন ট্যাব খুলুন"
+  },
+  "tabCount": {
+    "message": "one=$1টি ট্যাব|other=$1টি ট্যাব"
+  },
+  "searchForTab_placeholder": {
+    "message": "ট্যাব খুঁজুন..."
+  },
+  "searchForTab_noResults": {
+    "message": "কোনো ট্যাব পাওয়া যায়নি"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "কিবোর্ড শর্টকাট"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "শর্টকাট বিকল্পের ফরম্যাট এখানে বিস্তারিত দেওয়া আছে।"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "হালনাগাদ করুন"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "রিসেট করুন"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "নিষ্ক্রিয় করুন"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "সক্রিয় করুন"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ট্যাব গ্রুপ ভিউ টগল করুন"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "পরবর্তী ট্যাব গ্রুপ সক্রিয় করুন"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "আগের ট্যাব গ্রুপ সক্রিয় করুন"
+  },
+  "optionsView": {
+    "message": "ভিউ"
+  },
+  "optionsViewFreeform": {
+    "message": "মুক্ত বিন্যাস (ক্লাসিক)"
+  },
+  "optionsViewPopup": {
+    "message": "পপআপ"
+  },
+  "optionsTheme": {
+    "message": "থিম"
+  },
+  "optionsThemeLight": {
+    "message": "হালকা"
+  },
+  "optionsThemeDark": {
+    "message": "গাঢ়"
+  },
+  "optionsToolbar": {
+    "message": "টুলবার"
+  },
+  "optionsToolbarPosition": {
+    "message": "অবস্থান"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "উপরে"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ডানে"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "নিচে"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "বামে"
+  },
+  "optionsBackup": {
+    "message": "ব্যাকআপ"
+  },
+  "optionsBackupImport": {
+    "message": "ইমপোর্ট"
+  },
+  "optionsBackupImportText": {
+    "message": "ইমপোর্ট করা ব্যাকআপ নতুন উইন্ডোতে খুলবে এবং কিছুই ওভাররাইট করবে না।\nআপনি পুরোনো \"Tab Groups\" অ্যাড-অন থেকেও ব্যাকআপ ইমপোর্ট করতে পারেন।"
+  },
+  "optionsBackupExport": {
+    "message": "এক্সপোর্ট"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox-এ সঠিক সেশন ব্যবস্থাপনা সম্ভব হলে এই অংশটি অপ্রয়োজনীয় হয়ে যেতে পারে।"
+  },
+  "optionsBackupExportButton": {
+    "message": "ব্যাকআপ সংরক্ষণ করুন"
+  },
+  "optionsStatistics": {
+    "message": "পরিসংখ্যান"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ট্যাবের সংখ্যা:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (সক্রিয়: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "থাম্বনেইল ক্যাশের আকার:"
+  },
+  "refreshGroups": {
+    "message": "গ্রুপ রিফ্রেশ করুন"
+  },
+  "sendTabToGroup": {
+    "message": "ট্যাব গ্রুপে পাঠান"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "ব্যবহারকারীরা Firefox-এর about:addons-এ \"এক্সটেনশন শর্টকাট পরিচালনা\" বিকল্পের মাধ্যমেও শর্টকাট হালনাগাদ করতে পারেন, যেমন {link} দেখা যায়।"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "উদাহরণ ভিডিওতে"
+  },
+  "optionsThemeAuto": {
+    "message": "সিস্টেম অনুসরণ করুন"
+  },
+  "optionsNativeGroups": {
+    "message": "ব্রাউজারের নিজস্ব গ্রুপ"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ব্রাউজারের নিজস্ব ট্যাব গ্রুপ ব্যবহার করুন"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "দৃশ্যমান সাজানো ও গুটিয়ে রাখার জন্য ব্রাউজারের নিজস্ব ট্যাব গ্রুপ ব্যবহার করুন।"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "এই ব্রাউজার সংস্করণে নিজস্ব ট্যাব গ্রুপ সমর্থিত নয় (ট্যাব লুকানোর API প্রয়োজন)।"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "এই ব্রাউজার সংস্করণে নিজস্ব ট্যাব গ্রুপ সমর্থিত নয়। অনুগ্রহ করে Firefox 139+ এ হালনাগাদ করুন অথবা Chrome 89+ ব্যবহার করুন।"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "আপনার ব্রাউজার ট্যাব গ্রুপের জন্য প্রয়োজনীয় API সমর্থন করে না।"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "নিজস্ব গ্রুপ সক্রিয় হয়েছে। গ্রুপ স্থানান্তর করা হচ্ছে..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "নিজস্ব গ্রুপ নিষ্ক্রিয় হয়েছে। পরিষ্কার করা হচ্ছে..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "অকার্যকর ফাইল"
+  },
+  "byteSizeBytes": {
+    "message": "$1 বাইট"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ট্যাব গ্রুপ পুনরুদ্ধার করা হচ্ছে..."
+  },
+  "migrationTitle": {
+    "message": "হাইব্রিড ট্যাব গ্রুপ স্থানান্তর"
+  },
+  "migrationChecking": {
+    "message": "স্থানান্তরের অবস্থা যাচাই করা হচ্ছে..."
+  },
+  "migrationRun": {
+    "message": "এখনই স্থানান্তর চালান"
+  },
+  "migrationReset": {
+    "message": "স্থানান্তর ফ্ল্যাগ রিসেট করুন"
+  },
+  "migrationCurrentGroups": {
+    "message": "বর্তমান গ্রুপ"
+  },
+  "migrationLoadingGroups": {
+    "message": "গ্রুপ লোড হচ্ছে..."
+  },
+  "migrationComplete": {
+    "message": "✓ স্থানান্তর সম্পন্ন - সব গ্রুপ হাইব্রিড ব্যবস্থায় স্থানান্তরিত হয়েছে"
+  },
+  "migrationPending": {
+    "message": "⚠ স্থানান্তর মুলতুবি - গ্রুপ এখনও স্থানান্তরিত হয়নি"
+  },
+  "migrationStatusError": {
+    "message": "স্থানান্তরের অবস্থা যাচাইয়ে ত্রুটি: $1"
+  },
+  "migrationNoGroups": {
+    "message": "বর্তমান উইন্ডোতে কোনো গ্রুপ পাওয়া যায়নি"
+  },
+  "migrationGroupsError": {
+    "message": "গ্রুপ লোড করতে ত্রুটি: $1"
+  },
+  "migrationRunning": {
+    "message": "স্থানান্তর চলছে..."
+  },
+  "migrationSucceeded": {
+    "message": "স্থানান্তর সফলভাবে সম্পন্ন হয়েছে!"
+  },
+  "migrationFailed": {
+    "message": "স্থানান্তর ব্যর্থ হয়েছে: $1"
+  },
+  "migrationNoResponse": {
+    "message": "কোনো সাড়া নেই"
+  },
+  "migrationRunError": {
+    "message": "স্থানান্তরে ত্রুটি: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "স্থানান্তর ফ্ল্যাগ রিসেট করবেন? এতে স্থানান্তর আবার চালানো যাবে।"
+  },
+  "migrationResetSucceeded": {
+    "message": "স্থানান্তর ফ্ল্যাগ সফলভাবে রিসেট হয়েছে!"
+  },
+  "migrationResetFailed": {
+    "message": "রিসেট ব্যর্থ হয়েছে: $1"
+  },
+  "migrationResetError": {
+    "message": "রিসেটে ত্রুটি: $1"
+  },
+  "migrationGroup": {
+    "message": "গ্রুপ $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ স্থানান্তরিত (নিজস্ব আইডি: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ স্থানান্তরিত হয়নি"
+  },
+  "migrationGroupStatus": {
+    "message": "অবস্থা: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ট্যাব গ্রুপ ভিউ"
+  }
+}

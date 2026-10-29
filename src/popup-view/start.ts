@@ -112,7 +112,7 @@ export async function startPopup(): Promise<void> {
         body: document.body,
         scheduler,
         isAside: true,
-        onLeftAtStart: back,
+        onBackAtStart: back,
       }),
       service,
       tabList,

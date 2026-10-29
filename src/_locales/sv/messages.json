@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Lägg till ny grupp"
+  },
+  "freeformButton": {
+    "message": "Fri placering"
+  },
+  "tilingButton": {
+    "message": "Automatisk placering (sida vid sida)"
+  },
+  "settingsButton": {
+    "message": "Inställningar"
+  },
+  "defaultGroupName": {
+    "message": "Grp"
+  },
+  "dragGroup": {
+    "message": "Dra grupp"
+  },
+  "closeGroup": {
+    "message": "Stäng grupp"
+  },
+  "closeGroupWarning": {
+    "message": "one=Om du stänger den här gruppen stängs $1 flik i den. Är du säker på att du vill göra det?|other=Om du stänger den här gruppen stängs $1 flikar i den. Är du säker på att du vill göra det?"
+  },
+  "editGroup": {
+    "message": "Redigera grupp"
+  },
+  "closeTab": {
+    "message": "Stäng flik"
+  },
+  "openNewTab": {
+    "message": "Öppna ny flik"
+  },
+  "tabCount": {
+    "message": "one=$1 flik|other=$1 flikar"
+  },
+  "searchForTab_placeholder": {
+    "message": "Sök efter en flik..."
+  },
+  "searchForTab_noResults": {
+    "message": "Inga flikar hittades"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Kortkommandon"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Formatet för kortkommandoalternativet beskrivs här."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Uppdatera"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Återställ"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Inaktivera"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Aktivera"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Växla vy för flikgrupper"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktivera nästa flikgrupp"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktivera föregående flikgrupp"
+  },
+  "optionsView": {
+    "message": "Vy"
+  },
+  "optionsViewFreeform": {
+    "message": "Fri (klassisk)"
+  },
+  "optionsViewPopup": {
+    "message": "Popup"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "ljust"
+  },
+  "optionsThemeDark": {
+    "message": "mörkt"
+  },
+  "optionsToolbar": {
+    "message": "Verktygsfält"
+  },
+  "optionsToolbarPosition": {
+    "message": "Position"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "överst"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "till höger"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "nederst"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "till vänster"
+  },
+  "optionsBackup": {
+    "message": "Säkerhetskopia"
+  },
+  "optionsBackupImport": {
+    "message": "Importera"
+  },
+  "optionsBackupImportText": {
+    "message": "Importerade säkerhetskopior öppnas i nya fönster och skriver inte över något.\nDu kan också importera säkerhetskopior från det gamla tillägget \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "Exportera"
+  },
+  "optionsBackupExportText": {
+    "message": "Det här avsnittet kan bli överflödigt när riktig sessionshantering blir möjlig i Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Spara säkerhetskopia"
+  },
+  "optionsStatistics": {
+    "message": "Statistik"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Antal flikar:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktiva: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Storlek på miniatyrcache:"
+  },
+  "refreshGroups": {
+    "message": "Uppdatera grupper"
+  },
+  "sendTabToGroup": {
+    "message": "Skicka flik till grupp"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Användare kan också uppdatera kortkommandon via alternativet \"Hantera tilläggens kortkommandon\" på about:addons i Firefox, som visas {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "i exempelvideon"
+  },
+  "optionsThemeAuto": {
+    "message": "Följ systemet"
+  },
+  "optionsNativeGroups": {
+    "message": "Webbläsarens egna grupper"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Använd webbläsarens egna flikgrupper"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Använd webbläsarens egna flikgrupper för visuell organisering och hopfällning."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Webbläsarens egna flikgrupper stöds inte i den här webbläsarversionen (kräver API:et för att dölja flikar)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Webbläsarens egna flikgrupper stöds inte i den här webbläsarversionen. Uppdatera till Firefox 139+ eller använd Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Din webbläsare stöder inte de API:er som krävs för flikgrupper."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Webbläsarens egna grupper är aktiverade. Migrerar grupper..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Webbläsarens egna grupper är inaktiverade. Rensar upp..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ogiltig fil"
+  },
+  "byteSizeBytes": {
+    "message": "$1 byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Återställer flikgrupper..."
+  },
+  "migrationTitle": {
+    "message": "Migrering av hybrida flikgrupper"
+  },
+  "migrationChecking": {
+    "message": "Kontrollerar migreringsstatus..."
+  },
+  "migrationRun": {
+    "message": "Kör migreringen nu"
+  },
+  "migrationReset": {
+    "message": "Återställ migreringsflaggan"
+  },
+  "migrationCurrentGroups": {
+    "message": "Aktuella grupper"
+  },
+  "migrationLoadingGroups": {
+    "message": "Läser in grupper..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migreringen är klar - Alla grupper har migrerats till det hybrida systemet"
+  },
+  "migrationPending": {
+    "message": "⚠ Migreringen väntar - Grupperna har inte migrerats än"
+  },
+  "migrationStatusError": {
+    "message": "Fel vid kontroll av migreringsstatus: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Inga grupper hittades i det aktuella fönstret"
+  },
+  "migrationGroupsError": {
+    "message": "Fel vid inläsning av grupper: $1"
+  },
+  "migrationRunning": {
+    "message": "Kör migrering..."
+  },
+  "migrationSucceeded": {
+    "message": "Migreringen slutfördes!"
+  },
+  "migrationFailed": {
+    "message": "Migreringen misslyckades: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Inget svar"
+  },
+  "migrationRunError": {
+    "message": "Migreringsfel: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Vill du återställa migreringsflaggan? Då kan migreringen köras igen."
+  },
+  "migrationResetSucceeded": {
+    "message": "Migreringsflaggan återställdes!"
+  },
+  "migrationResetFailed": {
+    "message": "Återställningen misslyckades: $1"
+  },
+  "migrationResetError": {
+    "message": "Återställningsfel: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupp $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrerad (eget ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Inte migrerad"
+  },
+  "migrationGroupStatus": {
+    "message": "Status: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vy för flikgrupper"
+  }
+}

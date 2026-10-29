@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Добавяне на нова група"
+  },
+  "freeformButton": {
+    "message": "Свободно подреждане"
+  },
+  "tilingButton": {
+    "message": "Автоматично (мозаечно) подреждане"
+  },
+  "settingsButton": {
+    "message": "Настройки"
+  },
+  "defaultGroupName": {
+    "message": "Гр."
+  },
+  "dragGroup": {
+    "message": "Плъзнете групата"
+  },
+  "closeGroup": {
+    "message": "Затваряне на групата"
+  },
+  "closeGroupWarning": {
+    "message": "one=Затварянето на тази група ще затвори $1 подлист в нея. Сигурни ли сте, че искате да го направите?|other=Затварянето на тази група ще затвори $1 подлиста в нея. Сигурни ли сте, че искате да го направите?"
+  },
+  "editGroup": {
+    "message": "Редактиране на групата"
+  },
+  "closeTab": {
+    "message": "Затваряне на подлиста"
+  },
+  "openNewTab": {
+    "message": "Отваряне на нов подлист"
+  },
+  "tabCount": {
+    "message": "one=$1 подлист|other=$1 подлиста"
+  },
+  "searchForTab_placeholder": {
+    "message": "Търсене на подлист..."
+  },
+  "searchForTab_noResults": {
+    "message": "Не са намерени подлистове"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Клавишни комбинации"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Форматът на настройката за клавишните комбинации е описан тук."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Обновяване"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Нулиране"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Изключване"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Включване"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Превключване на изгледа с групи подлистове"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Активиране на следващата група подлистове"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Активиране на предишната група подлистове"
+  },
+  "optionsView": {
+    "message": "Изглед"
+  },
+  "optionsViewFreeform": {
+    "message": "Свободен (класически)"
+  },
+  "optionsViewPopup": {
+    "message": "Изскачащ прозорец"
+  },
+  "optionsTheme": {
+    "message": "Тема"
+  },
+  "optionsThemeLight": {
+    "message": "светла"
+  },
+  "optionsThemeDark": {
+    "message": "тъмна"
+  },
+  "optionsToolbar": {
+    "message": "Лента с инструменти"
+  },
+  "optionsToolbarPosition": {
+    "message": "Позиция"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "горе"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "вдясно"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "долу"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "вляво"
+  },
+  "optionsBackup": {
+    "message": "Резервно копие"
+  },
+  "optionsBackupImport": {
+    "message": "Внасяне"
+  },
+  "optionsBackupImportText": {
+    "message": "Внесените резервни копия ще се отварят в нови прозорци и няма да презапишат нищо.\nМожете да внасяте резервни копия и от старото разширение „Tab Groups“."
+  },
+  "optionsBackupExport": {
+    "message": "Изнасяне"
+  },
+  "optionsBackupExportText": {
+    "message": "Този раздел може да стане ненужен, когато във Firefox стане възможно правилното управление на сесиите."
+  },
+  "optionsBackupExportButton": {
+    "message": "Запазване на резервно копие"
+  },
+  "optionsStatistics": {
+    "message": "Статистика"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Брой подлистове:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Активни: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Размер на кеша за миниатюрите:"
+  },
+  "refreshGroups": {
+    "message": "Опресняване на групите"
+  },
+  "sendTabToGroup": {
+    "message": "Изпращане на подлиста към група"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Потребителите могат да променят клавишните комбинации и чрез опцията „Управление на клавишните комбинации на разширенията“ в about:addons във Firefox, както се вижда {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "в примерното видео"
+  },
+  "optionsThemeAuto": {
+    "message": "Според системата"
+  },
+  "optionsNativeGroups": {
+    "message": "Собствени групи на браузъра"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Използване на собствените групи подлистове на браузъра"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Използване на собствените групи подлистове на браузъра за визуална организация и свиване."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Собствените групи подлистове не се поддържат в тази версия на браузъра (изискват API за скриване на подлистове)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Собствените групи подлистове не се поддържат в тази версия на браузъра. Обновете до Firefox 139+ или използвайте Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Вашият браузър не поддържа необходимите API за групи подлистове."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Собствените групи са включени. Групите се прехвърлят..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Собствените групи са изключени. Почистване..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Невалиден файл"
+  },
+  "byteSizeBytes": {
+    "message": "$1 байта"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Групите подлистове се възстановяват..."
+  },
+  "migrationTitle": {
+    "message": "Прехвърляне на хибридните групи подлистове"
+  },
+  "migrationChecking": {
+    "message": "Проверка на състоянието на прехвърлянето..."
+  },
+  "migrationRun": {
+    "message": "Стартиране на прехвърлянето сега"
+  },
+  "migrationReset": {
+    "message": "Нулиране на флага за прехвърляне"
+  },
+  "migrationCurrentGroups": {
+    "message": "Текущи групи"
+  },
+  "migrationLoadingGroups": {
+    "message": "Групите се зареждат..."
+  },
+  "migrationComplete": {
+    "message": "✓ Прехвърлянето е завършено - всички групи са прехвърлени към хибридната система"
+  },
+  "migrationPending": {
+    "message": "⚠ Прехвърлянето предстои - групите още не са прехвърлени"
+  },
+  "migrationStatusError": {
+    "message": "Грешка при проверка на състоянието на прехвърлянето: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Няма намерени групи в текущия прозорец"
+  },
+  "migrationGroupsError": {
+    "message": "Грешка при зареждане на групите: $1"
+  },
+  "migrationRunning": {
+    "message": "Прехвърлянето се изпълнява..."
+  },
+  "migrationSucceeded": {
+    "message": "Прехвърлянето завърши успешно!"
+  },
+  "migrationFailed": {
+    "message": "Прехвърлянето не успя: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Няма отговор"
+  },
+  "migrationRunError": {
+    "message": "Грешка при прехвърлянето: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Да се нулира ли флагът за прехвърляне? Това ще позволи прехвърлянето да се изпълни отново."
+  },
+  "migrationResetSucceeded": {
+    "message": "Флагът за прехвърляне е нулиран успешно!"
+  },
+  "migrationResetFailed": {
+    "message": "Нулирането не успя: $1"
+  },
+  "migrationResetError": {
+    "message": "Грешка при нулиране: $1"
+  },
+  "migrationGroup": {
+    "message": "Група $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Прехвърлена (собствен ИД: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Не е прехвърлена"
+  },
+  "migrationGroupStatus": {
+    "message": "Състояние: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Изглед на групите подлистове"
+  }
+}

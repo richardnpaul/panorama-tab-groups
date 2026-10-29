@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Tambah grup baru"
+  },
+  "freeformButton": {
+    "message": "Tata letak bebas"
+  },
+  "tilingButton": {
+    "message": "Tata letak otomatis (ubin)"
+  },
+  "settingsButton": {
+    "message": "Pengaturan"
+  },
+  "defaultGroupName": {
+    "message": "Grup"
+  },
+  "dragGroup": {
+    "message": "Seret grup"
+  },
+  "closeGroup": {
+    "message": "Tutup grup"
+  },
+  "closeGroupWarning": {
+    "message": "Menutup grup ini akan menutup $1 tab di dalamnya. Anda yakin ingin melakukannya?"
+  },
+  "editGroup": {
+    "message": "Edit grup"
+  },
+  "closeTab": {
+    "message": "Tutup tab"
+  },
+  "openNewTab": {
+    "message": "Buka tab baru"
+  },
+  "tabCount": {
+    "message": "$1 tab"
+  },
+  "searchForTab_placeholder": {
+    "message": "Cari tab..."
+  },
+  "searchForTab_noResults": {
+    "message": "Tidak ada tab yang ditemukan"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Pintasan Papan Ketik"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Format opsi pintasan dijelaskan di sini."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Perbarui"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Setel ulang"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Nonaktifkan"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Aktifkan"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Alihkan tampilan grup tab"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktifkan grup tab berikutnya"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktifkan grup tab sebelumnya"
+  },
+  "optionsView": {
+    "message": "Tampilan"
+  },
+  "optionsViewFreeform": {
+    "message": "Bebas (klasik)"
+  },
+  "optionsViewPopup": {
+    "message": "Jendela pop-up"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "terang"
+  },
+  "optionsThemeDark": {
+    "message": "gelap"
+  },
+  "optionsToolbar": {
+    "message": "Bilah alat"
+  },
+  "optionsToolbarPosition": {
+    "message": "Posisi"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "atas"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "kanan"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "bawah"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "kiri"
+  },
+  "optionsBackup": {
+    "message": "Cadangan"
+  },
+  "optionsBackupImport": {
+    "message": "Impor"
+  },
+  "optionsBackupImportText": {
+    "message": "Cadangan yang diimpor akan dibuka di jendela baru dan tidak menimpa apa pun.\nAnda juga dapat mengimpor cadangan dari pengaya \"Tab Groups\" yang lama."
+  },
+  "optionsBackupExport": {
+    "message": "Ekspor"
+  },
+  "optionsBackupExportText": {
+    "message": "Bagian ini mungkin tidak diperlukan lagi setelah pengelolaan sesi yang layak tersedia di Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Simpan cadangan"
+  },
+  "optionsStatistics": {
+    "message": "Statistik"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Jumlah tab:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktif: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Ukuran cache gambar mini:"
+  },
+  "refreshGroups": {
+    "message": "Segarkan grup"
+  },
+  "sendTabToGroup": {
+    "message": "Kirim tab ke grup"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Pengguna juga dapat memperbarui pintasan lewat opsi \"Kelola Pintasan Ekstensi\" di about:addons pada Firefox, seperti terlihat {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "di video contoh"
+  },
+  "optionsThemeAuto": {
+    "message": "Ikuti sistem"
+  },
+  "optionsNativeGroups": {
+    "message": "Grup Asli Peramban"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Gunakan grup tab asli peramban"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Gunakan grup tab asli peramban untuk pengaturan visual dan pelipatan."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Grup tab asli tidak didukung di versi peramban ini (memerlukan API penyembunyian tab)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Grup tab asli tidak didukung di versi peramban ini. Harap perbarui ke Firefox 139+ atau gunakan Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Peramban Anda tidak mendukung API yang diperlukan untuk grup tab."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grup asli diaktifkan. Memigrasikan grup..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grup asli dinonaktifkan. Membersihkan..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Berkas tidak valid"
+  },
+  "byteSizeBytes": {
+    "message": "$1 byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Memulihkan grup tab..."
+  },
+  "migrationTitle": {
+    "message": "Migrasi Grup Tab Hibrida"
+  },
+  "migrationChecking": {
+    "message": "Memeriksa status migrasi..."
+  },
+  "migrationRun": {
+    "message": "Jalankan migrasi sekarang"
+  },
+  "migrationReset": {
+    "message": "Setel ulang penanda migrasi"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grup saat ini"
+  },
+  "migrationLoadingGroups": {
+    "message": "Memuat grup..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migrasi selesai - Semua grup telah dimigrasikan ke sistem hibrida"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrasi tertunda - Grup belum dimigrasikan"
+  },
+  "migrationStatusError": {
+    "message": "Kesalahan saat memeriksa status migrasi: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Tidak ada grup di jendela saat ini"
+  },
+  "migrationGroupsError": {
+    "message": "Kesalahan saat memuat grup: $1"
+  },
+  "migrationRunning": {
+    "message": "Menjalankan migrasi..."
+  },
+  "migrationSucceeded": {
+    "message": "Migrasi berhasil diselesaikan!"
+  },
+  "migrationFailed": {
+    "message": "Migrasi gagal: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Tidak ada respons"
+  },
+  "migrationRunError": {
+    "message": "Kesalahan migrasi: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Setel ulang penanda migrasi? Ini memungkinkan migrasi dijalankan lagi."
+  },
+  "migrationResetSucceeded": {
+    "message": "Penanda migrasi berhasil disetel ulang!"
+  },
+  "migrationResetFailed": {
+    "message": "Penyetelan ulang gagal: $1"
+  },
+  "migrationResetError": {
+    "message": "Kesalahan penyetelan ulang: $1"
+  },
+  "migrationGroup": {
+    "message": "Grup $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Dimigrasikan (ID asli: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Belum dimigrasikan"
+  },
+  "migrationGroupStatus": {
+    "message": "Status: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Tampilan Grup Tab"
+  }
+}

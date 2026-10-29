@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Engadir un grupo novo"
+  },
+  "freeformButton": {
+    "message": "Disposición libre"
+  },
+  "tilingButton": {
+    "message": "Disposición automática (en mosaico)"
+  },
+  "settingsButton": {
+    "message": "Configuración"
+  },
+  "defaultGroupName": {
+    "message": "Grp"
+  },
+  "dragGroup": {
+    "message": "Arrastrar o grupo"
+  },
+  "closeGroup": {
+    "message": "Pechar o grupo"
+  },
+  "closeGroupWarning": {
+    "message": "one=Ao pechar este grupo pecharase a $1 lapela que contén. Seguro que queres facelo?|other=Ao pechar este grupo pecharanse as $1 lapelas que contén. Seguro que queres facelo?"
+  },
+  "editGroup": {
+    "message": "Editar o grupo"
+  },
+  "closeTab": {
+    "message": "Pechar a lapela"
+  },
+  "openNewTab": {
+    "message": "Abrir unha lapela nova"
+  },
+  "tabCount": {
+    "message": "one=$1 lapela|other=$1 lapelas"
+  },
+  "searchForTab_placeholder": {
+    "message": "Buscar unha lapela..."
+  },
+  "searchForTab_noResults": {
+    "message": "Non se atopou ningunha lapela"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Atallos de teclado"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "O formato da opción de atallo detállase aquí."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Actualizar"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Restablecer"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Desactivar"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Activar"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Alternar a vista de grupos de lapelas"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Activar o seguinte grupo de lapelas"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Activar o grupo de lapelas anterior"
+  },
+  "optionsView": {
+    "message": "Vista"
+  },
+  "optionsViewFreeform": {
+    "message": "Libre (clásica)"
+  },
+  "optionsViewPopup": {
+    "message": "Xanela emerxente"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "claro"
+  },
+  "optionsThemeDark": {
+    "message": "escuro"
+  },
+  "optionsToolbar": {
+    "message": "Barra de ferramentas"
+  },
+  "optionsToolbarPosition": {
+    "message": "Posición"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "arriba"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "dereita"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "abaixo"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "esquerda"
+  },
+  "optionsBackup": {
+    "message": "Copia de seguranza"
+  },
+  "optionsBackupImport": {
+    "message": "Importar"
+  },
+  "optionsBackupImportText": {
+    "message": "As copias de seguranza importadas abriranse en xanelas novas e non sobrescribirán nada.\nTamén podes importar copias de seguranza do antigo complemento «Tab Groups»."
+  },
+  "optionsBackupExport": {
+    "message": "Exportar"
+  },
+  "optionsBackupExportText": {
+    "message": "Esta sección pode quedar obsoleta cando Firefox permita unha xestión de sesións axeitada."
+  },
+  "optionsBackupExportButton": {
+    "message": "Gardar a copia de seguranza"
+  },
+  "optionsStatistics": {
+    "message": "Estatísticas"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Número de lapelas:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Activas: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Tamaño da caché de miniaturas:"
+  },
+  "refreshGroups": {
+    "message": "Actualizar os grupos"
+  },
+  "sendTabToGroup": {
+    "message": "Enviar a lapela a un grupo"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "As persoas usuarias tamén poden actualizar os atallos coa opción «Xestionar os atallos das extensións» en about:addons de Firefox, como se ve {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "no vídeo de exemplo"
+  },
+  "optionsThemeAuto": {
+    "message": "Seguir o sistema"
+  },
+  "optionsNativeGroups": {
+    "message": "Grupos nativos do navegador"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Usar os grupos de lapelas nativos do navegador"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Usar os grupos de lapelas nativos do navegador para a organización visual e o pregado."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Os grupos de lapelas nativos non son compatibles con esta versión do navegador (require a API para agochar lapelas)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Os grupos de lapelas nativos non son compatibles con esta versión do navegador. Actualiza a Firefox 139+ ou usa Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "O teu navegador non admite as API necesarias para os grupos de lapelas."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grupos nativos activados. Migrando os grupos..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grupos nativos desactivados. Limpando..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ficheiro non válido"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bytes"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Restaurando os grupos de lapelas..."
+  },
+  "migrationTitle": {
+    "message": "Migración de grupos de lapelas híbridos"
+  },
+  "migrationChecking": {
+    "message": "Comprobando o estado da migración..."
+  },
+  "migrationRun": {
+    "message": "Executar a migración agora"
+  },
+  "migrationReset": {
+    "message": "Restablecer o indicador de migración"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grupos actuais"
+  },
+  "migrationLoadingGroups": {
+    "message": "Cargando os grupos..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migración completada - Todos os grupos migráronse ao sistema híbrido"
+  },
+  "migrationPending": {
+    "message": "⚠ Migración pendente - Os grupos aínda non se migraron"
+  },
+  "migrationStatusError": {
+    "message": "Erro ao comprobar o estado da migración: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Non se atopou ningún grupo na xanela actual"
+  },
+  "migrationGroupsError": {
+    "message": "Erro ao cargar os grupos: $1"
+  },
+  "migrationRunning": {
+    "message": "Executando a migración..."
+  },
+  "migrationSucceeded": {
+    "message": "A migración completouse correctamente!"
+  },
+  "migrationFailed": {
+    "message": "A migración fallou: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Sen resposta"
+  },
+  "migrationRunError": {
+    "message": "Erro de migración: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Restablecer o indicador de migración? Isto permitirá que a migración se execute de novo."
+  },
+  "migrationResetSucceeded": {
+    "message": "O indicador de migración restableceuse correctamente!"
+  },
+  "migrationResetFailed": {
+    "message": "O restablecemento fallou: $1"
+  },
+  "migrationResetError": {
+    "message": "Erro de restablecemento: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupo $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrado (ID nativo: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Sen migrar"
+  },
+  "migrationGroupStatus": {
+    "message": "Estado: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vista de grupos de lapelas"
+  }
+}

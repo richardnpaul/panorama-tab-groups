@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "ახალი ჯგუფის დამატება"
+  },
+  "freeformButton": {
+    "message": "თავისუფალი განლაგება"
+  },
+  "tilingButton": {
+    "message": "ავტომატური (ფილების) განლაგება"
+  },
+  "settingsButton": {
+    "message": "პარამეტრები"
+  },
+  "defaultGroupName": {
+    "message": "ჯგ."
+  },
+  "dragGroup": {
+    "message": "ჯგუფის გადათრევა"
+  },
+  "closeGroup": {
+    "message": "ჯგუფის დახურვა"
+  },
+  "closeGroupWarning": {
+    "message": "one=ამ ჯგუფის დახურვით დაიხურება მასში არსებული $1 ჩანართი. დარწმუნებული ხართ, რომ გსურთ ამის გაკეთება?|other=ამ ჯგუფის დახურვით დაიხურება მასში არსებული $1 ჩანართი. დარწმუნებული ხართ, რომ გსურთ ამის გაკეთება?"
+  },
+  "editGroup": {
+    "message": "ჯგუფის ჩასწორება"
+  },
+  "closeTab": {
+    "message": "ჩანართის დახურვა"
+  },
+  "openNewTab": {
+    "message": "ახალი ჩანართის გახსნა"
+  },
+  "tabCount": {
+    "message": "one=$1 ჩანართი|other=$1 ჩანართი"
+  },
+  "searchForTab_placeholder": {
+    "message": "ჩანართის ძიება..."
+  },
+  "searchForTab_noResults": {
+    "message": "ჩანართები ვერ მოიძებნა"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "კლავიატურის მალსახმობები"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "მალსახმობის პარამეტრის ფორმატი აღწერილია აქ."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "განახლება"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "ნაგულისხმევზე დაბრუნება"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "გამორთვა"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "ჩართვა"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ჩანართების ჯგუფების ხედის გადართვა"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "ჩანართების შემდეგი ჯგუფის გააქტიურება"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "ჩანართების წინა ჯგუფის გააქტიურება"
+  },
+  "optionsView": {
+    "message": "ხედი"
+  },
+  "optionsViewFreeform": {
+    "message": "თავისუფალი (კლასიკური)"
+  },
+  "optionsViewPopup": {
+    "message": "ამომხტარი ფანჯარა"
+  },
+  "optionsTheme": {
+    "message": "თემა"
+  },
+  "optionsThemeLight": {
+    "message": "ღია"
+  },
+  "optionsThemeDark": {
+    "message": "მუქი"
+  },
+  "optionsToolbar": {
+    "message": "ხელსაწყოთა ზოლი"
+  },
+  "optionsToolbarPosition": {
+    "message": "მდებარეობა"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ზემოთ"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "მარჯვნივ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ქვემოთ"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "მარცხნივ"
+  },
+  "optionsBackup": {
+    "message": "სარეზერვო ასლი"
+  },
+  "optionsBackupImport": {
+    "message": "შემოტანა"
+  },
+  "optionsBackupImportText": {
+    "message": "შემოტანილი სარეზერვო ასლები გაიხსნება ახალ ფანჯრებში და არაფერს გადააწერს.\nასევე შეგიძლიათ შემოიტანოთ სარეზერვო ასლები ძველი „Tab Groups“ დამატებიდან."
+  },
+  "optionsBackupExport": {
+    "message": "გატანა"
+  },
+  "optionsBackupExportText": {
+    "message": "ეს განყოფილება შესაძლოა საჭირო აღარ იყოს, როცა Firefox-ში სესიების სათანადო მართვა გახდება შესაძლებელი."
+  },
+  "optionsBackupExportButton": {
+    "message": "სარეზერვო ასლის შენახვა"
+  },
+  "optionsStatistics": {
+    "message": "სტატისტიკა"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ჩანართების რაოდენობა:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (აქტიური: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "მინიატურების ქეშის ზომა:"
+  },
+  "refreshGroups": {
+    "message": "ჯგუფების განახლება"
+  },
+  "sendTabToGroup": {
+    "message": "ჩანართის ჯგუფში გაგზავნა"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "მომხმარებლებს მალსახმობების განახლებაც შეუძლიათ Firefox-ის about:addons გვერდზე „გაფართოებების მალსახმობების მართვა“ პარამეტრით, როგორც ჩანს {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "ნიმუშ ვიდეოში"
+  },
+  "optionsThemeAuto": {
+    "message": "სისტემის მიყოლა"
+  },
+  "optionsNativeGroups": {
+    "message": "ბრაუზერის საკუთარი ჯგუფები"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ბრაუზერის საკუთარი ჩანართების ჯგუფების გამოყენება"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "ბრაუზერის საკუთარი ჩანართების ჯგუფების გამოყენება ვიზუალური დალაგებისა და ჩაკეცვისთვის."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "საკუთარი ჩანართების ჯგუფები ბრაუზერის ამ ვერსიაში მხარდაჭერილი არაა (საჭიროა ჩანართების დამალვის API)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "საკუთარი ჩანართების ჯგუფები ბრაუზერის ამ ვერსიაში მხარდაჭერილი არაა. გთხოვთ, განაახლოთ Firefox 139+ ვერსიამდე ან გამოიყენოთ Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "თქვენი ბრაუზერი არ უჭერს მხარს ჩანართების ჯგუფებისთვის საჭირო API-ებს."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "საკუთარი ჯგუფები ჩართულია. ჯგუფები გადადის..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "საკუთარი ჯგუფები გამორთულია. მიმდინარეობს გასუფთავება..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "არასწორი ფაილი"
+  },
+  "byteSizeBytes": {
+    "message": "$1 ბაიტი"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ჩანართების ჯგუფები აღდგება..."
+  },
+  "migrationTitle": {
+    "message": "ჰიბრიდული ჩანართების ჯგუფების მიგრაცია"
+  },
+  "migrationChecking": {
+    "message": "მიმდინარეობს მიგრაციის მდგომარეობის შემოწმება..."
+  },
+  "migrationRun": {
+    "message": "მიგრაციის ახლავე გაშვება"
+  },
+  "migrationReset": {
+    "message": "მიგრაციის დროშის გადაყენება"
+  },
+  "migrationCurrentGroups": {
+    "message": "მიმდინარე ჯგუფები"
+  },
+  "migrationLoadingGroups": {
+    "message": "ჯგუფები იტვირთება..."
+  },
+  "migrationComplete": {
+    "message": "✓ მიგრაცია დასრულდა - ყველა ჯგუფი გადავიდა ჰიბრიდულ სისტემაში"
+  },
+  "migrationPending": {
+    "message": "⚠ მიგრაცია მოლოდინშია - ჯგუფები ჯერ არ გადასულა"
+  },
+  "migrationStatusError": {
+    "message": "შეცდომა მიგრაციის მდგომარეობის შემოწმებისას: $1"
+  },
+  "migrationNoGroups": {
+    "message": "მიმდინარე ფანჯარაში ჯგუფები ვერ მოიძებნა"
+  },
+  "migrationGroupsError": {
+    "message": "შეცდომა ჯგუფების ჩატვირთვისას: $1"
+  },
+  "migrationRunning": {
+    "message": "მიმდინარეობს მიგრაცია..."
+  },
+  "migrationSucceeded": {
+    "message": "მიგრაცია წარმატებით დასრულდა!"
+  },
+  "migrationFailed": {
+    "message": "მიგრაცია ვერ შესრულდა: $1"
+  },
+  "migrationNoResponse": {
+    "message": "პასუხი არ არის"
+  },
+  "migrationRunError": {
+    "message": "მიგრაციის შეცდომა: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "გადაყენდეს მიგრაციის დროშა? ეს მიგრაციის ხელახლა გაშვების საშუალებას მისცემს."
+  },
+  "migrationResetSucceeded": {
+    "message": "მიგრაციის დროშა წარმატებით გადაყენდა!"
+  },
+  "migrationResetFailed": {
+    "message": "გადაყენება ვერ მოხერხდა: $1"
+  },
+  "migrationResetError": {
+    "message": "გადაყენების შეცდომა: $1"
+  },
+  "migrationGroup": {
+    "message": "ჯგუფი $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ გადატანილია (საკუთარი ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ გადატანილი არაა"
+  },
+  "migrationGroupStatus": {
+    "message": "მდგომარეობა: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ჩანართების ჯგუფების ხედი"
+  }
+}

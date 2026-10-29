@@ -129,17 +129,28 @@ export interface NavPosition {
 
 const wrap = (value: number, size: number): number => (value + size) % size;
 
-const STEPS: Record<NavKey, number> = {
+/**
+ * Whether the key points the way reading goes along a row: right where text runs
+ * from the left, and left where it runs from the right, since the page is laid
+ * out the other way round there and the next thing is at the left.
+ */
+export const isForwardKey = (key: NavKey, rtl: boolean): boolean =>
+  key === (rtl ? 'ArrowLeft' : 'ArrowRight');
+
+/** Whether the key points back along a row, the other way */
+export const isBackKey = (key: NavKey, rtl: boolean): boolean =>
+  key === (rtl ? 'ArrowRight' : 'ArrowLeft');
+
+const ROW_STEPS: Record<'ArrowUp' | 'ArrowDown', number> = {
   ArrowUp: -1,
   ArrowDown: 1,
-  ArrowLeft: -1,
-  ArrowRight: 1,
 };
 
 /**
  * Where the focus goes for an arrow key, in rows of things that can have the
  * focus: up and down go to the row above and below, and round the ends; left
- * and right go along the row, and round its ends. Up and down keep to the
+ * and right go along the row, and round its ends (the other way round where
+ * text runs from the right, `rtl`). Up and down keep to the
  * place in the row the user was last at, as far as the row they go to reaches.
  * Nothing when the row they go to has nothing to focus.
  */
@@ -147,16 +158,20 @@ export function navigate(
   key: NavKey,
   rowSizes: readonly number[],
   at: NavPosition,
+  rtl = false,
 ): NavPosition | null {
   const along = key === 'ArrowLeft' || key === 'ArrowRight';
-  const row = along ? at.row : wrap(at.row + STEPS[key], rowSizes.length);
+  const row =
+    key === 'ArrowUp' || key === 'ArrowDown'
+      ? wrap(at.row + ROW_STEPS[key], rowSizes.length)
+      : at.row;
   const size = rowSizes[row] ?? 0;
   if (size === 0) {
     return null;
   }
 
   const column = along
-    ? wrap(at.column + STEPS[key], size)
+    ? wrap(at.column + (isForwardKey(key, rtl) ? 1 : -1), size)
     : Math.min(at.wanted, size - 1);
   return { row, column, wanted: along ? column : at.wanted };
 }

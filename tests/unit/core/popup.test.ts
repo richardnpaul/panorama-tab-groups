@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   gridRect,
+  isBackKey,
+  isForwardKey,
   isNavKey,
   matchingTabs,
   mostRecent,
@@ -294,6 +296,60 @@ describe('core/popup.ts', () => {
     it('stays on the only item of the only row', () => {
       expect(navigate('ArrowDown', [1], at(0, 0))).toEqual(at(0, 0));
       expect(navigate('ArrowRight', [1], at(0, 0))).toEqual(at(0, 0));
+    });
+
+    describe('where text runs from the right', () => {
+      it('goes along a row the other way: left is on, right is back', () => {
+        expect(navigate('ArrowLeft', rows, at(0, 0), true)).toEqual({
+          row: 0,
+          column: 1,
+          wanted: 1,
+        });
+        expect(navigate('ArrowRight', rows, at(0, 2), true)).toEqual({
+          row: 0,
+          column: 1,
+          wanted: 1,
+        });
+      });
+
+      it('goes round the ends of a row the same way as before, turned round', () => {
+        expect(navigate('ArrowRight', rows, at(2, 0), true)).toEqual({
+          row: 2,
+          column: 3,
+          wanted: 3,
+        });
+        expect(navigate('ArrowLeft', rows, at(2, 3), true)).toEqual({
+          row: 2,
+          column: 0,
+          wanted: 0,
+        });
+      });
+
+      it('does not turn up and down round', () => {
+        expect(navigate('ArrowDown', rows, at(0, 0), true)).toEqual(
+          navigate('ArrowDown', rows, at(0, 0)),
+        );
+        expect(navigate('ArrowUp', rows, at(1, 0), true)).toEqual(
+          navigate('ArrowUp', rows, at(1, 0)),
+        );
+      });
+    });
+
+    describe('isForwardKey and isBackKey', () => {
+      it.each([
+        ['ArrowRight', false, true, false],
+        ['ArrowLeft', false, false, true],
+        ['ArrowLeft', true, true, false],
+        ['ArrowRight', true, false, true],
+        ['ArrowUp', false, false, false],
+        ['ArrowDown', true, false, false],
+      ] as const)(
+        '%s where rtl is %s: forward %s, back %s',
+        (key, rtl, forward, back) => {
+          expect(isForwardKey(key, rtl)).toBe(forward);
+          expect(isBackKey(key, rtl)).toBe(back);
+        },
+      );
     });
   });
 });

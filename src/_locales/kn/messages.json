@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "ಹೊಸ ಗುಂಪನ್ನು ಸೇರಿಸಿ"
+  },
+  "freeformButton": {
+    "message": "ಮುಕ್ತ ಜೋಡಣೆ"
+  },
+  "tilingButton": {
+    "message": "ಸ್ವಯಂಚಾಲಿತ (ಟೈಲಿಂಗ್) ಜೋಡಣೆ"
+  },
+  "settingsButton": {
+    "message": "ಸೆಟ್ಟಿಂಗ್‌ಗಳು"
+  },
+  "defaultGroupName": {
+    "message": "ಗುಂಪು"
+  },
+  "dragGroup": {
+    "message": "ಗುಂಪನ್ನು ಎಳೆಯಿರಿ"
+  },
+  "closeGroup": {
+    "message": "ಗುಂಪನ್ನು ಮುಚ್ಚಿ"
+  },
+  "closeGroupWarning": {
+    "message": "one=ಈ ಗುಂಪನ್ನು ಮುಚ್ಚಿದರೆ ಅದರೊಳಗಿನ $1 ಟ್ಯಾಬ್ ಮುಚ್ಚಲ್ಪಡುತ್ತದೆ. ನೀವು ಖಚಿತವಾಗಿ ಇದನ್ನು ಮಾಡಲು ಬಯಸುವಿರಾ?|other=ಈ ಗುಂಪನ್ನು ಮುಚ್ಚಿದರೆ ಅದರೊಳಗಿನ $1 ಟ್ಯಾಬ್‌ಗಳು ಮುಚ್ಚಲ್ಪಡುತ್ತವೆ. ನೀವು ಖಚಿತವಾಗಿ ಇದನ್ನು ಮಾಡಲು ಬಯಸುವಿರಾ?"
+  },
+  "editGroup": {
+    "message": "ಗುಂಪನ್ನು ಸಂಪಾದಿಸಿ"
+  },
+  "closeTab": {
+    "message": "ಟ್ಯಾಬ್ ಮುಚ್ಚಿ"
+  },
+  "openNewTab": {
+    "message": "ಹೊಸ ಟ್ಯಾಬ್ ತೆರೆಯಿರಿ"
+  },
+  "tabCount": {
+    "message": "one=$1 ಟ್ಯಾಬ್|other=$1 ಟ್ಯಾಬ್‌ಗಳು"
+  },
+  "searchForTab_placeholder": {
+    "message": "ಟ್ಯಾಬ್ ಹುಡುಕಿ..."
+  },
+  "searchForTab_noResults": {
+    "message": "ಯಾವುದೇ ಟ್ಯಾಬ್‌ಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "ಕೀಬೋರ್ಡ್ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳು"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "ಶಾರ್ಟ್‌ಕಟ್ ಆಯ್ಕೆಯ ಸ್ವರೂಪವನ್ನು ಇಲ್ಲಿ ವಿವರಿಸಲಾಗಿದೆ."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "ನವೀಕರಿಸಿ"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "ಮರುಹೊಂದಿಸಿ"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "ಸಕ್ರಿಯಗೊಳಿಸಿ"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ಟ್ಯಾಬ್ ಗುಂಪುಗಳ ನೋಟವನ್ನು ಬದಲಿಸಿ"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "ಮುಂದಿನ ಟ್ಯಾಬ್ ಗುಂಪನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "ಹಿಂದಿನ ಟ್ಯಾಬ್ ಗುಂಪನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ"
+  },
+  "optionsView": {
+    "message": "ನೋಟ"
+  },
+  "optionsViewFreeform": {
+    "message": "ಮುಕ್ತ (ಕ್ಲಾಸಿಕ್)"
+  },
+  "optionsViewPopup": {
+    "message": "ಪಾಪ್‌ಅಪ್"
+  },
+  "optionsTheme": {
+    "message": "ಥೀಮ್"
+  },
+  "optionsThemeLight": {
+    "message": "ತಿಳಿ"
+  },
+  "optionsThemeDark": {
+    "message": "ಗಾಢ"
+  },
+  "optionsToolbar": {
+    "message": "ಟೂಲ್‌ಬಾರ್"
+  },
+  "optionsToolbarPosition": {
+    "message": "ಸ್ಥಾನ"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ಮೇಲೆ"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ಬಲ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ಕೆಳಗೆ"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ಎಡ"
+  },
+  "optionsBackup": {
+    "message": "ಬ್ಯಾಕಪ್"
+  },
+  "optionsBackupImport": {
+    "message": "ಆಮದು ಮಾಡಿ"
+  },
+  "optionsBackupImportText": {
+    "message": "ಆಮದು ಮಾಡಿದ ಬ್ಯಾಕಪ್‌ಗಳು ಹೊಸ ವಿಂಡೋಗಳಲ್ಲಿ ತೆರೆಯುತ್ತವೆ ಮತ್ತು ಯಾವುದನ್ನೂ ಮೇಲ್ಬರಹ ಮಾಡುವುದಿಲ್ಲ.\nನೀವು ಹಳೆಯ \"Tab Groups\" ಆಡ್-ಆನ್‌ನ ಬ್ಯಾಕಪ್‌ಗಳನ್ನೂ ಆಮದು ಮಾಡಬಹುದು."
+  },
+  "optionsBackupExport": {
+    "message": "ರಫ್ತು ಮಾಡಿ"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox ನಲ್ಲಿ ಸರಿಯಾದ ಸೆಷನ್ ನಿರ್ವಹಣೆ ಸಾಧ್ಯವಾದಾಗ ಈ ವಿಭಾಗ ಅನಗತ್ಯವಾಗಬಹುದು."
+  },
+  "optionsBackupExportButton": {
+    "message": "ಬ್ಯಾಕಪ್ ಉಳಿಸಿ"
+  },
+  "optionsStatistics": {
+    "message": "ಅಂಕಿಅಂಶಗಳು"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ಟ್ಯಾಬ್‌ಗಳ ಸಂಖ್ಯೆ:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (ಸಕ್ರಿಯ: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "ಥಂಬ್‌ನೇಲ್ ಕ್ಯಾಶ್ ಗಾತ್ರ:"
+  },
+  "refreshGroups": {
+    "message": "ಗುಂಪುಗಳನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ"
+  },
+  "sendTabToGroup": {
+    "message": "ಟ್ಯಾಬ್ ಅನ್ನು ಗುಂಪಿಗೆ ಕಳುಹಿಸಿ"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "ಬಳಕೆದಾರರು Firefox ನ about:addons ನಲ್ಲಿರುವ \"ವಿಸ್ತರಣೆ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ\" ಆಯ್ಕೆಯ ಮೂಲಕವೂ ಶಾರ್ಟ್‌ಕಟ್‌ಗಳನ್ನು ನವೀಕರಿಸಬಹುದು, {link} ತೋರಿಸಿರುವಂತೆ."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "ಉದಾಹರಣೆ ವೀಡಿಯೊದಲ್ಲಿ"
+  },
+  "optionsThemeAuto": {
+    "message": "ಸಿಸ್ಟಮ್ ಅನ್ನು ಅನುಸರಿಸಿ"
+  },
+  "optionsNativeGroups": {
+    "message": "ಬ್ರೌಸರ್‌ನ ಸ್ವಂತ ಗುಂಪುಗಳು"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ಬ್ರೌಸರ್‌ನ ಸ್ವಂತ ಟ್ಯಾಬ್ ಗುಂಪುಗಳನ್ನು ಬಳಸಿ"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "ದೃಶ್ಯ ಸಂಘಟನೆ ಮತ್ತು ಮಡಚುವಿಕೆಗಾಗಿ ಬ್ರೌಸರ್‌ನ ಸ್ವಂತ ಟ್ಯಾಬ್ ಗುಂಪುಗಳನ್ನು ಬಳಸಿ."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "ಈ ಬ್ರೌಸರ್ ಆವೃತ್ತಿಯಲ್ಲಿ ಸ್ವಂತ ಟ್ಯಾಬ್ ಗುಂಪುಗಳಿಗೆ ಬೆಂಬಲವಿಲ್ಲ (ಟ್ಯಾಬ್ ಮರೆಮಾಚುವ API ಅಗತ್ಯ)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "ಈ ಬ್ರೌಸರ್ ಆವೃತ್ತಿಯಲ್ಲಿ ಸ್ವಂತ ಟ್ಯಾಬ್ ಗುಂಪುಗಳಿಗೆ ಬೆಂಬಲವಿಲ್ಲ. ದಯವಿಟ್ಟು Firefox 139+ ಗೆ ನವೀಕರಿಸಿ ಅಥವಾ Chrome 89+ ಬಳಸಿ."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "ನಿಮ್ಮ ಬ್ರೌಸರ್ ಟ್ಯಾಬ್ ಗುಂಪುಗಳಿಗೆ ಅಗತ್ಯವಾದ API ಗಳನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "ಸ್ವಂತ ಗುಂಪುಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಗುಂಪುಗಳನ್ನು ವರ್ಗಾಯಿಸಲಾಗುತ್ತಿದೆ..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "ಸ್ವಂತ ಗುಂಪುಗಳನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ. ಸ್ವಚ್ಛಗೊಳಿಸಲಾಗುತ್ತಿದೆ..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "ಅಮಾನ್ಯ ಫೈಲ್"
+  },
+  "byteSizeBytes": {
+    "message": "$1 ಬೈಟ್‌ಗಳು"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ಟ್ಯಾಬ್ ಗುಂಪುಗಳನ್ನು ಮರುಸ್ಥಾಪಿಸಲಾಗುತ್ತಿದೆ..."
+  },
+  "migrationTitle": {
+    "message": "ಹೈಬ್ರಿಡ್ ಟ್ಯಾಬ್ ಗುಂಪುಗಳ ವರ್ಗಾವಣೆ"
+  },
+  "migrationChecking": {
+    "message": "ವರ್ಗಾವಣೆಯ ಸ್ಥಿತಿಯನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ..."
+  },
+  "migrationRun": {
+    "message": "ಈಗಲೇ ವರ್ಗಾವಣೆ ನಡೆಸಿ"
+  },
+  "migrationReset": {
+    "message": "ವರ್ಗಾವಣೆ ಫ್ಲ್ಯಾಗ್ ಮರುಹೊಂದಿಸಿ"
+  },
+  "migrationCurrentGroups": {
+    "message": "ಪ್ರಸ್ತುತ ಗುಂಪುಗಳು"
+  },
+  "migrationLoadingGroups": {
+    "message": "ಗುಂಪುಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ..."
+  },
+  "migrationComplete": {
+    "message": "✓ ವರ್ಗಾವಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ - ಎಲ್ಲಾ ಗುಂಪುಗಳನ್ನು ಹೈಬ್ರಿಡ್ ವ್ಯವಸ್ಥೆಗೆ ವರ್ಗಾಯಿಸಲಾಗಿದೆ"
+  },
+  "migrationPending": {
+    "message": "⚠ ವರ್ಗಾವಣೆ ಬಾಕಿ ಇದೆ - ಗುಂಪುಗಳನ್ನು ಇನ್ನೂ ವರ್ಗಾಯಿಸಿಲ್ಲ"
+  },
+  "migrationStatusError": {
+    "message": "ವರ್ಗಾವಣೆಯ ಸ್ಥಿತಿ ಪರಿಶೀಲಿಸುವಾಗ ದೋಷ: $1"
+  },
+  "migrationNoGroups": {
+    "message": "ಪ್ರಸ್ತುತ ವಿಂಡೋದಲ್ಲಿ ಯಾವುದೇ ಗುಂಪುಗಳು ಕಂಡುಬಂದಿಲ್ಲ"
+  },
+  "migrationGroupsError": {
+    "message": "ಗುಂಪುಗಳನ್ನು ಲೋಡ್ ಮಾಡುವಾಗ ದೋಷ: $1"
+  },
+  "migrationRunning": {
+    "message": "ವರ್ಗಾವಣೆ ನಡೆಯುತ್ತಿದೆ..."
+  },
+  "migrationSucceeded": {
+    "message": "ವರ್ಗಾವಣೆ ಯಶಸ್ವಿಯಾಗಿ ಪೂರ್ಣಗೊಂಡಿದೆ!"
+  },
+  "migrationFailed": {
+    "message": "ವರ್ಗಾವಣೆ ವಿಫಲವಾಗಿದೆ: $1"
+  },
+  "migrationNoResponse": {
+    "message": "ಪ್ರತಿಕ್ರಿಯೆ ಇಲ್ಲ"
+  },
+  "migrationRunError": {
+    "message": "ವರ್ಗಾವಣೆ ದೋಷ: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "ವರ್ಗಾವಣೆ ಫ್ಲ್ಯಾಗ್ ಮರುಹೊಂದಿಸಬೇಕೇ? ಇದು ವರ್ಗಾವಣೆಯನ್ನು ಮತ್ತೆ ನಡೆಸಲು ಅವಕಾಶ ನೀಡುತ್ತದೆ."
+  },
+  "migrationResetSucceeded": {
+    "message": "ವರ್ಗಾವಣೆ ಫ್ಲ್ಯಾಗ್ ಯಶಸ್ವಿಯಾಗಿ ಮರುಹೊಂದಿಸಲಾಗಿದೆ!"
+  },
+  "migrationResetFailed": {
+    "message": "ಮರುಹೊಂದಿಸುವುದು ವಿಫಲವಾಗಿದೆ: $1"
+  },
+  "migrationResetError": {
+    "message": "ಮರುಹೊಂದಿಸುವ ದೋಷ: $1"
+  },
+  "migrationGroup": {
+    "message": "ಗುಂಪು $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ ವರ್ಗಾಯಿಸಲಾಗಿದೆ (ಸ್ವಂತ ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ ವರ್ಗಾಯಿಸಿಲ್ಲ"
+  },
+  "migrationGroupStatus": {
+    "message": "ಸ್ಥಿತಿ: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ಟ್ಯಾಬ್ ಗುಂಪುಗಳ ನೋಟ"
+  }
+}

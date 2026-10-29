@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Bæta við nýjum hópi"
+  },
+  "freeformButton": {
+    "message": "Frjáls uppröðun"
+  },
+  "tilingButton": {
+    "message": "Sjálfvirk uppröðun (flísalögn)"
+  },
+  "settingsButton": {
+    "message": "Stillingar"
+  },
+  "defaultGroupName": {
+    "message": "Hóp."
+  },
+  "dragGroup": {
+    "message": "Draga hóp"
+  },
+  "closeGroup": {
+    "message": "Loka hóp"
+  },
+  "closeGroupWarning": {
+    "message": "one=Ef þú lokar þessum hópi lokast $1 flipi í honum. Ertu viss um að þú viljir gera þetta?|other=Ef þú lokar þessum hópi lokast $1 flipar í honum. Ertu viss um að þú viljir gera þetta?"
+  },
+  "editGroup": {
+    "message": "Breyta hóp"
+  },
+  "closeTab": {
+    "message": "Loka flipa"
+  },
+  "openNewTab": {
+    "message": "Opna nýjan flipa"
+  },
+  "tabCount": {
+    "message": "one=$1 flipi|other=$1 flipar"
+  },
+  "searchForTab_placeholder": {
+    "message": "Leita að flipa..."
+  },
+  "searchForTab_noResults": {
+    "message": "Engir flipar fundust"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Flýtilyklar"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Sniðið fyrir flýtilykla er útskýrt hér."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Uppfæra"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Endurstilla"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Gera óvirkt"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Gera virkt"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Víxla yfirliti flipahópa"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Virkja næsta flipahóp"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Virkja fyrri flipahóp"
+  },
+  "optionsView": {
+    "message": "Sýn"
+  },
+  "optionsViewFreeform": {
+    "message": "Frjáls (klassísk)"
+  },
+  "optionsViewPopup": {
+    "message": "Sprettgluggi"
+  },
+  "optionsTheme": {
+    "message": "Þema"
+  },
+  "optionsThemeLight": {
+    "message": "ljóst"
+  },
+  "optionsThemeDark": {
+    "message": "dökkt"
+  },
+  "optionsToolbar": {
+    "message": "Verkfærastika"
+  },
+  "optionsToolbarPosition": {
+    "message": "Staðsetning"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "efst"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "hægra megin"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "neðst"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "vinstra megin"
+  },
+  "optionsBackup": {
+    "message": "Öryggisafrit"
+  },
+  "optionsBackupImport": {
+    "message": "Flytja inn"
+  },
+  "optionsBackupImportText": {
+    "message": "Innflutt öryggisafrit opnast í nýjum gluggum og skrifar ekki yfir neitt.\nÞú getur líka flutt inn öryggisafrit úr gamla viðbótinni „Tab Groups“."
+  },
+  "optionsBackupExport": {
+    "message": "Flytja út"
+  },
+  "optionsBackupExportText": {
+    "message": "Þessi hluti gæti orðið óþarfur þegar hægt verður að stjórna lotum almennilega í Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Vista öryggisafrit"
+  },
+  "optionsStatistics": {
+    "message": "Tölfræði"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Fjöldi flipa:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Virkir: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Stærð smámyndageymslu:"
+  },
+  "refreshGroups": {
+    "message": "Endurnýja hópa"
+  },
+  "sendTabToGroup": {
+    "message": "Senda flipa í hóp"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Notendur geta einnig uppfært flýtilykla með valkostinum „Stjórna flýtilyklum viðbóta“ á about:addons í Firefox, eins og sést {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "í sýnismyndbandinu"
+  },
+  "optionsThemeAuto": {
+    "message": "Fylgja kerfinu"
+  },
+  "optionsNativeGroups": {
+    "message": "Eigin hópar vafrans"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Nota eigin flipahópa vafrans"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Nota eigin flipahópa vafrans fyrir sjónræna skipulagningu og samanbrot."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Eigin flipahópar eru ekki studdir í þessari útgáfu vafrans (krefst forritaskilsins til að fela flipa)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Eigin flipahópar eru ekki studdir í þessari útgáfu vafrans. Uppfærðu í Firefox 139+ eða notaðu Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Vafrinn þinn styður ekki forritaskilin sem þarf fyrir flipahópa."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Eigin hópar eru virkir. Flyt hópa..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Eigin hópar eru óvirkir. Hreinsa til..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ógild skrá"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bæti"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Endurheimti flipahópa..."
+  },
+  "migrationTitle": {
+    "message": "Flutningur á blendum flipahópum"
+  },
+  "migrationChecking": {
+    "message": "Athuga stöðu flutnings..."
+  },
+  "migrationRun": {
+    "message": "Keyra flutning núna"
+  },
+  "migrationReset": {
+    "message": "Endurstilla flutningsflagg"
+  },
+  "migrationCurrentGroups": {
+    "message": "Núverandi hópar"
+  },
+  "migrationLoadingGroups": {
+    "message": "Hleð hópum..."
+  },
+  "migrationComplete": {
+    "message": "✓ Flutningi lokið - Allir hópar hafa verið fluttir í blandaða kerfið"
+  },
+  "migrationPending": {
+    "message": "⚠ Flutningur í bið - Hóparnir hafa ekki verið fluttir enn"
+  },
+  "migrationStatusError": {
+    "message": "Villa við að athuga stöðu flutnings: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Engir hópar fundust í núverandi glugga"
+  },
+  "migrationGroupsError": {
+    "message": "Villa við að hlaða hópum: $1"
+  },
+  "migrationRunning": {
+    "message": "Keyri flutning..."
+  },
+  "migrationSucceeded": {
+    "message": "Flutningi lauk með góðum árangri!"
+  },
+  "migrationFailed": {
+    "message": "Flutningur mistókst: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Ekkert svar"
+  },
+  "migrationRunError": {
+    "message": "Villa í flutningi: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Endurstilla flutningsflagg? Þá er hægt að keyra flutninginn aftur."
+  },
+  "migrationResetSucceeded": {
+    "message": "Flutningsflagg endurstillt!"
+  },
+  "migrationResetFailed": {
+    "message": "Endurstilling mistókst: $1"
+  },
+  "migrationResetError": {
+    "message": "Villa við endurstillingu: $1"
+  },
+  "migrationGroup": {
+    "message": "Hópur $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Fluttur (eigið auðkenni: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Ekki fluttur"
+  },
+  "migrationGroupStatus": {
+    "message": "Staða: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Yfirlit flipahópa"
+  }
+}

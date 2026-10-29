@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Ongeza kikundi kipya"
+  },
+  "freeformButton": {
+    "message": "Mpangilio huru"
+  },
+  "tilingButton": {
+    "message": "Mpangilio wa kiotomatiki (vigae)"
+  },
+  "settingsButton": {
+    "message": "Mipangilio"
+  },
+  "defaultGroupName": {
+    "message": "Kik."
+  },
+  "dragGroup": {
+    "message": "Buruta kikundi"
+  },
+  "closeGroup": {
+    "message": "Funga kikundi"
+  },
+  "closeGroupWarning": {
+    "message": "one=Kufunga kikundi hiki kutafunga kichupo $1 kilichomo ndani yake. Una uhakika unataka kufanya hivi?|other=Kufunga kikundi hiki kutafunga vichupo $1 vilivyomo ndani yake. Una uhakika unataka kufanya hivi?"
+  },
+  "editGroup": {
+    "message": "Hariri kikundi"
+  },
+  "closeTab": {
+    "message": "Funga kichupo"
+  },
+  "openNewTab": {
+    "message": "Fungua kichupo kipya"
+  },
+  "tabCount": {
+    "message": "one=kichupo $1|other=vichupo $1"
+  },
+  "searchForTab_placeholder": {
+    "message": "Tafuta kichupo..."
+  },
+  "searchForTab_noResults": {
+    "message": "Hakuna vichupo vilivyopatikana"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Njia za mkato za kibodi"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Muundo wa chaguo la njia ya mkato umeelezwa hapa."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Sasisha"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Weka upya"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Zima"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Washa"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Badilisha mwonekano wa vikundi vya vichupo"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Amilisha kikundi kinachofuata cha vichupo"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Amilisha kikundi kilichotangulia cha vichupo"
+  },
+  "optionsView": {
+    "message": "Mwonekano"
+  },
+  "optionsViewFreeform": {
+    "message": "Huru (wa kawaida)"
+  },
+  "optionsViewPopup": {
+    "message": "Dirisha ibukizi"
+  },
+  "optionsTheme": {
+    "message": "Mandhari"
+  },
+  "optionsThemeLight": {
+    "message": "angavu"
+  },
+  "optionsThemeDark": {
+    "message": "giza"
+  },
+  "optionsToolbar": {
+    "message": "Upau wa zana"
+  },
+  "optionsToolbarPosition": {
+    "message": "Nafasi"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "juu"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "kulia"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "chini"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "kushoto"
+  },
+  "optionsBackup": {
+    "message": "Hifadhi nakala"
+  },
+  "optionsBackupImport": {
+    "message": "Ingiza"
+  },
+  "optionsBackupImportText": {
+    "message": "Nakala rudufu zilizoingizwa zitafunguka katika madirisha mapya na hazitaandika juu ya chochote.\nUnaweza pia kuingiza nakala rudufu kutoka kwenye programu jalizi ya zamani ya \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "Hamisha"
+  },
+  "optionsBackupExportText": {
+    "message": "Sehemu hii inaweza kutohitajika tena pindi usimamizi mzuri wa vipindi utakapowezekana katika Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Hifadhi nakala rudufu"
+  },
+  "optionsStatistics": {
+    "message": "Takwimu"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Idadi ya vichupo:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Vinavyotumika: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Ukubwa wa akiba ya picha ndogo:"
+  },
+  "refreshGroups": {
+    "message": "Onyesha upya vikundi"
+  },
+  "sendTabToGroup": {
+    "message": "Tuma kichupo kwenye kikundi"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Watumiaji wanaweza pia kusasisha njia za mkato kupitia chaguo la \"Simamia Njia za Mkato za Viendelezi\" katika about:addons ndani ya Firefox, kama inavyoonekana {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "kwenye video ya mfano"
+  },
+  "optionsThemeAuto": {
+    "message": "Fuata mfumo"
+  },
+  "optionsNativeGroups": {
+    "message": "Vikundi asilia vya kivinjari"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Tumia vikundi asilia vya vichupo vya kivinjari"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Tumia vikundi asilia vya vichupo vya kivinjari kwa mpangilio wa kuona na kukunja."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Vikundi asilia vya vichupo havitumiki katika toleo hili la kivinjari (vinahitaji API ya kuficha vichupo)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Vikundi asilia vya vichupo havitumiki katika toleo hili la kivinjari. Tafadhali sasisha hadi Firefox 139+ au tumia Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Kivinjari chako hakitumii API zinazohitajika kwa vikundi vya vichupo."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Vikundi asilia vimewashwa. Inahamisha vikundi..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Vikundi asilia vimezimwa. Inasafisha..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Faili batili"
+  },
+  "byteSizeBytes": {
+    "message": "baiti $1"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Inarejesha vikundi vya vichupo..."
+  },
+  "migrationTitle": {
+    "message": "Uhamishaji wa vikundi mseto vya vichupo"
+  },
+  "migrationChecking": {
+    "message": "Inakagua hali ya uhamishaji..."
+  },
+  "migrationRun": {
+    "message": "Endesha uhamishaji sasa"
+  },
+  "migrationReset": {
+    "message": "Weka upya bendera ya uhamishaji"
+  },
+  "migrationCurrentGroups": {
+    "message": "Vikundi vya sasa"
+  },
+  "migrationLoadingGroups": {
+    "message": "Inapakia vikundi..."
+  },
+  "migrationComplete": {
+    "message": "✓ Uhamishaji umekamilika - Vikundi vyote vimehamishiwa kwenye mfumo mseto"
+  },
+  "migrationPending": {
+    "message": "⚠ Uhamishaji unasubiri - Vikundi bado havijahamishwa"
+  },
+  "migrationStatusError": {
+    "message": "Hitilafu wakati wa kukagua hali ya uhamishaji: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Hakuna vikundi vilivyopatikana kwenye dirisha la sasa"
+  },
+  "migrationGroupsError": {
+    "message": "Hitilafu wakati wa kupakia vikundi: $1"
+  },
+  "migrationRunning": {
+    "message": "Inaendesha uhamishaji..."
+  },
+  "migrationSucceeded": {
+    "message": "Uhamishaji umekamilika kwa mafanikio!"
+  },
+  "migrationFailed": {
+    "message": "Uhamishaji umeshindwa: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Hakuna jibu"
+  },
+  "migrationRunError": {
+    "message": "Hitilafu ya uhamishaji: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Weka upya bendera ya uhamishaji? Hii itaruhusu uhamishaji kuendeshwa tena."
+  },
+  "migrationResetSucceeded": {
+    "message": "Bendera ya uhamishaji imewekwa upya kwa mafanikio!"
+  },
+  "migrationResetFailed": {
+    "message": "Kuweka upya kumeshindwa: $1"
+  },
+  "migrationResetError": {
+    "message": "Hitilafu ya kuweka upya: $1"
+  },
+  "migrationGroup": {
+    "message": "Kikundi $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Kimehamishwa (Kitambulisho asilia: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Hakijahamishwa"
+  },
+  "migrationGroupStatus": {
+    "message": "Hali: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Mwonekano wa vikundi vya vichupo"
+  }
+}

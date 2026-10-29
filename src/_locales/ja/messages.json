@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "新しいグループを追加"
+  },
+  "freeformButton": {
+    "message": "自由配置"
+  },
+  "tilingButton": {
+    "message": "自動配置（タイル表示）"
+  },
+  "settingsButton": {
+    "message": "設定"
+  },
+  "defaultGroupName": {
+    "message": "グループ"
+  },
+  "dragGroup": {
+    "message": "グループをドラッグ"
+  },
+  "closeGroup": {
+    "message": "グループを閉じる"
+  },
+  "closeGroupWarning": {
+    "message": "このグループを閉じると、中の $1 個のタブも閉じられます。本当に閉じてもよろしいですか？"
+  },
+  "editGroup": {
+    "message": "グループを編集"
+  },
+  "closeTab": {
+    "message": "タブを閉じる"
+  },
+  "openNewTab": {
+    "message": "新しいタブを開く"
+  },
+  "tabCount": {
+    "message": "$1 個のタブ"
+  },
+  "searchForTab_placeholder": {
+    "message": "タブを検索..."
+  },
+  "searchForTab_noResults": {
+    "message": "タブが見つかりません"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "キーボードショートカット"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "ショートカットの指定形式についてはこちらをご覧ください。"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "更新"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "リセット"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "無効にする"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "有効にする"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "タブグループビューを切り替える"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "次のタブグループをアクティブにする"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "前のタブグループをアクティブにする"
+  },
+  "optionsView": {
+    "message": "表示"
+  },
+  "optionsViewFreeform": {
+    "message": "自由配置（クラシック）"
+  },
+  "optionsViewPopup": {
+    "message": "ポップアップ"
+  },
+  "optionsTheme": {
+    "message": "テーマ"
+  },
+  "optionsThemeLight": {
+    "message": "ライト"
+  },
+  "optionsThemeDark": {
+    "message": "ダーク"
+  },
+  "optionsToolbar": {
+    "message": "ツールバー"
+  },
+  "optionsToolbarPosition": {
+    "message": "位置"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "上"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "右"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "下"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "左"
+  },
+  "optionsBackup": {
+    "message": "バックアップ"
+  },
+  "optionsBackupImport": {
+    "message": "インポート"
+  },
+  "optionsBackupImportText": {
+    "message": "インポートしたバックアップは新しいウィンドウで開かれ、既存の内容は上書きされません。\n古い「Tab Groups」アドオンのバックアップもインポートできます。"
+  },
+  "optionsBackupExport": {
+    "message": "エクスポート"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox で適切なセッション管理ができるようになれば、このセクションは不要になるかもしれません。"
+  },
+  "optionsBackupExportButton": {
+    "message": "バックアップを保存"
+  },
+  "optionsStatistics": {
+    "message": "統計"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "タブの数："
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (アクティブ： $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "サムネイルキャッシュのサイズ："
+  },
+  "refreshGroups": {
+    "message": "グループを更新"
+  },
+  "sendTabToGroup": {
+    "message": "タブをグループに送る"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Firefox の about:addons にある「拡張機能のショートカットを管理」からもショートカットを変更できます。{link}ご覧ください。"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "サンプル動画で"
+  },
+  "optionsThemeAuto": {
+    "message": "システムに合わせる"
+  },
+  "optionsNativeGroups": {
+    "message": "ブラウザー標準のグループ"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ブラウザー標準のタブグループを使う"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "視覚的な整理と折りたたみにブラウザー標準のタブグループを使います。"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "このバージョンのブラウザーでは標準のタブグループはサポートされていません（タブ非表示 API が必要です）。"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "このバージョンのブラウザーでは標準のタブグループはサポートされていません。Firefox 139 以降に更新するか、Chrome 89 以降をお使いください。"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "お使いのブラウザーは、タブグループに必要な API をサポートしていません。"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "標準グループを有効にしました。グループを移行しています..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "標準グループを無効にしました。クリーンアップしています..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "無効なファイル"
+  },
+  "byteSizeBytes": {
+    "message": "$1 バイト"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "タブグループを復元しています..."
+  },
+  "migrationTitle": {
+    "message": "ハイブリッドタブグループの移行"
+  },
+  "migrationChecking": {
+    "message": "移行の状態を確認しています..."
+  },
+  "migrationRun": {
+    "message": "今すぐ移行を実行"
+  },
+  "migrationReset": {
+    "message": "移行フラグをリセット"
+  },
+  "migrationCurrentGroups": {
+    "message": "現在のグループ"
+  },
+  "migrationLoadingGroups": {
+    "message": "グループを読み込んでいます..."
+  },
+  "migrationComplete": {
+    "message": "✓ 移行が完了しました - すべてのグループがハイブリッド方式に移行されました"
+  },
+  "migrationPending": {
+    "message": "⚠ 移行は保留中です - グループはまだ移行されていません"
+  },
+  "migrationStatusError": {
+    "message": "移行状態の確認中にエラーが発生しました：$1"
+  },
+  "migrationNoGroups": {
+    "message": "現在のウィンドウにグループが見つかりません"
+  },
+  "migrationGroupsError": {
+    "message": "グループの読み込み中にエラーが発生しました：$1"
+  },
+  "migrationRunning": {
+    "message": "移行を実行しています..."
+  },
+  "migrationSucceeded": {
+    "message": "移行が正常に完了しました！"
+  },
+  "migrationFailed": {
+    "message": "移行に失敗しました：$1"
+  },
+  "migrationNoResponse": {
+    "message": "応答がありません"
+  },
+  "migrationRunError": {
+    "message": "移行エラー：$1"
+  },
+  "migrationResetConfirm": {
+    "message": "移行フラグをリセットしますか？ リセットすると、移行をもう一度実行できます。"
+  },
+  "migrationResetSucceeded": {
+    "message": "移行フラグをリセットしました！"
+  },
+  "migrationResetFailed": {
+    "message": "リセットに失敗しました：$1"
+  },
+  "migrationResetError": {
+    "message": "リセットエラー：$1"
+  },
+  "migrationGroup": {
+    "message": "グループ $1："
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ 移行済み（標準 ID：$1）"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ 未移行"
+  },
+  "migrationGroupStatus": {
+    "message": "状態：$1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "タブグループビュー"
+  }
+}

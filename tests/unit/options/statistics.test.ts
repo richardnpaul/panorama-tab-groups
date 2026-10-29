@@ -51,9 +51,7 @@ describe('options/statistics.ts', () => {
     getMessage
       .mockReset()
       .mockImplementation((name, substitutions) =>
-        name === 'optionsStatisticsNumberOfTabsActive'
-          ? 'active'
-          : englishMessage(name, substitutions),
+        englishMessage(name, substitutions),
       );
     document.body.innerHTML = `
       <span id="thumbnailCacheSize">old size</span>
@@ -125,9 +123,21 @@ describe('options/statistics.ts', () => {
     await show();
 
     expect(getMessage).toHaveBeenCalledWith(
-      'optionsStatisticsNumberOfTabsActive',
+      'optionsStatisticsNumberOfTabsAndActive',
+      ['3', '2'],
     );
-    expect(text('numberOfTabs')).toBe('3 (active 2)');
+    expect(text('numberOfTabs')).toBe('3 (Active: 2)');
+  });
+
+  it('writes the counts in the digits and grouping of the language of the browser', async () => {
+    getMessage.mockImplementation((name, substitutions) =>
+      name === '@@ui_locale' ? 'fa' : englishMessage(name, substitutions),
+    );
+    const { show } = statisticsOf([tab(1), tab(2, true), tab(3)]);
+
+    await show();
+
+    expect(text('numberOfTabs')).toBe('۳ (Active: ۲)');
   });
 
   it('reports zero when there are no tabs', async () => {
@@ -135,7 +145,7 @@ describe('options/statistics.ts', () => {
 
     await show();
 
-    expect(text('numberOfTabs')).toBe('0 (active 0)');
+    expect(text('numberOfTabs')).toBe('0 (Active: 0)');
     expect(text('thumbnailCacheSize')).toBe('0 bytes');
   });
 

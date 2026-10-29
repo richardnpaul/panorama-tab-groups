@@ -5,6 +5,7 @@ import {
   PAGE_NAMES,
   boxOf,
   pagesOfTheExtension as pages,
+  overlappingTexts,
   sidewaysOverflow,
 } from './pages.js';
 
@@ -82,6 +83,8 @@ test.describe('Pages in the pseudo-locale', () => {
           if (name !== 'popup') {
             expect(await sidewaysOverflow(page)).toBeLessThanOrEqual(0);
           }
+          // A text longer than its room must not be written over the next
+          expect(await overlappingTexts(page)).toEqual([]);
         });
       }
 
@@ -133,6 +136,42 @@ test.describe('Pages in the pseudo-locale', () => {
         expect(extend.x > name.x).toBe(!rtl);
         // The arrow is turned round where text runs from the right
         expect(arrow).toBe(rtl ? 'matrix(-1, 0, 0, 1, 0, 0)' : 'none');
+      });
+
+      test(`popup: the ${rtl ? 'left' : 'right'} arrow opens the tabs of a group and the ${rtl ? 'right' : 'left'} arrow goes back`, async ({
+        page,
+        extensionId,
+        extensionProtocol,
+      }) => {
+        await pages.popup(
+          page,
+          (path) => `${extensionProtocol}://${extensionId}/${path}`,
+        );
+        const onward = rtl ? 'ArrowLeft' : 'ArrowRight';
+        const back = rtl ? 'ArrowRight' : 'ArrowLeft';
+        const shell = page.locator('#frame-shell');
+
+        // The arrow that points the other way does nothing on the button
+        const extend = page
+          .locator('#main-frame .list__item')
+          .first()
+          .locator('.list__link--extend');
+        await extend.focus();
+        await page.keyboard.press(back);
+        await expect(shell).not.toHaveClass(/frame-shell--aside-active/u);
+
+        // (the arrow moved the focus along the row, so it is put back)
+        await extend.focus();
+        await page.keyboard.press(onward);
+        await expect(shell).toHaveClass(/frame-shell--aside-active/u);
+
+        // In the frame that slid in, the arrow that points back at the start of a row goes back
+        await page
+          .locator('#aside-frame [data-nav-row] button')
+          .first()
+          .focus();
+        await page.keyboard.press(back);
+        await expect(shell).not.toHaveClass(/frame-shell--aside-active/u);
       });
     });
   }

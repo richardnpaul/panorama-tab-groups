@@ -18,12 +18,18 @@ For deeper insight it's recommended to read the [Internationalization guide for 
 
 ### Machine translations waiting for a native speaker
 
-These were written by machine when the add-on was renamed, so that they make sense, and have not been checked by a
-speaker of the language. Corrections are welcome.
+These were written by machine, so that they make sense, and have not been checked by a speaker of the language. Corrections are
+welcome. Three sets:
+
+- **The drafts:** 64 languages that were added as drafts on 2026-10-28 (`DRAFT_LOCALES` in `tests/support/target-locales.ts`; the table in
+  [`docs/languages.md`](docs/languages.md) says "draft"). A speaker who has read one takes it out of that list.
+- **The older languages, filled on 2026-10-29:** the 44 to 58 messages each of `de el es fr hu ko pl pt_BR tr zh_CN zh_TW` lacked were
+  written by machine (`git log` of each `messages.json` says which), as was `closeGroupWarning` of `hu`, `pl` and `tr`, which now has forms.
+  The messages that were there before are as they were.
+- **Single messages**, from when the add-on was renamed:
 
 - `optionKeyboardShortcutsToggle` in `pl` ("Przełącz widok grup kart") and `tr` ("Sekme Alanları Görünümünü Aç/Kapat",
   which keeps that file's word "alan" for a group).
-- `ru` also still refers to the old name by meaning ("Открыть панораму"); that locale is due to be removed.
 
 ### Update translation
 
@@ -40,17 +46,19 @@ A message that depends on a count has one form for each form the language has, w
 "tabCount": { "message": "one=$1 tab|other=$1 tabs" }
 ```
 
-The forms are the ones of the [Unicode CLDR plural rules](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html) for the language: `zero`, `one`, `two`, `few`, `many` and `other`. English and German have `one` and `other`; Russian and Polish have `one`, `few` and `many`; Arabic has all six. `other` is used for a count that has no form of its own. A language that says the same for every count (Japanese, Chinese, Korean) writes the text alone, with no labels. The test says which forms a message lacks for the counts 0 to 1000.
+The forms are the ones of the [Unicode CLDR plural rules](https://www.unicode.org/cldr/charts/latest/supplemental/language_plural_rules.html) for the language: `zero`, `one`, `two`, `few`, `many` and `other`. English and German have `one` and `other`; Czech has `one`, `few` and `other`; Polish and Ukrainian have `one`, `few` and `many` for whole numbers (and `other` for fractions, which a count is not); Arabic has all six. `other` is used for a count that has no form of its own. A language that says the same for every count (Japanese, Chinese, Korean) writes the text alone, with no labels. The test says which forms a message lacks for the counts 0 to 1000.
 
 ### Add language
 
-1. Create a directory named like the language of the browser it is for: the language alone (`de`, `fr`, `tr`), and a region only where the languages differ (`pt_BR`, `zh_CN`, `zh_TW`). A name with a region that the browser does not report, as `fr_FR` and `tr_TR` were, is never loaded: those two and `el_GR` showed English to every Greek, French and Turkish user until they were renamed. `tests/e2e/locales.spec.ts` starts Chromium in the language of every folder and fails for one it does not load.
-1. Copy the `messages.json` file from the directory `en` into it, and replace all `message`s.
-1. Add the language to `tests/unit/locale-gaps.json` with the number of messages it still lacks (0 when it has them all).
-1. Run `npm test`, and `npx playwright test locales --project=chromium`: it keeps a picture of the options page, the view and the popup in the language (attachments of the test), so that a reviewer can look at it without speaking it. A language that runs from the right (Arabic, Hebrew) is put on the page the right way round by itself; look at the pictures for what does not turn.
-1. Say in the pull request who read the translation. A language is not merged on a machine draft alone; one that is listed below as waiting has the explicit consent of the owner.
+Which languages are wanted, and which folder name a browser takes for each, is in [`docs/languages.md`](docs/languages.md): start from its table.
 
-What `npm test` checks of every language: valid JSON; no message that English lacks; the same placeholders as English in each message; no markup; a form for every count; a name that looks like a language. Pull requests show what each language lacks on the page of the run (`npm run report:locales` prints it).
+1. Create a directory named like the language of the browser it is for: the language alone (`de`, `fr`, `tr`), and a region only where the languages differ (`pt_BR`, `zh_CN`, `zh_TW`). A name with a region that the browser does not report, as `fr_FR` and `tr_TR` were, is never loaded: those two and `el_GR` showed English to every Greek, French and Turkish user until they were renamed. `tests/e2e/locales.spec.ts` starts Chromium in the language of every folder and fails for one it does not load, and `tests/e2e/firefox-locale-folders.spec.ts` does the same for Firefox (it downloads the language packs it needs). A folder that no language of any browser takes is never seen: `docs/languages.md` says which those are.
+1. Copy the `messages.json` file from the directory `en` into it, and replace all `message`s.
+1. Add the language to `tests/unit/locale-gaps.json` with the number of messages it still lacks (0 when it has them all), and to `tests/unit/locale-copies.json` with the number of its messages that are the same as English (`npm run report:locales` prints it; the add-on's name, the link and the units of size do not count). Look at each copy: a word that is the same in the language (`Import`, `Status`) is fine, a sentence is not.
+1. Run `npm test`, and `npx playwright test locales --project=chromium`: it keeps a picture of the options page, the view and the popup in the language (attachments of the test), so that a reviewer can look at it without speaking it. A language that runs from the right (Arabic, Hebrew) is put on the page the right way round by itself; look at the pictures for what does not turn.
+1. Say in the pull request who read the translation, or that nobody has. The owner waived the need for a reader (2026-10-28): a language nobody has read is added to `DRAFT_LOCALES` and is a draft until someone reads it.
+
+What `npm test` checks of every language: valid JSON; no message that English lacks; the same placeholders as English in each message; no markup; a form for every count; a name that looks like a language; no more messages missing, and no more that are the same as English, than were written down. Pull requests show what each language lacks on the page of the run (`npm run report:locales` prints it).
 
 ### Texts in the code
 

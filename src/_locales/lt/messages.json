@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Pridėti naują grupę"
+  },
+  "freeformButton": {
+    "message": "Laisvas išdėstymas"
+  },
+  "tilingButton": {
+    "message": "Automatinis (plytelių) išdėstymas"
+  },
+  "settingsButton": {
+    "message": "Nustatymai"
+  },
+  "defaultGroupName": {
+    "message": "Grp."
+  },
+  "dragGroup": {
+    "message": "Vilkti grupę"
+  },
+  "closeGroup": {
+    "message": "Užverti grupę"
+  },
+  "closeGroupWarning": {
+    "message": "one=Užvėrus šią grupę, bus užvertas $1 joje esantis skirtukas. Ar tikrai norite tai padaryti?|few=Užvėrus šią grupę, bus užverti $1 joje esantys skirtukai. Ar tikrai norite tai padaryti?|other=Užvėrus šią grupę, bus užverta $1 joje esančių skirtukų. Ar tikrai norite tai padaryti?"
+  },
+  "editGroup": {
+    "message": "Redaguoti grupę"
+  },
+  "closeTab": {
+    "message": "Užverti skirtuką"
+  },
+  "openNewTab": {
+    "message": "Atverti naują skirtuką"
+  },
+  "tabCount": {
+    "message": "one=$1 skirtukas|few=$1 skirtukai|other=$1 skirtukų"
+  },
+  "searchForTab_placeholder": {
+    "message": "Ieškoti skirtuko..."
+  },
+  "searchForTab_noResults": {
+    "message": "Skirtukų nerasta"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Spartieji klavišai"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Spartžiojo klavišo nustatymo formatas aprašytas čia."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Atnaujinti"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Atstatyti"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Išjungti"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Įjungti"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Perjungti skirtukų grupių rodinį"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktyvinti kitą skirtukų grupę"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktyvinti ankstesnę skirtukų grupę"
+  },
+  "optionsView": {
+    "message": "Rodinys"
+  },
+  "optionsViewFreeform": {
+    "message": "Laisvas (klasikinis)"
+  },
+  "optionsViewPopup": {
+    "message": "Iššokantis langas"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "šviesi"
+  },
+  "optionsThemeDark": {
+    "message": "tamsi"
+  },
+  "optionsToolbar": {
+    "message": "Įrankių juosta"
+  },
+  "optionsToolbarPosition": {
+    "message": "Padėtis"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "viršuje"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "dešinėje"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "apačioje"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "kairėje"
+  },
+  "optionsBackup": {
+    "message": "Atsarginė kopija"
+  },
+  "optionsBackupImport": {
+    "message": "Importuoti"
+  },
+  "optionsBackupImportText": {
+    "message": "Importuotos atsarginės kopijos bus atveriamos naujuose languose ir nieko neperrašys.\nGalite importuoti ir senojo priedo „Tab Groups“ atsargines kopijas."
+  },
+  "optionsBackupExport": {
+    "message": "Eksportuoti"
+  },
+  "optionsBackupExportText": {
+    "message": "Šis skyrius gali tapti nebereikalingas, kai „Firefox“ bus galima tinkamai valdyti seansus."
+  },
+  "optionsBackupExportButton": {
+    "message": "Įrašyti atsarginę kopiją"
+  },
+  "optionsStatistics": {
+    "message": "Statistika"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Skirtukų skaičius:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktyvūs: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Miniatiūrų talpyklos dydis:"
+  },
+  "refreshGroups": {
+    "message": "Atnaujinti grupes"
+  },
+  "sendTabToGroup": {
+    "message": "Siųsti skirtuką į grupę"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Naudotojai spartiuosius klavišus gali atnaujinti ir per parinktį „Tvarkyti plėtinių sparčiuosius klavišus“ „Firefox“ puslapyje about:addons, kaip matyti {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "pavyzdiniame vaizdo įraše"
+  },
+  "optionsThemeAuto": {
+    "message": "Sekti sistemą"
+  },
+  "optionsNativeGroups": {
+    "message": "Naršyklės savosios grupės"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Naudoti naršyklės savąsias skirtukų grupes"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Naudoti naršyklės savąsias skirtukų grupes vaizdiniam tvarkymui ir sutraukimui."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Savosios skirtukų grupės šioje naršyklės versijoje nepalaikomos (reikalinga skirtukų slėpimo API)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Savosios skirtukų grupės šioje naršyklės versijoje nepalaikomos. Atnaujinkite į „Firefox“ 139+ arba naudokite „Chrome“ 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Jūsų naršyklė nepalaiko skirtukų grupėms reikalingų API."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Savosios grupės įjungtos. Grupės perkeliamos..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Savosios grupės išjungtos. Tvarkoma..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Netinkamas failas"
+  },
+  "byteSizeBytes": {
+    "message": "$1 baitų"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Skirtukų grupės atkuriamos..."
+  },
+  "migrationTitle": {
+    "message": "Hibridinių skirtukų grupių perkėlimas"
+  },
+  "migrationChecking": {
+    "message": "Tikrinama perkėlimo būsena..."
+  },
+  "migrationRun": {
+    "message": "Vykdyti perkėlimą dabar"
+  },
+  "migrationReset": {
+    "message": "Atstatyti perkėlimo žymą"
+  },
+  "migrationCurrentGroups": {
+    "message": "Dabartinės grupės"
+  },
+  "migrationLoadingGroups": {
+    "message": "Įkeliamos grupės..."
+  },
+  "migrationComplete": {
+    "message": "✓ Perkėlimas baigtas - visos grupės perkeltos į hibridinę sistemą"
+  },
+  "migrationPending": {
+    "message": "⚠ Perkėlimas laukia - grupės dar neperkeltos"
+  },
+  "migrationStatusError": {
+    "message": "Klaida tikrinant perkėlimo būseną: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Dabartiniame lange grupių nerasta"
+  },
+  "migrationGroupsError": {
+    "message": "Klaida įkeliant grupes: $1"
+  },
+  "migrationRunning": {
+    "message": "Vykdomas perkėlimas..."
+  },
+  "migrationSucceeded": {
+    "message": "Perkėlimas sėkmingai baigtas!"
+  },
+  "migrationFailed": {
+    "message": "Perkėlimas nepavyko: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Nėra atsakymo"
+  },
+  "migrationRunError": {
+    "message": "Perkėlimo klaida: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Atstatyti perkėlimo žymą? Tada perkėlimą bus galima vykdyti iš naujo."
+  },
+  "migrationResetSucceeded": {
+    "message": "Perkėlimo žyma sėkmingai atstatyta!"
+  },
+  "migrationResetFailed": {
+    "message": "Atstatyti nepavyko: $1"
+  },
+  "migrationResetError": {
+    "message": "Atstatymo klaida: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupė $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Perkelta (savasis ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Neperkelta"
+  },
+  "migrationGroupStatus": {
+    "message": "Būsena: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Skirtukų grupių rodinys"
+  }
+}

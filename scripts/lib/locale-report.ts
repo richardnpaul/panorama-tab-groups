@@ -19,11 +19,37 @@ export function parseLocale(folder: string, text: string): Locale {
   );
 }
 
+/**
+ * The messages that are rightly the same in every language: the name of the add-on, the link
+ * to a page that is in English, and the units of size. Every other message of a language that
+ * is the same as English is a copy that was not translated.
+ */
+export const KEPT_AS_IS: readonly string[] = [
+  'extensionName',
+  'optionKeyboardShortcutsHelpLink',
+  'byteSizeKiB',
+  'byteSizeMiB',
+  'byteSizeGiB',
+];
+
+/** The messages of a language that are the same as English, and are not among those that rightly are */
+export function copiesOfEnglish(english: Locale, own: Locale): string[] {
+  return Object.entries(own)
+    .filter(
+      ([name, message]) =>
+        english[name] === message && !KEPT_AS_IS.includes(name),
+    )
+    .map(([name]) => name)
+    .sort();
+}
+
 /** How much of English a language has translated */
 export interface Completeness {
   folder: string;
   translated: number;
   missing: number;
+  // Messages that are the same as English and rightly or wrongly were not translated
+  copies: number;
 }
 
 export function completenessOf(
@@ -34,7 +60,12 @@ export function completenessOf(
   return Object.entries(locales)
     .map(([folder, own]) => {
       const missing = names.filter((name) => !(name in own)).length;
-      return { folder, translated: names.length - missing, missing };
+      return {
+        folder,
+        translated: names.length - missing,
+        missing,
+        copies: copiesOfEnglish(english, own).length,
+      };
     })
     .sort(
       (first, second) =>
@@ -50,16 +81,16 @@ export function localeReport(
 ): string {
   const total = Object.keys(english).length;
   const rows = completenessOf(english, locales).map(
-    ({ folder, translated, missing }) =>
-      `| ${folder} | ${String(translated)} | ${String(missing)} | ${String(Math.floor((translated / total) * 100))}% |`,
+    ({ folder, translated, missing, copies }) =>
+      `| ${folder} | ${String(translated)} | ${String(missing)} | ${String(Math.floor((translated / total) * 100))}% | ${String(copies)} |`,
   );
   return [
     '## Translations',
     '',
-    `English has ${String(total)} messages. A message a language lacks is shown in English.`,
+    `English has ${String(total)} messages. A message a language lacks is shown in English; one that is the same as English may be a copy that was not translated.`,
     '',
-    '| Locale | Translated | Missing | Complete |',
-    '| ------ | ---------- | ------- | -------- |',
+    '| Locale | Translated | Missing | Complete | Same as English |',
+    '| ------ | ---------- | ------- | -------- | --------------- |',
     ...rows,
     '',
   ].join('\n');
