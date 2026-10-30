@@ -22,9 +22,15 @@ const pageBody = /<body[^>]*>([\s\S]*)<\/body>/.exec(optionsPage)?.[1] ?? '';
 
 const fn = () => undefined;
 
+type StorageListener = (
+  changes: Record<string, { newValue?: unknown }>,
+  areaName: string,
+) => void;
+
 function fakeBrowser(stored: Record<string, unknown>) {
   const sessions = createFakeSessions();
   const synced: Record<string, unknown> = { ...stored };
+  const storageListeners: StorageListener[] = [];
   return {
     runtime: {
       getManifest: () => ({ version: '2.0' }),
@@ -35,10 +41,24 @@ function fakeBrowser(stored: Record<string, unknown>) {
         get: vi.fn((defaults: object) =>
           Promise.resolve({ ...defaults, ...synced }),
         ),
-        set: vi.fn((items: object) => {
+        set: vi.fn((items: Record<string, unknown>) => {
           Object.assign(synced, items);
+          const changes = Object.fromEntries(
+            Object.entries(items).map(([name, newValue]) => [
+              name,
+              { newValue },
+            ]),
+          );
+          storageListeners.forEach((listener) => {
+            listener(changes, 'sync');
+          });
           return Promise.resolve();
         }),
+      },
+      onChanged: {
+        addListener: (listener: StorageListener) => {
+          storageListeners.push(listener);
+        },
       },
     },
     commands: {
@@ -78,6 +98,31 @@ function fakeBrowser(stored: Record<string, unknown>) {
 }
 
 type FakeBrowser = ReturnType<typeof fakeBrowser>;
+
+/** The system's colour setting, which can be changed while the page is open */
+function fakeSystemTheme(prefersDark: boolean) {
+  const listeners: (() => void)[] = [];
+  const query = {
+    matches: prefersDark,
+    addEventListener: (_type: string, listener: () => void) => {
+      listeners.push(listener);
+    },
+  };
+  // Only the question about dark gets this answer; any other is a "no"
+  vi.stubGlobal('matchMedia', (asked: string) =>
+    asked === '(prefers-color-scheme: dark)'
+      ? query
+      : { matches: false, addEventListener: fn },
+  );
+  return {
+    change: (nowDark: boolean) => {
+      query.matches = nowDark;
+      listeners.forEach((listener) => {
+        listener();
+      });
+    },
+  };
+}
 
 async function start(
   stored: Record<string, unknown> = {},
@@ -120,12 +165,49 @@ describe('options/start.ts', () => {
   beforeEach(() => {
     vi.spyOn(console, 'debug').mockImplementation(fn);
     document.body.innerHTML = pageBody;
+    document.body.className = '';
+    fakeSystemTheme(false);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.body.innerHTML = '';
+    document.body.className = '';
+  });
+
+  describe('theme', () => {
+    it.each(['dark', 'light'])(
+      'dresses the page in the %s theme that is stored',
+      async (theme) => {
+        await start({ theme });
+
+        expect(document.body.classList.contains(`theme-${theme}`)).toBe(true);
+      },
+    );
+
+    it('follows the system while the theme is Auto, as the system changes', async () => {
+      const system = fakeSystemTheme(true);
+      await start({ theme: 'auto' });
+      expect(document.body.classList.contains('theme-dark')).toBe(true);
+
+      system.change(false);
+
+      expect(document.body.classList.contains('theme-light')).toBe(true);
+      expect(document.body.classList.contains('theme-dark')).toBe(false);
+    });
+
+    it('changes the page as the theme is chosen, with no reload', async () => {
+      await start({ theme: 'light' });
+      expect(document.body.classList.contains('theme-light')).toBe(true);
+
+      document.querySelector<HTMLInputElement>('#themeDark')?.click();
+
+      await vi.waitFor(() => {
+        expect(document.body.classList.contains('theme-dark')).toBe(true);
+      });
+      expect(document.body.classList.contains('theme-light')).toBe(false);
+    });
   });
 
   it('shows the options that storage holds', async () => {

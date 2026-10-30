@@ -1,0 +1,44 @@
+/*
+ * The colours of the extension, each defined once as light-dark(light, dark).
+ * Pages use these through var(--name) and name no colour of their own.
+ *
+ * Which side is used follows `color-scheme`: the theme class that applyAppearance
+ * puts on <body> (theme-light or theme-dark, where Auto has already become one of
+ * the two), and the system's setting until the class is there, so a page does not
+ * flash the wrong theme while it starts. The same property gives the scroll bars
+ * and the browser's own controls the theme.
+ */
+:root {
+  color-scheme: light dark;
+}
+
+:root:has(> body.theme-light) {
+  color-scheme: light;
+}
+
+:root:has(> body.theme-dark) {
+  color-scheme: dark;
+}
+
+body {
+  --surface: light-dark(#ffffff, #2a2a2e);
+  --text: light-dark(#0c0c0d, #f9f9fa);
+
+  /* Rules that only divide things (no information in them) */
+  --separator: light-dark(#d7d7db, #4a4a4f);
+
+  /* The edge of a control: at least 3:1 against the surface */
+  --border: #8f8f9d;
+  --input: light-dark(#ffffff, #1c1b22);
+  --control: light-dark(#f0f0f4, #4a4a4f);
+  --control-hover: light-dark(#e0e0e6, #5a5a5f);
+  --control-active: light-dark(#d0d0d7, #6a6a6f);
+
+  /* The choice that is checked, and where the keyboard is */
+  --accent: light-dark(#0a84ff, #4da3ff);
+
+  /* Text that tells something: at least 4.5:1 against the surface */
+  --info: light-dark(#0060df, #6cb5ff);
+  --warning: light-dark(#8f4700, #ffa436);
+  --error: light-dark(#d70022, #ff7b86);
+}

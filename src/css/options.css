@@ -1,49 +1,90 @@
+/* The colours are in tokens.css; the page takes the width it is given, up to a readable one */
+body {
+  background: var(--surface);
+  color: var(--text);
+  box-sizing: border-box;
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: 1rem 1.5rem;
+}
+
+a {
+  color: var(--info);
+}
+
 h2 {
-  border-bottom: solid 1px #d7d7db;
+  border-bottom: solid 1px var(--separator);
   line-height: 2em;
 }
 
+/*
+ * A label, the field, and the buttons. Wrapping where there is little room;
+ * with room, the same columns in every row, whatever number of buttons it has.
+ */
+.keyboardShortcuts form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .keyboardShortcuts label {
-  width: 220px;
-  display: inline-block;
+  flex: 1 1 14rem;
   line-height: 2em;
 }
 
 .keyboardShortcuts button {
   text-align: center;
-  margin: 0em;
+  margin: 0;
 }
 
 .keyboardShortcuts input {
-  width: 120px;
+  flex: 0 1 10rem;
+  min-width: 0;
+}
+
+@media (min-width: 40rem) {
+  .keyboardShortcuts form {
+    display: grid;
+    grid-template-columns: minmax(12rem, 24rem) minmax(8rem, 10rem) repeat(
+        3,
+        max-content
+      );
+  }
 }
 
 .input-radio-image {
-  display: inline-block;
-  padding-inline-end: 10px;
   position: relative;
   text-align: center;
-  /* The label under the picture is as high as its text, which may be more than a line in a language that is longer */
-  vertical-align: top;
-  min-height: 40px;
-  /* ... and as wide as its text, which a word of another language may make more than the picture */
-  min-width: 40px;
+}
+
+/* The pictures of a choice, side by side, as many to a row as fit */
+form:has(> .input-radio-image) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 10px;
+}
+
+.input-radio-image label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input-radio-image label span {
+  max-width: 7rem;
+  overflow-wrap: anywhere;
 }
 
 .input-radio-image label::before,
 .input-radio-image label img {
+  box-sizing: border-box;
   width: 40px;
   height: 40px;
 }
 
-#optionsView .input-radio-image,
-#optionsView .input-radio-image label {
-  min-width: 76px;
-}
-
 #optionsView .input-radio-image label::before,
-#optionsView .input-radio-image label img,
-#optionsView .input-radio-image input {
+#optionsView .input-radio-image label img {
   width: 76px;
 }
 
@@ -53,17 +94,17 @@ h2 {
   opacity: 0;
 }
 
-.input-radio-image label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .input-radio-image input:checked ~ label:before {
   content: '';
-  border: 2px solid #0a84ff;
+  border: 2px solid var(--accent);
   position: absolute;
   top: 0;
+}
+
+/* The radio button itself is hidden, so the keyboard shows on its picture */
+.input-radio-image input:focus-visible ~ label img {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .input-radio-image--extended img {
@@ -72,14 +113,14 @@ h2 {
 
 .input-radio-image--extended input ~ label:before {
   content: '';
-  outline: 2px solid #737373;
+  outline: 2px solid var(--border);
   position: absolute;
   top: 0;
 }
 
 .input-radio-image--extended input:checked ~ label:before {
   border: none;
-  outline-color: #0a84ff;
+  outline-color: var(--accent);
 }
 
 /* A message may hold a line break, which is a break in the text and not a tag */
@@ -101,14 +142,18 @@ h2 {
   font-size: 0.9em;
 }
 
+#nativeGroupsFeedback {
+  font-weight: bold;
+}
+
 .info-text {
-  color: #0060df;
+  color: var(--info);
 }
 
 .warning-text {
-  color: #ff9400;
+  color: var(--warning);
 }
 
 .error-text {
-  color: #d70022;
+  color: var(--error);
 }

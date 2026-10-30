@@ -2,6 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <link rel="stylesheet" type="text/css" href="css/tokens.css" />
     <link rel="stylesheet" type="text/css" href="css/options.css" />
     <link rel="stylesheet" type="text/css" href="css/browser-style.css" />
     <script type="module" src="js/options/index.js"></script>
@@ -33,23 +34,19 @@
         <form id="_execute_action" class="browser-style">
           <label for="_execute_action">Toggle Tab Groups View</label>
           <input type="text" />
-          <button class="updateShortcut" class="browser-style">Update</button>
-          <button class="resetShortcut" class="browser-style">Reset</button>
-          <button class="enableShortcut" class="browser-style" hidden>
-            Enable
-          </button>
+          <button class="updateShortcut">Update</button>
+          <button class="resetShortcut">Reset</button>
+          <button class="enableShortcut" hidden>Enable</button>
         </form>
       </div>
       <div class="keyboardShortcuts">
         <form id="activate-next-group" class="browser-style">
           <label for="activate-next-group">Activate the next Tab Group</label>
           <input type="text" />
-          <button class="updateShortcut" class="browser-style">Update</button>
-          <button class="resetShortcut" class="browser-style">Reset</button>
-          <button class="disableShortcut" class="browser-style">Disable</button>
-          <button class="enableShortcut" class="browser-style" hidden>
-            Enable
-          </button>
+          <button class="updateShortcut">Update</button>
+          <button class="resetShortcut">Reset</button>
+          <button class="disableShortcut">Disable</button>
+          <button class="enableShortcut" hidden>Enable</button>
         </form>
       </div>
       <div class="keyboardShortcuts">
@@ -58,12 +55,10 @@
             >Activate the previous Tab Group</label
           >
           <input type="text" />
-          <button class="updateShortcut" class="browser-style">Update</button>
-          <button class="resetShortcut" class="browser-style">Reset</button>
-          <button class="disableShortcut" class="browser-style">Disable</button>
-          <button class="enableShortcut" class="browser-style" hidden>
-            Enable
-          </button>
+          <button class="updateShortcut">Update</button>
+          <button class="resetShortcut">Reset</button>
+          <button class="disableShortcut">Disable</button>
+          <button class="enableShortcut" hidden>Enable</button>
         </form>
       </div>
     </section>
@@ -186,7 +181,8 @@
         <p id="nativeGroupsWarning" class="info-text"></p>
         <p
           id="nativeGroupsFeedback"
-          style="display: none; color: #0060df; font-weight: bold"
+          class="info-text"
+          style="display: none"
         ></p>
       </div>
     </section>

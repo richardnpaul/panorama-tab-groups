@@ -1,3 +1,4 @@
+import { createAppearanceSettings } from '../adapters/browser/appearance-settings.js';
 import { createBrowserDownloads } from '../adapters/browser/downloads.js';
 import { createBrowserI18n } from '../adapters/browser/i18n.js';
 import { createBrowserMessaging } from '../adapters/browser/messaging.js';
@@ -13,6 +14,7 @@ import { createBackupService } from '../app/backup-service.js';
 import { stateManager } from '../background/StateManager.js';
 import { applyLanguage } from '../share/direction.js';
 import { detectCapabilities } from '../share/capabilities.js';
+import { applyAppearance } from '../view/theme.js';
 import { createBackupHandlers } from './backup.js';
 import { createOptionsPage } from './page.js';
 
@@ -24,6 +26,13 @@ const objectUrlFor = (content: string): string =>
 export async function startOptions(): Promise<void> {
   const i18n = createBrowserI18n(() => browser);
   applyLanguage(i18n, document.documentElement);
+
+  // The theme first, so the page is not shown in the wrong colours while the rest is built
+  await applyAppearance({
+    body: document.body,
+    systemPrefersDark: window.matchMedia('(prefers-color-scheme: dark)'),
+    settings: createAppearanceSettings(() => browser),
+  });
 
   const options = createBrowserOptions(() => browser);
   const messaging = createBrowserMessaging(() => browser);
