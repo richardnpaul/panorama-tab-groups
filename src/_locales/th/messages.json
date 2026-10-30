@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "เพิ่มกลุ่มใหม่"
+  },
+  "freeformButton": {
+    "message": "จัดเรียงแบบอิสระ"
+  },
+  "tilingButton": {
+    "message": "จัดเรียงอัตโนมัติ (แบบกระเบื้อง)"
+  },
+  "settingsButton": {
+    "message": "การตั้งค่า"
+  },
+  "defaultGroupName": {
+    "message": "กลุ่ม"
+  },
+  "dragGroup": {
+    "message": "ลากกลุ่ม"
+  },
+  "closeGroup": {
+    "message": "ปิดกลุ่ม"
+  },
+  "closeGroupWarning": {
+    "message": "การปิดกลุ่มนี้จะปิดแท็บ $1 แท็บที่อยู่ในกลุ่ม คุณแน่ใจหรือไม่ว่าต้องการทำเช่นนั้น?"
+  },
+  "editGroup": {
+    "message": "แก้ไขกลุ่ม"
+  },
+  "closeTab": {
+    "message": "ปิดแท็บ"
+  },
+  "openNewTab": {
+    "message": "เปิดแท็บใหม่"
+  },
+  "tabCount": {
+    "message": "$1 แท็บ"
+  },
+  "searchForTab_placeholder": {
+    "message": "ค้นหาแท็บ..."
+  },
+  "searchForTab_noResults": {
+    "message": "ไม่พบแท็บ"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "แป้นพิมพ์ลัด"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "รูปแบบของตัวเลือกแป้นพิมพ์ลัดอธิบายไว้ที่นี่"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "อัปเดต"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "รีเซ็ต"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "ปิดใช้งาน"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "เปิดใช้งาน"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "สลับมุมมองกลุ่มแท็บ"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "เปิดใช้งานกลุ่มแท็บถัดไป"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "เปิดใช้งานกลุ่มแท็บก่อนหน้า"
+  },
+  "optionsView": {
+    "message": "มุมมอง"
+  },
+  "optionsViewFreeform": {
+    "message": "อิสระ (แบบดั้งเดิม)"
+  },
+  "optionsViewPopup": {
+    "message": "ป๊อปอัป"
+  },
+  "optionsTheme": {
+    "message": "ชุดรูปแบบ"
+  },
+  "optionsThemeLight": {
+    "message": "สว่าง"
+  },
+  "optionsThemeDark": {
+    "message": "มืด"
+  },
+  "optionsToolbar": {
+    "message": "แถบเครื่องมือ"
+  },
+  "optionsToolbarPosition": {
+    "message": "ตำแหน่ง"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ด้านบน"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ด้านขวา"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ด้านล่าง"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ด้านซ้าย"
+  },
+  "optionsBackup": {
+    "message": "การสำรองข้อมูล"
+  },
+  "optionsBackupImport": {
+    "message": "นำเข้า"
+  },
+  "optionsBackupImportText": {
+    "message": "ข้อมูลสำรองที่นำเข้าจะเปิดในหน้าต่างใหม่และไม่เขียนทับสิ่งใด\nคุณยังนำเข้าข้อมูลสำรองจากโปรแกรมเสริม \"Tab Groups\" รุ่นเก่าได้ด้วย"
+  },
+  "optionsBackupExport": {
+    "message": "ส่งออก"
+  },
+  "optionsBackupExportText": {
+    "message": "ส่วนนี้อาจไม่จำเป็นอีกต่อไปเมื่อ Firefox จัดการเซสชันได้อย่างเหมาะสม"
+  },
+  "optionsBackupExportButton": {
+    "message": "บันทึกข้อมูลสำรอง"
+  },
+  "optionsStatistics": {
+    "message": "สถิติ"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "จำนวนแท็บ:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (ที่ใช้งานอยู่: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "ขนาดแคชภาพขนาดย่อ:"
+  },
+  "refreshGroups": {
+    "message": "รีเฟรชกลุ่ม"
+  },
+  "sendTabToGroup": {
+    "message": "ส่งแท็บไปยังกลุ่ม"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "ผู้ใช้ยังอัปเดตแป้นพิมพ์ลัดได้ผ่านตัวเลือก \"จัดการแป้นพิมพ์ลัดของส่วนขยาย\" ที่ about:addons ใน Firefox ดังที่เห็น{link}"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "ในวิดีโอตัวอย่าง"
+  },
+  "optionsThemeAuto": {
+    "message": "ตามระบบ"
+  },
+  "optionsNativeGroups": {
+    "message": "กลุ่มดั้งเดิมของเบราว์เซอร์"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ใช้กลุ่มแท็บดั้งเดิมของเบราว์เซอร์"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "ใช้กลุ่มแท็บดั้งเดิมของเบราว์เซอร์เพื่อจัดระเบียบด้วยภาพและพับเก็บ"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "เบราว์เซอร์รุ่นนี้ไม่รองรับกลุ่มแท็บดั้งเดิม (ต้องใช้ API ซ่อนแท็บ)"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "เบราว์เซอร์รุ่นนี้ไม่รองรับกลุ่มแท็บดั้งเดิม โปรดอัปเดตเป็น Firefox 139+ หรือใช้ Chrome 89+"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "เบราว์เซอร์ของคุณไม่รองรับ API ที่จำเป็นสำหรับกลุ่มแท็บ"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "เปิดใช้งานกลุ่มดั้งเดิมแล้ว กำลังย้ายกลุ่ม..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "ปิดใช้งานกลุ่มดั้งเดิมแล้ว กำลังล้างข้อมูล..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "ไฟล์ไม่ถูกต้อง"
+  },
+  "byteSizeBytes": {
+    "message": "$1 ไบต์"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "กำลังกู้คืนกลุ่มแท็บ..."
+  },
+  "migrationTitle": {
+    "message": "การย้ายกลุ่มแท็บแบบไฮบริด"
+  },
+  "migrationChecking": {
+    "message": "กำลังตรวจสอบสถานะการย้าย..."
+  },
+  "migrationRun": {
+    "message": "เริ่มการย้ายเดี๋ยวนี้"
+  },
+  "migrationReset": {
+    "message": "รีเซ็ตแฟล็กการย้าย"
+  },
+  "migrationCurrentGroups": {
+    "message": "กลุ่มปัจจุบัน"
+  },
+  "migrationLoadingGroups": {
+    "message": "กำลังโหลดกลุ่ม..."
+  },
+  "migrationComplete": {
+    "message": "✓ การย้ายเสร็จสมบูรณ์ - ย้ายทุกกลุ่มไปยังระบบไฮบริดแล้ว"
+  },
+  "migrationPending": {
+    "message": "⚠ การย้ายรอดำเนินการ - ยังไม่ได้ย้ายกลุ่ม"
+  },
+  "migrationStatusError": {
+    "message": "เกิดข้อผิดพลาดในการตรวจสอบสถานะการย้าย: $1"
+  },
+  "migrationNoGroups": {
+    "message": "ไม่พบกลุ่มในหน้าต่างปัจจุบัน"
+  },
+  "migrationGroupsError": {
+    "message": "เกิดข้อผิดพลาดในการโหลดกลุ่ม: $1"
+  },
+  "migrationRunning": {
+    "message": "กำลังย้าย..."
+  },
+  "migrationSucceeded": {
+    "message": "ย้ายสำเร็จ!"
+  },
+  "migrationFailed": {
+    "message": "การย้ายล้มเหลว: $1"
+  },
+  "migrationNoResponse": {
+    "message": "ไม่มีการตอบกลับ"
+  },
+  "migrationRunError": {
+    "message": "ข้อผิดพลาดในการย้าย: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "รีเซ็ตแฟล็กการย้ายหรือไม่? การทำเช่นนี้จะอนุญาตให้ย้ายได้อีกครั้ง"
+  },
+  "migrationResetSucceeded": {
+    "message": "รีเซ็ตแฟล็กการย้ายสำเร็จ!"
+  },
+  "migrationResetFailed": {
+    "message": "การรีเซ็ตล้มเหลว: $1"
+  },
+  "migrationResetError": {
+    "message": "ข้อผิดพลาดในการรีเซ็ต: $1"
+  },
+  "migrationGroup": {
+    "message": "กลุ่ม $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ ย้ายแล้ว (ID ดั้งเดิม: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ ยังไม่ได้ย้าย"
+  },
+  "migrationGroupStatus": {
+    "message": "สถานะ: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "มุมมองกลุ่มแท็บ"
+  }
+}

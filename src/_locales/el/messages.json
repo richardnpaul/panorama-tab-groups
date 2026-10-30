@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Προσθήκη νέου γκρουπ"
+  },
+  "freeformButton": {
+    "message": "Ελεύθερη ευθυγράμμιση"
+  },
+  "tilingButton": {
+    "message": "Αυτόματη (ψηφιδωτή) ευθυγράμμιση"
+  },
+  "settingsButton": {
+    "message": "Ρυθμίσεις"
+  },
+  "defaultGroupName": {
+    "message": "Γκρουπ"
+  },
+  "dragGroup": {
+    "message": "Μετακίνηση γκρουπ"
+  },
+  "closeGroup": {
+    "message": "Κλείσιμο γκρουπ"
+  },
+  "closeGroupWarning": {
+    "message": "one=Με το κλείσιμο αυτού του γκρουπ, θα χαθεί και η καρτέλα $1 μαζί. Είστε σίγουροι για αυτό;|other=Με το κλείσιμο αυτού του γκρουπ, θα χαθούν και οι καρτέλες $1 μαζί. Είστε σίγουροι για αυτό;"
+  },
+  "editGroup": {
+    "message": "Επεξεργασία γκρουπ"
+  },
+  "closeTab": {
+    "message": "Κλείσιμο καρτέλας"
+  },
+  "openNewTab": {
+    "message": "Άνοιγμα νέας καρτέλας"
+  },
+  "tabCount": {
+    "message": "one=$1 καρτέλα|other=$1 καρτέλες"
+  },
+  "searchForTab_placeholder": {
+    "message": "Αναζήτηση καρτέλας..."
+  },
+  "searchForTab_noResults": {
+    "message": "Δε βρέθηκαν καρτέλες"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Συντομεύσεις πληκτρολογίου"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/el/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Η μορφή της επιλογής συντόμευσης περιγράφεται εδώ."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Ενημέρωση"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Επαναφορά"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Απενεργοποίηση"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Ενεργοποίηση"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Εναλλαγή σε Tab Groups View"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Ενεργοποίηση του επόμενου Γκρουπ Καρτελών"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Ενεργοποίηση του επόμενου Γκρουπ Καρτελών"
+  },
+  "optionsView": {
+    "message": "Προβολή"
+  },
+  "optionsViewFreeform": {
+    "message": "Ελεύθερη (κλασσική)"
+  },
+  "optionsViewPopup": {
+    "message": "Εικόνα εντός εικόνας (Popup)"
+  },
+  "optionsTheme": {
+    "message": "Θέμα"
+  },
+  "optionsThemeLight": {
+    "message": "ανοιχτό"
+  },
+  "optionsThemeDark": {
+    "message": "σκούρο"
+  },
+  "optionsToolbar": {
+    "message": "Γραμμή Εργαλείων"
+  },
+  "optionsToolbarPosition": {
+    "message": "Θέση"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "πάνω"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "δεξιά"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "κάτω"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "αριστερά"
+  },
+  "optionsBackup": {
+    "message": "Αντίγραφο Ασφαλείας"
+  },
+  "optionsBackupImport": {
+    "message": "Εισαγωγή"
+  },
+  "optionsBackupImportText": {
+    "message": "Τα εισαγόμενα αντίγραφα ασφαλείας θα ανοίξουν σε νέα παράθυρα και δε θα αντικαταστήσουν κάτι.\nΜπορείτε επίσης να εισάγετε αντίγραφα ασφαλείας από το παλιό πρόσθετο \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "Εξαγωγή"
+  },
+  "optionsBackupExportText": {
+    "message": "Αυτό το τμήμα ίσως καταστεί παρωχημένο όταν μια πρέπουσα διαχείριση συνεδρίας είναι δυνατή στο Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Αποθήκευση αντιγράφου ασφαλείας"
+  },
+  "optionsStatistics": {
+    "message": "Στατιστικά"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Αριθμός Καρτελών:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Ενεργές: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Μέγεθος Προσωρινής Μνήμης Thumbnail:"
+  },
+  "refreshGroups": {
+    "message": "Ανανέωση των Γκρουπ"
+  },
+  "sendTabToGroup": {
+    "message": "Αποστολή σε Γκρουπ"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Οι χρήστες μπορούν επίσης να ενημερώσουν τις συντομεύσεις μέσω της επιλογής «Διαχείριση συντομεύσεων επεκτάσεων» στο about:addons του Firefox, όπως φαίνεται {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "στο βίντεο παράδειγμα"
+  },
+  "optionsThemeAuto": {
+    "message": "Ακολούθηση συστήματος"
+  },
+  "optionsNativeGroups": {
+    "message": "Εγγενή γκρουπ του προγράμματος περιήγησης"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Χρήση των εγγενών γκρουπ καρτελών του προγράμματος περιήγησης"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Χρήση των εγγενών γκρουπ καρτελών του προγράμματος περιήγησης για οπτική οργάνωση και σύμπτυξη."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Τα εγγενή γκρουπ καρτελών δεν υποστηρίζονται σε αυτή την έκδοση του προγράμματος περιήγησης (απαιτείται το API απόκρυψης καρτελών)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Τα εγγενή γκρουπ καρτελών δεν υποστηρίζονται σε αυτή την έκδοση του προγράμματος περιήγησης. Ενημερώστε στο Firefox 139+ ή χρησιμοποιήστε το Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Το πρόγραμμα περιήγησής σας δεν υποστηρίζει τα API που απαιτούνται για τα γκρουπ καρτελών."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Τα εγγενή γκρουπ ενεργοποιήθηκαν. Μετεγκατάσταση γκρουπ..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Τα εγγενή γκρουπ απενεργοποιήθηκαν. Καθαρισμός..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Μη έγκυρο αρχείο"
+  },
+  "byteSizeBytes": {
+    "message": "$1 byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Επαναφορά γκρουπ καρτελών..."
+  },
+  "migrationTitle": {
+    "message": "Μετεγκατάσταση υβριδικών γκρουπ καρτελών"
+  },
+  "migrationChecking": {
+    "message": "Έλεγχος κατάστασης μετεγκατάστασης..."
+  },
+  "migrationRun": {
+    "message": "Εκτέλεση μετεγκατάστασης τώρα"
+  },
+  "migrationReset": {
+    "message": "Επαναφορά σημαίας μετεγκατάστασης"
+  },
+  "migrationCurrentGroups": {
+    "message": "Τρέχοντα γκρουπ"
+  },
+  "migrationLoadingGroups": {
+    "message": "Φόρτωση γκρουπ..."
+  },
+  "migrationComplete": {
+    "message": "✓ Η μετεγκατάσταση ολοκληρώθηκε - Όλα τα γκρουπ μετεγκαταστάθηκαν στο υβριδικό σύστημα"
+  },
+  "migrationPending": {
+    "message": "⚠ Η μετεγκατάσταση εκκρεμεί - Τα γκρουπ δεν έχουν μετεγκατασταθεί ακόμα"
+  },
+  "migrationStatusError": {
+    "message": "Σφάλμα κατά τον έλεγχο της κατάστασης μετεγκατάστασης: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Δεν βρέθηκαν γκρουπ στο τρέχον παράθυρο"
+  },
+  "migrationGroupsError": {
+    "message": "Σφάλμα κατά τη φόρτωση των γκρουπ: $1"
+  },
+  "migrationRunning": {
+    "message": "Εκτέλεση μετεγκατάστασης..."
+  },
+  "migrationSucceeded": {
+    "message": "Η μετεγκατάσταση ολοκληρώθηκε με επιτυχία!"
+  },
+  "migrationFailed": {
+    "message": "Η μετεγκατάσταση απέτυχε: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Καμία απάντηση"
+  },
+  "migrationRunError": {
+    "message": "Σφάλμα μετεγκατάστασης: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Επαναφορά της σημαίας μετεγκατάστασης; Έτσι θα μπορεί να εκτελεστεί ξανά η μετεγκατάσταση."
+  },
+  "migrationResetSucceeded": {
+    "message": "Η σημαία μετεγκατάστασης επαναφέρθηκε με επιτυχία!"
+  },
+  "migrationResetFailed": {
+    "message": "Η επαναφορά απέτυχε: $1"
+  },
+  "migrationResetError": {
+    "message": "Σφάλμα επαναφοράς: $1"
+  },
+  "migrationGroup": {
+    "message": "Γκρουπ $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Μετεγκαταστάθηκε (εγγενές ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Δεν μετεγκαταστάθηκε"
+  },
+  "migrationGroupStatus": {
+    "message": "Κατάσταση: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Προβολή γκρουπ καρτελών"
+  }
+}

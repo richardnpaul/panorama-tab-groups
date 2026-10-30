@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Thêm nhóm mới"
+  },
+  "freeformButton": {
+    "message": "Bố cục tự do"
+  },
+  "tilingButton": {
+    "message": "Bố cục tự động (xếp ô)"
+  },
+  "settingsButton": {
+    "message": "Cài đặt"
+  },
+  "defaultGroupName": {
+    "message": "Nhóm"
+  },
+  "dragGroup": {
+    "message": "Kéo nhóm"
+  },
+  "closeGroup": {
+    "message": "Đóng nhóm"
+  },
+  "closeGroupWarning": {
+    "message": "Đóng nhóm này sẽ đóng $1 thẻ trong nhóm. Bạn có chắc chắn muốn làm vậy không?"
+  },
+  "editGroup": {
+    "message": "Chỉnh sửa nhóm"
+  },
+  "closeTab": {
+    "message": "Đóng thẻ"
+  },
+  "openNewTab": {
+    "message": "Mở thẻ mới"
+  },
+  "tabCount": {
+    "message": "$1 thẻ"
+  },
+  "searchForTab_placeholder": {
+    "message": "Tìm thẻ..."
+  },
+  "searchForTab_noResults": {
+    "message": "Không tìm thấy thẻ nào"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Phím tắt"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Định dạng của tùy chọn phím tắt được mô tả ở đây."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Cập nhật"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Đặt lại"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Tắt"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Bật"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Bật/tắt chế độ xem nhóm thẻ"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Kích hoạt nhóm thẻ tiếp theo"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Kích hoạt nhóm thẻ trước đó"
+  },
+  "optionsView": {
+    "message": "Chế độ xem"
+  },
+  "optionsViewFreeform": {
+    "message": "Tự do (cổ điển)"
+  },
+  "optionsViewPopup": {
+    "message": "Cửa sổ bật lên"
+  },
+  "optionsTheme": {
+    "message": "Giao diện"
+  },
+  "optionsThemeLight": {
+    "message": "sáng"
+  },
+  "optionsThemeDark": {
+    "message": "tối"
+  },
+  "optionsToolbar": {
+    "message": "Thanh công cụ"
+  },
+  "optionsToolbarPosition": {
+    "message": "Vị trí"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "trên cùng"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "bên phải"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "dưới cùng"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "bên trái"
+  },
+  "optionsBackup": {
+    "message": "Sao lưu"
+  },
+  "optionsBackupImport": {
+    "message": "Nhập"
+  },
+  "optionsBackupImportText": {
+    "message": "Các bản sao lưu được nhập sẽ mở trong cửa sổ mới và không ghi đè lên bất cứ thứ gì.\nBạn cũng có thể nhập bản sao lưu từ tiện ích \"Tab Groups\" cũ."
+  },
+  "optionsBackupExport": {
+    "message": "Xuất"
+  },
+  "optionsBackupExportText": {
+    "message": "Phần này có thể trở nên không cần thiết khi Firefox có thể quản lý phiên một cách đầy đủ."
+  },
+  "optionsBackupExportButton": {
+    "message": "Lưu bản sao lưu"
+  },
+  "optionsStatistics": {
+    "message": "Thống kê"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Số lượng thẻ:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Đang hoạt động: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Kích thước bộ nhớ đệm ảnh thu nhỏ:"
+  },
+  "refreshGroups": {
+    "message": "Làm mới nhóm"
+  },
+  "sendTabToGroup": {
+    "message": "Gửi thẻ đến nhóm"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Người dùng cũng có thể cập nhật phím tắt qua tùy chọn \"Quản lý phím tắt tiện ích mở rộng\" tại about:addons trong Firefox, như được thấy {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "trong video ví dụ"
+  },
+  "optionsThemeAuto": {
+    "message": "Theo hệ thống"
+  },
+  "optionsNativeGroups": {
+    "message": "Nhóm gốc của trình duyệt"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Dùng nhóm thẻ gốc của trình duyệt"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Dùng nhóm thẻ gốc của trình duyệt để sắp xếp trực quan và thu gọn."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Phiên bản trình duyệt này không hỗ trợ nhóm thẻ gốc (cần API ẩn thẻ)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Phiên bản trình duyệt này không hỗ trợ nhóm thẻ gốc. Vui lòng cập nhật lên Firefox 139+ hoặc dùng Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Trình duyệt của bạn không hỗ trợ các API cần thiết cho nhóm thẻ."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Đã bật nhóm gốc. Đang di chuyển các nhóm..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Đã tắt nhóm gốc. Đang dọn dẹp..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Tệp không hợp lệ"
+  },
+  "byteSizeBytes": {
+    "message": "$1 byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Đang khôi phục các nhóm thẻ..."
+  },
+  "migrationTitle": {
+    "message": "Di chuyển nhóm thẻ kết hợp"
+  },
+  "migrationChecking": {
+    "message": "Đang kiểm tra trạng thái di chuyển..."
+  },
+  "migrationRun": {
+    "message": "Chạy di chuyển ngay"
+  },
+  "migrationReset": {
+    "message": "Đặt lại cờ di chuyển"
+  },
+  "migrationCurrentGroups": {
+    "message": "Các nhóm hiện tại"
+  },
+  "migrationLoadingGroups": {
+    "message": "Đang tải các nhóm..."
+  },
+  "migrationComplete": {
+    "message": "✓ Đã hoàn tất di chuyển - Tất cả các nhóm đã được chuyển sang hệ thống kết hợp"
+  },
+  "migrationPending": {
+    "message": "⚠ Đang chờ di chuyển - Các nhóm chưa được di chuyển"
+  },
+  "migrationStatusError": {
+    "message": "Lỗi khi kiểm tra trạng thái di chuyển: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Không tìm thấy nhóm nào trong cửa sổ hiện tại"
+  },
+  "migrationGroupsError": {
+    "message": "Lỗi khi tải các nhóm: $1"
+  },
+  "migrationRunning": {
+    "message": "Đang chạy di chuyển..."
+  },
+  "migrationSucceeded": {
+    "message": "Di chuyển đã hoàn tất thành công!"
+  },
+  "migrationFailed": {
+    "message": "Di chuyển thất bại: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Không có phản hồi"
+  },
+  "migrationRunError": {
+    "message": "Lỗi di chuyển: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Đặt lại cờ di chuyển? Việc này sẽ cho phép chạy di chuyển lại."
+  },
+  "migrationResetSucceeded": {
+    "message": "Đã đặt lại cờ di chuyển thành công!"
+  },
+  "migrationResetFailed": {
+    "message": "Đặt lại thất bại: $1"
+  },
+  "migrationResetError": {
+    "message": "Lỗi đặt lại: $1"
+  },
+  "migrationGroup": {
+    "message": "Nhóm $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Đã di chuyển (ID gốc: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Chưa di chuyển"
+  },
+  "migrationGroupStatus": {
+    "message": "Trạng thái: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Chế độ xem nhóm thẻ"
+  }
+}

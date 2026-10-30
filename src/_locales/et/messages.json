@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Lisa uus rühm"
+  },
+  "freeformButton": {
+    "message": "Vaba paigutus"
+  },
+  "tilingButton": {
+    "message": "Automaatne (paanidega) paigutus"
+  },
+  "settingsButton": {
+    "message": "Seaded"
+  },
+  "defaultGroupName": {
+    "message": "Rühm"
+  },
+  "dragGroup": {
+    "message": "Lohista rühma"
+  },
+  "closeGroup": {
+    "message": "Sulge rühm"
+  },
+  "closeGroupWarning": {
+    "message": "one=Selle rühma sulgemisel suletakse selles olev $1 vaheleht. Kas oled kindel, et tahad seda teha?|other=Selle rühma sulgemisel suletakse selles olevad $1 vahelehte. Kas oled kindel, et tahad seda teha?"
+  },
+  "editGroup": {
+    "message": "Muuda rühma"
+  },
+  "closeTab": {
+    "message": "Sulge vaheleht"
+  },
+  "openNewTab": {
+    "message": "Ava uus vaheleht"
+  },
+  "tabCount": {
+    "message": "one=$1 vaheleht|other=$1 vahelehte"
+  },
+  "searchForTab_placeholder": {
+    "message": "Otsi vahelehte..."
+  },
+  "searchForTab_noResults": {
+    "message": "Vahelehti ei leitud"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Klaviatuuri otseteed"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Otsetee valiku vorming on kirjeldatud siin."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Uuenda"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Lähtesta"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Keela"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Luba"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Lülita vahelehtede rühmade vaade sisse või välja"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktiveeri järgmine vahelehtede rühm"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktiveeri eelmine vahelehtede rühm"
+  },
+  "optionsView": {
+    "message": "Vaade"
+  },
+  "optionsViewFreeform": {
+    "message": "Vaba (klassikaline)"
+  },
+  "optionsViewPopup": {
+    "message": "Hüpikaken"
+  },
+  "optionsTheme": {
+    "message": "Teema"
+  },
+  "optionsThemeLight": {
+    "message": "hele"
+  },
+  "optionsThemeDark": {
+    "message": "tume"
+  },
+  "optionsToolbar": {
+    "message": "Tööriistariba"
+  },
+  "optionsToolbarPosition": {
+    "message": "Asukoht"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "üleval"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "paremal"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "all"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "vasakul"
+  },
+  "optionsBackup": {
+    "message": "Varundus"
+  },
+  "optionsBackupImport": {
+    "message": "Impordi"
+  },
+  "optionsBackupImportText": {
+    "message": "Imporditud varukoopiad avatakse uutes akendes ega kirjuta midagi üle.\nSaad importida varukoopiaid ka vanast lisandmoodulist „Tab Groups“."
+  },
+  "optionsBackupExport": {
+    "message": "Ekspordi"
+  },
+  "optionsBackupExportText": {
+    "message": "See jaotis võib muutuda tarbetuks, kui Firefoxis on võimalik korralik seansihaldus."
+  },
+  "optionsBackupExportButton": {
+    "message": "Salvesta varukoopia"
+  },
+  "optionsStatistics": {
+    "message": "Statistika"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Vahelehtede arv:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktiivsed: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Pisipiltide vahemälu suurus:"
+  },
+  "refreshGroups": {
+    "message": "Värskenda rühmi"
+  },
+  "sendTabToGroup": {
+    "message": "Saada vaheleht rühma"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Kasutajad saavad otseteid uuendada ka Firefoxi lehel about:addons valiku „Halda laienduste otseteid“ kaudu, nagu on näha {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "näitevideos"
+  },
+  "optionsThemeAuto": {
+    "message": "Järgi süsteemi"
+  },
+  "optionsNativeGroups": {
+    "message": "Brauseri enda rühmad"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Kasuta brauseri enda vahelehtede rühmi"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Kasuta brauseri enda vahelehtede rühmi visuaalseks korraldamiseks ja ahendamiseks."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Brauseri enda vahelehtede rühmi selles brauseri versioonis ei toetata (nõuab vahelehtede peitmise API-t)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Brauseri enda vahelehtede rühmi selles brauseri versioonis ei toetata. Uuenda Firefox 139+ peale või kasuta Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Sinu brauser ei toeta vahelehtede rühmade jaoks vajalikke API-sid."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Brauseri enda rühmad on lubatud. Rühmi viiakse üle..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Brauseri enda rühmad on keelatud. Koristan..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Vigane fail"
+  },
+  "byteSizeBytes": {
+    "message": "$1 baiti"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Vahelehtede rühmi taastatakse..."
+  },
+  "migrationTitle": {
+    "message": "Hübriidsete vahelehtede rühmade üleviimine"
+  },
+  "migrationChecking": {
+    "message": "Kontrollin üleviimise olekut..."
+  },
+  "migrationRun": {
+    "message": "Käivita üleviimine kohe"
+  },
+  "migrationReset": {
+    "message": "Lähtesta üleviimise lipp"
+  },
+  "migrationCurrentGroups": {
+    "message": "Praegused rühmad"
+  },
+  "migrationLoadingGroups": {
+    "message": "Rühmi laaditakse..."
+  },
+  "migrationComplete": {
+    "message": "✓ Üleviimine lõpetatud - kõik rühmad on viidud üle hübriidsüsteemi"
+  },
+  "migrationPending": {
+    "message": "⚠ Üleviimine ootel - rühmi pole veel üle viidud"
+  },
+  "migrationStatusError": {
+    "message": "Viga üleviimise oleku kontrollimisel: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Praeguses aknas ei leitud ühtegi rühma"
+  },
+  "migrationGroupsError": {
+    "message": "Viga rühmade laadimisel: $1"
+  },
+  "migrationRunning": {
+    "message": "Üleviimine käib..."
+  },
+  "migrationSucceeded": {
+    "message": "Üleviimine õnnestus!"
+  },
+  "migrationFailed": {
+    "message": "Üleviimine ebaõnnestus: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Vastust ei tulnud"
+  },
+  "migrationRunError": {
+    "message": "Üleviimise viga: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Kas lähtestada üleviimise lipp? See lubab üleviimise uuesti käivitada."
+  },
+  "migrationResetSucceeded": {
+    "message": "Üleviimise lipp lähtestati!"
+  },
+  "migrationResetFailed": {
+    "message": "Lähtestamine ebaõnnestus: $1"
+  },
+  "migrationResetError": {
+    "message": "Lähtestamise viga: $1"
+  },
+  "migrationGroup": {
+    "message": "Rühm $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Üle viidud (brauseri ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Üle viimata"
+  },
+  "migrationGroupStatus": {
+    "message": "Olek: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vahelehtede rühmade vaade"
+  }
+}

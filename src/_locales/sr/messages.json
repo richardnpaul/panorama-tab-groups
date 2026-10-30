@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Додај нову групу"
+  },
+  "freeformButton": {
+    "message": "Слободан распоред"
+  },
+  "tilingButton": {
+    "message": "Аутоматски распоред (плочице)"
+  },
+  "settingsButton": {
+    "message": "Подешавања"
+  },
+  "defaultGroupName": {
+    "message": "Грп."
+  },
+  "dragGroup": {
+    "message": "Превуци групу"
+  },
+  "closeGroup": {
+    "message": "Затвори групу"
+  },
+  "closeGroupWarning": {
+    "message": "one=Затварањем ове групе затвориће се $1 картица у њој. Да ли сте сигурни да то желите?|few=Затварањем ове групе затвориће се $1 картице у њој. Да ли сте сигурни да то желите?|other=Затварањем ове групе затвориће се $1 картица у њој. Да ли сте сигурни да то желите?"
+  },
+  "editGroup": {
+    "message": "Измени групу"
+  },
+  "closeTab": {
+    "message": "Затвори картицу"
+  },
+  "openNewTab": {
+    "message": "Отвори нову картицу"
+  },
+  "tabCount": {
+    "message": "one=$1 картица|few=$1 картице|other=$1 картица"
+  },
+  "searchForTab_placeholder": {
+    "message": "Претражи картице..."
+  },
+  "searchForTab_noResults": {
+    "message": "Нема пронађених картица"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Пречице на тастатури"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Формат опције пречице је описан овде."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Ажурирај"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Врати на подразумевано"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Онемогући"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Омогући"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Укључи или искључи приказ група картица"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Активирај следећу групу картица"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Активирај претходну групу картица"
+  },
+  "optionsView": {
+    "message": "Приказ"
+  },
+  "optionsViewFreeform": {
+    "message": "Слободан (класичан)"
+  },
+  "optionsViewPopup": {
+    "message": "Искачући прозор"
+  },
+  "optionsTheme": {
+    "message": "Тема"
+  },
+  "optionsThemeLight": {
+    "message": "светла"
+  },
+  "optionsThemeDark": {
+    "message": "тамна"
+  },
+  "optionsToolbar": {
+    "message": "Трака са алаткама"
+  },
+  "optionsToolbarPosition": {
+    "message": "Положај"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "горе"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "десно"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "доле"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "лево"
+  },
+  "optionsBackup": {
+    "message": "Резервна копија"
+  },
+  "optionsBackupImport": {
+    "message": "Увоз"
+  },
+  "optionsBackupImportText": {
+    "message": "Увезене резервне копије отварају се у новим прозорима и ништа не преписују.\nМожете увести и резервне копије из старог додатка „Tab Groups“."
+  },
+  "optionsBackupExport": {
+    "message": "Извоз"
+  },
+  "optionsBackupExportText": {
+    "message": "Овај одељак може постати непотребан када у Firefox-у буде могуће исправно управљање сесијама."
+  },
+  "optionsBackupExportButton": {
+    "message": "Сачувај резервну копију"
+  },
+  "optionsStatistics": {
+    "message": "Статистика"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Број картица:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Активне: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Величина кеша сличица:"
+  },
+  "refreshGroups": {
+    "message": "Освежи групе"
+  },
+  "sendTabToGroup": {
+    "message": "Пошаљи картицу у групу"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Корисници могу ажурирати пречице и преко опције „Управљање пречицама проширења“ на about:addons у Firefox-у, као што се види {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "у примеру видео снимка"
+  },
+  "optionsThemeAuto": {
+    "message": "Прати систем"
+  },
+  "optionsNativeGroups": {
+    "message": "Изворне групе прегледача"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Користи изворне групе картица прегледача"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Користи изворне групе картица прегледача за визуелно организовање и скупљање."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Изворне групе картица нису подржане у овој верзији прегледача (потребан је API за скривање картица)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Изворне групе картица нису подржане у овој верзији прегледача. Ажурирајте на Firefox 139+ или користите Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Ваш прегледач не подржава API-је потребне за групе картица."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Изворне групе су омогућене. Групе се мигрирају..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Изворне групе су онемогућене. Чишћење..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Неважећа датотека"
+  },
+  "byteSizeBytes": {
+    "message": "$1 бајтова"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Враћање група картица..."
+  },
+  "migrationTitle": {
+    "message": "Миграција хибридних група картица"
+  },
+  "migrationChecking": {
+    "message": "Провера стања миграције..."
+  },
+  "migrationRun": {
+    "message": "Покрени миграцију одмах"
+  },
+  "migrationReset": {
+    "message": "Врати заставицу миграције на подразумевано"
+  },
+  "migrationCurrentGroups": {
+    "message": "Тренутне групе"
+  },
+  "migrationLoadingGroups": {
+    "message": "Учитавање група..."
+  },
+  "migrationComplete": {
+    "message": "✓ Миграција је завршена - Све групе су мигриране у хибридни систем"
+  },
+  "migrationPending": {
+    "message": "⚠ Миграција је на чекању - Групе још нису мигриране"
+  },
+  "migrationStatusError": {
+    "message": "Грешка при провери стања миграције: $1"
+  },
+  "migrationNoGroups": {
+    "message": "У тренутном прозору нису пронађене групе"
+  },
+  "migrationGroupsError": {
+    "message": "Грешка при учитавању група: $1"
+  },
+  "migrationRunning": {
+    "message": "Миграција је у току..."
+  },
+  "migrationSucceeded": {
+    "message": "Миграција је успешно завршена!"
+  },
+  "migrationFailed": {
+    "message": "Миграција није успела: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Нема одговора"
+  },
+  "migrationRunError": {
+    "message": "Грешка миграције: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Желите ли да вратите заставицу миграције на подразумевано? Тиме ће миграција моћи поново да се покрене."
+  },
+  "migrationResetSucceeded": {
+    "message": "Заставица миграције је успешно враћена на подразумевано!"
+  },
+  "migrationResetFailed": {
+    "message": "Враћање на подразумевано није успело: $1"
+  },
+  "migrationResetError": {
+    "message": "Грешка при враћању на подразумевано: $1"
+  },
+  "migrationGroup": {
+    "message": "Група $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Мигрирано (изворни ИД: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Није мигрирано"
+  },
+  "migrationGroupStatus": {
+    "message": "Стање: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Приказ група картица"
+  }
+}

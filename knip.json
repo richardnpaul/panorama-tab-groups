@@ -5,6 +5,7 @@
     ".": {
       "entry": ["tests/unit/scripts/fixtures/*.ts"]
     },
-    "tools/adbkit-stub": {}
+    "tools/adbkit-stub": {},
+    "tools/deepmerge-patched": {}
   }
 }

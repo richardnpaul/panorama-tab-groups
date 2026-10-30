@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Pievienot jaunu grupu"
+  },
+  "freeformButton": {
+    "message": "Brīvs izkārtojums"
+  },
+  "tilingButton": {
+    "message": "Automātisks (flīžu) izkārtojums"
+  },
+  "settingsButton": {
+    "message": "Iestatījumi"
+  },
+  "defaultGroupName": {
+    "message": "Grp."
+  },
+  "dragGroup": {
+    "message": "Vilkt grupu"
+  },
+  "closeGroup": {
+    "message": "Aizvērt grupu"
+  },
+  "closeGroupWarning": {
+    "message": "zero=Aizverot šo grupu, tiks aizvērtas $1 tajā esošās cilnes. Vai tiešām vēlaties to darīt?|one=Aizverot šo grupu, tiks aizvērta $1 tajā esošā cilne. Vai tiešām vēlaties to darīt?|other=Aizverot šo grupu, tiks aizvērtas $1 tajā esošās cilnes. Vai tiešām vēlaties to darīt?"
+  },
+  "editGroup": {
+    "message": "Rediģēt grupu"
+  },
+  "closeTab": {
+    "message": "Aizvērt cilni"
+  },
+  "openNewTab": {
+    "message": "Atvērt jaunu cilni"
+  },
+  "tabCount": {
+    "message": "zero=$1 cilņu|one=$1 cilne|other=$1 cilnes"
+  },
+  "searchForTab_placeholder": {
+    "message": "Meklēt cilni..."
+  },
+  "searchForTab_noResults": {
+    "message": "Cilnes nav atrastas"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Tastatūras īsinājumtaustiņi"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Īsinājumtaustiņa iestatījuma formāts ir aprakstīts šeit."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Atjaunināt"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Atiestatīt"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Atspējot"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Iespējot"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Pārslēgt cilņu grupu skatu"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktivizēt nākamo cilņu grupu"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktivizēt iepriekšējo cilņu grupu"
+  },
+  "optionsView": {
+    "message": "Skats"
+  },
+  "optionsViewFreeform": {
+    "message": "Brīvs (klasisks)"
+  },
+  "optionsViewPopup": {
+    "message": "Uznirstošais logs"
+  },
+  "optionsTheme": {
+    "message": "Motīvs"
+  },
+  "optionsThemeLight": {
+    "message": "gaišs"
+  },
+  "optionsThemeDark": {
+    "message": "tumšs"
+  },
+  "optionsToolbar": {
+    "message": "Rīkjosla"
+  },
+  "optionsToolbarPosition": {
+    "message": "Novietojums"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "augšā"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "pa labi"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "apakšā"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "pa kreisi"
+  },
+  "optionsBackup": {
+    "message": "Dublējums"
+  },
+  "optionsBackupImport": {
+    "message": "Importēt"
+  },
+  "optionsBackupImportText": {
+    "message": "Importētie dublējumi tiks atvērti jaunos logos un neko nepārrakstīs.\nVarat importēt arī dublējumus no vecā papildinājuma “Tab Groups”."
+  },
+  "optionsBackupExport": {
+    "message": "Eksportēt"
+  },
+  "optionsBackupExportText": {
+    "message": "Šī sadaļa var kļūt nevajadzīga, kad Firefox būs iespējama pienācīga sesiju pārvaldība."
+  },
+  "optionsBackupExportButton": {
+    "message": "Saglabāt dublējumu"
+  },
+  "optionsStatistics": {
+    "message": "Statistika"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Cilņu skaits:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktīvās: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Sīktēlu kešatmiņas izmērs:"
+  },
+  "refreshGroups": {
+    "message": "Atsvaidzināt grupas"
+  },
+  "sendTabToGroup": {
+    "message": "Nosūtīt cilni uz grupu"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Lietotāji īsinājumtaustiņus var atjaunināt arī ar opciju “Pārvaldīt paplašinājumu īsinājumtaustiņus” Firefox lapā about:addons, kā redzams {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "piemēra videoklipā"
+  },
+  "optionsThemeAuto": {
+    "message": "Sekot sistēmai"
+  },
+  "optionsNativeGroups": {
+    "message": "Pārlūka pašu grupas"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Izmantot pārlūka pašu cilņu grupas"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Izmantot pārlūka pašu cilņu grupas vizuālai organizēšanai un sakļaušanai."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Pārlūka pašu cilņu grupas šajā pārlūka versijā netiek atbalstītas (nepieciešama cilņu slēpšanas API)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Pārlūka pašu cilņu grupas šajā pārlūka versijā netiek atbalstītas. Lūdzu, atjauniniet uz Firefox 139+ vai izmantojiet Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Jūsu pārlūks neatbalsta cilņu grupām nepieciešamās API."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Pārlūka pašu grupas iespējotas. Grupas tiek pārvietotas..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Pārlūka pašu grupas atspējotas. Notiek tīrīšana..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Nederīga datne"
+  },
+  "byteSizeBytes": {
+    "message": "$1 baiti"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Notiek cilņu grupu atjaunošana..."
+  },
+  "migrationTitle": {
+    "message": "Hibrīdo cilņu grupu migrācija"
+  },
+  "migrationChecking": {
+    "message": "Notiek migrācijas statusa pārbaude..."
+  },
+  "migrationRun": {
+    "message": "Palaist migrāciju tūlīt"
+  },
+  "migrationReset": {
+    "message": "Atiestatīt migrācijas karogu"
+  },
+  "migrationCurrentGroups": {
+    "message": "Pašreizējās grupas"
+  },
+  "migrationLoadingGroups": {
+    "message": "Notiek grupu ielāde..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migrācija pabeigta - visas grupas ir pārvietotas uz hibrīdo sistēmu"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrācija gaida - grupas vēl nav pārvietotas"
+  },
+  "migrationStatusError": {
+    "message": "Kļūda, pārbaudot migrācijas statusu: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Pašreizējā logā grupas nav atrastas"
+  },
+  "migrationGroupsError": {
+    "message": "Kļūda, ielādējot grupas: $1"
+  },
+  "migrationRunning": {
+    "message": "Notiek migrācija..."
+  },
+  "migrationSucceeded": {
+    "message": "Migrācija veiksmīgi pabeigta!"
+  },
+  "migrationFailed": {
+    "message": "Migrācija neizdevās: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Nav atbildes"
+  },
+  "migrationRunError": {
+    "message": "Migrācijas kļūda: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Vai atiestatīt migrācijas karogu? Tādējādi migrāciju varēs palaist vēlreiz."
+  },
+  "migrationResetSucceeded": {
+    "message": "Migrācijas karogs veiksmīgi atiestatīts!"
+  },
+  "migrationResetFailed": {
+    "message": "Atiestatīšana neizdevās: $1"
+  },
+  "migrationResetError": {
+    "message": "Atiestatīšanas kļūda: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupa $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Pārvietota (pašu ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Nav pārvietota"
+  },
+  "migrationGroupStatus": {
+    "message": "Statuss: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Cilņu grupu skats"
+  }
+}

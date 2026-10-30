@@ -15,6 +15,7 @@ export default {
   mutate: only ?? [
     'scripts/**/*.ts',
     'tools/adbkit-stub/index.js',
+    'tools/deepmerge-patched/index.js',
     'tools/oxlint/**/*.ts',
     'src/**/*.ts',
   ],

@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Yeni qrup əlavə et"
+  },
+  "freeformButton": {
+    "message": "Sərbəst düzülüş"
+  },
+  "tilingButton": {
+    "message": "Avtomatik (kafel) düzülüş"
+  },
+  "settingsButton": {
+    "message": "Ayarlar"
+  },
+  "defaultGroupName": {
+    "message": "Qrp"
+  },
+  "dragGroup": {
+    "message": "Qrupu sürüşdür"
+  },
+  "closeGroup": {
+    "message": "Qrupu bağla"
+  },
+  "closeGroupWarning": {
+    "message": "one=Bu qrupu bağlamaq içindəki $1 vərəqi bağlayacaq. Bunu etmək istədiyinizə əminsiniz?|other=Bu qrupu bağlamaq içindəki $1 vərəqi bağlayacaq. Bunu etmək istədiyinizə əminsiniz?"
+  },
+  "editGroup": {
+    "message": "Qrupu redaktə et"
+  },
+  "closeTab": {
+    "message": "Vərəqi bağla"
+  },
+  "openNewTab": {
+    "message": "Yeni vərəq aç"
+  },
+  "tabCount": {
+    "message": "one=$1 vərəq|other=$1 vərəq"
+  },
+  "searchForTab_placeholder": {
+    "message": "Vərəq axtar..."
+  },
+  "searchForTab_noResults": {
+    "message": "Heç bir vərəq tapılmadı"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Klaviatura qısayolları"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Qısayol seçiminin formatı burada izah olunub."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Yenilə"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Sıfırla"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Söndür"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Yandır"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Vərəq qrupları görünüşünü dəyiş"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Növbəti vərəq qrupunu aktivləşdir"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Əvvəlki vərəq qrupunu aktivləşdir"
+  },
+  "optionsView": {
+    "message": "Görünüş"
+  },
+  "optionsViewFreeform": {
+    "message": "Sərbəst (klassik)"
+  },
+  "optionsViewPopup": {
+    "message": "Pop-up"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "açıq"
+  },
+  "optionsThemeDark": {
+    "message": "tünd"
+  },
+  "optionsToolbar": {
+    "message": "Alətlər paneli"
+  },
+  "optionsToolbarPosition": {
+    "message": "Mövqe"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "yuxarı"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "sağ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "aşağı"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "sol"
+  },
+  "optionsBackup": {
+    "message": "Ehtiyat nüsxə"
+  },
+  "optionsBackupImport": {
+    "message": "İdxal et"
+  },
+  "optionsBackupImportText": {
+    "message": "İdxal edilmiş ehtiyat nüsxələr yeni pəncərələrdə açılacaq və heç nəyin üzərinə yazmayacaq.\nEyni zamanda köhnə “Tab Groups” əlavəsindən ehtiyat nüsxələri idxal edə bilərsiniz."
+  },
+  "optionsBackupExport": {
+    "message": "İxrac et"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox-da düzgün sessiya idarəetməsi mümkün olduqda bu bölmə lazımsız ola bilər."
+  },
+  "optionsBackupExportButton": {
+    "message": "Ehtiyat nüsxəni saxla"
+  },
+  "optionsStatistics": {
+    "message": "Statistika"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Vərəqlərin sayı:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktiv: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Miniatür keşinin ölçüsü:"
+  },
+  "refreshGroups": {
+    "message": "Qrupları yenilə"
+  },
+  "sendTabToGroup": {
+    "message": "Vərəqi qrupa göndər"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "İstifadəçilər Firefox-da about:addons səhifəsindəki “Əlavə qısayollarını idarə et” seçimi ilə də qısayolları yeniləyə bilər, {link} göstərildiyi kimi."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "nümunə videoda"
+  },
+  "optionsThemeAuto": {
+    "message": "Sistemə uyğun"
+  },
+  "optionsNativeGroups": {
+    "message": "Brauzerin doğma qrupları"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Brauzerin doğma vərəq qruplarından istifadə et"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Vizual təşkil və yığcamlaşdırma üçün brauzerin doğma vərəq qruplarından istifadə et."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Doğma vərəq qrupları bu brauzer versiyasında dəstəklənmir (vərəqləri gizlətmə API-si tələb olunur)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Doğma vərəq qrupları bu brauzer versiyasında dəstəklənmir. Zəhmət olmasa Firefox 139+ versiyasına yeniləyin və ya Chrome 89+ istifadə edin."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Brauzeriniz vərəq qrupları üçün lazım olan API-ləri dəstəkləmir."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Doğma qruplar aktivdir. Qruplar köçürülür..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Doğma qruplar deaktivdir. Təmizlənir..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Yararsız fayl"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bayt"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Vərəq qrupları bərpa olunur..."
+  },
+  "migrationTitle": {
+    "message": "Hibrid vərəq qruplarının köçürülməsi"
+  },
+  "migrationChecking": {
+    "message": "Köçürmə vəziyyəti yoxlanılır..."
+  },
+  "migrationRun": {
+    "message": "Köçürməni indi işə sal"
+  },
+  "migrationReset": {
+    "message": "Köçürmə bayrağını sıfırla"
+  },
+  "migrationCurrentGroups": {
+    "message": "Cari qruplar"
+  },
+  "migrationLoadingGroups": {
+    "message": "Qruplar yüklənir..."
+  },
+  "migrationComplete": {
+    "message": "✓ Köçürmə tamamlandı - Bütün qruplar hibrid sistemə köçürüldü"
+  },
+  "migrationPending": {
+    "message": "⚠ Köçürmə gözləyir - Qruplar hələ köçürülməyib"
+  },
+  "migrationStatusError": {
+    "message": "Köçürmə vəziyyəti yoxlanarkən xəta: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Cari pəncərədə qrup tapılmadı"
+  },
+  "migrationGroupsError": {
+    "message": "Qruplar yüklənərkən xəta: $1"
+  },
+  "migrationRunning": {
+    "message": "Köçürmə icra olunur..."
+  },
+  "migrationSucceeded": {
+    "message": "Köçürmə uğurla tamamlandı!"
+  },
+  "migrationFailed": {
+    "message": "Köçürmə uğursuz oldu: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Cavab yoxdur"
+  },
+  "migrationRunError": {
+    "message": "Köçürmə xətası: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Köçürmə bayrağı sıfırlansın? Bu, köçürməni yenidən işə salmağa imkan verəcək."
+  },
+  "migrationResetSucceeded": {
+    "message": "Köçürmə bayrağı uğurla sıfırlandı!"
+  },
+  "migrationResetFailed": {
+    "message": "Sıfırlama uğursuz oldu: $1"
+  },
+  "migrationResetError": {
+    "message": "Sıfırlama xətası: $1"
+  },
+  "migrationGroup": {
+    "message": "Qrup $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Köçürüldü (doğma ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Köçürülməyib"
+  },
+  "migrationGroupStatus": {
+    "message": "Vəziyyət: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vərəq qrupları görünüşü"
+  }
+}

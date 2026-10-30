@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Yangi guruh qoʻshish"
+  },
+  "freeformButton": {
+    "message": "Erkin joylashuv"
+  },
+  "tilingButton": {
+    "message": "Avtomatik (plitkali) joylashuv"
+  },
+  "settingsButton": {
+    "message": "Sozlamalar"
+  },
+  "defaultGroupName": {
+    "message": "Gur."
+  },
+  "dragGroup": {
+    "message": "Guruhni surish"
+  },
+  "closeGroup": {
+    "message": "Guruhni yopish"
+  },
+  "closeGroupWarning": {
+    "message": "one=Bu guruhni yopsangiz, undagi $1 ta varaq yopiladi. Buni bajarishga ishonchingiz komilmi?|other=Bu guruhni yopsangiz, undagi $1 ta varaq yopiladi. Buni bajarishga ishonchingiz komilmi?"
+  },
+  "editGroup": {
+    "message": "Guruhni tahrirlash"
+  },
+  "closeTab": {
+    "message": "Varaqni yopish"
+  },
+  "openNewTab": {
+    "message": "Yangi varaq ochish"
+  },
+  "tabCount": {
+    "message": "one=$1 ta varaq|other=$1 ta varaq"
+  },
+  "searchForTab_placeholder": {
+    "message": "Varaq qidirish..."
+  },
+  "searchForTab_noResults": {
+    "message": "Hech qanday varaq topilmadi"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Klaviatura tezkor tugmalari"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Tezkor tugma sozlamasining formati bu yerda tushuntirilgan."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Yangilash"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Asliga qaytarish"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Oʻchirish"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Yoqish"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Varaq guruhlari koʻrinishini almashtirish"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Keyingi varaq guruhini faollashtirish"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Oldingi varaq guruhini faollashtirish"
+  },
+  "optionsView": {
+    "message": "Koʻrinish"
+  },
+  "optionsViewFreeform": {
+    "message": "Erkin (klassik)"
+  },
+  "optionsViewPopup": {
+    "message": "Qalqib chiquvchi oyna"
+  },
+  "optionsTheme": {
+    "message": "Mavzu"
+  },
+  "optionsThemeLight": {
+    "message": "yorugʻ"
+  },
+  "optionsThemeDark": {
+    "message": "qorongʻi"
+  },
+  "optionsToolbar": {
+    "message": "Asboblar paneli"
+  },
+  "optionsToolbarPosition": {
+    "message": "Joylashuvi"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "tepada"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "oʻngda"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "pastda"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "chapda"
+  },
+  "optionsBackup": {
+    "message": "Zaxira nusxa"
+  },
+  "optionsBackupImport": {
+    "message": "Import qilish"
+  },
+  "optionsBackupImportText": {
+    "message": "Import qilingan zaxira nusxalar yangi oynalarda ochiladi va hech narsani ustidan yozmaydi.\nShuningdek, eski \"Tab Groups\" qoʻshimchasidan zaxira nusxalarni import qilishingiz mumkin."
+  },
+  "optionsBackupExport": {
+    "message": "Eksport qilish"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefoxda seanslarni toʻgʻri boshqarish imkoni boʻlganda bu boʻlim keraksiz boʻlib qolishi mumkin."
+  },
+  "optionsBackupExportButton": {
+    "message": "Zaxira nusxani saqlash"
+  },
+  "optionsStatistics": {
+    "message": "Statistika"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Varaqlar soni:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Faol: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Eskiz keshining hajmi:"
+  },
+  "refreshGroups": {
+    "message": "Guruhlarni yangilash"
+  },
+  "sendTabToGroup": {
+    "message": "Varaqni guruhga yuborish"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Foydalanuvchilar tezkor tugmalarni Firefoxdagi about:addons sahifasida \"Kengaytma tezkor tugmalarini boshqarish\" orqali ham yangilashi mumkin, {link} koʻrsatilganidek."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "namunaviy videoda"
+  },
+  "optionsThemeAuto": {
+    "message": "Tizimga mos"
+  },
+  "optionsNativeGroups": {
+    "message": "Brauzerning oʻz guruhlari"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Brauzerning oʻz varaq guruhlaridan foydalanish"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Koʻrinishni tartiblash va yigʻish uchun brauzerning oʻz varaq guruhlaridan foydalanish."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Brauzerning bu versiyasida oʻz varaq guruhlari qoʻllab-quvvatlanmaydi (varaqlarni yashirish API si kerak)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Brauzerning bu versiyasida oʻz varaq guruhlari qoʻllab-quvvatlanmaydi. Iltimos, Firefox 139+ ga yangilang yoki Chrome 89+ dan foydalaning."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Brauzeringiz varaq guruhlari uchun zarur API larni qoʻllab-quvvatlamaydi."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Oʻz guruhlari yoqildi. Guruhlar koʻchirilmoqda..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Oʻz guruhlari oʻchirildi. Tozalanmoqda..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Yaroqsiz fayl"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bayt"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Varaq guruhlari tiklanmoqda..."
+  },
+  "migrationTitle": {
+    "message": "Gibrid varaq guruhlarini koʻchirish"
+  },
+  "migrationChecking": {
+    "message": "Koʻchirish holati tekshirilmoqda..."
+  },
+  "migrationRun": {
+    "message": "Koʻchirishni hozir ishga tushirish"
+  },
+  "migrationReset": {
+    "message": "Koʻchirish bayrogʻini asliga qaytarish"
+  },
+  "migrationCurrentGroups": {
+    "message": "Joriy guruhlar"
+  },
+  "migrationLoadingGroups": {
+    "message": "Guruhlar yuklanmoqda..."
+  },
+  "migrationComplete": {
+    "message": "✓ Koʻchirish yakunlandi - Barcha guruhlar gibrid tizimga koʻchirildi"
+  },
+  "migrationPending": {
+    "message": "⚠ Koʻchirish kutilmoqda - Guruhlar hali koʻchirilmagan"
+  },
+  "migrationStatusError": {
+    "message": "Koʻchirish holatini tekshirishda xato: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Joriy oynada guruhlar topilmadi"
+  },
+  "migrationGroupsError": {
+    "message": "Guruhlarni yuklashda xato: $1"
+  },
+  "migrationRunning": {
+    "message": "Koʻchirish bajarilmoqda..."
+  },
+  "migrationSucceeded": {
+    "message": "Koʻchirish muvaffaqiyatli yakunlandi!"
+  },
+  "migrationFailed": {
+    "message": "Koʻchirish amalga oshmadi: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Javob yoʻq"
+  },
+  "migrationRunError": {
+    "message": "Koʻchirish xatosi: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Koʻchirish bayrogʻi asliga qaytarilsinmi? Bu koʻchirishni qayta ishga tushirish imkonini beradi."
+  },
+  "migrationResetSucceeded": {
+    "message": "Koʻchirish bayrogʻi muvaffaqiyatli asliga qaytarildi!"
+  },
+  "migrationResetFailed": {
+    "message": "Asliga qaytarish amalga oshmadi: $1"
+  },
+  "migrationResetError": {
+    "message": "Asliga qaytarish xatosi: $1"
+  },
+  "migrationGroup": {
+    "message": "Guruh $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Koʻchirildi (oʻz ID si: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Koʻchirilmagan"
+  },
+  "migrationGroupStatus": {
+    "message": "Holati: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Varaq guruhlari koʻrinishi"
+  }
+}

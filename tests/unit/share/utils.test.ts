@@ -5,6 +5,7 @@ import {
   getPluralForm,
   newElement,
 } from '../../../src/js/share/utils.js';
+import { markedMessage } from '../../support/messages.js';
 
 const getMessage = vi.fn<(messageName: string) => string>();
 const i18n = { getMessage };
@@ -77,172 +78,146 @@ describe('share/utils.ts', () => {
       getMessage.mockReset();
     });
 
-    const withRule = (rule: string) => {
-      getMessage.mockReturnValue(rule);
+    /** The browser says it is set to this language */
+    const inLanguage = (locale: string) => {
+      getMessage.mockReturnValue(locale);
     };
 
-    it('asks the translations for the plural rule of the current language', () => {
-      withRule('1');
+    it('asks the browser for the language it is set to', () => {
+      inLanguage('en');
 
-      getPluralForm(i18n, 1, 'a|b');
+      getPluralForm(i18n, 1, 'one=a|other=b');
 
       expect(getMessage).toHaveBeenCalledTimes(1);
-      expect(getMessage).toHaveBeenCalledWith('pluralRule');
+      expect(getMessage).toHaveBeenCalledWith('@@ui_locale');
     });
 
-    it.each(['0', '1', '2', '7', '9', '999', ''])(
-      'returns a string with a single form unchanged under rule %s',
-      (rule) => {
-        withRule(rule);
+    it.each(['en', 'ru', 'ja', ''])(
+      'returns a message with a single form unchanged in %j',
+      (locale) => {
+        inLanguage(locale);
 
         expect(getPluralForm(i18n, 5, 'single form')).toBe('single form');
       },
     );
 
     it('uses a count of 1 and an empty string by default', () => {
-      withRule('1');
+      inLanguage('en');
 
       expect(getPluralForm(i18n)).toBe('');
-      expect(getPluralForm(i18n, undefined, 'one|other')).toBe('one');
+      expect(getPluralForm(i18n, undefined, 'one=a|other=b')).toBe('a');
     });
 
     it('accepts the count as a string', () => {
-      withRule('1');
+      inLanguage('en');
 
-      expect(getPluralForm(i18n, '1', 'one|other')).toBe('one');
-      expect(getPluralForm(i18n, '2', 'one|other')).toBe('other');
+      expect(getPluralForm(i18n, '1', 'one=a|other=b')).toBe('a');
+      expect(getPluralForm(i18n, '2', 'one=a|other=b')).toBe('b');
     });
 
-    it('treats a count that is not a number as not matching', () => {
-      withRule('1');
+    it('treats a count that is not a number as the form for the rest', () => {
+      inLanguage('en');
 
-      expect(getPluralForm(i18n, 'abc', 'one|other')).toBe('other');
+      expect(getPluralForm(i18n, 'abc', 'one=a|other=b')).toBe('b');
     });
 
-    it('returns the whole string for an unknown rule', () => {
-      withRule('999');
+    it.each(['', '@@ui_locale', 'not a language'])(
+      'counts as English does when the browser gives %j',
+      (locale) => {
+        inLanguage(locale);
 
-      expect(getPluralForm(i18n, 5, 'form1|form2')).toBe('form1|form2');
+        expect(getPluralForm(i18n, 1, 'one=a|other=b')).toBe('a');
+        expect(getPluralForm(i18n, 2, 'one=a|other=b')).toBe('b');
+      },
+    );
+
+    it('takes the language the way the browser writes it, with an underscore for a region', () => {
+      inLanguage('pt_BR');
+
+      // Brazilian Portuguese counts 0 as one, as French does
+      expect(getPluralForm(i18n, 0, 'one=a|other=b')).toBe('a');
     });
 
-    it('returns the whole string when the rule is not a number', () => {
-      withRule('');
-
-      expect(getPluralForm(i18n, 5, 'form1|form2')).toBe('form1|form2');
-    });
-
-    it('rule 0 always uses the first form', () => {
-      withRule('0');
-
-      expect(getPluralForm(i18n, 0, 'form1|form2')).toBe('form1');
-      expect(getPluralForm(i18n, 5, 'form1|form2')).toBe('form1');
-    });
-
+    // The forms of a language, from its table of forms, for the counts that tell them apart
     it.each([
-      [0, 'other'],
-      [1, 'one'],
-      [2, 'other'],
-      [5, 'other'],
-      [-1, 'other'],
-    ])('rule 1: %s is %s', (count, form) => {
-      withRule('1');
+      ['en', 1, 'one'],
+      ['en', 0, 'other'],
+      ['en', 2, 'other'],
+      ['fr', 0, 'one'],
+      ['fr', 1, 'one'],
+      ['fr', 2, 'other'],
+      ['ru', 1, 'one'],
+      ['ru', 21, 'one'],
+      ['ru', 2, 'few'],
+      ['ru', 24, 'few'],
+      ['ru', 5, 'many'],
+      ['ru', 11, 'many'],
+      ['ru', 12, 'many'],
+      ['ru', 0, 'many'],
+      ['pl', 1, 'one'],
+      ['pl', 3, 'few'],
+      ['pl', 5, 'many'],
+      ['pl', 22, 'few'],
+      ['ar', 0, 'zero'],
+      ['ar', 1, 'one'],
+      ['ar', 2, 'two'],
+      ['ar', 3, 'few'],
+      ['ar', 11, 'many'],
+      ['ar', 100, 'other'],
+      ['ja', 1, 'other'],
+      ['ja', 5, 'other'],
+    ])('%s: %s takes the form for %s', (locale, count, form) => {
+      inLanguage(locale);
+      const message = 'zero=zero|one=one|two=two|few=few|many=many|other=other';
 
-      expect(getPluralForm(i18n, count, 'one|other')).toBe(form);
-    });
-
-    it.each([
-      [-1, 'one'],
-      [0, 'one'],
-      [1, 'one'],
-      [2, 'other'],
-      [5, 'other'],
-    ])('rule 2: %s is %s', (count, form) => {
-      withRule('2');
-
-      expect(getPluralForm(i18n, count, 'one|other')).toBe(form);
-    });
-
-    it.each([
-      [0, 'other'],
-      [1, 'one'],
-      [21, 'one'],
-      [101, 'one'],
-      [11, 'other'],
-      [111, 'other'],
-      [2, 'few'],
-      [3, 'few'],
-      [4, 'few'],
-      [22, 'few'],
-      [24, 'few'],
-      [102, 'few'],
-      [12, 'other'],
-      [13, 'other'],
-      [14, 'other'],
-      [112, 'other'],
-      [114, 'other'],
-      [5, 'other'],
-      [10, 'other'],
-      [15, 'other'],
-      [20, 'other'],
-      [25, 'other'],
-      [100, 'other'],
-      [-1, 'other'],
-      [-2, 'other'],
-    ])('rule 7: %s is %s', (count, form) => {
-      withRule('7');
-
-      expect(getPluralForm(i18n, count, 'one|few|other')).toBe(form);
-    });
-
-    it.each([
-      [0, 'other'],
-      [1, 'one'],
-      [21, 'other'],
-      [101, 'other'],
-      [11, 'other'],
-      [2, 'few'],
-      [3, 'few'],
-      [4, 'few'],
-      [22, 'few'],
-      [24, 'few'],
-      [102, 'few'],
-      [12, 'other'],
-      [13, 'other'],
-      [14, 'other'],
-      [112, 'other'],
-      [5, 'other'],
-      [20, 'other'],
-      [100, 'other'],
-      [-1, 'other'],
-      [-2, 'other'],
-    ])('rule 9: %s is %s', (count, form) => {
-      withRule('9');
-
-      expect(getPluralForm(i18n, count, 'one|few|other')).toBe(form);
-    });
-
-    it('returns undefined when the string lacks the needed form', () => {
-      withRule('7');
-
-      expect(getPluralForm(i18n, 5, 'one|few')).toBeUndefined();
+      expect(getPluralForm(i18n, count, message)).toBe(form);
     });
   });
 
   describe('formatByteSize', () => {
+    /** The browser is set to this language, and gives each message as its name with what it was given */
+    const inLanguage = (locale: string) => ({
+      getMessage: (name: string, substitutions: readonly string[] = []) =>
+        name === '@@ui_locale' ? locale : markedMessage(name, substitutions),
+    });
+
     it.each([
-      [0, '0 bytes'],
-      [500, '500 bytes'],
-      [1023, '1023 bytes'],
-      [1024, '1.000 KiB'],
-      [1536, '1.500 KiB'],
-      [1048575, '1023.999 KiB'],
-      [1048576, '1.000 MiB'],
-      [1610612736, '1.500 GiB'],
-      [1073741823, '1024.000 MiB'],
-      [1073741824, '1.000 GiB'],
-      [5368709120, '5.000 GiB'],
-    ])('formats %s as %s', (bytes, text) => {
-      expect(formatByteSize(bytes)).toBe(text);
+      [0, 'byteSizeBytes', '0'],
+      [500, 'byteSizeBytes', '500'],
+      [1023, 'byteSizeBytes', '1,023'],
+      [1024, 'byteSizeKiB', '1.000'],
+      [1536, 'byteSizeKiB', '1.500'],
+      [1048575, 'byteSizeKiB', '1,023.999'],
+      [1048576, 'byteSizeMiB', '1.000'],
+      [1610612736, 'byteSizeGiB', '1.500'],
+      [1073741823, 'byteSizeMiB', '1,024.000'],
+      [1073741824, 'byteSizeGiB', '1.000'],
+      [5368709120, 'byteSizeGiB', '5.000'],
+    ])('formats %s with the message %s and %s', (bytes, name, number) => {
+      expect(formatByteSize(inLanguage('en'), bytes)).toBe(
+        markedMessage(name, [number]),
+      );
+    });
+
+    it('writes the number as the language of the browser does', () => {
+      expect(formatByteSize(inLanguage('de'), 1536)).toBe(
+        markedMessage('byteSizeKiB', ['1,500']),
+      );
+      expect(formatByteSize(inLanguage('fr'), 1536)).toBe(
+        markedMessage('byteSizeKiB', ['1,500']),
+      );
+      expect(formatByteSize(inLanguage('pt_BR'), 1536)).toBe(
+        markedMessage('byteSizeKiB', ['1,500']),
+      );
+    });
+
+    it('writes it in English when the browser gives no language', () => {
+      expect(formatByteSize(inLanguage(''), 1536)).toBe(
+        markedMessage('byteSizeKiB', ['1.500']),
+      );
+      expect(formatByteSize(inLanguage('@@ui_locale'), 1536)).toBe(
+        markedMessage('byteSizeKiB', ['1.500']),
+      );
     });
   });
 });

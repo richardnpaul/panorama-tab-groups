@@ -6,6 +6,7 @@ import { createMemoryWindows } from '../../../src/js/adapters/memory/windows.js'
 import { createNativeGroupAssignment } from '../../../src/js/app/native-group-assignment.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
 import type { TabDetails } from '../../../src/js/ports/tabs.js';
+import { englishMessage } from '../../support/messages.js';
 
 const WINDOW = 3;
 const VIEW = 'moz-extension://id/view.html';
@@ -51,6 +52,7 @@ async function setUp(
       groupState,
       nativeGroups,
       viewUrl: VIEW,
+      i18n: { getMessage: englishMessage },
       logger,
     }),
     tabs,
@@ -124,7 +126,7 @@ describe('app/native-group-assignment.ts', () => {
       label: 'TabCreated',
     });
 
-    expect(env.nativeGroups.groups.get(1000)?.title).toBe('Group 2');
+    expect(env.nativeGroups.groups.get(1000)?.title).toBe('Grp2');
   });
 
   it('only changes the group that was given in the groups it saves', async () => {
@@ -285,6 +287,7 @@ describe('app/native-group-assignment.ts', () => {
         removeTabs: () => Promise.reject(failure),
       },
       viewUrl: VIEW,
+      i18n: { getMessage: englishMessage },
       logger: env.logger,
     });
 
@@ -337,6 +340,7 @@ describe('app/native-group-assignment.ts', () => {
         removeTabs: (ids) => env.nativeGroups.removeTabs(ids),
       },
       viewUrl: VIEW,
+      i18n: { getMessage: englishMessage },
       logger: env.logger,
     });
 
@@ -374,6 +378,7 @@ describe('app/native-group-assignment.ts', () => {
         removeTabs: (ids) => env.nativeGroups.removeTabs(ids),
       },
       viewUrl: VIEW,
+      i18n: { getMessage: englishMessage },
       logger: env.logger,
     });
 

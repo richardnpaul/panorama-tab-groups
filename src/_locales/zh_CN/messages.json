@@ -1,9 +1,12 @@
 {
-  "pluralRule": {
-    "message": "0"
-  },
   "newGroupButton": {
     "message": "新增组"
+  },
+  "freeformButton": {
+    "message": "自由排列"
+  },
+  "tilingButton": {
+    "message": "自动排列（平铺）"
   },
   "settingsButton": {
     "message": "设置"
@@ -20,6 +23,24 @@
   "closeGroupWarning": {
     "message": "$1 个标签页在本标签页组会关闭。您确定吗？"
   },
+  "editGroup": {
+    "message": "编辑组"
+  },
+  "closeTab": {
+    "message": "关闭标签页"
+  },
+  "openNewTab": {
+    "message": "打开新标签页"
+  },
+  "tabCount": {
+    "message": "$1 个标签页"
+  },
+  "searchForTab_placeholder": {
+    "message": "搜索标签页..."
+  },
+  "searchForTab_noResults": {
+    "message": "未找到标签页"
+  },
   "optionKeyboardShortcuts": {
     "message": "键盘快捷键"
   },
@@ -35,6 +56,12 @@
   "optionKeyboardShortcutsButtonsReset": {
     "message": "重置"
   },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "禁用"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "启用"
+  },
   "optionKeyboardShortcutsToggle": {
     "message": "打开或关闭 Tab Groups View"
   },
@@ -43,6 +70,15 @@
   },
   "optionKeyboardShortcutsPreviousGroup": {
     "message": "上一个标签页组"
+  },
+  "optionsView": {
+    "message": "视图"
+  },
+  "optionsViewFreeform": {
+    "message": "自由（经典）"
+  },
+  "optionsViewPopup": {
+    "message": "弹出窗口"
   },
   "optionsTheme": {
     "message": "主题"
@@ -78,7 +114,7 @@
     "message": "恢复"
   },
   "optionsBackupImportText": {
-    "message": "备份恢复会开启新的视窗，不会开启在现有的视窗。<br />可以恢复旧 “Tab Groups” 扩展的备份。"
+    "message": "备份恢复会开启新的视窗，不会开启在现有的视窗。\n可以恢复旧 “Tab Groups” 扩展的备份。"
   },
   "optionsBackupExport": {
     "message": "输出"
@@ -95,10 +131,145 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "标签页的数量："
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "活跃的标签页："
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (活跃的标签页： $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "小视图高速缓存的大小："
+  },
+  "refreshGroups": {
+    "message": "刷新组"
+  },
+  "sendTabToGroup": {
+    "message": "将标签页发送到组"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "用户也可以通过 Firefox 中 about:addons 页面的“管理扩展快捷键”选项来更新快捷键，如{link}所示。"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "示例视频中"
+  },
+  "optionsThemeAuto": {
+    "message": "跟随系统"
+  },
+  "optionsNativeGroups": {
+    "message": "浏览器原生组"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "使用浏览器原生标签页组"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "使用浏览器原生标签页组进行可视化整理和折叠。"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "此浏览器版本不支持原生标签页组（需要标签页隐藏 API）。"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "此浏览器版本不支持原生标签页组。请更新到 Firefox 139+ 或使用 Chrome 89+。"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "您的浏览器不支持标签页组所需的 API。"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "已启用原生组。正在迁移组..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "已禁用原生组。正在清理..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "无效的文件"
+  },
+  "byteSizeBytes": {
+    "message": "$1 字节"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "正在恢复标签页组..."
+  },
+  "migrationTitle": {
+    "message": "混合标签页组迁移"
+  },
+  "migrationChecking": {
+    "message": "正在检查迁移状态..."
+  },
+  "migrationRun": {
+    "message": "立即运行迁移"
+  },
+  "migrationReset": {
+    "message": "重置迁移标志"
+  },
+  "migrationCurrentGroups": {
+    "message": "当前组"
+  },
+  "migrationLoadingGroups": {
+    "message": "正在加载组..."
+  },
+  "migrationComplete": {
+    "message": "✓ 迁移完成 - 所有组已迁移到混合系统"
+  },
+  "migrationPending": {
+    "message": "⚠ 迁移待处理 - 组尚未迁移"
+  },
+  "migrationStatusError": {
+    "message": "检查迁移状态时出错：$1"
+  },
+  "migrationNoGroups": {
+    "message": "在当前窗口中未找到组"
+  },
+  "migrationGroupsError": {
+    "message": "加载组时出错：$1"
+  },
+  "migrationRunning": {
+    "message": "正在运行迁移..."
+  },
+  "migrationSucceeded": {
+    "message": "迁移已成功完成！"
+  },
+  "migrationFailed": {
+    "message": "迁移失败：$1"
+  },
+  "migrationNoResponse": {
+    "message": "无响应"
+  },
+  "migrationRunError": {
+    "message": "迁移出错：$1"
+  },
+  "migrationResetConfirm": {
+    "message": "要重置迁移标志吗？这将允许再次运行迁移。"
+  },
+  "migrationResetSucceeded": {
+    "message": "迁移标志已成功重置！"
+  },
+  "migrationResetFailed": {
+    "message": "重置失败：$1"
+  },
+  "migrationResetError": {
+    "message": "重置出错：$1"
+  },
+  "migrationGroup": {
+    "message": "组 $1："
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ 已迁移（原生 ID：$1）"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ 未迁移"
+  },
+  "migrationGroupStatus": {
+    "message": "状态：$1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "标签页组视图"
   }
 }

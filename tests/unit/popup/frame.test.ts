@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryScheduler } from '../../../src/js/adapters/memory/scheduler.js';
 import { createFrame } from '../../../src/popup-view/frame.js';
 import { elementById, setUpPopupPage } from '../../support/popup-page.js';
 
 function setUp(
-  options: { isAside?: boolean; onLeftAtStart?: () => void } = {},
+  options: { isAside?: boolean; onBackAtStart?: () => void } = {},
 ) {
   setUpPopupPage();
   const scheduler = createMemoryScheduler();
@@ -22,9 +22,9 @@ function setUp(
     body: document.body,
     scheduler,
     isAside: options.isAside ?? true,
-    ...(options.onLeftAtStart === undefined
+    ...(options.onBackAtStart === undefined
       ? {}
-      : { onLeftAtStart: options.onLeftAtStart }),
+      : { onBackAtStart: options.onBackAtStart }),
   });
   return { main, aside, scheduler };
 }
@@ -384,17 +384,17 @@ describe('popup-view/frame.ts', () => {
     });
 
     it('tells that the left arrow was pressed at the start of a row, and does not move', () => {
-      const onLeftAtStart = vi.fn();
-      const { aside } = setUp({ onLeftAtStart });
+      const onBackAtStart = vi.fn();
+      const { aside } = setUp({ onBackAtStart });
       const { a, b } = fill(aside);
 
       b.focus();
       press('ArrowLeft', b);
-      expect(onLeftAtStart).not.toHaveBeenCalled();
+      expect(onBackAtStart).not.toHaveBeenCalled();
       expect(document.activeElement).toBe(a);
 
       press('ArrowLeft', a);
-      expect(onLeftAtStart).toHaveBeenCalledTimes(1);
+      expect(onBackAtStart).toHaveBeenCalledTimes(1);
       expect(document.activeElement).toBe(a);
     });
 
@@ -409,8 +409,8 @@ describe('popup-view/frame.ts', () => {
     });
 
     it('does not tell of the right arrow, or of the left arrow elsewhere than the start', () => {
-      const onLeftAtStart = vi.fn();
-      const { aside } = setUp({ onLeftAtStart });
+      const onBackAtStart = vi.fn();
+      const { aside } = setUp({ onBackAtStart });
       const { a, c } = fill(aside);
 
       c.focus();
@@ -418,7 +418,42 @@ describe('popup-view/frame.ts', () => {
       expect(document.activeElement).toBe(a);
 
       press('ArrowDown', a);
-      expect(onLeftAtStart).not.toHaveBeenCalled();
+      expect(onBackAtStart).not.toHaveBeenCalled();
+    });
+
+    describe('where text runs from the right', () => {
+      beforeEach(() => {
+        document.documentElement.dir = 'rtl';
+      });
+      afterEach(() => {
+        document.documentElement.dir = 'ltr';
+      });
+
+      it('tells that the right arrow was pressed at the start of a row: it points back', () => {
+        const onBackAtStart = vi.fn();
+        const { aside } = setUp({ onBackAtStart });
+        const { a, b } = fill(aside);
+
+        b.focus();
+        press('ArrowRight', b);
+        expect(onBackAtStart).not.toHaveBeenCalled();
+        expect(document.activeElement).toBe(a);
+
+        press('ArrowRight', a);
+        expect(onBackAtStart).toHaveBeenCalledTimes(1);
+      });
+
+      it('moves along a row with the left arrow, which points on, and does not tell of it at the start', () => {
+        const onBackAtStart = vi.fn();
+        const { aside } = setUp({ onBackAtStart });
+        const { a, b } = fill(aside);
+
+        a.focus();
+        press('ArrowLeft', a);
+
+        expect(document.activeElement).toBe(b);
+        expect(onBackAtStart).not.toHaveBeenCalled();
+      });
     });
   });
 });

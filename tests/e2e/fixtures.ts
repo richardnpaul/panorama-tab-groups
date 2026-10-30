@@ -426,6 +426,7 @@ const definedEnv = (): Record<string, string> =>
 async function launchChromium(
   userDataDir: string,
   headless: boolean,
+  uiLanguage: string,
 ): Promise<BrowserContext> {
   fs.rmSync(userDataDir, { recursive: true, force: true });
   fs.mkdirSync(userDataDir, { recursive: true });
@@ -435,7 +436,10 @@ async function launchChromium(
   return chromium.launchPersistentContext(userDataDir, {
     executablePath: chromium.executablePath(),
     headless,
+    // The language of the browser itself, which is what picks the _locales folder
+    env: { ...definedEnv(), LANGUAGE: uiLanguage },
     args: [
+      `--lang=${uiLanguage}`,
       `--disable-extensions-except=${pathToExtension}`,
       `--load-extension=${pathToExtension}`,
       '--no-sandbox',
@@ -447,6 +451,7 @@ async function launchChromium(
 async function launchFirefox(
   userDataDir: string,
   headless: boolean,
+  uiLanguage: string,
 ): Promise<BrowserContext> {
   await startLocalServer();
 
@@ -478,6 +483,8 @@ async function launchFirefox(
       'devtools.debugger.prompt-connection': false,
       'extensions.manifestV3.enabled': true,
       'xpinstall.signatures.required': false,
+      'intl.locale.requested': uiLanguage,
+      'intl.accept_languages': uiLanguage,
     },
   });
 
@@ -532,8 +539,14 @@ interface ExtensionFixtures {
   extensionId: string;
 }
 
-export const test = base.extend<ExtensionFixtures>({
-  context: async ({ browserName }, use) => {
+interface ExtensionOptions {
+  /** The language the browser is started in, as a BCP 47 tag such as `pt-BR` */
+  uiLanguage: string;
+}
+
+export const test = base.extend<ExtensionFixtures & ExtensionOptions>({
+  uiLanguage: ['en-US', { option: true }],
+  context: async ({ browserName, uiLanguage }, use) => {
     const userDataDir = path.join(
       process.cwd(),
       `test-user-data-${browserName}`,
@@ -547,8 +560,8 @@ export const test = base.extend<ExtensionFixtures>({
     }
     const context =
       browserName === 'chromium'
-        ? await launchChromium(userDataDir, headless)
-        : await launchFirefox(userDataDir, headless);
+        ? await launchChromium(userDataDir, headless, uiLanguage)
+        : await launchFirefox(userDataDir, headless, uiLanguage);
 
     context.on('page', (page) => {
       page.on('console', (msg) => {

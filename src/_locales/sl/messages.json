@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Dodaj novo skupino"
+  },
+  "freeformButton": {
+    "message": "Prosta razporeditev"
+  },
+  "tilingButton": {
+    "message": "Samodejna razporeditev (ploščice)"
+  },
+  "settingsButton": {
+    "message": "Nastavitve"
+  },
+  "defaultGroupName": {
+    "message": "Skp."
+  },
+  "dragGroup": {
+    "message": "Povleci skupino"
+  },
+  "closeGroup": {
+    "message": "Zapri skupino"
+  },
+  "closeGroupWarning": {
+    "message": "one=Z zaprtjem te skupine se bo zaprl $1 zavihek v njej. Ali res želite to storiti?|two=Z zaprtjem te skupine se bosta zaprla $1 zavihka v njej. Ali res želite to storiti?|few=Z zaprtjem te skupine se bodo zaprli $1 zavihki v njej. Ali res želite to storiti?|other=Z zaprtjem te skupine se bo zaprlo $1 zavihkov v njej. Ali res želite to storiti?"
+  },
+  "editGroup": {
+    "message": "Uredi skupino"
+  },
+  "closeTab": {
+    "message": "Zapri zavihek"
+  },
+  "openNewTab": {
+    "message": "Odpri nov zavihek"
+  },
+  "tabCount": {
+    "message": "one=$1 zavihek|two=$1 zavihka|few=$1 zavihki|other=$1 zavihkov"
+  },
+  "searchForTab_placeholder": {
+    "message": "Poišči zavihek ..."
+  },
+  "searchForTab_noResults": {
+    "message": "Ni najdenih zavihkov"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Tipkovne bližnjice"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Oblika možnosti bližnjice je opisana tukaj."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Posodobi"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Ponastavi"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Onemogoči"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Omogoči"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Preklopi pogled skupin zavihkov"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktiviraj naslednjo skupino zavihkov"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktiviraj prejšnjo skupino zavihkov"
+  },
+  "optionsView": {
+    "message": "Pogled"
+  },
+  "optionsViewFreeform": {
+    "message": "Prosti (klasični)"
+  },
+  "optionsViewPopup": {
+    "message": "Pojavno okno"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "svetla"
+  },
+  "optionsThemeDark": {
+    "message": "temna"
+  },
+  "optionsToolbar": {
+    "message": "Orodna vrstica"
+  },
+  "optionsToolbarPosition": {
+    "message": "Položaj"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "zgoraj"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "desno"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "spodaj"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "levo"
+  },
+  "optionsBackup": {
+    "message": "Varnostna kopija"
+  },
+  "optionsBackupImport": {
+    "message": "Uvozi"
+  },
+  "optionsBackupImportText": {
+    "message": "Uvožene varnostne kopije se odprejo v novih oknih in ničesar ne prepišejo.\nUvozite lahko tudi varnostne kopije iz starega dodatka »Tab Groups«."
+  },
+  "optionsBackupExport": {
+    "message": "Izvozi"
+  },
+  "optionsBackupExportText": {
+    "message": "Ta razdelek bo morda postal nepotreben, ko bo v Firefoxu mogoče ustrezno upravljanje sej."
+  },
+  "optionsBackupExportButton": {
+    "message": "Shrani varnostno kopijo"
+  },
+  "optionsStatistics": {
+    "message": "Statistika"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Število zavihkov:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Dejavni: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Velikost predpomnilnika sličic:"
+  },
+  "refreshGroups": {
+    "message": "Osveži skupine"
+  },
+  "sendTabToGroup": {
+    "message": "Pošlji zavihek v skupino"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Uporabniki lahko bližnjice posodobijo tudi z možnostjo »Upravljaj bližnjice razširitev« na about:addons v Firefoxu, kot je prikazano {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "v primeru videoposnetka"
+  },
+  "optionsThemeAuto": {
+    "message": "Sledi sistemu"
+  },
+  "optionsNativeGroups": {
+    "message": "Izvorne skupine brskalnika"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Uporabi izvorne skupine zavihkov brskalnika"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Uporabi izvorne skupine zavihkov brskalnika za vizualno organizacijo in strnjevanje."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Izvorne skupine zavihkov v tej različici brskalnika niso podprte (zahtevajo API za skrivanje zavihkov)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Izvorne skupine zavihkov v tej različici brskalnika niso podprte. Posodobite na Firefox 139+ ali uporabite Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Vaš brskalnik ne podpira API-jev, potrebnih za skupine zavihkov."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Izvorne skupine so omogočene. Selitev skupin ..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Izvorne skupine so onemogočene. Čiščenje ..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Neveljavna datoteka"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bajtov"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Obnavljanje skupin zavihkov ..."
+  },
+  "migrationTitle": {
+    "message": "Selitev hibridnih skupin zavihkov"
+  },
+  "migrationChecking": {
+    "message": "Preverjanje stanja selitve ..."
+  },
+  "migrationRun": {
+    "message": "Zaženi selitev zdaj"
+  },
+  "migrationReset": {
+    "message": "Ponastavi zastavico selitve"
+  },
+  "migrationCurrentGroups": {
+    "message": "Trenutne skupine"
+  },
+  "migrationLoadingGroups": {
+    "message": "Nalaganje skupin ..."
+  },
+  "migrationComplete": {
+    "message": "✓ Selitev je končana - vse skupine so preseljene v hibridni sistem"
+  },
+  "migrationPending": {
+    "message": "⚠ Selitev čaka - skupine še niso preseljene"
+  },
+  "migrationStatusError": {
+    "message": "Napaka pri preverjanju stanja selitve: $1"
+  },
+  "migrationNoGroups": {
+    "message": "V trenutnem oknu ni najdenih skupin"
+  },
+  "migrationGroupsError": {
+    "message": "Napaka pri nalaganju skupin: $1"
+  },
+  "migrationRunning": {
+    "message": "Selitev poteka ..."
+  },
+  "migrationSucceeded": {
+    "message": "Selitev je bila uspešno končana!"
+  },
+  "migrationFailed": {
+    "message": "Selitev ni uspela: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Ni odgovora"
+  },
+  "migrationRunError": {
+    "message": "Napaka selitve: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Ponastavim zastavico selitve? S tem bo selitev mogoče znova zagnati."
+  },
+  "migrationResetSucceeded": {
+    "message": "Zastavica selitve je bila uspešno ponastavljena!"
+  },
+  "migrationResetFailed": {
+    "message": "Ponastavitev ni uspela: $1"
+  },
+  "migrationResetError": {
+    "message": "Napaka ponastavitve: $1"
+  },
+  "migrationGroup": {
+    "message": "Skupina $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Preseljeno (izvorni ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Ni preseljeno"
+  },
+  "migrationGroupStatus": {
+    "message": "Stanje: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Pogled skupin zavihkov"
+  }
+}

@@ -18,6 +18,7 @@ import { createDrag } from './drag.js';
 import { initDragScroll } from './dragscroll.js';
 import { createGroupNodes, type GroupNodes } from './group-nodes.js';
 import { createLate } from './late.js';
+import { applyLanguage } from '../share/direction.js';
 import { createLeaveView } from './leave-view.js';
 import { createPage } from './page.js';
 import { createTabNodes } from './tab-nodes.js';
@@ -43,6 +44,7 @@ const BUTTON_TITLES = [
 async function initView(): Promise<void> {
   const logger = console;
   const i18n = createBrowserI18n(() => browser);
+  applyLanguage(i18n, document.documentElement);
   const viewTabs = createBrowserViewTabs(() => browser);
   const viewState = createBrowserViewState(() => browser);
   const messaging = createBrowserMessaging(() => browser);
@@ -50,6 +52,9 @@ async function initView(): Promise<void> {
   BUTTON_TITLES.forEach(([id, message]) => {
     requireElementById(HTMLElement, id).title = i18n.getMessage(message);
   });
+  document.title = i18n.getMessage('viewTitle');
+  requireElementById(HTMLInputElement, 'tab-search').placeholder =
+    i18n.getMessage('searchForTab_placeholder');
 
   const windowId = await createBrowserWindows(() => browser).currentWindowId();
   const viewTabId = await viewTabs.currentId();

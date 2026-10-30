@@ -1,9 +1,12 @@
 {
-  "pluralRule": {
-    "message": "9"
-  },
   "newGroupButton": {
     "message": "Utwórz nową grupę"
+  },
+  "freeformButton": {
+    "message": "Układ swobodny"
+  },
+  "tilingButton": {
+    "message": "Układ automatyczny (kafelki)"
   },
   "settingsButton": {
     "message": "Ustawienia"
@@ -18,7 +21,25 @@
     "message": "Zamknij grupę"
   },
   "closeGroupWarning": {
-    "message": "Zamknięcie tej grupy spowoduje również zamknięcie jej $1 kart. Na pewno chcesz to zrobić?"
+    "message": "one=Zamknięcie tej grupy spowoduje zamknięcie $1 karty, która się w niej znajduje. Na pewno chcesz to zrobić?|few=Zamknięcie tej grupy spowoduje zamknięcie $1 kart, które się w niej znajdują. Na pewno chcesz to zrobić?|other=Zamknięcie tej grupy spowoduje zamknięcie $1 kart, które się w niej znajdują. Na pewno chcesz to zrobić?"
+  },
+  "editGroup": {
+    "message": "Edytuj grupę"
+  },
+  "closeTab": {
+    "message": "Zamknij kartę"
+  },
+  "openNewTab": {
+    "message": "Otwórz nową kartę"
+  },
+  "tabCount": {
+    "message": "one=$1 karta|few=$1 karty|other=$1 kart"
+  },
+  "searchForTab_placeholder": {
+    "message": "Szukaj karty..."
+  },
+  "searchForTab_noResults": {
+    "message": "Nie znaleziono kart"
   },
   "optionKeyboardShortcuts": {
     "message": "Skróty klawiszowe"
@@ -35,6 +56,12 @@
   "optionKeyboardShortcutsButtonsReset": {
     "message": "Resetuj"
   },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Wyłącz"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Włącz"
+  },
   "optionKeyboardShortcutsToggle": {
     "message": "Przełącz widok grup kart"
   },
@@ -43,6 +70,15 @@
   },
   "optionKeyboardShortcutsPreviousGroup": {
     "message": "Przejdź do poprzedniej grupy kart"
+  },
+  "optionsView": {
+    "message": "Widok"
+  },
+  "optionsViewFreeform": {
+    "message": "Swobodny (klasyczny)"
+  },
+  "optionsViewPopup": {
+    "message": "Okno podręczne"
   },
   "optionsTheme": {
     "message": "Motyw"
@@ -78,7 +114,7 @@
     "message": "Import"
   },
   "optionsBackupImportText": {
-    "message": "Zaimportowane grupy kart zostaną otwarte w nowych oknach i niczego nie nadpiszą.<br />Możesz również zaimportować dane ze starego rozszerzenia \"Grupy Kart\"."
+    "message": "Zaimportowane grupy kart zostaną otwarte w nowych oknach i niczego nie nadpiszą.\nMożesz również zaimportować dane ze starego rozszerzenia \"Grupy Kart\"."
   },
   "optionsBackupExport": {
     "message": "Eksport"
@@ -95,10 +131,145 @@
   "optionsStatisticsNumberOfTabs": {
     "message": "Ilość kart:"
   },
-  "optionsStatisticsNumberOfTabsActive": {
-    "message": "Aktywnych:"
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktywnych: $2)"
   },
   "optionsStatisticsThumbnailCacheSize": {
     "message": "Pamięć podręczna miniaturek:"
+  },
+  "refreshGroups": {
+    "message": "Odśwież grupy"
+  },
+  "sendTabToGroup": {
+    "message": "Wyślij kartę do grupy"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Skróty można też zmienić za pomocą opcji „Zarządzaj skrótami rozszerzeń” na stronie about:addons w Firefoksie, jak widać {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "w filmie z przykładem"
+  },
+  "optionsThemeAuto": {
+    "message": "Zgodny z systemem"
+  },
+  "optionsNativeGroups": {
+    "message": "Natywne grupy przeglądarki"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Używaj natywnych grup kart przeglądarki"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Używaj natywnych grup kart przeglądarki do wizualnego porządkowania i zwijania."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Natywne grupy kart nie są obsługiwane w tej wersji przeglądarki (wymagany jest interfejs API do ukrywania kart)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Natywne grupy kart nie są obsługiwane w tej wersji przeglądarki. Zaktualizuj do Firefoksa 139+ lub użyj Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Twoja przeglądarka nie obsługuje interfejsów API wymaganych dla grup kart."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Włączono natywne grupy. Przenoszenie grup..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Wyłączono natywne grupy. Porządkowanie..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Nieprawidłowy plik"
+  },
+  "byteSizeBytes": {
+    "message": "$1 B"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Przywracanie grup kart..."
+  },
+  "migrationTitle": {
+    "message": "Migracja hybrydowych grup kart"
+  },
+  "migrationChecking": {
+    "message": "Sprawdzanie stanu migracji..."
+  },
+  "migrationRun": {
+    "message": "Uruchom migrację teraz"
+  },
+  "migrationReset": {
+    "message": "Zresetuj znacznik migracji"
+  },
+  "migrationCurrentGroups": {
+    "message": "Bieżące grupy"
+  },
+  "migrationLoadingGroups": {
+    "message": "Wczytywanie grup..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migracja zakończona - wszystkie grupy zostały przeniesione do systemu hybrydowego"
+  },
+  "migrationPending": {
+    "message": "⚠ Migracja oczekuje - grupy nie zostały jeszcze przeniesione"
+  },
+  "migrationStatusError": {
+    "message": "Błąd podczas sprawdzania stanu migracji: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Nie znaleziono grup w bieżącym oknie"
+  },
+  "migrationGroupsError": {
+    "message": "Błąd podczas wczytywania grup: $1"
+  },
+  "migrationRunning": {
+    "message": "Trwa migracja..."
+  },
+  "migrationSucceeded": {
+    "message": "Migracja zakończyła się pomyślnie!"
+  },
+  "migrationFailed": {
+    "message": "Migracja nie powiodła się: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Brak odpowiedzi"
+  },
+  "migrationRunError": {
+    "message": "Błąd migracji: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Zresetować znacznik migracji? Pozwoli to uruchomić migrację ponownie."
+  },
+  "migrationResetSucceeded": {
+    "message": "Znacznik migracji został zresetowany!"
+  },
+  "migrationResetFailed": {
+    "message": "Resetowanie nie powiodło się: $1"
+  },
+  "migrationResetError": {
+    "message": "Błąd resetowania: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupa $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Przeniesiona (natywny ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Nieprzeniesiona"
+  },
+  "migrationGroupStatus": {
+    "message": "Stan: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Widok grup kart"
   }
 }

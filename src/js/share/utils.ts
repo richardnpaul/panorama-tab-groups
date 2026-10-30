@@ -1,3 +1,4 @@
+import { pluralCategory, selectPluralForm } from '../core/plural.js';
 import type { I18n } from '../ports/i18n.js';
 
 /**
@@ -22,70 +23,68 @@ export function newElement(
   return e;
 }
 
-// Counts that take the "2-4" plural form: ends in 2, 3 or 4, but not 12, 13 or 14
-function isFewCount(count: number): boolean {
-  return [2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100);
-}
-
 /**
- * Extract correct plural form for a translated string, by the plural rule of
- * the language the translations are in.
- * For insight for the plural rules see:
- * https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localization_and_Plurals#List_of_Plural_Rules
+ * The form of a translated message that fits the count, in the language of the
+ * browser: "one=$1 tab|other=$1 tabs" gives the first for 1 and the second for
+ * the rest (see `core/plural.ts` for the format).
  */
 export function getPluralForm(
-  i18n: I18n,
+  i18n: Pick<I18n, 'getMessage'>,
   pluralCount: number | string = 1,
   translatedString = '',
-): string | undefined {
+): string {
   const count = parseInt(String(pluralCount), 10);
-  const pluralRule = parseInt(i18n.getMessage('pluralRule'), 10);
-  const pluralForms = translatedString.split('|');
+  return selectPluralForm(
+    translatedString,
+    pluralCategory(i18n.getMessage('@@ui_locale'), count),
+  );
+}
 
-  if (pluralForms.length === 1) {
-    return translatedString;
-  }
-
-  switch (pluralRule) {
-    /*
-     * Rule #0 [everything]
-     */
-    case 0:
-      return pluralForms[0];
-    /*
-     * Rule #1 [is 1]|[everything else]
-     */
-    case 1:
-      return count === 1 ? pluralForms[0] : pluralForms[1];
-    /*
-     * Rule #2 [0 or 1]|[everything else]
-     */
-    case 2:
-      return count < 2 ? pluralForms[0] : pluralForms[1];
-    /*
-     * Rule #7 [is 1, excluding 11]|[2-4, excluding 12-14]|[everything else]
-     */
-    case 7:
-      if (count % 10 === 1 && count % 100 !== 11) {
-        return pluralForms[0];
-      }
-      return isFewCount(count) ? pluralForms[1] : pluralForms[2];
-    /*
-     * Rule #9 [is 1]|[2-4, excluding 12-14]|[everything else]
-     */
-    case 9:
-      if (count === 1) {
-        return pluralForms[0];
-      }
-      return isFewCount(count) ? pluralForms[1] : pluralForms[2];
-    default:
-      return translatedString;
+/** The number as the language of the browser writes it, with this many digits after the point */
+function formatNumber(
+  i18n: Pick<I18n, 'getMessage'>,
+  value: number,
+  digits: number,
+): string {
+  const options = {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  };
+  try {
+    return new Intl.NumberFormat(
+      i18n.getMessage('@@ui_locale').replaceAll('_', '-'),
+      options,
+    ).format(value);
+  } catch {
+    // Not a language tag, as a browser that gives no answer shows
+    return new Intl.NumberFormat('en', options).format(value);
   }
 }
 
-export function formatByteSize(bytes: number): string {
-  if (bytes < 1024) return `${String(bytes)} bytes`;
-  if (bytes < 1048576) return `${(bytes / 1024).toFixed(3)} KiB`;
-  if (bytes < 1073741824) return `${(bytes / 1048576).toFixed(3)} MiB`;
-  return `${(bytes / 1073741824).toFixed(3)} GiB`;
+/** A whole number as the language of the browser writes it (its digits and its grouping) */
+export const formatCount = (
+  i18n: Pick<I18n, 'getMessage'>,
+  value: number,
+): string => formatNumber(i18n, value, 0);
+
+// The sizes, smallest first: the message that names the unit, and what a byte count is divided by
+const SMALLER_SIZES = [
+  { below: 1024, name: 'byteSizeBytes', divisor: 1, digits: 0 },
+  { below: 1048576, name: 'byteSizeKiB', divisor: 1024, digits: 3 },
+  { below: 1073741824, name: 'byteSizeMiB', divisor: 1048576, digits: 3 },
+] as const;
+const LARGEST_SIZE = {
+  name: 'byteSizeGiB',
+  divisor: 1073741824,
+  digits: 3,
+} as const;
+
+/** A size in bytes in the largest unit that keeps it above 1, in the words and numbers of the browser's language */
+export function formatByteSize(
+  i18n: Pick<I18n, 'getMessage'>,
+  bytes: number,
+): string {
+  const { name, divisor, digits } =
+    SMALLER_SIZES.find(({ below }) => bytes < below) ?? LARGEST_SIZE;
+  return i18n.getMessage(name, [formatNumber(i18n, bytes / divisor, digits)]);
 }

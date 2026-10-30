@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFakeSessions } from '../../support/fake-sessions.js';
+import { markedMessage, textsOutsideMessages } from '../../support/messages.js';
 
 const backupJson = JSON.stringify({
   file: { type: 'tgvView', version: 1 },
@@ -50,7 +51,7 @@ function fakeBrowser(stored: Record<string, unknown>) {
       reset: vi.fn().mockResolvedValue(undefined),
     },
     i18n: {
-      getMessage: (name: string) => (name === 'pluralRule' ? '1' : name),
+      getMessage: markedMessage,
     },
     sessions: sessions.api.sessions,
     windows: {
@@ -142,7 +143,29 @@ describe('options/start.ts', () => {
       document.querySelector<HTMLInputElement>('#activate-next-group input')
         ?.value,
     ).toBe('Alt+W');
-    expect(element('#optionsView h2').textContent).toBe('optionsView');
+    expect(element('#optionsView h2').textContent).toBe(
+      markedMessage('optionsView'),
+    );
+  });
+
+  it('sets the direction and the language of the page from the browser', async () => {
+    await start({}, (browser) => {
+      browser.i18n.getMessage = (name: string) =>
+        ({ '@@bidi_dir': 'rtl', '@@ui_locale': 'ar' })[name] ??
+        markedMessage(name);
+    });
+
+    expect(document.documentElement.dir).toBe('rtl');
+    expect(document.documentElement.lang).toBe('ar');
+  });
+
+  it('shows no text that is not from a message', async () => {
+    await start();
+    await vi.waitFor(() => {
+      expect(element('#numberOfTabs').textContent).not.toBe('');
+    });
+
+    expect(textsOutsideMessages(document.body)).toEqual([]);
   });
 
   it('keeps only the option that changed', async () => {
@@ -160,7 +183,7 @@ describe('options/start.ts', () => {
     await start();
 
     expect(element('#nativeGroupsWarning').textContent).toBe(
-      'Use native browser tab groups for visual organization and collapsing.',
+      markedMessage('optionsNativeGroupsHybrid'),
     );
   });
 
@@ -171,10 +194,12 @@ describe('options/start.ts', () => {
 
     await vi.waitFor(() => {
       expect(element('#numberOfTabs').textContent).toBe(
-        '2 (optionsStatisticsNumberOfTabsActive 1)',
+        markedMessage('optionsStatisticsNumberOfTabsAndActive', ['2', '1']),
       );
     });
-    expect(element('#thumbnailCacheSize').textContent).toBe('5 bytes');
+    expect(element('#thumbnailCacheSize').textContent).toBe(
+      markedMessage('byteSizeBytes', ['5']),
+    );
     expect(browser.tabs.query).toHaveBeenCalledWith({});
   });
 
@@ -202,7 +227,9 @@ describe('options/start.ts', () => {
       chooseBackup([new File(['x'], 'backup.txt', { type: 'text/plain' })]);
 
       await vi.waitFor(() => {
-        expect(alert).toHaveBeenCalledWith('Invalid file');
+        expect(alert).toHaveBeenCalledWith(
+          markedMessage('optionsBackupInvalidFile'),
+        );
       });
       expect(browser.windows.create).not.toHaveBeenCalled();
     });

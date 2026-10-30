@@ -24,7 +24,6 @@ const showViewSpecificOptions = vi.fn();
 const saveOptionTheme = vi.fn();
 const saveOptionToolbarPosition = vi.fn();
 const getStatistics = vi.fn();
-const resetPTG = vi.fn();
 const initNativeGroupsOption = vi.fn();
 // What each factory was built with
 const builtWith = vi.fn();
@@ -68,9 +67,6 @@ vi.mock('../../../src/js/options/statistics.js', () => ({
     builtWith('statistics', ports);
     return (): unknown => getStatistics();
   },
-}));
-vi.mock('../../../src/js/options/reset.js', () => ({
-  default: (): unknown => resetPTG(),
 }));
 vi.mock('../../../src/js/options/native-groups.js', () => ({
   default: (ports: unknown): unknown => initNativeGroupsOption(ports),
@@ -141,7 +137,6 @@ describe('options/page.ts', () => {
       saveOptionTheme,
       saveOptionToolbarPosition,
       getStatistics,
-      resetPTG,
       initNativeGroupsOption,
       builtWith,
       loadOptions,
@@ -527,14 +522,6 @@ describe('options/page.ts', () => {
       expect(saveBackup).toHaveBeenCalledTimes(1);
     });
 
-    it('resets the add-on when the reset button is clicked', async () => {
-      await startPage();
-
-      element('#resetAddon').dispatchEvent(new Event('click'));
-
-      expect(resetPTG).toHaveBeenCalledTimes(1);
-    });
-
     it.each([
       'form[name="formView"]',
       'form[name="formTheme"]',
@@ -548,7 +535,7 @@ describe('options/page.ts', () => {
       );
     });
 
-    it.each(['#backupFileInput', '#saveBackupButton', '#resetAddon'])(
+    it.each(['#backupFileInput', '#saveBackupButton'])(
       'fails naming %s when it is missing',
       async (selector) => {
         element(selector).remove();

@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Shto grup të ri"
+  },
+  "freeformButton": {
+    "message": "Renditje e lirë"
+  },
+  "tilingButton": {
+    "message": "Renditje automatike (pllaka)"
+  },
+  "settingsButton": {
+    "message": "Rregullime"
+  },
+  "defaultGroupName": {
+    "message": "Grp"
+  },
+  "dragGroup": {
+    "message": "Zvarrit grupin"
+  },
+  "closeGroup": {
+    "message": "Mbyll grupin"
+  },
+  "closeGroupWarning": {
+    "message": "one=Mbyllja e këtij grupi do të mbyllë skedën $1 që ka brenda. Jeni i sigurt se doni ta bëni këtë?|other=Mbyllja e këtij grupi do të mbyllë $1 skedat që ka brenda. Jeni i sigurt se doni ta bëni këtë?"
+  },
+  "editGroup": {
+    "message": "Përpuno grupin"
+  },
+  "closeTab": {
+    "message": "Mbyll skedën"
+  },
+  "openNewTab": {
+    "message": "Hap skedë të re"
+  },
+  "tabCount": {
+    "message": "one=$1 skedë|other=$1 skeda"
+  },
+  "searchForTab_placeholder": {
+    "message": "Kërko një skedë..."
+  },
+  "searchForTab_noResults": {
+    "message": "S'u gjet asnjë skedë"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Shkurtore tastiere"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Formati i mundësisë së shkurtores përshkruhet këtu."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Përditëso"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Zhbëj ndryshimet"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Çaktivizo"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Aktivizo"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Shfaq/fshih pamjen e grupeve të skedave"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktivizo grupin pasues të skedave"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktivizo grupin e mëparshëm të skedave"
+  },
+  "optionsView": {
+    "message": "Pamja"
+  },
+  "optionsViewFreeform": {
+    "message": "E lirë (klasike)"
+  },
+  "optionsViewPopup": {
+    "message": "Flluskë"
+  },
+  "optionsTheme": {
+    "message": "Temë"
+  },
+  "optionsThemeLight": {
+    "message": "e çelët"
+  },
+  "optionsThemeDark": {
+    "message": "e errët"
+  },
+  "optionsToolbar": {
+    "message": "Shiriti i veglave"
+  },
+  "optionsToolbarPosition": {
+    "message": "Pozicioni"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "sipër"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "djathtas"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "poshtë"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "majtas"
+  },
+  "optionsBackup": {
+    "message": "Kopjeruajtje"
+  },
+  "optionsBackupImport": {
+    "message": "Importo"
+  },
+  "optionsBackupImportText": {
+    "message": "Kopjeruajtjet e importuara do të hapen në dritare të reja dhe nuk do të mbishkruajnë asgjë.\nMund të importoni edhe kopjeruajtje nga shtesa e vjetër \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "Eksporto"
+  },
+  "optionsBackupExportText": {
+    "message": "Ky seksion mund të bëhet i panevojshëm kur në Firefox të jetë i mundur një administrim i duhur sesionesh."
+  },
+  "optionsBackupExportButton": {
+    "message": "Ruaj kopjeruajtjen"
+  },
+  "optionsStatistics": {
+    "message": "Statistika"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Numër skedash:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktive: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Madhësia e fshehtinës së miniaturave:"
+  },
+  "refreshGroups": {
+    "message": "Rifresko grupet"
+  },
+  "sendTabToGroup": {
+    "message": "Dërgo skedën te një grup"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Përdoruesit mund t'i përditësojnë shkurtoret edhe përmes mundësisë \"Administroni shkurtore zgjerimesh\" te about:addons në Firefox, siç shihet {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "në videon shembull"
+  },
+  "optionsThemeAuto": {
+    "message": "Ndiq sistemin"
+  },
+  "optionsNativeGroups": {
+    "message": "Grupe të brendshme të shfletuesit"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Përdor grupet e brendshme të skedave të shfletuesit"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Përdor grupet e brendshme të skedave të shfletuesit për organizim pamor dhe palosje."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Grupet e brendshme të skedave nuk mbulohen në këtë version shfletuesi (lypset API-ja e fshehjes së skedave)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Grupet e brendshme të skedave nuk mbulohen në këtë version shfletuesi. Përditësojeni te Firefox 139+ ose përdorni Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Shfletuesi juaj nuk mbulon API-të e domosdoshme për grupet e skedave."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grupet e brendshme u aktivizuan. Po migrohen grupet..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grupet e brendshme u çaktivizuan. Po pastrohet..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Kartelë e pavlefshme"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bajte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Po rikthehen grupet e skedave..."
+  },
+  "migrationTitle": {
+    "message": "Migrim i grupeve hibride të skedave"
+  },
+  "migrationChecking": {
+    "message": "Po kontrollohet gjendja e migrimit..."
+  },
+  "migrationRun": {
+    "message": "Nise migrimin tani"
+  },
+  "migrationReset": {
+    "message": "Zhbëj shenjën e migrimit"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grupet aktuale"
+  },
+  "migrationLoadingGroups": {
+    "message": "Po ngarkohen grupet..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migrimi përfundoi - Krejt grupet u migruan te sistemi hibrid"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrimi në pritje - Grupet ende s'janë migruar"
+  },
+  "migrationStatusError": {
+    "message": "Gabim gjatë kontrollit të gjendjes së migrimit: $1"
+  },
+  "migrationNoGroups": {
+    "message": "S'u gjet asnjë grup në dritaren aktuale"
+  },
+  "migrationGroupsError": {
+    "message": "Gabim gjatë ngarkimit të grupeve: $1"
+  },
+  "migrationRunning": {
+    "message": "Po kryhet migrimi..."
+  },
+  "migrationSucceeded": {
+    "message": "Migrimi përfundoi me sukses!"
+  },
+  "migrationFailed": {
+    "message": "Migrimi dështoi: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Pa përgjigje"
+  },
+  "migrationRunError": {
+    "message": "Gabim migrimi: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Të zhbëhet shenja e migrimit? Kjo do të lejojë që migrimi të niset sërish."
+  },
+  "migrationResetSucceeded": {
+    "message": "Shenja e migrimit u zhbë me sukses!"
+  },
+  "migrationResetFailed": {
+    "message": "Zhbërja dështoi: $1"
+  },
+  "migrationResetError": {
+    "message": "Gabim zhbërjeje: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupi $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ I migruar (ID e brendshme: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ I pamigruar"
+  },
+  "migrationGroupStatus": {
+    "message": "Gjendja: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Pamja e grupeve të skedave"
+  }
+}

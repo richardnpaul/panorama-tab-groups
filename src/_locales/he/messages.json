@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "הוספת קבוצה חדשה"
+  },
+  "freeformButton": {
+    "message": "סידור חופשי"
+  },
+  "tilingButton": {
+    "message": "סידור אוטומטי (בלוקים)"
+  },
+  "settingsButton": {
+    "message": "הגדרות"
+  },
+  "defaultGroupName": {
+    "message": "קבוצה"
+  },
+  "dragGroup": {
+    "message": "גרירת קבוצה"
+  },
+  "closeGroup": {
+    "message": "סגירת קבוצה"
+  },
+  "closeGroupWarning": {
+    "message": "one=סגירת הקבוצה הזו תסגור את הלשונית $1 שבתוכה. האם אתה בטוח שברצונך לעשות זאת?|two=סגירת הקבוצה הזו תסגור את שתי הלשוניות שבתוכה ($1). האם אתה בטוח שברצונך לעשות זאת?|other=סגירת הקבוצה הזו תסגור את $1 הלשוניות שבתוכה. האם אתה בטוח שברצונך לעשות זאת?"
+  },
+  "editGroup": {
+    "message": "עריכת קבוצה"
+  },
+  "closeTab": {
+    "message": "סגירת לשונית"
+  },
+  "openNewTab": {
+    "message": "פתיחת לשונית חדשה"
+  },
+  "tabCount": {
+    "message": "one=לשונית אחת ($1)|two=שתי לשוניות ($1)|other=$1 לשוניות"
+  },
+  "searchForTab_placeholder": {
+    "message": "חיפוש לשונית..."
+  },
+  "searchForTab_noResults": {
+    "message": "לא נמצאו לשוניות"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "קיצורי מקלדת"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "הפורמט של אפשרות הקיצור מפורט כאן."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "עדכון"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "איפוס"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "השבתה"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "הפעלה"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "החלפת תצוגת קבוצות הלשוניות"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "הפעלת קבוצת הלשוניות הבאה"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "הפעלת קבוצת הלשוניות הקודמת"
+  },
+  "optionsView": {
+    "message": "תצוגה"
+  },
+  "optionsViewFreeform": {
+    "message": "חופשית (קלאסית)"
+  },
+  "optionsViewPopup": {
+    "message": "חלון קופץ"
+  },
+  "optionsTheme": {
+    "message": "ערכת נושא"
+  },
+  "optionsThemeLight": {
+    "message": "בהירה"
+  },
+  "optionsThemeDark": {
+    "message": "כהה"
+  },
+  "optionsToolbar": {
+    "message": "סרגל כלים"
+  },
+  "optionsToolbarPosition": {
+    "message": "מיקום"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "למעלה"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ימין"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "למטה"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "שמאל"
+  },
+  "optionsBackup": {
+    "message": "גיבוי"
+  },
+  "optionsBackupImport": {
+    "message": "ייבוא"
+  },
+  "optionsBackupImportText": {
+    "message": "גיבויים שיובאו ייפתחו בחלונות חדשים ולא ידרסו דבר.\nאפשר לייבא גם גיבויים מהתוסף הישן \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "ייצוא"
+  },
+  "optionsBackupExportText": {
+    "message": "ייתכן שהחלק הזה יהפוך למיותר כשיתאפשר ניהול הפעלות תקין ב-Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "שמירת גיבוי"
+  },
+  "optionsStatistics": {
+    "message": "סטטיסטיקה"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "מספר הלשוניות:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (פעילות: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "גודל מטמון התמונות הממוזערות:"
+  },
+  "refreshGroups": {
+    "message": "רענון קבוצות"
+  },
+  "sendTabToGroup": {
+    "message": "שליחת הלשונית לקבוצה"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "משתמשים יכולים לעדכן קיצורים גם דרך האפשרות \"ניהול קיצורי הרחבות\" בכתובת about:addons ב-Firefox, כפי שרואים {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "בסרטון הדוגמה"
+  },
+  "optionsThemeAuto": {
+    "message": "לפי המערכת"
+  },
+  "optionsNativeGroups": {
+    "message": "קבוצות מובנות של הדפדפן"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "שימוש בקבוצות הלשוניות המובנות של הדפדפן"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "שימוש בקבוצות הלשוניות המובנות של הדפדפן לארגון חזותי ולכיווץ."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "קבוצות לשוניות מובנות אינן נתמכות בגרסת הדפדפן הזו (נדרש ממשק API להסתרת לשוניות)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "קבוצות לשוניות מובנות אינן נתמכות בגרסת הדפדפן הזו. יש לעדכן ל-Firefox 139 ומעלה או להשתמש ב-Chrome 89 ומעלה."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "הדפדפן שלך אינו תומך בממשקי ה-API הנדרשים לקבוצות לשוניות."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "הקבוצות המובנות הופעלו. הקבוצות מועברות..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "הקבוצות המובנות הושבתו. מתבצע ניקוי..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "קובץ לא תקין"
+  },
+  "byteSizeBytes": {
+    "message": "$1 בייטים"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "שחזור קבוצות לשוניות..."
+  },
+  "migrationTitle": {
+    "message": "העברת קבוצות לשוניות היברידיות"
+  },
+  "migrationChecking": {
+    "message": "בודק את מצב ההעברה..."
+  },
+  "migrationRun": {
+    "message": "הפעלת ההעברה עכשיו"
+  },
+  "migrationReset": {
+    "message": "איפוס דגל ההעברה"
+  },
+  "migrationCurrentGroups": {
+    "message": "הקבוצות הנוכחיות"
+  },
+  "migrationLoadingGroups": {
+    "message": "טוען קבוצות..."
+  },
+  "migrationComplete": {
+    "message": "✓ ההעברה הושלמה - כל הקבוצות הועברו למערכת ההיברידית"
+  },
+  "migrationPending": {
+    "message": "⚠ ההעברה ממתינה - הקבוצות טרם הועברו"
+  },
+  "migrationStatusError": {
+    "message": "שגיאה בבדיקת מצב ההעברה: $1"
+  },
+  "migrationNoGroups": {
+    "message": "לא נמצאו קבוצות בחלון הנוכחי"
+  },
+  "migrationGroupsError": {
+    "message": "שגיאה בטעינת הקבוצות: $1"
+  },
+  "migrationRunning": {
+    "message": "ההעברה מתבצעת..."
+  },
+  "migrationSucceeded": {
+    "message": "ההעברה הושלמה בהצלחה!"
+  },
+  "migrationFailed": {
+    "message": "ההעברה נכשלה: $1"
+  },
+  "migrationNoResponse": {
+    "message": "אין תגובה"
+  },
+  "migrationRunError": {
+    "message": "שגיאת העברה: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "לאפס את דגל ההעברה? כך ניתן יהיה להפעיל את ההעברה שוב."
+  },
+  "migrationResetSucceeded": {
+    "message": "דגל ההעברה אופס בהצלחה!"
+  },
+  "migrationResetFailed": {
+    "message": "האיפוס נכשל: $1"
+  },
+  "migrationResetError": {
+    "message": "שגיאת איפוס: $1"
+  },
+  "migrationGroup": {
+    "message": "קבוצה $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ הועברה (מזהה מובנה: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ לא הועברה"
+  },
+  "migrationGroupStatus": {
+    "message": "מצב: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "תצוגת קבוצות לשוניות"
+  }
+}

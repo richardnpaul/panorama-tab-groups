@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Yeni alan ekle"
+  },
+  "freeformButton": {
+    "message": "Serbest yerleşim"
+  },
+  "tilingButton": {
+    "message": "Otomatik yerleşim (döşeme)"
+  },
+  "settingsButton": {
+    "message": "Ayarlar"
+  },
+  "defaultGroupName": {
+    "message": "Grp"
+  },
+  "dragGroup": {
+    "message": "Alanı sürükle"
+  },
+  "closeGroup": {
+    "message": "Alanı kapat"
+  },
+  "closeGroupWarning": {
+    "message": "one=Bu alanı kapatmak içindeki $1 sekmeyi de kapatacak. Bunu yapmak istediğinizden emin misiniz?|other=Bu alanı kapatmak içindeki $1 sekmeyi de kapatacak. Bunu yapmak istediğinizden emin misiniz?"
+  },
+  "editGroup": {
+    "message": "Alanı düzenle"
+  },
+  "closeTab": {
+    "message": "Sekmeyi kapat"
+  },
+  "openNewTab": {
+    "message": "Yeni sekme aç"
+  },
+  "tabCount": {
+    "message": "one=$1 sekme|other=$1 sekme"
+  },
+  "searchForTab_placeholder": {
+    "message": "Sekme ara..."
+  },
+  "searchForTab_noResults": {
+    "message": "Sekme bulunamadı"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Klavye Kısayolları"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Kısayol seçenekleriyle ilgili ayrıntılı bilgi için tıklayınız."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Uygula"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Sıfırla"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Devre dışı bırak"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Etkinleştir"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Sekme Alanları Görünümünü Aç/Kapat"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Sonraki Sekme Alanına Geç"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Önceki Sekme Alanına Geç"
+  },
+  "optionsView": {
+    "message": "Görünüm"
+  },
+  "optionsViewFreeform": {
+    "message": "Serbest (klasik)"
+  },
+  "optionsViewPopup": {
+    "message": "Açılır pencere"
+  },
+  "optionsTheme": {
+    "message": "Arayüz"
+  },
+  "optionsThemeLight": {
+    "message": "açık"
+  },
+  "optionsThemeDark": {
+    "message": "koyu"
+  },
+  "optionsToolbar": {
+    "message": "Araç Çubuğu"
+  },
+  "optionsToolbarPosition": {
+    "message": "Konum"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "üst"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "sağ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "alt"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "sol"
+  },
+  "optionsBackup": {
+    "message": "Yedekleme"
+  },
+  "optionsBackupImport": {
+    "message": "İçe Aktar"
+  },
+  "optionsBackupImportText": {
+    "message": "İçe aktarılan yedekler yeni pencerede açılır ve hiçbir sekmenin üstüne yazılmaz.\nEski \"Tab Groups\" eklentisinin yedeklerini de içer aktarabilirsiniz."
+  },
+  "optionsBackupExport": {
+    "message": "Dışa Aktar"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox tarafından sorunsuz oturum yönetimi olası duruma getirilirse bu özellik kaldırılabilir."
+  },
+  "optionsBackupExportButton": {
+    "message": "Yedeği kaydet"
+  },
+  "optionsStatistics": {
+    "message": "Sayısal Veriler"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Sekme Sayısı:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Etkin: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Küçük Görüntü Önbellek Boyutu:"
+  },
+  "refreshGroups": {
+    "message": "Alanları yenile"
+  },
+  "sendTabToGroup": {
+    "message": "Sekmeyi bir alana gönder"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Kullanıcılar, kısayolları Firefox'ta about:addons sayfasındaki \"Eklenti Kısayollarını Yönet\" seçeneğiyle de güncelleyebilir; {link} görüldüğü gibi."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "örnek videoda"
+  },
+  "optionsThemeAuto": {
+    "message": "Sistemi izle"
+  },
+  "optionsNativeGroups": {
+    "message": "Tarayıcının yerel alanları"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Tarayıcının yerel sekme alanlarını kullan"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Görsel düzenleme ve daraltma için tarayıcının yerel sekme alanlarını kullan."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Yerel sekme alanları bu tarayıcı sürümünde desteklenmiyor (sekme gizleme API'si gerekir)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Yerel sekme alanları bu tarayıcı sürümünde desteklenmiyor. Lütfen Firefox 139+ sürümüne güncelleyin veya Chrome 89+ kullanın."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Tarayıcınız sekme alanları için gereken API'leri desteklemiyor."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Yerel alanlar etkinleştirildi. Alanlar taşınıyor..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Yerel alanlar devre dışı bırakıldı. Temizleniyor..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Geçersiz dosya"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bayt"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Sekme alanları geri yükleniyor..."
+  },
+  "migrationTitle": {
+    "message": "Karma Sekme Alanlarının Taşınması"
+  },
+  "migrationChecking": {
+    "message": "Taşıma durumu denetleniyor..."
+  },
+  "migrationRun": {
+    "message": "Taşımayı şimdi çalıştır"
+  },
+  "migrationReset": {
+    "message": "Taşıma bayrağını sıfırla"
+  },
+  "migrationCurrentGroups": {
+    "message": "Geçerli alanlar"
+  },
+  "migrationLoadingGroups": {
+    "message": "Alanlar yükleniyor..."
+  },
+  "migrationComplete": {
+    "message": "✓ Taşıma tamamlandı - Tüm alanlar karma sisteme taşındı"
+  },
+  "migrationPending": {
+    "message": "⚠ Taşıma bekliyor - Alanlar henüz taşınmadı"
+  },
+  "migrationStatusError": {
+    "message": "Taşıma durumu denetlenirken hata: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Geçerli pencerede alan bulunamadı"
+  },
+  "migrationGroupsError": {
+    "message": "Alanlar yüklenirken hata: $1"
+  },
+  "migrationRunning": {
+    "message": "Taşıma çalışıyor..."
+  },
+  "migrationSucceeded": {
+    "message": "Taşıma başarıyla tamamlandı!"
+  },
+  "migrationFailed": {
+    "message": "Taşıma başarısız oldu: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Yanıt yok"
+  },
+  "migrationRunError": {
+    "message": "Taşıma hatası: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Taşıma bayrağı sıfırlansın mı? Bu, taşımanın yeniden çalıştırılmasına izin verir."
+  },
+  "migrationResetSucceeded": {
+    "message": "Taşıma bayrağı başarıyla sıfırlandı!"
+  },
+  "migrationResetFailed": {
+    "message": "Sıfırlama başarısız oldu: $1"
+  },
+  "migrationResetError": {
+    "message": "Sıfırlama hatası: $1"
+  },
+  "migrationGroup": {
+    "message": "Alan $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Taşındı (yerel kimlik: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Taşınmadı"
+  },
+  "migrationGroupStatus": {
+    "message": "Durum: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Sekme Alanları Görünümü"
+  }
+}

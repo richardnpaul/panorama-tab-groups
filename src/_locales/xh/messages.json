@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Yongeza iqela elitsha"
+  },
+  "freeformButton": {
+    "message": "Uhlengahlengiso lweenkululeko"
+  },
+  "tilingButton": {
+    "message": "Uhlengahlengiso oluzenzekelayo (iithayile)"
+  },
+  "settingsButton": {
+    "message": "Useto"
+  },
+  "defaultGroupName": {
+    "message": "Iqela"
+  },
+  "dragGroup": {
+    "message": "Rhuqa iqela"
+  },
+  "closeGroup": {
+    "message": "Vala iqela"
+  },
+  "closeGroupWarning": {
+    "message": "one=Ukuvala eli qela kuya kuvala ithebhu ye-$1 ekulo. Ngaba uqinisekile ukuba ufuna ukwenza oku?|other=Ukuvala eli qela kuya kuvala iithebhu ezi-$1 ezikulo. Ngaba uqinisekile ukuba ufuna ukwenza oku?"
+  },
+  "editGroup": {
+    "message": "Hlela iqela"
+  },
+  "closeTab": {
+    "message": "Vala ithebhu"
+  },
+  "openNewTab": {
+    "message": "Vula ithebhu entsha"
+  },
+  "tabCount": {
+    "message": "one=ithebhu e-$1|other=iithebhu ezi-$1"
+  },
+  "searchForTab_placeholder": {
+    "message": "Khangela ithebhu..."
+  },
+  "searchForTab_noResults": {
+    "message": "Akukho thebhu ifunyenweyo"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Izinqumleli zebhodi yezitshixo"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Ifomathi yenketho yesinqumleli ichazwe apha."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Hlaziya"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Seta kwakhona"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Yenza ingasebenzi"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Yenza isebenze"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Tshintsha imbonakalo yamaqela eethebhu"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Yenza isebenze iqela leethebhu elilandelayo"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Yenza isebenze iqela leethebhu elandulelayo"
+  },
+  "optionsView": {
+    "message": "Imbonakalo"
+  },
+  "optionsViewFreeform": {
+    "message": "Yenkululeko (yakudala)"
+  },
+  "optionsViewPopup": {
+    "message": "Ifestile evelayo"
+  },
+  "optionsTheme": {
+    "message": "Ithiyma"
+  },
+  "optionsThemeLight": {
+    "message": "ukukhanya"
+  },
+  "optionsThemeDark": {
+    "message": "ubumnyama"
+  },
+  "optionsToolbar": {
+    "message": "Ibha yezixhobo"
+  },
+  "optionsToolbarPosition": {
+    "message": "Indawo"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "phezulu"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ekunene"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ezantsi"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ekhohlo"
+  },
+  "optionsBackup": {
+    "message": "Isitshixo sokukhuseleka"
+  },
+  "optionsBackupImport": {
+    "message": "Ngenisa"
+  },
+  "optionsBackupImportText": {
+    "message": "Izitshixo zokukhuseleka ezingeniswe ziza kuvulwa kwiifestile ezintsha kwaye aziyi kubhala phezu kwanto.\nUnako nokungenisa izitshixo zokukhuseleka kwi-add-on endala ye-\"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "Khupha"
+  },
+  "optionsBackupExportText": {
+    "message": "Eli candelo linokungabi sabalulekanga xa ulawulo olufanelekileyo lweeseshoni lusenzeka kwi-Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Gcina isitshixo sokukhuseleka"
+  },
+  "optionsStatistics": {
+    "message": "Izibalo"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Inani leethebhu:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Ezisebenzayo: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Ubungakanani be-cache yeethumbnail:"
+  },
+  "refreshGroups": {
+    "message": "Hlaziya amaqela"
+  },
+  "sendTabToGroup": {
+    "message": "Thumela ithebhu kwiqela"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Abasebenzisi banokuhlaziya izinqumleli ngenketho ethi \"Lawula izinqumleli zolwandiso\" kwi-about:addons kwi-Firefox, njengoko kubonakala {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "kwividiyo yomzekelo"
+  },
+  "optionsThemeAuto": {
+    "message": "Landela inkqubo"
+  },
+  "optionsNativeGroups": {
+    "message": "Amaqela esiXelisi ngokwaso"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Sebenzisa amaqela eethebhu esiXelisi ngokwaso"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Sebenzisa amaqela eethebhu esiXelisi ngokwaso ukulungiselela okubonakalayo nokubumba."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Amaqela eethebhu esiXelisi ngokwaso akaxhaswa kolu hlobo lwesiXelisi (kufuneka i-API yokufihla iithebhu)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Amaqela eethebhu esiXelisi ngokwaso akaxhaswa kolu hlobo lwesiXelisi. Nceda uhlaziye ukuya kwi-Firefox 139+ okanye usebenzise i-Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Isiphequluli sakho asixhasi ii-API ezifunekayo kumaqela eethebhu."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Amaqela ngokwawo asebenzisiwe. Kuhanjiswa amaqela..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Amaqela ngokwawo ayekisiwe. Kuyacocwa..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ifayile engasebenziyo"
+  },
+  "byteSizeBytes": {
+    "message": "iibhayithi ezi-$1"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Kubuyiselwa amaqela eethebhu..."
+  },
+  "migrationTitle": {
+    "message": "Ukuhanjiswa kwamaqela eethebhu ahlanganisiweyo"
+  },
+  "migrationChecking": {
+    "message": "Kuhlolwa imeko yokuhanjiswa..."
+  },
+  "migrationRun": {
+    "message": "Qhuba ukuhanjiswa ngoku"
+  },
+  "migrationReset": {
+    "message": "Seta kwakhona iflegi yokuhanjiswa"
+  },
+  "migrationCurrentGroups": {
+    "message": "Amaqela akhoyo ngoku"
+  },
+  "migrationLoadingGroups": {
+    "message": "Kulayishwa amaqela..."
+  },
+  "migrationComplete": {
+    "message": "✓ Ukuhanjiswa kugqityiwe - Onke amaqela ahanjiselwe kwinkqubo ehlanganisiweyo"
+  },
+  "migrationPending": {
+    "message": "⚠ Ukuhanjiswa kulindile - Amaqela akahanjiswa okwangoku"
+  },
+  "migrationStatusError": {
+    "message": "Impazamo ekuhloleni imeko yokuhanjiswa: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Akukho maqela afunyenweyo kwifestile yangoku"
+  },
+  "migrationGroupsError": {
+    "message": "Impazamo ekulayisheni amaqela: $1"
+  },
+  "migrationRunning": {
+    "message": "Kuqhutywa ukuhanjiswa..."
+  },
+  "migrationSucceeded": {
+    "message": "Ukuhanjiswa kugqityiwe ngempumelelo!"
+  },
+  "migrationFailed": {
+    "message": "Ukuhanjiswa kusilele: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Akukho mpendulo"
+  },
+  "migrationRunError": {
+    "message": "Impazamo yokuhanjiswa: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Seta kwakhona iflegi yokuhanjiswa? Oku kuya kuvumela ukuba ukuhanjiswa kuqhutywe kwakhona."
+  },
+  "migrationResetSucceeded": {
+    "message": "Iflegi yokuhanjiswa isetwe kwakhona ngempumelelo!"
+  },
+  "migrationResetFailed": {
+    "message": "Ukuseta kwakhona kusilele: $1"
+  },
+  "migrationResetError": {
+    "message": "Impazamo yokuseta kwakhona: $1"
+  },
+  "migrationGroup": {
+    "message": "Iqela $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Lihanjisiwe (I-ID yaso: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Alihanjiswanga"
+  },
+  "migrationGroupStatus": {
+    "message": "Imeko: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Imbonakalo yamaqela eethebhu"
+  }
+}

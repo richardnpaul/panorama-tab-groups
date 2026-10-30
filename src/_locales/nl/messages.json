@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Nieuwe groep toevoegen"
+  },
+  "freeformButton": {
+    "message": "Vrije indeling"
+  },
+  "tilingButton": {
+    "message": "Automatische indeling (tegels)"
+  },
+  "settingsButton": {
+    "message": "Instellingen"
+  },
+  "defaultGroupName": {
+    "message": "Grp."
+  },
+  "dragGroup": {
+    "message": "Groep slepen"
+  },
+  "closeGroup": {
+    "message": "Groep sluiten"
+  },
+  "closeGroupWarning": {
+    "message": "one=Als je deze groep sluit, wordt het $1 tabblad erin ook gesloten. Weet je zeker dat je dit wilt doen?|other=Als je deze groep sluit, worden de $1 tabbladen erin ook gesloten. Weet je zeker dat je dit wilt doen?"
+  },
+  "editGroup": {
+    "message": "Groep bewerken"
+  },
+  "closeTab": {
+    "message": "Tabblad sluiten"
+  },
+  "openNewTab": {
+    "message": "Nieuw tabblad openen"
+  },
+  "tabCount": {
+    "message": "one=$1 tabblad|other=$1 tabbladen"
+  },
+  "searchForTab_placeholder": {
+    "message": "Zoeken naar een tabblad..."
+  },
+  "searchForTab_noResults": {
+    "message": "Geen tabbladen gevonden"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Sneltoetsen"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "De notatie van de sneltoetsoptie wordt hier beschreven."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Bijwerken"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Herstellen"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Uitschakelen"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Inschakelen"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Weergave van tabbladgroepen in-/uitschakelen"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Volgende tabbladgroep activeren"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Vorige tabbladgroep activeren"
+  },
+  "optionsView": {
+    "message": "Weergave"
+  },
+  "optionsViewFreeform": {
+    "message": "Vrij (klassiek)"
+  },
+  "optionsViewPopup": {
+    "message": "Pop-up"
+  },
+  "optionsTheme": {
+    "message": "Thema"
+  },
+  "optionsThemeLight": {
+    "message": "licht"
+  },
+  "optionsThemeDark": {
+    "message": "donker"
+  },
+  "optionsToolbar": {
+    "message": "Werkbalk"
+  },
+  "optionsToolbarPosition": {
+    "message": "Positie"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "boven"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "rechts"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "onder"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "links"
+  },
+  "optionsBackup": {
+    "message": "Back-up"
+  },
+  "optionsBackupImport": {
+    "message": "Importeren"
+  },
+  "optionsBackupImportText": {
+    "message": "Geïmporteerde back-ups worden in nieuwe vensters geopend en overschrijven niets.\nJe kunt ook back-ups van de oude add-on 'Tab Groups' importeren."
+  },
+  "optionsBackupExport": {
+    "message": "Exporteren"
+  },
+  "optionsBackupExportText": {
+    "message": "Dit gedeelte is mogelijk overbodig zodra goed sessiebeheer in Firefox mogelijk is."
+  },
+  "optionsBackupExportButton": {
+    "message": "Back-up opslaan"
+  },
+  "optionsStatistics": {
+    "message": "Statistieken"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Aantal tabbladen:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Actief: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Grootte van miniatuurcache:"
+  },
+  "refreshGroups": {
+    "message": "Groepen vernieuwen"
+  },
+  "sendTabToGroup": {
+    "message": "Tabblad naar groep sturen"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Gebruikers kunnen sneltoetsen ook bijwerken via de optie 'Sneltoetsen voor extensies beheren' op about:addons in Firefox, zoals te zien is {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "in de voorbeeldvideo"
+  },
+  "optionsThemeAuto": {
+    "message": "Systeem volgen"
+  },
+  "optionsNativeGroups": {
+    "message": "Eigen groepen van de browser"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Eigen tabbladgroepen van de browser gebruiken"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Gebruik de eigen tabbladgroepen van de browser voor visuele ordening en het samenvouwen."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Eigen tabbladgroepen worden niet ondersteund in deze browserversie (de API voor het verbergen van tabbladen is vereist)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Eigen tabbladgroepen worden niet ondersteund in deze browserversie. Werk bij naar Firefox 139+ of gebruik Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Je browser ondersteunt de API's die nodig zijn voor tabbladgroepen niet."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Eigen groepen ingeschakeld. Groepen worden gemigreerd..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Eigen groepen uitgeschakeld. Opruimen..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ongeldig bestand"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bytes"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Tabbladgroepen herstellen..."
+  },
+  "migrationTitle": {
+    "message": "Migratie van hybride tabbladgroepen"
+  },
+  "migrationChecking": {
+    "message": "Migratiestatus controleren..."
+  },
+  "migrationRun": {
+    "message": "Migratie nu uitvoeren"
+  },
+  "migrationReset": {
+    "message": "Migratievlag herstellen"
+  },
+  "migrationCurrentGroups": {
+    "message": "Huidige groepen"
+  },
+  "migrationLoadingGroups": {
+    "message": "Groepen laden..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migratie voltooid - alle groepen zijn gemigreerd naar het hybride systeem"
+  },
+  "migrationPending": {
+    "message": "⚠ Migratie in afwachting - groepen zijn nog niet gemigreerd"
+  },
+  "migrationStatusError": {
+    "message": "Fout bij het controleren van de migratiestatus: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Geen groepen gevonden in het huidige venster"
+  },
+  "migrationGroupsError": {
+    "message": "Fout bij het laden van groepen: $1"
+  },
+  "migrationRunning": {
+    "message": "Migratie wordt uitgevoerd..."
+  },
+  "migrationSucceeded": {
+    "message": "Migratie succesvol voltooid!"
+  },
+  "migrationFailed": {
+    "message": "Migratie mislukt: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Geen reactie"
+  },
+  "migrationRunError": {
+    "message": "Migratiefout: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Migratievlag herstellen? Hierdoor kan de migratie opnieuw worden uitgevoerd."
+  },
+  "migrationResetSucceeded": {
+    "message": "Migratievlag succesvol hersteld!"
+  },
+  "migrationResetFailed": {
+    "message": "Herstellen mislukt: $1"
+  },
+  "migrationResetError": {
+    "message": "Fout bij herstellen: $1"
+  },
+  "migrationGroup": {
+    "message": "Groep $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Gemigreerd (eigen ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Niet gemigreerd"
+  },
+  "migrationGroupStatus": {
+    "message": "Status: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Weergave van tabbladgroepen"
+  }
+}

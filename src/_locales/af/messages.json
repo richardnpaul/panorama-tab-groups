@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Voeg nuwe groep by"
+  },
+  "freeformButton": {
+    "message": "Vrye belyning"
+  },
+  "tilingButton": {
+    "message": "Outomatiese (teël-)belyning"
+  },
+  "settingsButton": {
+    "message": "Instellings"
+  },
+  "defaultGroupName": {
+    "message": "Gr."
+  },
+  "dragGroup": {
+    "message": "Sleep groep"
+  },
+  "closeGroup": {
+    "message": "Maak groep toe"
+  },
+  "closeGroupWarning": {
+    "message": "one=As jy hierdie groep toemaak, word die $1 oortjie daarin ook toegemaak. Is jy seker jy wil dit doen?|other=As jy hierdie groep toemaak, word die $1 oortjies daarin ook toegemaak. Is jy seker jy wil dit doen?"
+  },
+  "editGroup": {
+    "message": "Wysig groep"
+  },
+  "closeTab": {
+    "message": "Maak oortjie toe"
+  },
+  "openNewTab": {
+    "message": "Maak nuwe oortjie oop"
+  },
+  "tabCount": {
+    "message": "one=$1 oortjie|other=$1 oortjies"
+  },
+  "searchForTab_placeholder": {
+    "message": "Soek na 'n oortjie..."
+  },
+  "searchForTab_noResults": {
+    "message": "Geen oortjies gevind nie"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Sleutelbordkortpaaie"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Die formaat vir die kortpaadopsie word hier beskryf."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Werk by"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Stel terug"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Deaktiveer"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Aktiveer"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Wissel Oortjiegroepe-aansig"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktiveer die volgende oortjiegroep"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktiveer die vorige oortjiegroep"
+  },
+  "optionsView": {
+    "message": "Aansig"
+  },
+  "optionsViewFreeform": {
+    "message": "Vry (klassiek)"
+  },
+  "optionsViewPopup": {
+    "message": "Opspringvenster"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "lig"
+  },
+  "optionsThemeDark": {
+    "message": "donker"
+  },
+  "optionsToolbar": {
+    "message": "Nutsbalk"
+  },
+  "optionsToolbarPosition": {
+    "message": "Posisie"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "bo"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "regs"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "onder"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "links"
+  },
+  "optionsBackup": {
+    "message": "Rugsteun"
+  },
+  "optionsBackupImport": {
+    "message": "Voer in"
+  },
+  "optionsBackupImportText": {
+    "message": "Ingevoerde rugsteune word in nuwe vensters oopgemaak en oorskryf niks nie.\nJy kan ook rugsteune van die ou \"Tab Groups\"-byvoeging invoer."
+  },
+  "optionsBackupExport": {
+    "message": "Voer uit"
+  },
+  "optionsBackupExportText": {
+    "message": "Hierdie afdeling word dalk oorbodig sodra behoorlike sessiebestuur in Firefox moontlik is."
+  },
+  "optionsBackupExportButton": {
+    "message": "Stoor rugsteun"
+  },
+  "optionsStatistics": {
+    "message": "Statistiek"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Aantal oortjies:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktief: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Grootte van duimnaelkas:"
+  },
+  "refreshGroups": {
+    "message": "Verfris groepe"
+  },
+  "sendTabToGroup": {
+    "message": "Stuur oortjie na groep"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Gebruikers kan ook kortpaaie opdateer deur die opsie \"Bestuur uitbreidingskortpaaie\" by about:addons in Firefox, soos gesien {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "in die voorbeeldvideo"
+  },
+  "optionsThemeAuto": {
+    "message": "Volg stelsel"
+  },
+  "optionsNativeGroups": {
+    "message": "Blaaier se eie groepe"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Gebruik die blaaier se eie oortjiegroepe"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Gebruik die blaaier se eie oortjiegroepe vir visuele organisering en invou."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Die blaaier se eie oortjiegroepe word nie in hierdie blaaierweergawe ondersteun nie (vereis die oortjie-versteek-API)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Die blaaier se eie oortjiegroepe word nie in hierdie blaaierweergawe ondersteun nie. Gradeer asseblief op na Firefox 139+ of gebruik Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Jou blaaier ondersteun nie die API's wat vir oortjiegroepe nodig is nie."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Blaaier se eie groepe geaktiveer. Groepe word gemigreer..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Blaaier se eie groepe gedeaktiveer. Word opgeruim..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ongeldige lêer"
+  },
+  "byteSizeBytes": {
+    "message": "$1 grepe"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Oortjiegroepe word herstel..."
+  },
+  "migrationTitle": {
+    "message": "Hibriede oortjiegroepe-migrasie"
+  },
+  "migrationChecking": {
+    "message": "Migrasiestatus word nagegaan..."
+  },
+  "migrationRun": {
+    "message": "Voer migrasie nou uit"
+  },
+  "migrationReset": {
+    "message": "Stel migrasievlag terug"
+  },
+  "migrationCurrentGroups": {
+    "message": "Huidige groepe"
+  },
+  "migrationLoadingGroups": {
+    "message": "Groepe word gelaai..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migrasie voltooi - Alle groepe is na die hibriede stelsel gemigreer"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrasie hangend - Groepe is nog nie gemigreer nie"
+  },
+  "migrationStatusError": {
+    "message": "Fout met nagaan van migrasiestatus: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Geen groepe in die huidige venster gevind nie"
+  },
+  "migrationGroupsError": {
+    "message": "Fout met laai van groepe: $1"
+  },
+  "migrationRunning": {
+    "message": "Migrasie word uitgevoer..."
+  },
+  "migrationSucceeded": {
+    "message": "Migrasie suksesvol voltooi!"
+  },
+  "migrationFailed": {
+    "message": "Migrasie het misluk: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Geen antwoord"
+  },
+  "migrationRunError": {
+    "message": "Migrasiefout: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Migrasievlag terugstel? Dit sal toelaat dat migrasie weer uitgevoer word."
+  },
+  "migrationResetSucceeded": {
+    "message": "Migrasievlag suksesvol teruggestel!"
+  },
+  "migrationResetFailed": {
+    "message": "Terugstelling het misluk: $1"
+  },
+  "migrationResetError": {
+    "message": "Terugstellingsfout: $1"
+  },
+  "migrationGroup": {
+    "message": "Groep $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Gemigreer (Eie ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Nie gemigreer nie"
+  },
+  "migrationGroupStatus": {
+    "message": "Status: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Oortjiegroepe-aansig"
+  }
+}

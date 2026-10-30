@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Gehitu talde berria"
+  },
+  "freeformButton": {
+    "message": "Antolaketa librea"
+  },
+  "tilingButton": {
+    "message": "Antolaketa automatikoa (lauzak)"
+  },
+  "settingsButton": {
+    "message": "Ezarpenak"
+  },
+  "defaultGroupName": {
+    "message": "Tld."
+  },
+  "dragGroup": {
+    "message": "Arrastatu taldea"
+  },
+  "closeGroup": {
+    "message": "Itxi taldea"
+  },
+  "closeGroupWarning": {
+    "message": "one=Talde hau ixteak bere barruko $1 fitxa itxiko du. Ziur zaude hori egin nahi duzula?|other=Talde hau ixteak bere barruko $1 fitxak itxiko ditu. Ziur zaude hori egin nahi duzula?"
+  },
+  "editGroup": {
+    "message": "Editatu taldea"
+  },
+  "closeTab": {
+    "message": "Itxi fitxa"
+  },
+  "openNewTab": {
+    "message": "Ireki fitxa berria"
+  },
+  "tabCount": {
+    "message": "one=$1 fitxa|other=$1 fitxa"
+  },
+  "searchForTab_placeholder": {
+    "message": "Bilatu fitxa bat..."
+  },
+  "searchForTab_noResults": {
+    "message": "Ez da fitxarik aurkitu"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Teklatu-lasterbideak"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Lasterbide-aukeraren formatua hemen azaltzen da."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Eguneratu"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Berrezarri"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Desgaitu"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Gaitu"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Txandakatu fitxa-taldeen ikuspegia"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktibatu hurrengo fitxa-taldea"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktibatu aurreko fitxa-taldea"
+  },
+  "optionsView": {
+    "message": "Ikuspegia"
+  },
+  "optionsViewFreeform": {
+    "message": "Librea (klasikoa)"
+  },
+  "optionsViewPopup": {
+    "message": "Laster-leihoa"
+  },
+  "optionsTheme": {
+    "message": "Gaia"
+  },
+  "optionsThemeLight": {
+    "message": "argia"
+  },
+  "optionsThemeDark": {
+    "message": "iluna"
+  },
+  "optionsToolbar": {
+    "message": "Tresna-barra"
+  },
+  "optionsToolbarPosition": {
+    "message": "Posizioa"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "goian"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "eskuinean"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "behean"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ezkerrean"
+  },
+  "optionsBackup": {
+    "message": "Babeskopia"
+  },
+  "optionsBackupImport": {
+    "message": "Inportatu"
+  },
+  "optionsBackupImportText": {
+    "message": "Inportatutako babeskopiak leiho berrietan irekiko dira, eta ez dute ezer gainidatziko.\n\"Tab Groups\" gehigarri zaharraren babeskopiak ere inporta ditzakezu."
+  },
+  "optionsBackupExport": {
+    "message": "Esportatu"
+  },
+  "optionsBackupExportText": {
+    "message": "Atal hau alferrikakoa izan daiteke Firefoxen saio-kudeaketa egokia posible denean."
+  },
+  "optionsBackupExportButton": {
+    "message": "Gorde babeskopia"
+  },
+  "optionsStatistics": {
+    "message": "Estatistikak"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Fitxa kopurua:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktiboak: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Miniaturen cachearen tamaina:"
+  },
+  "refreshGroups": {
+    "message": "Freskatu taldeak"
+  },
+  "sendTabToGroup": {
+    "message": "Bidali fitxa talde batera"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Erabiltzaileek lasterbideak Firefoxeko about:addons orriko \"Kudeatu hedapenen lasterbideak\" aukeraren bidez ere eguneratu ditzakete, {link} ikusten den bezala."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "adibideko bideoan"
+  },
+  "optionsThemeAuto": {
+    "message": "Jarraitu sistemari"
+  },
+  "optionsNativeGroups": {
+    "message": "Nabigatzailearen talde natiboak"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Erabili nabigatzailearen fitxa-talde natiboak"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Erabili nabigatzailearen fitxa-talde natiboak antolaketa bisualerako eta tolesteko."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Fitxa-talde natiboak ez dira onartzen nabigatzailearen bertsio honetan (fitxak ezkutatzeko APIa behar da)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Fitxa-talde natiboak ez dira onartzen nabigatzailearen bertsio honetan. Eguneratu Firefox 139+ bertsiora edo erabili Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Zure nabigatzaileak ez ditu onartzen fitxa-taldeetarako beharrezko APIak."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Talde natiboak gaituta. Taldeak migratzen..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Talde natiboak desgaituta. Garbitzen..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Fitxategi baliogabea"
+  },
+  "byteSizeBytes": {
+    "message": "$1 byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Fitxa-taldeak leheneratzen..."
+  },
+  "migrationTitle": {
+    "message": "Fitxa-talde hibridoen migrazioa"
+  },
+  "migrationChecking": {
+    "message": "Migrazioaren egoera egiaztatzen..."
+  },
+  "migrationRun": {
+    "message": "Exekutatu migrazioa orain"
+  },
+  "migrationReset": {
+    "message": "Berrezarri migrazio-bandera"
+  },
+  "migrationCurrentGroups": {
+    "message": "Uneko taldeak"
+  },
+  "migrationLoadingGroups": {
+    "message": "Taldeak kargatzen..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migrazioa amaitu da - Talde guztiak sistema hibridora migratu dira"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrazioa zain dago - Taldeak ez dira oraindik migratu"
+  },
+  "migrationStatusError": {
+    "message": "Errorea migrazioaren egoera egiaztatzean: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Ez da talderik aurkitu uneko leihoan"
+  },
+  "migrationGroupsError": {
+    "message": "Errorea taldeak kargatzean: $1"
+  },
+  "migrationRunning": {
+    "message": "Migrazioa exekutatzen..."
+  },
+  "migrationSucceeded": {
+    "message": "Migrazioa ongi amaitu da!"
+  },
+  "migrationFailed": {
+    "message": "Migrazioak huts egin du: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Erantzunik ez"
+  },
+  "migrationRunError": {
+    "message": "Migrazio-errorea: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Migrazio-bandera berrezarri nahi duzu? Horrela migrazioa berriro exekutatu ahal izango da."
+  },
+  "migrationResetSucceeded": {
+    "message": "Migrazio-bandera ongi berrezarri da!"
+  },
+  "migrationResetFailed": {
+    "message": "Berrezartzeak huts egin du: $1"
+  },
+  "migrationResetError": {
+    "message": "Berrezartze-errorea: $1"
+  },
+  "migrationGroup": {
+    "message": "$1. taldea:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migratuta (ID natiboa: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Migratu gabe"
+  },
+  "migrationGroupStatus": {
+    "message": "Egoera: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Fitxa-taldeen ikuspegia"
+  }
+}

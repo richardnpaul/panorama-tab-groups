@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Lisää uusi ryhmä"
+  },
+  "freeformButton": {
+    "message": "Vapaa asettelu"
+  },
+  "tilingButton": {
+    "message": "Automaattinen (ruudutettu) asettelu"
+  },
+  "settingsButton": {
+    "message": "Asetukset"
+  },
+  "defaultGroupName": {
+    "message": "Ryhmä"
+  },
+  "dragGroup": {
+    "message": "Vedä ryhmää"
+  },
+  "closeGroup": {
+    "message": "Sulje ryhmä"
+  },
+  "closeGroupWarning": {
+    "message": "one=Ryhmän sulkeminen sulkee siinä olevan $1 välilehden. Haluatko varmasti tehdä niin?|other=Ryhmän sulkeminen sulkee siinä olevat $1 välilehteä. Haluatko varmasti tehdä niin?"
+  },
+  "editGroup": {
+    "message": "Muokkaa ryhmää"
+  },
+  "closeTab": {
+    "message": "Sulje välilehti"
+  },
+  "openNewTab": {
+    "message": "Avaa uusi välilehti"
+  },
+  "tabCount": {
+    "message": "one=$1 välilehti|other=$1 välilehteä"
+  },
+  "searchForTab_placeholder": {
+    "message": "Etsi välilehteä..."
+  },
+  "searchForTab_noResults": {
+    "message": "Välilehtiä ei löytynyt"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Pikanäppäimet"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Pikanäppäinasetuksen muoto on kuvattu täällä."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Päivitä"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Palauta"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Poista käytöstä"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Ota käyttöön"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Näytä tai piilota välilehtiryhmien näkymä"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktivoi seuraava välilehtiryhmä"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktivoi edellinen välilehtiryhmä"
+  },
+  "optionsView": {
+    "message": "Näkymä"
+  },
+  "optionsViewFreeform": {
+    "message": "Vapaa (perinteinen)"
+  },
+  "optionsViewPopup": {
+    "message": "Ponnahdusikkuna"
+  },
+  "optionsTheme": {
+    "message": "Teema"
+  },
+  "optionsThemeLight": {
+    "message": "vaalea"
+  },
+  "optionsThemeDark": {
+    "message": "tumma"
+  },
+  "optionsToolbar": {
+    "message": "Työkalupalkki"
+  },
+  "optionsToolbarPosition": {
+    "message": "Sijainti"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ylhäällä"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "oikealla"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "alhaalla"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "vasemmalla"
+  },
+  "optionsBackup": {
+    "message": "Varmuuskopio"
+  },
+  "optionsBackupImport": {
+    "message": "Tuo"
+  },
+  "optionsBackupImportText": {
+    "message": "Tuodut varmuuskopiot avautuvat uusiin ikkunoihin eivätkä korvaa mitään.\nVoit tuoda varmuuskopioita myös vanhasta \"Tab Groups\" -lisäosasta."
+  },
+  "optionsBackupExport": {
+    "message": "Vie"
+  },
+  "optionsBackupExportText": {
+    "message": "Tämä osio saattaa käydä tarpeettomaksi, kun Firefoxissa on mahdollista hallita istuntoja kunnolla."
+  },
+  "optionsBackupExportButton": {
+    "message": "Tallenna varmuuskopio"
+  },
+  "optionsStatistics": {
+    "message": "Tilastot"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Välilehtien määrä:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktiiviset: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Pikkukuvien välimuistin koko:"
+  },
+  "refreshGroups": {
+    "message": "Päivitä ryhmät"
+  },
+  "sendTabToGroup": {
+    "message": "Lähetä välilehti ryhmään"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Käyttäjät voivat päivittää pikanäppäimiä myös Firefoxin about:addons-sivun \"Hallitse laajennusten pikanäppäimiä\" -valinnalla, kuten nähdään {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "esimerkkivideossa"
+  },
+  "optionsThemeAuto": {
+    "message": "Seuraa järjestelmää"
+  },
+  "optionsNativeGroups": {
+    "message": "Selaimen omat ryhmät"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Käytä selaimen omia välilehtiryhmiä"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Käytä selaimen omia välilehtiryhmiä visuaaliseen järjestämiseen ja tiivistämiseen."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Selaimen omia välilehtiryhmiä ei tueta tässä selainversiossa (vaatii välilehtien piilotus -rajapinnan)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Selaimen omia välilehtiryhmiä ei tueta tässä selainversiossa. Päivitä Firefox 139+ -versioon tai käytä Chrome 89+ -versiota."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Selaimesi ei tue välilehtiryhmiin tarvittavia rajapintoja."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Selaimen omat ryhmät otettu käyttöön. Siirretään ryhmiä..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Selaimen omat ryhmät poistettu käytöstä. Siivotaan..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Virheellinen tiedosto"
+  },
+  "byteSizeBytes": {
+    "message": "$1 tavua"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Palautetaan välilehtiryhmiä..."
+  },
+  "migrationTitle": {
+    "message": "Hybridivälilehtiryhmien siirto"
+  },
+  "migrationChecking": {
+    "message": "Tarkistetaan siirron tilaa..."
+  },
+  "migrationRun": {
+    "message": "Suorita siirto nyt"
+  },
+  "migrationReset": {
+    "message": "Nollaa siirtolippu"
+  },
+  "migrationCurrentGroups": {
+    "message": "Nykyiset ryhmät"
+  },
+  "migrationLoadingGroups": {
+    "message": "Ladataan ryhmiä..."
+  },
+  "migrationComplete": {
+    "message": "✓ Siirto valmis - kaikki ryhmät on siirretty hybridijärjestelmään"
+  },
+  "migrationPending": {
+    "message": "⚠ Siirto odottaa - ryhmiä ei ole vielä siirretty"
+  },
+  "migrationStatusError": {
+    "message": "Virhe siirron tilan tarkistuksessa: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Nykyisestä ikkunasta ei löytynyt ryhmiä"
+  },
+  "migrationGroupsError": {
+    "message": "Virhe ryhmien latauksessa: $1"
+  },
+  "migrationRunning": {
+    "message": "Suoritetaan siirtoa..."
+  },
+  "migrationSucceeded": {
+    "message": "Siirto onnistui!"
+  },
+  "migrationFailed": {
+    "message": "Siirto epäonnistui: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Ei vastausta"
+  },
+  "migrationRunError": {
+    "message": "Siirtovirhe: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Nollataanko siirtolippu? Tämä sallii siirron suorittamisen uudelleen."
+  },
+  "migrationResetSucceeded": {
+    "message": "Siirtolippu nollattu!"
+  },
+  "migrationResetFailed": {
+    "message": "Nollaus epäonnistui: $1"
+  },
+  "migrationResetError": {
+    "message": "Nollausvirhe: $1"
+  },
+  "migrationGroup": {
+    "message": "Ryhmä $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Siirretty (oma tunnus: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Ei siirretty"
+  },
+  "migrationGroupStatus": {
+    "message": "Tila: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Välilehtiryhmien näkymä"
+  }
+}

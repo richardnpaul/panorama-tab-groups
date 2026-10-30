@@ -1,6 +1,7 @@
 import { checkWindowSurvives } from '../core/grouping-safety.js';
 import { getColorForGroupId } from '../core/utils.js';
 import type { Group, GroupState } from '../ports/group-state.js';
+import type { I18n } from '../ports/i18n.js';
 import type { Logger } from '../ports/logger.js';
 import type { NativeGroups } from '../ports/native-groups.js';
 import type { Tabs } from '../ports/tabs.js';
@@ -16,6 +17,8 @@ export interface NativeGroupAssignmentDeps {
   >;
   // The address of the view page
   viewUrl: string;
+  // For the title of a group that has no name
+  i18n: Pick<I18n, 'getMessage'>;
   logger: Pick<Logger, 'debug' | 'error' | 'warn'>;
 }
 
@@ -46,6 +49,7 @@ export function createNativeGroupAssignment({
   groupState,
   nativeGroups,
   viewUrl,
+  i18n,
   logger,
 }: NativeGroupAssignmentDeps): NativeGroupAssignment {
   // The group was made in the window it was meant for. If not, the browser
@@ -111,7 +115,10 @@ export function createNativeGroupAssignment({
 
       const nativeGroupId = await nativeGroups.createFromTabs(tabIds);
       await nativeGroups.setAppearance(nativeGroupId, {
-        title: group.name === '' ? `Group ${String(group.id)}` : group.name,
+        title:
+          group.name === ''
+            ? `${i18n.getMessage('defaultGroupName')}${String(group.id)}`
+            : group.name,
         color: getColorForGroupId(group.id),
       });
 

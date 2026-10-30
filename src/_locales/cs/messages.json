@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Přidat novou skupinu"
+  },
+  "freeformButton": {
+    "message": "Volné rozmístění"
+  },
+  "tilingButton": {
+    "message": "Automatické (dlaždicové) rozmístění"
+  },
+  "settingsButton": {
+    "message": "Nastavení"
+  },
+  "defaultGroupName": {
+    "message": "Skup."
+  },
+  "dragGroup": {
+    "message": "Přetáhnout skupinu"
+  },
+  "closeGroup": {
+    "message": "Zavřít skupinu"
+  },
+  "closeGroupWarning": {
+    "message": "one=Zavřením této skupiny se zavře $1 karta, která v ní je. Opravdu to chcete udělat?|few=Zavřením této skupiny se zavřou $1 karty, které v ní jsou. Opravdu to chcete udělat?|other=Zavřením této skupiny se zavře $1 karet, které v ní jsou. Opravdu to chcete udělat?"
+  },
+  "editGroup": {
+    "message": "Upravit skupinu"
+  },
+  "closeTab": {
+    "message": "Zavřít kartu"
+  },
+  "openNewTab": {
+    "message": "Otevřít novou kartu"
+  },
+  "tabCount": {
+    "message": "one=$1 karta|few=$1 karty|other=$1 karet"
+  },
+  "searchForTab_placeholder": {
+    "message": "Hledat kartu..."
+  },
+  "searchForTab_noResults": {
+    "message": "Nebyly nalezeny žádné karty"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Klávesové zkratky"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Formát volby zkratky je popsán zde."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Aktualizovat"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Obnovit"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Zakázat"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Povolit"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Přepnout zobrazení skupin karet"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktivovat další skupinu karet"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktivovat předchozí skupinu karet"
+  },
+  "optionsView": {
+    "message": "Zobrazení"
+  },
+  "optionsViewFreeform": {
+    "message": "Volné (klasické)"
+  },
+  "optionsViewPopup": {
+    "message": "Vyskakovací okno"
+  },
+  "optionsTheme": {
+    "message": "Motiv"
+  },
+  "optionsThemeLight": {
+    "message": "světlý"
+  },
+  "optionsThemeDark": {
+    "message": "tmavý"
+  },
+  "optionsToolbar": {
+    "message": "Panel nástrojů"
+  },
+  "optionsToolbarPosition": {
+    "message": "Umístění"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "nahoře"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "vpravo"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "dole"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "vlevo"
+  },
+  "optionsBackup": {
+    "message": "Záloha"
+  },
+  "optionsBackupImport": {
+    "message": "Import"
+  },
+  "optionsBackupImportText": {
+    "message": "Importované zálohy se otevřou v nových oknech a nic se nepřepíše.\nMůžete také importovat zálohy ze starého doplňku „Tab Groups“."
+  },
+  "optionsBackupExport": {
+    "message": "Export"
+  },
+  "optionsBackupExportText": {
+    "message": "Tato část může být zbytečná, jakmile bude ve Firefoxu možná správná správa relací."
+  },
+  "optionsBackupExportButton": {
+    "message": "Uložit zálohu"
+  },
+  "optionsStatistics": {
+    "message": "Statistiky"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Počet karet:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktivní: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Velikost mezipaměti náhledů:"
+  },
+  "refreshGroups": {
+    "message": "Obnovit skupiny"
+  },
+  "sendTabToGroup": {
+    "message": "Poslat kartu do skupiny"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Uživatelé mohou zkratky upravit také pomocí volby „Spravovat zkratky rozšíření“ na about:addons ve Firefoxu, jak je vidět {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "v ukázkovém videu"
+  },
+  "optionsThemeAuto": {
+    "message": "Podle systému"
+  },
+  "optionsNativeGroups": {
+    "message": "Nativní skupiny prohlížeče"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Používat nativní skupiny karet prohlížeče"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Používat nativní skupiny karet prohlížeče pro vizuální uspořádání a sbalování."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Nativní skupiny karet nejsou v této verzi prohlížeče podporovány (vyžadují rozhraní API pro skrývání karet)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Nativní skupiny karet nejsou v této verzi prohlížeče podporovány. Aktualizujte na Firefox 139+ nebo použijte Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Váš prohlížeč nepodporuje rozhraní API potřebná pro skupiny karet."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Nativní skupiny povoleny. Skupiny se migrují..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Nativní skupiny zakázány. Probíhá úklid..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Neplatný soubor"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bajtů"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Obnovují se skupiny karet..."
+  },
+  "migrationTitle": {
+    "message": "Migrace hybridních skupin karet"
+  },
+  "migrationChecking": {
+    "message": "Kontroluje se stav migrace..."
+  },
+  "migrationRun": {
+    "message": "Spustit migraci nyní"
+  },
+  "migrationReset": {
+    "message": "Obnovit příznak migrace"
+  },
+  "migrationCurrentGroups": {
+    "message": "Aktuální skupiny"
+  },
+  "migrationLoadingGroups": {
+    "message": "Načítají se skupiny..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migrace dokončena - všechny skupiny byly převedeny do hybridního systému"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrace čeká - skupiny dosud nebyly převedeny"
+  },
+  "migrationStatusError": {
+    "message": "Chyba při kontrole stavu migrace: $1"
+  },
+  "migrationNoGroups": {
+    "message": "V aktuálním okně nebyly nalezeny žádné skupiny"
+  },
+  "migrationGroupsError": {
+    "message": "Chyba při načítání skupin: $1"
+  },
+  "migrationRunning": {
+    "message": "Migrace probíhá..."
+  },
+  "migrationSucceeded": {
+    "message": "Migrace byla úspěšně dokončena!"
+  },
+  "migrationFailed": {
+    "message": "Migrace selhala: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Žádná odpověď"
+  },
+  "migrationRunError": {
+    "message": "Chyba migrace: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Obnovit příznak migrace? Migraci bude možné spustit znovu."
+  },
+  "migrationResetSucceeded": {
+    "message": "Příznak migrace byl úspěšně obnoven!"
+  },
+  "migrationResetFailed": {
+    "message": "Obnovení selhalo: $1"
+  },
+  "migrationResetError": {
+    "message": "Chyba obnovení: $1"
+  },
+  "migrationGroup": {
+    "message": "Skupina $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Převedeno (nativní ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Nepřevedeno"
+  },
+  "migrationGroupStatus": {
+    "message": "Stav: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Zobrazení skupin karet"
+  }
+}

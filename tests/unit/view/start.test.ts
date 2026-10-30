@@ -1,6 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { createFakeSessions } from '../../support/fake-sessions.js';
+import { markedMessage, textsOutsideMessages } from '../../support/messages.js';
 
 const WINDOW = 1;
 const VIEW_TAB = 99;
@@ -59,6 +61,8 @@ async function load(
     groups?: ReturnType<typeof group>[];
     stored?: Record<string, unknown>;
     path?: string;
+    // The markup of the page, where the test is about what the page itself says
+    page?: string;
   } = {},
 ) {
   vi.resetModules();
@@ -71,9 +75,10 @@ async function load(
     tabGroups = { 1: 0, 2: 1, [VIEW_TAB]: -1 },
     groups = [group(0, 'First'), group(1, 'Second')],
     stored = {},
+    page = PAGE,
   } = options;
   document.body.className = '';
-  document.body.innerHTML = PAGE;
+  document.body.innerHTML = page;
 
   const sessions = createFakeSessions();
   await sessions.api.sessions.setWindowValue(WINDOW, 'groups', groups);
@@ -100,7 +105,7 @@ async function load(
       openOptionsPage: vi.fn().mockResolvedValue(undefined),
     },
     i18n: {
-      getMessage: vi.fn((name: string) => `[${name}]`),
+      getMessage: vi.fn((name: string) => markedMessage(name)),
     },
     storage: {
       sync: {
@@ -180,6 +185,8 @@ describe('view/start.ts', () => {
   });
 
   afterEach(() => {
+    document.documentElement.removeAttribute('dir');
+    document.documentElement.removeAttribute('lang');
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.body.innerHTML = '';
@@ -220,15 +227,54 @@ describe('view/start.ts', () => {
       expect(document.body.classList.contains('view-ready')).toBe(true);
     });
 
+    it('shows no text that is not from a message, in the real page', async () => {
+      // The names of groups and tabs are the user's, so these have no words in them
+      const real = readFileSync('src/view.html', 'utf8');
+      const env = await load({
+        page: /<body[^>]*>([\s\S]*)<\/body>/.exec(real)?.[1] ?? '',
+        groups: [group(0, '#0'), group(1, '#1')],
+        tabs: [
+          rawTab(1, { title: '#1' }),
+          rawTab(2, { title: '#2' }),
+          rawTab(VIEW_TAB, {
+            url: 'moz-extension://id/view.html',
+            title: '#3',
+          }),
+        ],
+      });
+
+      await env.startView();
+
+      expect(textsOutsideMessages(document.body)).toEqual([]);
+      expect(document.title).toBe(markedMessage('viewTitle'));
+      expect(element('#tab-search').getAttribute('placeholder')).toBe(
+        markedMessage('searchForTab_placeholder'),
+      );
+    });
+
+    it('sets the direction and the language of the page from the browser', async () => {
+      const env = await load();
+      env.browser.i18n.getMessage.mockImplementation(
+        (name: string) =>
+          ({ '@@bidi_dir': 'rtl', '@@ui_locale': 'ar' })[name] ??
+          markedMessage(name),
+      );
+
+      await env.startView();
+
+      expect(document.documentElement.dir).toBe('rtl');
+      expect(document.documentElement.lang).toBe('ar');
+    });
+
     it('gives the buttons their titles', async () => {
       const env = await load();
 
       await env.startView();
 
-      expect(element('#newGroup').title).toBe('[newGroupButton]');
-      expect(element('#settings').title).toBe('[settingsButton]');
-      expect(element('#tiling').title).toBe('[tilingButton]');
-      expect(element('#freeform').title).toBe('[freeformButton]');
+      expect(element('#newGroup').title).toBe(markedMessage('newGroupButton'));
+      expect(element('#settings').title).toBe(markedMessage('settingsButton'));
+      expect(element('#tiling').title).toBe(markedMessage('tilingButton'));
+      expect(element('#freeform').title).toBe(markedMessage('freeformButton'));
     });
 
     it('puts the tabs in their groups, and the pinned ones with the pinned tabs', async () => {

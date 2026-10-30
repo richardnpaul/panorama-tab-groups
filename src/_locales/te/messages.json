@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "కొత్త సమూహాన్ని జోడించండి"
+  },
+  "freeformButton": {
+    "message": "స్వేచ్ఛా అమరిక"
+  },
+  "tilingButton": {
+    "message": "స్వయంచాలక (టైలింగ్) అమరిక"
+  },
+  "settingsButton": {
+    "message": "సెట్టింగ్‌లు"
+  },
+  "defaultGroupName": {
+    "message": "సమూహం"
+  },
+  "dragGroup": {
+    "message": "సమూహాన్ని లాగండి"
+  },
+  "closeGroup": {
+    "message": "సమూహాన్ని మూసివేయండి"
+  },
+  "closeGroupWarning": {
+    "message": "one=ఈ సమూహాన్ని మూసివేస్తే దానిలోని $1 ట్యాబ్ మూసివేయబడుతుంది. మీరు ఖచ్చితంగా దీన్ని చేయాలనుకుంటున్నారా?|other=ఈ సమూహాన్ని మూసివేస్తే దానిలోని $1 ట్యాబ్‌లు మూసివేయబడతాయి. మీరు ఖచ్చితంగా దీన్ని చేయాలనుకుంటున్నారా?"
+  },
+  "editGroup": {
+    "message": "సమూహాన్ని సవరించండి"
+  },
+  "closeTab": {
+    "message": "ట్యాబ్‌ను మూసివేయండి"
+  },
+  "openNewTab": {
+    "message": "కొత్త ట్యాబ్‌ను తెరవండి"
+  },
+  "tabCount": {
+    "message": "one=$1 ట్యాబ్|other=$1 ట్యాబ్‌లు"
+  },
+  "searchForTab_placeholder": {
+    "message": "ట్యాబ్ కోసం వెతకండి..."
+  },
+  "searchForTab_noResults": {
+    "message": "ట్యాబ్‌లు ఏవీ కనుగొనబడలేదు"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "కీబోర్డ్ షార్ట్‌కట్‌లు"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "షార్ట్‌కట్ ఎంపిక యొక్క ఫార్మాట్ ఇక్కడ వివరించబడింది."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "నవీకరించండి"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "రీసెట్ చేయండి"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "నిలిపివేయండి"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "ప్రారంభించండి"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ట్యాబ్ సమూహాల వీక్షణను మార్చండి"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "తదుపరి ట్యాబ్ సమూహాన్ని సక్రియం చేయండి"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "మునుపటి ట్యాబ్ సమూహాన్ని సక్రియం చేయండి"
+  },
+  "optionsView": {
+    "message": "వీక్షణ"
+  },
+  "optionsViewFreeform": {
+    "message": "స్వేచ్ఛా (క్లాసిక్)"
+  },
+  "optionsViewPopup": {
+    "message": "పాపప్"
+  },
+  "optionsTheme": {
+    "message": "థీమ్"
+  },
+  "optionsThemeLight": {
+    "message": "లేత"
+  },
+  "optionsThemeDark": {
+    "message": "ముదురు"
+  },
+  "optionsToolbar": {
+    "message": "టూల్‌బార్"
+  },
+  "optionsToolbarPosition": {
+    "message": "స్థానం"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "పైన"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "కుడి"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "కింద"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ఎడమ"
+  },
+  "optionsBackup": {
+    "message": "బ్యాకప్"
+  },
+  "optionsBackupImport": {
+    "message": "దిగుమతి చేయండి"
+  },
+  "optionsBackupImportText": {
+    "message": "దిగుమతి చేసిన బ్యాకప్‌లు కొత్త విండోలలో తెరుచుకుంటాయి మరియు దేన్నీ ఓవర్‌రైట్ చేయవు.\nమీరు పాత \"Tab Groups\" యాడ్-ఆన్ నుండి బ్యాకప్‌లను కూడా దిగుమతి చేయవచ్చు."
+  },
+  "optionsBackupExport": {
+    "message": "ఎగుమతి చేయండి"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefoxలో సరైన సెషన్ నిర్వహణ సాధ్యమైనప్పుడు ఈ విభాగం అనవసరం కావచ్చు."
+  },
+  "optionsBackupExportButton": {
+    "message": "బ్యాకప్‌ను సేవ్ చేయండి"
+  },
+  "optionsStatistics": {
+    "message": "గణాంకాలు"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ట్యాబ్‌ల సంఖ్య:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (సక్రియంగా ఉన్నవి: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "థంబ్‌నెయిల్ కాష్ పరిమాణం:"
+  },
+  "refreshGroups": {
+    "message": "సమూహాలను రిఫ్రెష్ చేయండి"
+  },
+  "sendTabToGroup": {
+    "message": "ట్యాబ్‌ను సమూహానికి పంపండి"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "వినియోగదారులు Firefoxలో about:addons వద్ద ఉన్న \"పొడిగింపు షార్ట్‌కట్‌లను నిర్వహించండి\" ఎంపిక ద్వారా కూడా షార్ట్‌కట్‌లను నవీకరించవచ్చు, {link} చూపినట్లు."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "ఉదాహరణ వీడియోలో"
+  },
+  "optionsThemeAuto": {
+    "message": "సిస్టమ్‌ను అనుసరించండి"
+  },
+  "optionsNativeGroups": {
+    "message": "బ్రౌజర్ స్వంత సమూహాలు"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "బ్రౌజర్ స్వంత ట్యాబ్ సమూహాలను ఉపయోగించండి"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "దృశ్య సంఘటన మరియు కుదింపు కోసం బ్రౌజర్ స్వంత ట్యాబ్ సమూహాలను ఉపయోగించండి."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "ఈ బ్రౌజర్ వెర్షన్‌లో స్వంత ట్యాబ్ సమూహాలకు మద్దతు లేదు (ట్యాబ్ దాచే API అవసరం)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "ఈ బ్రౌజర్ వెర్షన్‌లో స్వంత ట్యాబ్ సమూహాలకు మద్దతు లేదు. దయచేసి Firefox 139+కి నవీకరించండి లేదా Chrome 89+ ఉపయోగించండి."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "ట్యాబ్ సమూహాలకు అవసరమైన APIలకు మీ బ్రౌజర్ మద్దతు ఇవ్వదు."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "స్వంత సమూహాలు ప్రారంభించబడ్డాయి. సమూహాలను తరలిస్తున్నాము..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "స్వంత సమూహాలు నిలిపివేయబడ్డాయి. శుభ్రం చేస్తున్నాము..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "చెల్లని ఫైల్"
+  },
+  "byteSizeBytes": {
+    "message": "$1 బైట్‌లు"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ట్యాబ్ సమూహాలను పునరుద్ధరిస్తున్నాము..."
+  },
+  "migrationTitle": {
+    "message": "హైబ్రిడ్ ట్యాబ్ సమూహాల తరలింపు"
+  },
+  "migrationChecking": {
+    "message": "తరలింపు స్థితిని తనిఖీ చేస్తున్నాము..."
+  },
+  "migrationRun": {
+    "message": "ఇప్పుడే తరలింపును అమలు చేయండి"
+  },
+  "migrationReset": {
+    "message": "తరలింపు ఫ్లాగ్‌ను రీసెట్ చేయండి"
+  },
+  "migrationCurrentGroups": {
+    "message": "ప్రస్తుత సమూహాలు"
+  },
+  "migrationLoadingGroups": {
+    "message": "సమూహాలను లోడ్ చేస్తున్నాము..."
+  },
+  "migrationComplete": {
+    "message": "✓ తరలింపు పూర్తయింది - అన్ని సమూహాలు హైబ్రిడ్ వ్యవస్థకు తరలించబడ్డాయి"
+  },
+  "migrationPending": {
+    "message": "⚠ తరలింపు పెండింగ్‌లో ఉంది - సమూహాలు ఇంకా తరలించబడలేదు"
+  },
+  "migrationStatusError": {
+    "message": "తరలింపు స్థితిని తనిఖీ చేయడంలో లోపం: $1"
+  },
+  "migrationNoGroups": {
+    "message": "ప్రస్తుత విండోలో సమూహాలు ఏవీ కనుగొనబడలేదు"
+  },
+  "migrationGroupsError": {
+    "message": "సమూహాలను లోడ్ చేయడంలో లోపం: $1"
+  },
+  "migrationRunning": {
+    "message": "తరలింపు జరుగుతోంది..."
+  },
+  "migrationSucceeded": {
+    "message": "తరలింపు విజయవంతంగా పూర్తయింది!"
+  },
+  "migrationFailed": {
+    "message": "తరలింపు విఫలమైంది: $1"
+  },
+  "migrationNoResponse": {
+    "message": "స్పందన లేదు"
+  },
+  "migrationRunError": {
+    "message": "తరలింపు లోపం: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "తరలింపు ఫ్లాగ్‌ను రీసెట్ చేయాలా? దీనివల్ల తరలింపును మళ్లీ అమలు చేయవచ్చు."
+  },
+  "migrationResetSucceeded": {
+    "message": "తరలింపు ఫ్లాగ్ విజయవంతంగా రీసెట్ అయింది!"
+  },
+  "migrationResetFailed": {
+    "message": "రీసెట్ విఫలమైంది: $1"
+  },
+  "migrationResetError": {
+    "message": "రీసెట్ లోపం: $1"
+  },
+  "migrationGroup": {
+    "message": "సమూహం $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ తరలించబడింది (స్వంత ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ తరలించబడలేదు"
+  },
+  "migrationGroupStatus": {
+    "message": "స్థితి: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ట్యాబ్ సమూహాల వీక్షణ"
+  }
+}

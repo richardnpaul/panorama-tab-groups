@@ -61,7 +61,7 @@ function setUp(
     body: document.body,
     scheduler,
     isAside: true,
-    onLeftAtStart: back,
+    onBackAtStart: back,
   });
   const logger = { error: vi.fn() };
   const service = {

@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "नयाँ समूह थप्नुहोस्"
+  },
+  "freeformButton": {
+    "message": "स्वतन्त्र व्यवस्था"
+  },
+  "tilingButton": {
+    "message": "स्वचालित (टाइलिङ) व्यवस्था"
+  },
+  "settingsButton": {
+    "message": "सेटिङहरू"
+  },
+  "defaultGroupName": {
+    "message": "समूह"
+  },
+  "dragGroup": {
+    "message": "समूह तान्नुहोस्"
+  },
+  "closeGroup": {
+    "message": "समूह बन्द गर्नुहोस्"
+  },
+  "closeGroupWarning": {
+    "message": "one=यो समूह बन्द गर्दा यसभित्रको $1 ट्याब बन्द हुनेछ। के तपाईं यो गर्न पक्का हुनुहुन्छ?|other=यो समूह बन्द गर्दा यसभित्रका $1 ट्याबहरू बन्द हुनेछन्। के तपाईं यो गर्न पक्का हुनुहुन्छ?"
+  },
+  "editGroup": {
+    "message": "समूह सम्पादन गर्नुहोस्"
+  },
+  "closeTab": {
+    "message": "ट्याब बन्द गर्नुहोस्"
+  },
+  "openNewTab": {
+    "message": "नयाँ ट्याब खोल्नुहोस्"
+  },
+  "tabCount": {
+    "message": "one=$1 ट्याब|other=$1 ट्याबहरू"
+  },
+  "searchForTab_placeholder": {
+    "message": "ट्याब खोज्नुहोस्..."
+  },
+  "searchForTab_noResults": {
+    "message": "कुनै ट्याब फेला परेन"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "किबोर्ड सर्टकटहरू"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "सर्टकट विकल्पको ढाँचा यहाँ वर्णन गरिएको छ।"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "अद्यावधिक गर्नुहोस्"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "रिसेट गर्नुहोस्"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "असक्षम पार्नुहोस्"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "सक्षम पार्नुहोस्"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ट्याब समूह दृश्य टगल गर्नुहोस्"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "अर्को ट्याब समूह सक्रिय गर्नुहोस्"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "अघिल्लो ट्याब समूह सक्रिय गर्नुहोस्"
+  },
+  "optionsView": {
+    "message": "दृश्य"
+  },
+  "optionsViewFreeform": {
+    "message": "स्वतन्त्र (क्लासिक)"
+  },
+  "optionsViewPopup": {
+    "message": "पपअप"
+  },
+  "optionsTheme": {
+    "message": "विषयवस्तु"
+  },
+  "optionsThemeLight": {
+    "message": "हल्का"
+  },
+  "optionsThemeDark": {
+    "message": "गाढा"
+  },
+  "optionsToolbar": {
+    "message": "उपकरणपट्टी"
+  },
+  "optionsToolbarPosition": {
+    "message": "स्थान"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "माथि"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "दायाँ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "तल"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "बायाँ"
+  },
+  "optionsBackup": {
+    "message": "ब्याकअप"
+  },
+  "optionsBackupImport": {
+    "message": "आयात गर्नुहोस्"
+  },
+  "optionsBackupImportText": {
+    "message": "आयात गरिएका ब्याकअपहरू नयाँ सञ्झ्यालहरूमा खुल्नेछन् र केही पनि ओभरराइट गर्नेछैनन्।\nतपाईंले पुरानो \"Tab Groups\" एड-अनका ब्याकअपहरू पनि आयात गर्न सक्नुहुन्छ।"
+  },
+  "optionsBackupExport": {
+    "message": "निर्यात गर्नुहोस्"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox मा उचित सत्र व्यवस्थापन सम्भव भएपछि यो खण्ड अनावश्यक हुन सक्छ।"
+  },
+  "optionsBackupExportButton": {
+    "message": "ब्याकअप सुरक्षित गर्नुहोस्"
+  },
+  "optionsStatistics": {
+    "message": "तथ्याङ्क"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ट्याबहरूको संख्या:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (सक्रिय: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "थम्बनेल क्यासको आकार:"
+  },
+  "refreshGroups": {
+    "message": "समूहहरू ताजा गर्नुहोस्"
+  },
+  "sendTabToGroup": {
+    "message": "ट्याब समूहमा पठाउनुहोस्"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "प्रयोगकर्ताहरूले Firefox को about:addons मा रहेको \"एक्स्टेन्सन सर्टकट व्यवस्थापन गर्नुहोस्\" विकल्पबाट पनि सर्टकट अद्यावधिक गर्न सक्छन्, {link} देखाइएझैं।"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "उदाहरण भिडियोमा"
+  },
+  "optionsThemeAuto": {
+    "message": "प्रणालीलाई पछ्याउनुहोस्"
+  },
+  "optionsNativeGroups": {
+    "message": "ब्राउजरका आफ्नै समूहहरू"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ब्राउजरका आफ्नै ट्याब समूहहरू प्रयोग गर्नुहोस्"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "दृश्यात्मक व्यवस्थापन र खुम्च्याउनका लागि ब्राउजरका आफ्नै ट्याब समूहहरू प्रयोग गर्नुहोस्।"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "यो ब्राउजर संस्करणमा आफ्नै ट्याब समूहहरू समर्थित छैनन् (ट्याब लुकाउने API आवश्यक छ)।"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "यो ब्राउजर संस्करणमा आफ्नै ट्याब समूहहरू समर्थित छैनन्। कृपया Firefox 139+ मा अद्यावधिक गर्नुहोस् वा Chrome 89+ प्रयोग गर्नुहोस्।"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "तपाईंको ब्राउजरले ट्याब समूहहरूका लागि आवश्यक API हरूलाई समर्थन गर्दैन।"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "आफ्नै समूहहरू सक्षम गरियो। समूहहरू सारिँदै छन्..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "आफ्नै समूहहरू असक्षम गरियो। सफा गरिँदै छ..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "अमान्य फाइल"
+  },
+  "byteSizeBytes": {
+    "message": "$1 बाइट"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ट्याब समूहहरू पुनर्स्थापना गरिँदै छन्..."
+  },
+  "migrationTitle": {
+    "message": "हाइब्रिड ट्याब समूहहरूको स्थानान्तरण"
+  },
+  "migrationChecking": {
+    "message": "स्थानान्तरणको अवस्था जाँच गरिँदै छ..."
+  },
+  "migrationRun": {
+    "message": "अहिले स्थानान्तरण चलाउनुहोस्"
+  },
+  "migrationReset": {
+    "message": "स्थानान्तरण फ्ल्याग रिसेट गर्नुहोस्"
+  },
+  "migrationCurrentGroups": {
+    "message": "हालका समूहहरू"
+  },
+  "migrationLoadingGroups": {
+    "message": "समूहहरू लोड गरिँदै छन्..."
+  },
+  "migrationComplete": {
+    "message": "✓ स्थानान्तरण पूरा भयो - सबै समूहहरू हाइब्रिड प्रणालीमा सारिए"
+  },
+  "migrationPending": {
+    "message": "⚠ स्थानान्तरण बाँकी छ - समूहहरू अझै सारिएका छैनन्"
+  },
+  "migrationStatusError": {
+    "message": "स्थानान्तरणको अवस्था जाँच गर्दा त्रुटि: $1"
+  },
+  "migrationNoGroups": {
+    "message": "हालको सञ्झ्यालमा कुनै समूह फेला परेन"
+  },
+  "migrationGroupsError": {
+    "message": "समूहहरू लोड गर्दा त्रुटि: $1"
+  },
+  "migrationRunning": {
+    "message": "स्थानान्तरण चलिरहेको छ..."
+  },
+  "migrationSucceeded": {
+    "message": "स्थानान्तरण सफलतापूर्वक पूरा भयो!"
+  },
+  "migrationFailed": {
+    "message": "स्थानान्तरण असफल भयो: $1"
+  },
+  "migrationNoResponse": {
+    "message": "कुनै प्रतिक्रिया छैन"
+  },
+  "migrationRunError": {
+    "message": "स्थानान्तरण त्रुटि: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "स्थानान्तरण फ्ल्याग रिसेट गर्ने? यसले स्थानान्तरण फेरि चलाउन अनुमति दिनेछ।"
+  },
+  "migrationResetSucceeded": {
+    "message": "स्थानान्तरण फ्ल्याग सफलतापूर्वक रिसेट भयो!"
+  },
+  "migrationResetFailed": {
+    "message": "रिसेट असफल भयो: $1"
+  },
+  "migrationResetError": {
+    "message": "रिसेट त्रुटि: $1"
+  },
+  "migrationGroup": {
+    "message": "समूह $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ सारियो (आफ्नै ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ सारिएको छैन"
+  },
+  "migrationGroupStatus": {
+    "message": "अवस्था: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ट्याब समूह दृश्य"
+  }
+}

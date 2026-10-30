@@ -12,6 +12,7 @@ import {
   type BackupWindow,
 } from '../../../src/js/core/backup.js';
 import type { Options } from '../../../src/js/core/options.js';
+import { englishMessage } from '../../support/messages.js';
 
 const rect = { x: 0.1, y: 0.2, w: 0.3, h: 0.4 };
 
@@ -42,6 +43,7 @@ function setUp(view = 'popup') {
       tabs,
       groupState,
       messaging,
+      i18n: { getMessage: englishMessage },
       options: { load: () => Promise.resolve(optionsWith(view)) },
       downloads,
       clock: createMemoryClock(new Date(2026, 4, 6, 7, 8, 9).getTime()),
@@ -310,7 +312,7 @@ describe('app/backup-service.ts', () => {
       );
 
       expect((await env.groupState.getGroups(100))?.map((g) => g.name)).toEqual(
-        ['Group 7'],
+        ['Grp7'],
       );
     });
 

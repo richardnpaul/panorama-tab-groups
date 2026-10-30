@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "പുതിയ ഗ്രൂപ്പ് ചേർക്കുക"
+  },
+  "freeformButton": {
+    "message": "സ്വതന്ത്ര ക്രമീകരണം"
+  },
+  "tilingButton": {
+    "message": "സ്വയമേവയുള്ള (ടൈലിംഗ്) ക്രമീകരണം"
+  },
+  "settingsButton": {
+    "message": "ക്രമീകരണങ്ങൾ"
+  },
+  "defaultGroupName": {
+    "message": "ഗ്രൂപ്പ്"
+  },
+  "dragGroup": {
+    "message": "ഗ്രൂപ്പ് വലിച്ചിടുക"
+  },
+  "closeGroup": {
+    "message": "ഗ്രൂപ്പ് അടയ്ക്കുക"
+  },
+  "closeGroupWarning": {
+    "message": "one=ഈ ഗ്രൂപ്പ് അടച്ചാൽ അതിലെ $1 ടാബ് അടയും. ഇത് ചെയ്യണമെന്ന് ഉറപ്പാണോ?|other=ഈ ഗ്രൂപ്പ് അടച്ചാൽ അതിലെ $1 ടാബുകൾ അടയും. ഇത് ചെയ്യണമെന്ന് ഉറപ്പാണോ?"
+  },
+  "editGroup": {
+    "message": "ഗ്രൂപ്പ് എഡിറ്റ് ചെയ്യുക"
+  },
+  "closeTab": {
+    "message": "ടാബ് അടയ്ക്കുക"
+  },
+  "openNewTab": {
+    "message": "പുതിയ ടാബ് തുറക്കുക"
+  },
+  "tabCount": {
+    "message": "one=$1 ടാബ്|other=$1 ടാബുകൾ"
+  },
+  "searchForTab_placeholder": {
+    "message": "ടാബ് തിരയുക..."
+  },
+  "searchForTab_noResults": {
+    "message": "ടാബുകളൊന്നും കണ്ടെത്തിയില്ല"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "കീബോർഡ് കുറുക്കുവഴികൾ"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "കുറുക്കുവഴി ഓപ്ഷന്റെ ഫോർമാറ്റ് ഇവിടെ വിവരിച്ചിരിക്കുന്നു."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "അപ്‌ഡേറ്റ് ചെയ്യുക"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "പുനഃസജ്ജമാക്കുക"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "പ്രവർത്തനരഹിതമാക്കുക"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "പ്രവർത്തനക്ഷമമാക്കുക"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "ടാബ് ഗ്രൂപ്പ് കാഴ്ച ടോഗിൾ ചെയ്യുക"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "അടുത്ത ടാബ് ഗ്രൂപ്പ് സജീവമാക്കുക"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "മുമ്പത്തെ ടാബ് ഗ്രൂപ്പ് സജീവമാക്കുക"
+  },
+  "optionsView": {
+    "message": "കാഴ്ച"
+  },
+  "optionsViewFreeform": {
+    "message": "സ്വതന്ത്രം (ക്ലാസിക്)"
+  },
+  "optionsViewPopup": {
+    "message": "പോപ്പ്അപ്പ്"
+  },
+  "optionsTheme": {
+    "message": "തീം"
+  },
+  "optionsThemeLight": {
+    "message": "തെളിഞ്ഞത്"
+  },
+  "optionsThemeDark": {
+    "message": "ഇരുണ്ടത്"
+  },
+  "optionsToolbar": {
+    "message": "ടൂൾബാർ"
+  },
+  "optionsToolbarPosition": {
+    "message": "സ്ഥാനം"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "മുകളിൽ"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "വലത്"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "താഴെ"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ഇടത്"
+  },
+  "optionsBackup": {
+    "message": "ബാക്കപ്പ്"
+  },
+  "optionsBackupImport": {
+    "message": "ഇറക്കുമതി ചെയ്യുക"
+  },
+  "optionsBackupImportText": {
+    "message": "ഇറക്കുമതി ചെയ്ത ബാക്കപ്പുകൾ പുതിയ വിൻഡോകളിൽ തുറക്കും, ഒന്നും മേലെഴുതില്ല.\nപഴയ \"Tab Groups\" ആഡ്-ഓണിൽ നിന്നുള്ള ബാക്കപ്പുകളും ഇറക്കുമതി ചെയ്യാം."
+  },
+  "optionsBackupExport": {
+    "message": "കയറ്റുമതി ചെയ്യുക"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox-ൽ ശരിയായ സെഷൻ മാനേജ്‌മെന്റ് സാധ്യമാകുമ്പോൾ ഈ വിഭാഗം അനാവശ്യമായേക്കാം."
+  },
+  "optionsBackupExportButton": {
+    "message": "ബാക്കപ്പ് സംരക്ഷിക്കുക"
+  },
+  "optionsStatistics": {
+    "message": "സ്ഥിതിവിവരക്കണക്കുകൾ"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ടാബുകളുടെ എണ്ണം:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (സജീവം: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "ലഘുചിത്ര കാഷെയുടെ വലിപ്പം:"
+  },
+  "refreshGroups": {
+    "message": "ഗ്രൂപ്പുകൾ പുതുക്കുക"
+  },
+  "sendTabToGroup": {
+    "message": "ടാബ് ഗ്രൂപ്പിലേക്ക് അയയ്ക്കുക"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Firefox-ലെ about:addons-ൽ ഉള്ള \"എക്സ്റ്റൻഷൻ കുറുക്കുവഴികൾ നിയന്ത്രിക്കുക\" ഓപ്ഷൻ വഴിയും ഉപയോക്താക്കൾക്ക് കുറുക്കുവഴികൾ അപ്‌ഡേറ്റ് ചെയ്യാം, {link} കാണിച്ചിരിക്കുന്നതുപോലെ."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "ഉദാഹരണ വീഡിയോയിൽ"
+  },
+  "optionsThemeAuto": {
+    "message": "സിസ്റ്റത്തെ പിന്തുടരുക"
+  },
+  "optionsNativeGroups": {
+    "message": "ബ്രൗസറിന്റെ സ്വന്തം ഗ്രൂപ്പുകൾ"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ബ്രൗസറിന്റെ സ്വന്തം ടാബ് ഗ്രൂപ്പുകൾ ഉപയോഗിക്കുക"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "ദൃശ്യ ക്രമീകരണത്തിനും ചുരുക്കുന്നതിനും ബ്രൗസറിന്റെ സ്വന്തം ടാബ് ഗ്രൂപ്പുകൾ ഉപയോഗിക്കുക."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "ഈ ബ്രൗസർ പതിപ്പിൽ സ്വന്തം ടാബ് ഗ്രൂപ്പുകൾ പിന്തുണയ്ക്കുന്നില്ല (ടാബ് മറയ്ക്കൽ API ആവശ്യമാണ്)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "ഈ ബ്രൗസർ പതിപ്പിൽ സ്വന്തം ടാബ് ഗ്രൂപ്പുകൾ പിന്തുണയ്ക്കുന്നില്ല. ദയവായി Firefox 139+ ലേക്ക് അപ്‌ഡേറ്റ് ചെയ്യുക അല്ലെങ്കിൽ Chrome 89+ ഉപയോഗിക്കുക."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "ടാബ് ഗ്രൂപ്പുകൾക്ക് ആവശ്യമായ API-കൾ നിങ്ങളുടെ ബ്രൗസർ പിന്തുണയ്ക്കുന്നില്ല."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "സ്വന്തം ഗ്രൂപ്പുകൾ പ്രവർത്തനക്ഷമമാക്കി. ഗ്രൂപ്പുകൾ മാറ്റുന്നു..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "സ്വന്തം ഗ്രൂപ്പുകൾ പ്രവർത്തനരഹിതമാക്കി. വൃത്തിയാക്കുന്നു..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "അസാധുവായ ഫയൽ"
+  },
+  "byteSizeBytes": {
+    "message": "$1 ബൈറ്റുകൾ"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "ടാബ് ഗ്രൂപ്പുകൾ വീണ്ടെടുക്കുന്നു..."
+  },
+  "migrationTitle": {
+    "message": "ഹൈബ്രിഡ് ടാബ് ഗ്രൂപ്പുകളുടെ മൈഗ്രേഷൻ"
+  },
+  "migrationChecking": {
+    "message": "മൈഗ്രേഷൻ നില പരിശോധിക്കുന്നു..."
+  },
+  "migrationRun": {
+    "message": "ഇപ്പോൾ മൈഗ്രേഷൻ പ്രവർത്തിപ്പിക്കുക"
+  },
+  "migrationReset": {
+    "message": "മൈഗ്രേഷൻ ഫ്ലാഗ് പുനഃസജ്ജമാക്കുക"
+  },
+  "migrationCurrentGroups": {
+    "message": "നിലവിലെ ഗ്രൂപ്പുകൾ"
+  },
+  "migrationLoadingGroups": {
+    "message": "ഗ്രൂപ്പുകൾ ലോഡ് ചെയ്യുന്നു..."
+  },
+  "migrationComplete": {
+    "message": "✓ മൈഗ്രേഷൻ പൂർത്തിയായി - എല്ലാ ഗ്രൂപ്പുകളും ഹൈബ്രിഡ് സംവിധാനത്തിലേക്ക് മാറ്റി"
+  },
+  "migrationPending": {
+    "message": "⚠ മൈഗ്രേഷൻ തീർപ്പാക്കാനുണ്ട് - ഗ്രൂപ്പുകൾ ഇതുവരെ മാറ്റിയിട്ടില്ല"
+  },
+  "migrationStatusError": {
+    "message": "മൈഗ്രേഷൻ നില പരിശോധിക്കുന്നതിൽ പിശക്: $1"
+  },
+  "migrationNoGroups": {
+    "message": "നിലവിലെ വിൻഡോയിൽ ഗ്രൂപ്പുകളൊന്നും കണ്ടെത്തിയില്ല"
+  },
+  "migrationGroupsError": {
+    "message": "ഗ്രൂപ്പുകൾ ലോഡ് ചെയ്യുന്നതിൽ പിശക്: $1"
+  },
+  "migrationRunning": {
+    "message": "മൈഗ്രേഷൻ പ്രവർത്തിക്കുന്നു..."
+  },
+  "migrationSucceeded": {
+    "message": "മൈഗ്രേഷൻ വിജയകരമായി പൂർത്തിയായി!"
+  },
+  "migrationFailed": {
+    "message": "മൈഗ്രേഷൻ പരാജയപ്പെട്ടു: $1"
+  },
+  "migrationNoResponse": {
+    "message": "പ്രതികരണമില്ല"
+  },
+  "migrationRunError": {
+    "message": "മൈഗ്രേഷൻ പിശക്: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "മൈഗ്രേഷൻ ഫ്ലാഗ് പുനഃസജ്ജമാക്കണോ? ഇത് മൈഗ്രേഷൻ വീണ്ടും പ്രവർത്തിപ്പിക്കാൻ അനുവദിക്കും."
+  },
+  "migrationResetSucceeded": {
+    "message": "മൈഗ്രേഷൻ ഫ്ലാഗ് വിജയകരമായി പുനഃസജ്ജമാക്കി!"
+  },
+  "migrationResetFailed": {
+    "message": "പുനഃസജ്ജമാക്കൽ പരാജയപ്പെട്ടു: $1"
+  },
+  "migrationResetError": {
+    "message": "പുനഃസജ്ജമാക്കൽ പിശക്: $1"
+  },
+  "migrationGroup": {
+    "message": "ഗ്രൂപ്പ് $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ മാറ്റി (സ്വന്തം ഐഡി: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ മാറ്റിയിട്ടില്ല"
+  },
+  "migrationGroupStatus": {
+    "message": "നില: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ടാബ് ഗ്രൂപ്പുകളുടെ കാഴ്ച"
+  }
+}

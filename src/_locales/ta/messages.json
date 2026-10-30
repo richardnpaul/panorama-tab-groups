@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "புதிய குழுவைச் சேர்"
+  },
+  "freeformButton": {
+    "message": "தன்னிச்சையான அமைப்பு"
+  },
+  "tilingButton": {
+    "message": "தானியங்கி (ஓடு) அமைப்பு"
+  },
+  "settingsButton": {
+    "message": "அமைப்புகள்"
+  },
+  "defaultGroupName": {
+    "message": "குழு"
+  },
+  "dragGroup": {
+    "message": "குழுவை இழு"
+  },
+  "closeGroup": {
+    "message": "குழுவை மூடு"
+  },
+  "closeGroupWarning": {
+    "message": "one=இந்தக் குழுவை மூடினால் அதிலுள்ள $1 கீற்று மூடப்படும். இதைச் செய்ய விரும்புவது உறுதியா?|other=இந்தக் குழுவை மூடினால் அதிலுள்ள $1 கீற்றுகள் மூடப்படும். இதைச் செய்ய விரும்புவது உறுதியா?"
+  },
+  "editGroup": {
+    "message": "குழுவைத் திருத்து"
+  },
+  "closeTab": {
+    "message": "கீற்றை மூடு"
+  },
+  "openNewTab": {
+    "message": "புதிய கீற்றைத் திற"
+  },
+  "tabCount": {
+    "message": "one=$1 கீற்று|other=$1 கீற்றுகள்"
+  },
+  "searchForTab_placeholder": {
+    "message": "கீற்றைத் தேடு..."
+  },
+  "searchForTab_noResults": {
+    "message": "கீற்றுகள் எதுவும் கிடைக்கவில்லை"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "விசைப்பலகை குறுக்குவழிகள்"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "குறுக்குவழி விருப்பத்தின் வடிவம் இங்கே விவரிக்கப்பட்டுள்ளது."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "புதுப்பி"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "மீட்டமை"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "முடக்கு"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "இயக்கு"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "கீற்றுக் குழுக்களின் காட்சியை மாற்று"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "அடுத்த கீற்றுக் குழுவைச் செயலாக்கு"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "முந்தைய கீற்றுக் குழுவைச் செயலாக்கு"
+  },
+  "optionsView": {
+    "message": "காட்சி"
+  },
+  "optionsViewFreeform": {
+    "message": "தன்னிச்சையான (பாரம்பரிய)"
+  },
+  "optionsViewPopup": {
+    "message": "மேல்தோன்றும் சாளரம்"
+  },
+  "optionsTheme": {
+    "message": "தீம்"
+  },
+  "optionsThemeLight": {
+    "message": "வெளிர்"
+  },
+  "optionsThemeDark": {
+    "message": "அடர்"
+  },
+  "optionsToolbar": {
+    "message": "கருவிப்பட்டி"
+  },
+  "optionsToolbarPosition": {
+    "message": "இடம்"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "மேலே"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "வலது"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "கீழே"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "இடது"
+  },
+  "optionsBackup": {
+    "message": "காப்புப்பிரதி"
+  },
+  "optionsBackupImport": {
+    "message": "இறக்குமதி"
+  },
+  "optionsBackupImportText": {
+    "message": "இறக்குமதி செய்த காப்புப்பிரதிகள் புதிய சாளரங்களில் திறக்கும்; எதையும் மேலெழுதாது.\nபழைய \"Tab Groups\" நீட்சியின் காப்புப்பிரதிகளையும் இறக்குமதி செய்யலாம்."
+  },
+  "optionsBackupExport": {
+    "message": "ஏற்றுமதி"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox இல் முறையான அமர்வு மேலாண்மை சாத்தியமானால் இந்தப் பகுதி தேவையற்றதாகலாம்."
+  },
+  "optionsBackupExportButton": {
+    "message": "காப்புப்பிரதியைச் சேமி"
+  },
+  "optionsStatistics": {
+    "message": "புள்ளிவிவரங்கள்"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "கீற்றுகளின் எண்ணிக்கை:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (செயலில்: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "சிறுபடக் கேச் அளவு:"
+  },
+  "refreshGroups": {
+    "message": "குழுக்களைப் புதுப்பி"
+  },
+  "sendTabToGroup": {
+    "message": "கீற்றைக் குழுவுக்கு அனுப்பு"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Firefox இல் about:addons பக்கத்தில் உள்ள \"நீட்சி குறுக்குவழிகளை நிர்வகி\" விருப்பம் மூலமும் குறுக்குவழிகளைப் புதுப்பிக்கலாம்; {link} காட்டப்பட்டுள்ளபடி."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "எடுத்துக்காட்டு வீடியோவில்"
+  },
+  "optionsThemeAuto": {
+    "message": "கணினியைப் பின்பற்று"
+  },
+  "optionsNativeGroups": {
+    "message": "உலாவியின் சொந்தக் குழுக்கள்"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "உலாவியின் சொந்தக் கீற்றுக் குழுக்களைப் பயன்படுத்து"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "காட்சி ஒழுங்கமைப்பு மற்றும் சுருக்குதலுக்கு உலாவியின் சொந்தக் கீற்றுக் குழுக்களைப் பயன்படுத்து."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "இந்த உலாவி பதிப்பில் சொந்தக் கீற்றுக் குழுக்களுக்கு ஆதரவு இல்லை (கீற்று மறைப்பு API தேவை)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "இந்த உலாவி பதிப்பில் சொந்தக் கீற்றுக் குழுக்களுக்கு ஆதரவு இல்லை. Firefox 139+ க்குப் புதுப்பிக்கவும் அல்லது Chrome 89+ ஐப் பயன்படுத்தவும்."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "கீற்றுக் குழுக்களுக்குத் தேவையான API களை உங்கள் உலாவி ஆதரிக்கவில்லை."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "சொந்தக் குழுக்கள் இயக்கப்பட்டன. குழுக்கள் இடம்மாற்றப்படுகின்றன..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "சொந்தக் குழுக்கள் முடக்கப்பட்டன. சுத்தம் செய்யப்படுகிறது..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "செல்லாத கோப்பு"
+  },
+  "byteSizeBytes": {
+    "message": "$1 பைட்டுகள்"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "கீற்றுக் குழுக்கள் மீட்டெடுக்கப்படுகின்றன..."
+  },
+  "migrationTitle": {
+    "message": "கலப்பினக் கீற்றுக் குழுக்களின் இடமாற்றம்"
+  },
+  "migrationChecking": {
+    "message": "இடமாற்ற நிலை சரிபார்க்கப்படுகிறது..."
+  },
+  "migrationRun": {
+    "message": "இடமாற்றத்தை இப்போது இயக்கு"
+  },
+  "migrationReset": {
+    "message": "இடமாற்றக் கொடியை மீட்டமை"
+  },
+  "migrationCurrentGroups": {
+    "message": "தற்போதைய குழுக்கள்"
+  },
+  "migrationLoadingGroups": {
+    "message": "குழுக்கள் ஏற்றப்படுகின்றன..."
+  },
+  "migrationComplete": {
+    "message": "✓ இடமாற்றம் முடிந்தது - அனைத்துக் குழுக்களும் கலப்பின அமைப்புக்கு மாற்றப்பட்டன"
+  },
+  "migrationPending": {
+    "message": "⚠ இடமாற்றம் நிலுவையில் - குழுக்கள் இன்னும் மாற்றப்படவில்லை"
+  },
+  "migrationStatusError": {
+    "message": "இடமாற்ற நிலையைச் சரிபார்ப்பதில் பிழை: $1"
+  },
+  "migrationNoGroups": {
+    "message": "தற்போதைய சாளரத்தில் குழுக்கள் எதுவும் கிடைக்கவில்லை"
+  },
+  "migrationGroupsError": {
+    "message": "குழுக்களை ஏற்றுவதில் பிழை: $1"
+  },
+  "migrationRunning": {
+    "message": "இடமாற்றம் நடைபெறுகிறது..."
+  },
+  "migrationSucceeded": {
+    "message": "இடமாற்றம் வெற்றிகரமாக முடிந்தது!"
+  },
+  "migrationFailed": {
+    "message": "இடமாற்றம் தோல்வியடைந்தது: $1"
+  },
+  "migrationNoResponse": {
+    "message": "பதில் இல்லை"
+  },
+  "migrationRunError": {
+    "message": "இடமாற்றப் பிழை: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "இடமாற்றக் கொடியை மீட்டமைக்கவா? இதனால் இடமாற்றத்தை மீண்டும் இயக்க முடியும்."
+  },
+  "migrationResetSucceeded": {
+    "message": "இடமாற்றக் கொடி வெற்றிகரமாக மீட்டமைக்கப்பட்டது!"
+  },
+  "migrationResetFailed": {
+    "message": "மீட்டமைப்பு தோல்வியடைந்தது: $1"
+  },
+  "migrationResetError": {
+    "message": "மீட்டமைப்புப் பிழை: $1"
+  },
+  "migrationGroup": {
+    "message": "குழு $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ மாற்றப்பட்டது (சொந்த ஐடி: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ மாற்றப்படவில்லை"
+  },
+  "migrationGroupStatus": {
+    "message": "நிலை: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "கீற்றுக் குழுக்களின் காட்சி"
+  }
+}

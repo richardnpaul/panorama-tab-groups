@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "បន្ថែមក្រុមថ្មី"
+  },
+  "freeformButton": {
+    "message": "ការរៀបចំដោយសេរី"
+  },
+  "tilingButton": {
+    "message": "ការរៀបចំស្វ័យប្រវត្តិ (ក្រឡាល្អី)"
+  },
+  "settingsButton": {
+    "message": "ការកំណត់"
+  },
+  "defaultGroupName": {
+    "message": "ក្រុម"
+  },
+  "dragGroup": {
+    "message": "អូសក្រុម"
+  },
+  "closeGroup": {
+    "message": "បិទក្រុម"
+  },
+  "closeGroupWarning": {
+    "message": "ការបិទក្រុមនេះនឹងបិទផ្ទាំងចំនួន $1 ដែលនៅក្នុងវា។ តើអ្នកប្រាកដថាចង់ធ្វើដូច្នេះមែនទេ?"
+  },
+  "editGroup": {
+    "message": "កែក្រុម"
+  },
+  "closeTab": {
+    "message": "បិទផ្ទាំង"
+  },
+  "openNewTab": {
+    "message": "បើកផ្ទាំងថ្មី"
+  },
+  "tabCount": {
+    "message": "$1 ផ្ទាំង"
+  },
+  "searchForTab_placeholder": {
+    "message": "ស្វែងរកផ្ទាំង..."
+  },
+  "searchForTab_noResults": {
+    "message": "រកមិនឃើញផ្ទាំងទេ"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "ផ្លូវកាត់ក្តារចុច"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "ទម្រង់នៃជម្រើសផ្លូវកាត់ត្រូវបានពិពណ៌នានៅទីនេះ។"
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "ធ្វើបច្ចុប្បន្នភាព"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "កំណត់ឡើងវិញ"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "បិទ"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "បើក"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "បិទ/បើកទិដ្ឋភាពក្រុមផ្ទាំង"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "ធ្វើឱ្យក្រុមផ្ទាំងបន្ទាប់សកម្ម"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "ធ្វើឱ្យក្រុមផ្ទាំងមុនសកម្ម"
+  },
+  "optionsView": {
+    "message": "ទិដ្ឋភាព"
+  },
+  "optionsViewFreeform": {
+    "message": "សេរី (បុរាណ)"
+  },
+  "optionsViewPopup": {
+    "message": "ផ្ទាំងលោត"
+  },
+  "optionsTheme": {
+    "message": "រចនាប័ទ្ម"
+  },
+  "optionsThemeLight": {
+    "message": "ភ្លឺ"
+  },
+  "optionsThemeDark": {
+    "message": "ងងឹត"
+  },
+  "optionsToolbar": {
+    "message": "របារឧបករណ៍"
+  },
+  "optionsToolbarPosition": {
+    "message": "ទីតាំង"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "ខាងលើ"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "ខាងស្តាំ"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ខាងក្រោម"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ខាងឆ្វេង"
+  },
+  "optionsBackup": {
+    "message": "ការបម្រុងទុក"
+  },
+  "optionsBackupImport": {
+    "message": "នាំចូល"
+  },
+  "optionsBackupImportText": {
+    "message": "ការបម្រុងទុកដែលបាននាំចូលនឹងបើកក្នុងបង្អួចថ្មី ហើយមិនសរសេរជាន់លើអ្វីទេ។\nអ្នកក៏អាចនាំចូលការបម្រុងទុកពីកម្មវិធីបន្ថែម \"Tab Groups\" ចាស់បានដែរ។"
+  },
+  "optionsBackupExport": {
+    "message": "នាំចេញ"
+  },
+  "optionsBackupExportText": {
+    "message": "ផ្នែកនេះអាចលែងចាំបាច់ នៅពេលដែលការគ្រប់គ្រងសម័យត្រឹមត្រូវអាចធ្វើទៅបានក្នុង Firefox។"
+  },
+  "optionsBackupExportButton": {
+    "message": "រក្សាទុកការបម្រុងទុក"
+  },
+  "optionsStatistics": {
+    "message": "ស្ថិតិ"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "ចំនួនផ្ទាំង៖"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (សកម្ម៖ $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "ទំហំឃ្លាំងរូបភាពតូច៖"
+  },
+  "refreshGroups": {
+    "message": "ផ្ទុកក្រុមឡើងវិញ"
+  },
+  "sendTabToGroup": {
+    "message": "ផ្ញើផ្ទាំងទៅក្រុម"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "អ្នកប្រើក៏អាចធ្វើបច្ចុប្បន្នភាពផ្លូវកាត់តាមជម្រើស \"គ្រប់គ្រងផ្លូវកាត់នៃផ្នែកបន្ថែម\" នៅ about:addons ក្នុង Firefox ដូចដែលបានបង្ហាញ{link}។"
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "ក្នុងវីដេអូគំរូ"
+  },
+  "optionsThemeAuto": {
+    "message": "តាមប្រព័ន្ធ"
+  },
+  "optionsNativeGroups": {
+    "message": "ក្រុមដើមរបស់កម្មវិធីរុករក"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ប្រើក្រុមផ្ទាំងដើមរបស់កម្មវិធីរុករក"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "ប្រើក្រុមផ្ទាំងដើមរបស់កម្មវិធីរុករក សម្រាប់ការរៀបចំដោយមើលឃើញ និងការបត់។"
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "កំណែកម្មវិធីរុករកនេះមិនគាំទ្រក្រុមផ្ទាំងដើមទេ (តម្រូវឱ្យមាន API លាក់ផ្ទាំង)។"
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "កំណែកម្មវិធីរុករកនេះមិនគាំទ្រក្រុមផ្ទាំងដើមទេ។ សូមធ្វើបច្ចុប្បន្នភាពទៅ Firefox 139+ ឬប្រើ Chrome 89+។"
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "កម្មវិធីរុករករបស់អ្នកមិនគាំទ្រ API ដែលត្រូវការសម្រាប់ក្រុមផ្ទាំងទេ។"
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "បានបើកក្រុមដើម។ កំពុងផ្លាស់ប្តូរក្រុម..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "បានបិទក្រុមដើម។ កំពុងសម្អាត..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "ឯកសារមិនត្រឹមត្រូវ"
+  },
+  "byteSizeBytes": {
+    "message": "$1 បៃ"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "កំពុងស្ដារក្រុមផ្ទាំង..."
+  },
+  "migrationTitle": {
+    "message": "ការផ្លាស់ប្តូរក្រុមផ្ទាំងកូនកាត់"
+  },
+  "migrationChecking": {
+    "message": "កំពុងពិនិត្យស្ថានភាពនៃការផ្លាស់ប្តូរ..."
+  },
+  "migrationRun": {
+    "message": "ដំណើរការការផ្លាស់ប្តូរឥឡូវនេះ"
+  },
+  "migrationReset": {
+    "message": "កំណត់ទង់ការផ្លាស់ប្តូរឡើងវិញ"
+  },
+  "migrationCurrentGroups": {
+    "message": "ក្រុមបច្ចុប្បន្ន"
+  },
+  "migrationLoadingGroups": {
+    "message": "កំពុងផ្ទុកក្រុម..."
+  },
+  "migrationComplete": {
+    "message": "✓ ការផ្លាស់ប្តូរបានបញ្ចប់ - ក្រុមទាំងអស់ត្រូវបានផ្លាស់ប្តូរទៅប្រព័ន្ធកូនកាត់"
+  },
+  "migrationPending": {
+    "message": "⚠ ការផ្លាស់ប្តូរកំពុងរង់ចាំ - ក្រុមមិនទាន់ត្រូវបានផ្លាស់ប្តូរនៅឡើយ"
+  },
+  "migrationStatusError": {
+    "message": "កំហុសក្នុងការពិនិត្យស្ថានភាពនៃការផ្លាស់ប្តូរ៖ $1"
+  },
+  "migrationNoGroups": {
+    "message": "រកមិនឃើញក្រុមក្នុងបង្អួចបច្ចុប្បន្នទេ"
+  },
+  "migrationGroupsError": {
+    "message": "កំហុសក្នុងការផ្ទុកក្រុម៖ $1"
+  },
+  "migrationRunning": {
+    "message": "កំពុងដំណើរការការផ្លាស់ប្តូរ..."
+  },
+  "migrationSucceeded": {
+    "message": "ការផ្លាស់ប្តូរបានបញ្ចប់ដោយជោគជ័យ!"
+  },
+  "migrationFailed": {
+    "message": "ការផ្លាស់ប្តូរបរាជ័យ៖ $1"
+  },
+  "migrationNoResponse": {
+    "message": "គ្មានការឆ្លើយតប"
+  },
+  "migrationRunError": {
+    "message": "កំហុសក្នុងការផ្លាស់ប្តូរ៖ $1"
+  },
+  "migrationResetConfirm": {
+    "message": "កំណត់ទង់ការផ្លាស់ប្តូរឡើងវិញ? នេះនឹងអនុញ្ញាតឱ្យការផ្លាស់ប្តូរដំណើរការម្តងទៀត។"
+  },
+  "migrationResetSucceeded": {
+    "message": "បានកំណត់ទង់ការផ្លាស់ប្តូរឡើងវិញដោយជោគជ័យ!"
+  },
+  "migrationResetFailed": {
+    "message": "ការកំណត់ឡើងវិញបរាជ័យ៖ $1"
+  },
+  "migrationResetError": {
+    "message": "កំហុសក្នុងការកំណត់ឡើងវិញ៖ $1"
+  },
+  "migrationGroup": {
+    "message": "ក្រុម $1៖"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ បានផ្លាស់ប្តូរ (លេខសម្គាល់ដើម៖ $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ មិនទាន់ផ្លាស់ប្តូរ"
+  },
+  "migrationGroupStatus": {
+    "message": "ស្ថានភាព៖ $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "ទិដ្ឋភាពក្រុមផ្ទាំង"
+  }
+}

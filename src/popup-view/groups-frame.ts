@@ -1,9 +1,15 @@
 import type { PopupGroup, PopupService } from '../js/app/popup-service.js';
-import { searchGroups, searchMode } from '../js/core/popup.js';
+import {
+  isForwardKey,
+  isNavKey,
+  searchGroups,
+  searchMode,
+} from '../js/core/popup.js';
 import type { Extension } from '../js/ports/extension.js';
 import type { I18n } from '../js/ports/i18n.js';
 import type { Logger } from '../js/ports/logger.js';
 import type { ViewTab } from '../js/ports/view-tabs.js';
+import { runsFromTheRight } from '../js/share/direction.js';
 import { getPluralForm, newElement } from '../js/share/utils.js';
 import type { Frame } from './frame.js';
 import type { TabList } from './tab-list.js';
@@ -129,12 +135,11 @@ export function createGroupsFrame({
         { class: 'list__link list__link--extend' },
         [
           newElement('span', {
-            content:
-              getPluralForm(
-                i18n,
-                tabCount,
-                i18n.getMessage('tabCount', [String(tabCount)]),
-              ) ?? '',
+            content: getPluralForm(
+              i18n,
+              tabCount,
+              i18n.getMessage('tabCount', [String(tabCount)]),
+            ),
           }),
         ],
       );
@@ -167,7 +172,11 @@ export function createGroupsFrame({
         showDetail(group.id, false);
       });
       extendButton.addEventListener('keyup', (event) => {
-        if (event.key === 'ArrowRight') {
+        // The arrow that points on, where the chevron on the button points
+        if (
+          isNavKey(event.key) &&
+          isForwardKey(event.key, runsFromTheRight(item.ownerDocument))
+        ) {
           event.stopPropagation();
           showDetail(group.id, false);
         }
@@ -180,7 +189,7 @@ export function createGroupsFrame({
               tabCount,
               i18n.getMessage('closeGroupWarning', [String(tabCount)]),
             );
-            if (tabCount > 0 && !confirm(warning ?? '')) {
+            if (tabCount > 0 && !confirm(warning)) {
               return;
             }
             if (await service.removeGroup(group.id)) {

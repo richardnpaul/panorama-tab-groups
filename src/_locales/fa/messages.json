@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "افزودن گروه جدید"
+  },
+  "freeformButton": {
+    "message": "چیدمان آزاد"
+  },
+  "tilingButton": {
+    "message": "چیدمان خودکار (کاشی‌وار)"
+  },
+  "settingsButton": {
+    "message": "تنظیمات"
+  },
+  "defaultGroupName": {
+    "message": "گروه"
+  },
+  "dragGroup": {
+    "message": "کشیدن گروه"
+  },
+  "closeGroup": {
+    "message": "بستن گروه"
+  },
+  "closeGroupWarning": {
+    "message": "one=با بستن این گروه، $1 زبانه‌ی داخل آن بسته می‌شود. مطمئنید که می‌خواهید این کار را انجام دهید؟|other=با بستن این گروه، $1 زبانه‌ی داخل آن بسته می‌شوند. مطمئنید که می‌خواهید این کار را انجام دهید؟"
+  },
+  "editGroup": {
+    "message": "ویرایش گروه"
+  },
+  "closeTab": {
+    "message": "بستن زبانه"
+  },
+  "openNewTab": {
+    "message": "باز کردن زبانه‌ی جدید"
+  },
+  "tabCount": {
+    "message": "one=$1 زبانه|other=$1 زبانه"
+  },
+  "searchForTab_placeholder": {
+    "message": "جستجوی زبانه..."
+  },
+  "searchForTab_noResults": {
+    "message": "زبانه‌ای پیدا نشد"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "میان‌برهای صفحه‌کلید"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "قالب گزینه‌ی میان‌بر در اینجا شرح داده شده است."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "به‌روزرسانی"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "بازنشانی"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "غیرفعال کردن"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "فعال کردن"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "تغییر نمای گروه‌های زبانه"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "فعال کردن گروه زبانه‌ی بعدی"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "فعال کردن گروه زبانه‌ی قبلی"
+  },
+  "optionsView": {
+    "message": "نما"
+  },
+  "optionsViewFreeform": {
+    "message": "آزاد (کلاسیک)"
+  },
+  "optionsViewPopup": {
+    "message": "پنجره‌ی بازشو"
+  },
+  "optionsTheme": {
+    "message": "زمینه"
+  },
+  "optionsThemeLight": {
+    "message": "روشن"
+  },
+  "optionsThemeDark": {
+    "message": "تیره"
+  },
+  "optionsToolbar": {
+    "message": "نوار ابزار"
+  },
+  "optionsToolbarPosition": {
+    "message": "موقعیت"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "بالا"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "راست"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "پایین"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "چپ"
+  },
+  "optionsBackup": {
+    "message": "پشتیبان‌گیری"
+  },
+  "optionsBackupImport": {
+    "message": "درون‌ریزی"
+  },
+  "optionsBackupImportText": {
+    "message": "پشتیبان‌های درون‌ریزی‌شده در پنجره‌های جدید باز می‌شوند و چیزی را بازنویسی نمی‌کنند.\nهمچنین می‌توانید پشتیبان‌های افزونه‌ی قدیمی «Tab Groups» را درون‌ریزی کنید."
+  },
+  "optionsBackupExport": {
+    "message": "برون‌بری"
+  },
+  "optionsBackupExportText": {
+    "message": "وقتی مدیریت درست نشست‌ها در Firefox ممکن شود، ممکن است این بخش بی‌مصرف شود."
+  },
+  "optionsBackupExportButton": {
+    "message": "ذخیره‌ی پشتیبان"
+  },
+  "optionsStatistics": {
+    "message": "آمار"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "تعداد زبانه‌ها:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (فعال: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "اندازه‌ی حافظه‌ی نهان تصاویر بندانگشتی:"
+  },
+  "refreshGroups": {
+    "message": "تازه‌سازی گروه‌ها"
+  },
+  "sendTabToGroup": {
+    "message": "فرستادن زبانه به گروه"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "کاربران همچنین می‌توانند میان‌برها را از گزینه‌ی «مدیریت میان‌برهای افزونه» در about:addons در Firefox به‌روز کنند، همان‌طور که {link} دیده می‌شود."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "در ویدیوی نمونه"
+  },
+  "optionsThemeAuto": {
+    "message": "پیروی از سیستم"
+  },
+  "optionsNativeGroups": {
+    "message": "گروه‌های بومی مرورگر"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "استفاده از گروه‌های زبانه‌ی بومی مرورگر"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "استفاده از گروه‌های زبانه‌ی بومی مرورگر برای سازمان‌دهی بصری و جمع کردن."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "گروه‌های زبانه‌ی بومی در این نسخه‌ی مرورگر پشتیبانی نمی‌شوند (به API پنهان‌سازی زبانه نیاز دارد)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "گروه‌های زبانه‌ی بومی در این نسخه‌ی مرورگر پشتیبانی نمی‌شوند. لطفاً به Firefox 139 یا بالاتر به‌روزرسانی کنید یا از Chrome 89 یا بالاتر استفاده کنید."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "مرورگر شما از API‌های لازم برای گروه‌های زبانه پشتیبانی نمی‌کند."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "گروه‌های بومی فعال شدند. در حال انتقال گروه‌ها..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "گروه‌های بومی غیرفعال شدند. در حال پاک‌سازی..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "پرونده‌ی نامعتبر"
+  },
+  "byteSizeBytes": {
+    "message": "$1 بایت"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "در حال بازیابی گروه‌های زبانه..."
+  },
+  "migrationTitle": {
+    "message": "انتقال گروه‌های زبانه‌ی ترکیبی"
+  },
+  "migrationChecking": {
+    "message": "در حال بررسی وضعیت انتقال..."
+  },
+  "migrationRun": {
+    "message": "اجرای انتقال هم‌اکنون"
+  },
+  "migrationReset": {
+    "message": "بازنشانی پرچم انتقال"
+  },
+  "migrationCurrentGroups": {
+    "message": "گروه‌های فعلی"
+  },
+  "migrationLoadingGroups": {
+    "message": "در حال بارگذاری گروه‌ها..."
+  },
+  "migrationComplete": {
+    "message": "✓ انتقال کامل شد - همه‌ی گروه‌ها به سامانه‌ی ترکیبی منتقل شدند"
+  },
+  "migrationPending": {
+    "message": "⚠ انتقال در انتظار - گروه‌ها هنوز منتقل نشده‌اند"
+  },
+  "migrationStatusError": {
+    "message": "خطا در بررسی وضعیت انتقال: $1"
+  },
+  "migrationNoGroups": {
+    "message": "گروهی در پنجره‌ی فعلی پیدا نشد"
+  },
+  "migrationGroupsError": {
+    "message": "خطا در بارگذاری گروه‌ها: $1"
+  },
+  "migrationRunning": {
+    "message": "در حال اجرای انتقال..."
+  },
+  "migrationSucceeded": {
+    "message": "انتقال با موفقیت انجام شد!"
+  },
+  "migrationFailed": {
+    "message": "انتقال ناموفق بود: $1"
+  },
+  "migrationNoResponse": {
+    "message": "پاسخی نیست"
+  },
+  "migrationRunError": {
+    "message": "خطای انتقال: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "پرچم انتقال بازنشانی شود؟ این کار اجازه می‌دهد انتقال دوباره اجرا شود."
+  },
+  "migrationResetSucceeded": {
+    "message": "پرچم انتقال با موفقیت بازنشانی شد!"
+  },
+  "migrationResetFailed": {
+    "message": "بازنشانی ناموفق بود: $1"
+  },
+  "migrationResetError": {
+    "message": "خطای بازنشانی: $1"
+  },
+  "migrationGroup": {
+    "message": "گروه $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ منتقل شد (شناسه‌ی بومی: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ منتقل نشده"
+  },
+  "migrationGroupStatus": {
+    "message": "وضعیت: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "نمای گروه‌های زبانه"
+  }
+}

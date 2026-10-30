@@ -108,7 +108,7 @@ export function createMenuManager({
 
         menus.create({
           id: SEND_TAB,
-          title: i18n.getMessage('sendTabToGroup') || 'Send Tab to Group',
+          title: i18n.getMessage('sendTabToGroup'),
           contexts: ['tab'],
         });
 

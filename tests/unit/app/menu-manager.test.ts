@@ -179,19 +179,6 @@ describe('app/menu-manager.ts', () => {
       ]);
     });
 
-    it.each([[''], [undefined]])(
-      'names the menu "Send Tab to Group" when there is no translation (%j)',
-      async (message) => {
-        const { manager, menus } = await setUp({
-          messages: message === undefined ? {} : { sendTabToGroup: message },
-        });
-
-        await manager.createMenuList();
-
-        expect(menus.items[0]?.title).toBe('Send Tab to Group');
-      },
-    );
-
     it('starts from a clean menu', async () => {
       const menus = createMemoryMenus();
       menus.create({ id: 'stale', title: 'Stale', contexts: ['tab'] });

@@ -1,26 +1,53 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createFakeSessions } from '../../support/fake-sessions.js';
+import { readFileSync } from 'node:fs';
+import {
+  englishMessage,
+  markedMessage,
+  textsOutsideMessages,
+} from '../../support/messages.js';
 import { flush } from '../../support/popup-page.js';
 
 const WINDOW = 2;
 
 const PAGE = `
+  <h1 id="migration-title"></h1>
+  <h2 id="groups-title"></h2>
   <div id="migration-status"></div>
   <div id="groups-container"></div>
   <button id="run-migration">Run Migration Now</button>
   <button id="reset-migration">Reset Migration Flag</button>`;
 
-async function load(options: { page?: boolean; complete?: boolean } = {}) {
+async function load(
+  options: {
+    page?: boolean;
+    complete?: boolean;
+    without?: string;
+    // The real markup of the page, and each text shown as the name of its message
+    real?: boolean;
+  } = {},
+) {
   vi.resetModules();
-  const { page = true, complete = true } = options;
-  document.body.innerHTML = page ? PAGE : '';
+  const { page = true, complete = true, without, real = false } = options;
+  document.body.innerHTML = '';
+  if (real) {
+    const markup = readFileSync('src/migration-status.html', 'utf8');
+    document.body.innerHTML =
+      /<body[^>]*>([\s\S]*)<\/body>/.exec(markup)?.[1] ?? '';
+  } else if (page) {
+    document.body.innerHTML = PAGE;
+  }
+  if (without !== undefined) {
+    document.getElementById(without)?.remove();
+  }
 
   const sessions = createFakeSessions();
   await sessions.api.sessions.setWindowValue(WINDOW, 'groups', [
     {
       id: 1,
-      name: 'Work',
+      // The user's own, so it is made of no words when texts are checked
+      name: real ? '#1' : 'Work',
       containerId: 'firefox-default',
       rect: { x: 0, y: 0, w: 1, h: 1 },
       nativeGroupId: 5,
@@ -38,6 +65,9 @@ async function load(options: { page?: boolean; complete?: boolean } = {}) {
           .mockResolvedValue({ hybridGroupsMigrationComplete: complete }),
       },
     },
+    i18n: {
+      getMessage: vi.fn(real ? markedMessage : englishMessage),
+    },
     sessions: sessions.api.sessions,
     windows: { getCurrent: vi.fn().mockResolvedValue({ id: WINDOW }) },
   };
@@ -53,6 +83,8 @@ async function load(options: { page?: boolean; complete?: boolean } = {}) {
 
 describe('migration-status/start.ts', () => {
   afterEach(() => {
+    document.documentElement.removeAttribute('dir');
+    document.documentElement.removeAttribute('lang');
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     vi.useRealTimers();
@@ -72,11 +104,41 @@ describe('migration-status/start.ts', () => {
     );
   });
 
-  it('fails when the page lacks what it shows in', async () => {
-    const env = await load({ page: false });
+  it('sets the direction and the language of the page from the browser', async () => {
+    const env = await load();
+    env.browser.i18n.getMessage.mockImplementation(
+      (name: string) =>
+        ({ '@@bidi_dir': 'rtl', '@@ui_locale': 'ar' })[name] ??
+        englishMessage(name),
+    );
+
+    await env.startMigrationStatus();
+
+    expect(document.documentElement.dir).toBe('rtl');
+    expect(document.documentElement.lang).toBe('ar');
+  });
+
+  it('shows no text that is not from a message, in the real page', async () => {
+    const env = await load({ real: true });
+
+    await env.startMigrationStatus();
+
+    expect(textsOutsideMessages(document.body)).toEqual([]);
+    expect(document.title).toBe(markedMessage('migrationTitle'));
+  });
+
+  it.each([
+    'migration-title',
+    'groups-title',
+    'migration-status',
+    'groups-container',
+    'run-migration',
+    'reset-migration',
+  ])('fails naming #%s when the page lacks it', async (id) => {
+    const env = await load({ without: id });
 
     await expect(env.startMigrationStatus()).rejects.toThrow(
-      'Element not found: #migration-status',
+      `Element not found: #${id}`,
     );
   });
 

@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Embojuaju atyha pyahu"
+  },
+  "freeformButton": {
+    "message": "Ñemohenda sãso"
+  },
+  "tilingButton": {
+    "message": "Ñemohenda mba'eve'ỹ (tilingue)"
+  },
+  "settingsButton": {
+    "message": "Ñemboheko"
+  },
+  "defaultGroupName": {
+    "message": "Aty"
+  },
+  "dragGroup": {
+    "message": "Eguenohẽ atyha"
+  },
+  "closeGroup": {
+    "message": "Emboty atyha"
+  },
+  "closeGroupWarning": {
+    "message": "one=Emboty ko atyha ha oñembotýta pe $1 tendayke oĩva ipype. Ndaipóri ñembyahýi reiko rejapo hag̃ua?|other=Emboty ko atyha ha oñembotýta umi $1 tendayke oĩva ipype. Ndaipóri ñembyahýi reiko rejapo hag̃ua?"
+  },
+  "editGroup": {
+    "message": "Emoĩ atyha"
+  },
+  "closeTab": {
+    "message": "Emboty tendayke"
+  },
+  "openNewTab": {
+    "message": "Embojuruja tendayke pyahu"
+  },
+  "tabCount": {
+    "message": "one=$1 tendayke|other=$1 tendayke"
+  },
+  "searchForTab_placeholder": {
+    "message": "Eheka tendayke..."
+  },
+  "searchForTab_noResults": {
+    "message": "Ndojejuhúi tendayke"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Mbopya'e ñe'ẽ"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Pe mbopya'e ñemoĩporã jeporavo ojehesa'ỹijo ko'ápe."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Mbopyahu"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Mbopyahu jey"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Mboguejy"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Mohenda"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Emoambue tendayke atyha jehecha"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Emokyre'ỹ tendayke atyha upéi"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Emokyre'ỹ tendayke atyha ohasáva"
+  },
+  "optionsView": {
+    "message": "Jehecha"
+  },
+  "optionsViewFreeform": {
+    "message": "Sãso (tuja)"
+  },
+  "optionsViewPopup": {
+    "message": "Ovetã"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "hesakã"
+  },
+  "optionsThemeDark": {
+    "message": "pytũ"
+  },
+  "optionsToolbar": {
+    "message": "Tembiaporã renda"
+  },
+  "optionsToolbarPosition": {
+    "message": "Maymáva"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "yvate"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "akatúa"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "yvýpe"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "asu"
+  },
+  "optionsBackup": {
+    "message": "Ñeñongatu"
+  },
+  "optionsBackupImport": {
+    "message": "Mbohasa"
+  },
+  "optionsBackupImportText": {
+    "message": "Umi ñeñongatu ojegueru ojepe'áta ovetã pyahúpe ha ndojehaiséi mba'eve.\nUpeicha avei ikatu reguerú ñeñongatu \"Tab Groups\" tujávagui."
+  },
+  "optionsBackupExport": {
+    "message": "Mbohasa"
+  },
+  "optionsBackupExportText": {
+    "message": "Ko pehẽ ikatu ndojeporukavéi oikóvo Firefox-pe tembiapo mbaretegua."
+  },
+  "optionsBackupExportButton": {
+    "message": "Eñongatu ñeñongatu"
+  },
+  "optionsStatistics": {
+    "message": "Papapy"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Tendayke papapy:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Okyre'ỹva: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Ta'anga michĩ ñeñongatu tuichakue:"
+  },
+  "refreshGroups": {
+    "message": "Mbopyahu atyha"
+  },
+  "sendTabToGroup": {
+    "message": "Emondo tendayke atýpe"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Umi poruhára ikatu avei omopyahu mbopya'e Firefox-pe about:addons rupi, \"Eñangareko mbopya'e rehegua\" jeporavo rupi, ojehechaháicha {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "video techaukaha-pe"
+  },
+  "optionsThemeAuto": {
+    "message": "Eipyhy sistema"
+  },
+  "optionsNativeGroups": {
+    "message": "Kundaha atyha ijehegui"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Eporu kundaha tendayke atyha ijehegui"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Eporu kundaha tendayke atyha ijehegui ñemohenda hechapyrã ha mbopyrũrã."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Tendayke atyha ijehegui nomoneĩri ko kundaha rysýi-pe (oikotevẽ tendayke ñemokañy API)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Tendayke atyha ijehegui nomoneĩri ko kundaha rysýi-pe. Emopyahu Firefox 139+ térã eporu Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Nde kundaha nomoneĩri umi API oikotevẽva tendayke atyha-rã."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Atyha ijehegui ojemoĩ. Ojehasa atyha..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Atyha ijehegui ojemboguejy. Ojepohâ..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Marandurenda ndoikóiva"
+  },
+  "byteSizeBytes": {
+    "message": "$1 byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Ojeguerujey tendayke atyha..."
+  },
+  "migrationTitle": {
+    "message": "Tendayke atyha hibrido jehasa"
+  },
+  "migrationChecking": {
+    "message": "Ojehecha jehasa rembiapo..."
+  },
+  "migrationRun": {
+    "message": "Emoñepyrũ jehasa ko'ágã"
+  },
+  "migrationReset": {
+    "message": "Mbopyahu jey jehasa bandera"
+  },
+  "migrationCurrentGroups": {
+    "message": "Atyha ko'ágãgua"
+  },
+  "migrationLoadingGroups": {
+    "message": "Ojegueru atyha..."
+  },
+  "migrationComplete": {
+    "message": "✓ Jehasa opáma - Opa atyha ohasáma sistema hibrido-pe"
+  },
+  "migrationPending": {
+    "message": "⚠ Jehasa ohaʼarõ - Umi atyha ndohasáiva gueteri"
+  },
+  "migrationStatusError": {
+    "message": "Poche jehasa rembiapo jehechápe: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Ndojejuhúi atyha ovetã ko'ágãguápe"
+  },
+  "migrationGroupsError": {
+    "message": "Poche atyha jegueru jave: $1"
+  },
+  "migrationRunning": {
+    "message": "Oñemboguata jehasa..."
+  },
+  "migrationSucceeded": {
+    "message": "Jehasa opa porã!"
+  },
+  "migrationFailed": {
+    "message": "Jehasa ndoikói: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Ndaipóri mbohovái"
+  },
+  "migrationRunError": {
+    "message": "Jehasa poche: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Embopyahu jey jehasa bandera? Péicha jehasa ikatu oñemoñepyrũ jey."
+  },
+  "migrationResetSucceeded": {
+    "message": "Jehasa bandera oñembopyahu jey porã!"
+  },
+  "migrationResetFailed": {
+    "message": "Mbopyahu jey ndoikói: $1"
+  },
+  "migrationResetError": {
+    "message": "Mbopyahu jey poche: $1"
+  },
+  "migrationGroup": {
+    "message": "Aty $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Ohasáma (ID ijehegui: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Ndohasái"
+  },
+  "migrationGroupStatus": {
+    "message": "Hetepy: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Tendayke atyha jehecha"
+  }
+}

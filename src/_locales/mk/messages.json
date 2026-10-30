@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Додај нова група"
+  },
+  "freeformButton": {
+    "message": "Слободен распоред"
+  },
+  "tilingButton": {
+    "message": "Автоматски распоред (плочки)"
+  },
+  "settingsButton": {
+    "message": "Поставки"
+  },
+  "defaultGroupName": {
+    "message": "Грп."
+  },
+  "dragGroup": {
+    "message": "Повлечи ја групата"
+  },
+  "closeGroup": {
+    "message": "Затвори ја групата"
+  },
+  "closeGroupWarning": {
+    "message": "one=Со затворањето на оваа група ќе се затвори $1 картичка во неа. Дали сте сигурни дека сакате да го направите тоа?|other=Со затворањето на оваа група ќе се затворат $1 картички во неа. Дали сте сигурни дека сакате да го направите тоа?"
+  },
+  "editGroup": {
+    "message": "Уреди ја групата"
+  },
+  "closeTab": {
+    "message": "Затвори ја картичката"
+  },
+  "openNewTab": {
+    "message": "Отвори нова картичка"
+  },
+  "tabCount": {
+    "message": "one=$1 картичка|other=$1 картички"
+  },
+  "searchForTab_placeholder": {
+    "message": "Пребарај картичка..."
+  },
+  "searchForTab_noResults": {
+    "message": "Не се пронајдени картички"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Кратенки на тастатурата"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Форматот на опцијата за кратенка е објаснет тука."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Ажурирај"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Ресетирај"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Оневозможи"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Овозможи"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Префрли го прикажувањето на групите картички"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Активирај ја следната група картички"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Активирај ја претходната група картички"
+  },
+  "optionsView": {
+    "message": "Приказ"
+  },
+  "optionsViewFreeform": {
+    "message": "Слободен (класичен)"
+  },
+  "optionsViewPopup": {
+    "message": "Скокачки прозорец"
+  },
+  "optionsTheme": {
+    "message": "Тема"
+  },
+  "optionsThemeLight": {
+    "message": "светла"
+  },
+  "optionsThemeDark": {
+    "message": "темна"
+  },
+  "optionsToolbar": {
+    "message": "Лента со алатки"
+  },
+  "optionsToolbarPosition": {
+    "message": "Положба"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "горе"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "десно"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "долу"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "лево"
+  },
+  "optionsBackup": {
+    "message": "Резервна копија"
+  },
+  "optionsBackupImport": {
+    "message": "Увоз"
+  },
+  "optionsBackupImportText": {
+    "message": "Увезените резервни копии ќе се отвораат во нови прозорци и нема да пребришат ништо.\nМоже да увезете и резервни копии од старот додаток „Tab Groups“."
+  },
+  "optionsBackupExport": {
+    "message": "Извоз"
+  },
+  "optionsBackupExportText": {
+    "message": "Овој дел може да стане непотребен кога во Firefox ќе биде можно правилно управување со сесиите."
+  },
+  "optionsBackupExportButton": {
+    "message": "Зачувај резервна копија"
+  },
+  "optionsStatistics": {
+    "message": "Статистика"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Број на картички:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Активни: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Големина на кешот за минијатури:"
+  },
+  "refreshGroups": {
+    "message": "Освежи ги групите"
+  },
+  "sendTabToGroup": {
+    "message": "Испрати ја картичката во група"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Корисниците можат да ги ажурираат кратенките и преку опцијата „Управувај со кратенките на проширувањата“ на about:addons во Firefox, како што се гледа {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "во примерот на видеото"
+  },
+  "optionsThemeAuto": {
+    "message": "Следи го системот"
+  },
+  "optionsNativeGroups": {
+    "message": "Сопствени групи на прелистувачот"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Користи ги сопствените групи картички на прелистувачот"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Користи ги сопствените групи картички на прелистувачот за визуелна организација и собирање."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Сопствените групи картички не се поддржани во оваа верзија на прелистувачот (потребен е API за кријење картички)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Сопствените групи картички не се поддржани во оваа верзија на прелистувачот. Ажурирајте на Firefox 139+ или користете Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Вашиот прелистувач не ги поддржува API-јата потребни за групите картички."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Сопствените групи се овозможени. Се мигрираат групите..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Сопствените групи се оневозможени. Се чисти..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Неважечка датотека"
+  },
+  "byteSizeBytes": {
+    "message": "$1 бајти"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Се враќаат групите картички..."
+  },
+  "migrationTitle": {
+    "message": "Миграција на хибридни групи картички"
+  },
+  "migrationChecking": {
+    "message": "Се проверува статусот на миграцијата..."
+  },
+  "migrationRun": {
+    "message": "Започни ја миграцијата сега"
+  },
+  "migrationReset": {
+    "message": "Ресетирај го знамето за миграција"
+  },
+  "migrationCurrentGroups": {
+    "message": "Тековни групи"
+  },
+  "migrationLoadingGroups": {
+    "message": "Се вчитуваат групите..."
+  },
+  "migrationComplete": {
+    "message": "✓ Миграцијата е завршена - Сите групи се мигрирани во хибридниот систем"
+  },
+  "migrationPending": {
+    "message": "⚠ Миграцијата е на чекање - Групите сè уште не се мигрирани"
+  },
+  "migrationStatusError": {
+    "message": "Грешка при проверка на статусот на миграцијата: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Не се пронајдени групи во тековниот прозорец"
+  },
+  "migrationGroupsError": {
+    "message": "Грешка при вчитување на групите: $1"
+  },
+  "migrationRunning": {
+    "message": "Миграцијата е во тек..."
+  },
+  "migrationSucceeded": {
+    "message": "Миграцијата е успешно завршена!"
+  },
+  "migrationFailed": {
+    "message": "Миграцијата не успеа: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Нема одговор"
+  },
+  "migrationRunError": {
+    "message": "Грешка при миграцијата: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Да се ресетира ли знамето за миграција? Така миграцијата ќе може повторно да се изврши."
+  },
+  "migrationResetSucceeded": {
+    "message": "Знамето за миграција е успешно ресетирано!"
+  },
+  "migrationResetFailed": {
+    "message": "Ресетирањето не успеа: $1"
+  },
+  "migrationResetError": {
+    "message": "Грешка при ресетирање: $1"
+  },
+  "migrationGroup": {
+    "message": "Група $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Мигрирана (сопствен ИД: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Не е мигрирана"
+  },
+  "migrationGroupStatus": {
+    "message": "Статус: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Приказ на групите картички"
+  }
+}

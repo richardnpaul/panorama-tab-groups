@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Tambah kumpulan baharu"
+  },
+  "freeformButton": {
+    "message": "Susun atur bebas"
+  },
+  "tilingButton": {
+    "message": "Susun atur automatik (jubin)"
+  },
+  "settingsButton": {
+    "message": "Tetapan"
+  },
+  "defaultGroupName": {
+    "message": "Kump."
+  },
+  "dragGroup": {
+    "message": "Seret kumpulan"
+  },
+  "closeGroup": {
+    "message": "Tutup kumpulan"
+  },
+  "closeGroupWarning": {
+    "message": "Menutup kumpulan ini akan menutup $1 tab di dalamnya. Adakah anda pasti mahu berbuat demikian?"
+  },
+  "editGroup": {
+    "message": "Edit kumpulan"
+  },
+  "closeTab": {
+    "message": "Tutup tab"
+  },
+  "openNewTab": {
+    "message": "Buka tab baharu"
+  },
+  "tabCount": {
+    "message": "$1 tab"
+  },
+  "searchForTab_placeholder": {
+    "message": "Cari tab..."
+  },
+  "searchForTab_noResults": {
+    "message": "Tiada tab ditemui"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Pintasan Papan Kekunci"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Format pilihan pintasan diterangkan di sini."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Kemas kini"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Set semula"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Lumpuhkan"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Dayakan"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Togol paparan kumpulan tab"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktifkan kumpulan tab seterusnya"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktifkan kumpulan tab sebelumnya"
+  },
+  "optionsView": {
+    "message": "Paparan"
+  },
+  "optionsViewFreeform": {
+    "message": "Bebas (klasik)"
+  },
+  "optionsViewPopup": {
+    "message": "Tetingkap timbul"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "cerah"
+  },
+  "optionsThemeDark": {
+    "message": "gelap"
+  },
+  "optionsToolbar": {
+    "message": "Bar alat"
+  },
+  "optionsToolbarPosition": {
+    "message": "Kedudukan"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "atas"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "kanan"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "bawah"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "kiri"
+  },
+  "optionsBackup": {
+    "message": "Sandaran"
+  },
+  "optionsBackupImport": {
+    "message": "Import"
+  },
+  "optionsBackupImportText": {
+    "message": "Sandaran yang diimport akan dibuka dalam tetingkap baharu dan tidak menimpa apa-apa.\nAnda juga boleh mengimport sandaran daripada alat tambah \"Tab Groups\" yang lama."
+  },
+  "optionsBackupExport": {
+    "message": "Eksport"
+  },
+  "optionsBackupExportText": {
+    "message": "Bahagian ini mungkin tidak diperlukan lagi apabila pengurusan sesi yang betul dapat dilakukan dalam Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Simpan sandaran"
+  },
+  "optionsStatistics": {
+    "message": "Statistik"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Bilangan tab:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktif: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Saiz cache gambar kecil:"
+  },
+  "refreshGroups": {
+    "message": "Muat semula kumpulan"
+  },
+  "sendTabToGroup": {
+    "message": "Hantar tab ke kumpulan"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Pengguna juga boleh mengemas kini pintasan melalui pilihan \"Urus Pintasan Sambungan\" di about:addons dalam Firefox seperti yang ditunjukkan {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "dalam video contoh"
+  },
+  "optionsThemeAuto": {
+    "message": "Ikut sistem"
+  },
+  "optionsNativeGroups": {
+    "message": "Kumpulan Asal Pelayar"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Gunakan kumpulan tab asal pelayar"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Gunakan kumpulan tab asal pelayar untuk penyusunan visual dan pelipatan."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Kumpulan tab asal tidak disokong dalam versi pelayar ini (memerlukan API penyembunyian tab)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Kumpulan tab asal tidak disokong dalam versi pelayar ini. Sila kemas kini kepada Firefox 139+ atau gunakan Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Pelayar anda tidak menyokong API yang diperlukan untuk kumpulan tab."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Kumpulan asal didayakan. Memindahkan kumpulan..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Kumpulan asal dilumpuhkan. Membersihkan..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Fail tidak sah"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bait"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Memulihkan kumpulan tab..."
+  },
+  "migrationTitle": {
+    "message": "Penghijrahan Kumpulan Tab Hibrid"
+  },
+  "migrationChecking": {
+    "message": "Menyemak status penghijrahan..."
+  },
+  "migrationRun": {
+    "message": "Jalankan penghijrahan sekarang"
+  },
+  "migrationReset": {
+    "message": "Set semula bendera penghijrahan"
+  },
+  "migrationCurrentGroups": {
+    "message": "Kumpulan semasa"
+  },
+  "migrationLoadingGroups": {
+    "message": "Memuatkan kumpulan..."
+  },
+  "migrationComplete": {
+    "message": "✓ Penghijrahan selesai - Semua kumpulan telah dihijrahkan ke sistem hibrid"
+  },
+  "migrationPending": {
+    "message": "⚠ Penghijrahan belum selesai - Kumpulan belum dihijrahkan"
+  },
+  "migrationStatusError": {
+    "message": "Ralat semasa menyemak status penghijrahan: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Tiada kumpulan ditemui dalam tetingkap semasa"
+  },
+  "migrationGroupsError": {
+    "message": "Ralat semasa memuatkan kumpulan: $1"
+  },
+  "migrationRunning": {
+    "message": "Menjalankan penghijrahan..."
+  },
+  "migrationSucceeded": {
+    "message": "Penghijrahan berjaya diselesaikan!"
+  },
+  "migrationFailed": {
+    "message": "Penghijrahan gagal: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Tiada maklum balas"
+  },
+  "migrationRunError": {
+    "message": "Ralat penghijrahan: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Set semula bendera penghijrahan? Ini membolehkan penghijrahan dijalankan semula."
+  },
+  "migrationResetSucceeded": {
+    "message": "Bendera penghijrahan berjaya disetkan semula!"
+  },
+  "migrationResetFailed": {
+    "message": "Set semula gagal: $1"
+  },
+  "migrationResetError": {
+    "message": "Ralat set semula: $1"
+  },
+  "migrationGroup": {
+    "message": "Kumpulan $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Dihijrahkan (ID asal: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Belum dihijrahkan"
+  },
+  "migrationGroupStatus": {
+    "message": "Status: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Paparan Kumpulan Tab"
+  }
+}

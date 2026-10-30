@@ -267,7 +267,7 @@ export function createGroupNodes({
         tabCount,
         i18n.getMessage('closeGroupWarning', [String(tabCount)]),
       );
-      if (!confirm(warning ?? '')) {
+      if (!confirm(warning)) {
         return;
       }
     }

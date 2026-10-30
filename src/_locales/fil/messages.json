@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Magdagdag ng bagong grupo"
+  },
+  "freeformButton": {
+    "message": "Malayang ayos"
+  },
+  "tilingButton": {
+    "message": "Awtomatikong ayos (tiling)"
+  },
+  "settingsButton": {
+    "message": "Mga setting"
+  },
+  "defaultGroupName": {
+    "message": "Grp"
+  },
+  "dragGroup": {
+    "message": "I-drag ang grupo"
+  },
+  "closeGroup": {
+    "message": "Isara ang grupo"
+  },
+  "closeGroupWarning": {
+    "message": "one=Isasara ng pagsara sa grupong ito ang $1 tab na nasa loob nito. Sigurado ka bang gusto mong gawin ito?|other=Isasara ng pagsara sa grupong ito ang $1 na tab na nasa loob nito. Sigurado ka bang gusto mong gawin ito?"
+  },
+  "editGroup": {
+    "message": "I-edit ang grupo"
+  },
+  "closeTab": {
+    "message": "Isara ang tab"
+  },
+  "openNewTab": {
+    "message": "Magbukas ng bagong tab"
+  },
+  "tabCount": {
+    "message": "one=$1 tab|other=$1 na tab"
+  },
+  "searchForTab_placeholder": {
+    "message": "Maghanap ng tab..."
+  },
+  "searchForTab_noResults": {
+    "message": "Walang nahanap na tab"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Mga keyboard shortcut"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Nakalahad dito ang format ng opsyon sa shortcut."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "I-update"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "I-reset"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "I-disable"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "I-enable"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "I-toggle ang view ng mga grupo ng tab"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "I-activate ang susunod na grupo ng tab"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "I-activate ang nakaraang grupo ng tab"
+  },
+  "optionsView": {
+    "message": "View"
+  },
+  "optionsViewFreeform": {
+    "message": "Malaya (klasiko)"
+  },
+  "optionsViewPopup": {
+    "message": "Popup"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "maliwanag"
+  },
+  "optionsThemeDark": {
+    "message": "madilim"
+  },
+  "optionsToolbar": {
+    "message": "Toolbar"
+  },
+  "optionsToolbarPosition": {
+    "message": "Posisyon"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "itaas"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "kanan"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "ibaba"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "kaliwa"
+  },
+  "optionsBackup": {
+    "message": "Backup"
+  },
+  "optionsBackupImport": {
+    "message": "Mag-import"
+  },
+  "optionsBackupImportText": {
+    "message": "Magbubukas sa mga bagong window ang mga na-import na backup at wala silang papalitan.\nMaaari ka ring mag-import ng mga backup mula sa lumang add-on na \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "Mag-export"
+  },
+  "optionsBackupExportText": {
+    "message": "Maaaring hindi na kailanganin ang seksyong ito kapag posible na ang maayos na pamamahala ng session sa Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "I-save ang backup"
+  },
+  "optionsStatistics": {
+    "message": "Mga estadistika"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Bilang ng mga tab:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktibo: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Laki ng thumbnail cache:"
+  },
+  "refreshGroups": {
+    "message": "I-refresh ang mga grupo"
+  },
+  "sendTabToGroup": {
+    "message": "Ipadala ang tab sa grupo"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Maaari ding i-update ng mga user ang mga shortcut sa pamamagitan ng opsyong \"Pamahalaan ang Mga Shortcut ng Extension\" sa about:addons sa Firefox, gaya ng makikita {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "sa halimbawang video"
+  },
+  "optionsThemeAuto": {
+    "message": "Sundin ang system"
+  },
+  "optionsNativeGroups": {
+    "message": "Mga native na grupo ng browser"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Gamitin ang mga native na grupo ng tab ng browser"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Gamitin ang mga native na grupo ng tab ng browser para sa biswal na pag-aayos at pag-collapse."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Hindi sinusuportahan ang mga native na grupo ng tab sa bersyong ito ng browser (kailangan ang API sa pagtatago ng tab)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Hindi sinusuportahan ang mga native na grupo ng tab sa bersyong ito ng browser. Mag-update sa Firefox 139+ o gumamit ng Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Hindi sinusuportahan ng iyong browser ang mga API na kailangan para sa mga grupo ng tab."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Naka-enable na ang mga native na grupo. Inililipat ang mga grupo..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Naka-disable na ang mga native na grupo. Naglilinis..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Di-wastong file"
+  },
+  "byteSizeBytes": {
+    "message": "$1 na byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Ibinabalik ang mga grupo ng tab..."
+  },
+  "migrationTitle": {
+    "message": "Paglilipat ng mga hybrid na grupo ng tab"
+  },
+  "migrationChecking": {
+    "message": "Sinusuri ang katayuan ng paglilipat..."
+  },
+  "migrationRun": {
+    "message": "Patakbuhin ang paglilipat ngayon"
+  },
+  "migrationReset": {
+    "message": "I-reset ang flag ng paglilipat"
+  },
+  "migrationCurrentGroups": {
+    "message": "Mga kasalukuyang grupo"
+  },
+  "migrationLoadingGroups": {
+    "message": "Nilo-load ang mga grupo..."
+  },
+  "migrationComplete": {
+    "message": "✓ Tapos na ang paglilipat - Nailipat na ang lahat ng grupo sa hybrid na sistema"
+  },
+  "migrationPending": {
+    "message": "⚠ Nakabinbin ang paglilipat - Hindi pa nailipat ang mga grupo"
+  },
+  "migrationStatusError": {
+    "message": "Error sa pagsuri ng katayuan ng paglilipat: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Walang nakitang grupo sa kasalukuyang window"
+  },
+  "migrationGroupsError": {
+    "message": "Error sa pag-load ng mga grupo: $1"
+  },
+  "migrationRunning": {
+    "message": "Pinapatakbo ang paglilipat..."
+  },
+  "migrationSucceeded": {
+    "message": "Matagumpay na natapos ang paglilipat!"
+  },
+  "migrationFailed": {
+    "message": "Nabigo ang paglilipat: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Walang tugon"
+  },
+  "migrationRunError": {
+    "message": "Error sa paglilipat: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "I-reset ang flag ng paglilipat? Papayagan nitong patakbuhin muli ang paglilipat."
+  },
+  "migrationResetSucceeded": {
+    "message": "Matagumpay na na-reset ang flag ng paglilipat!"
+  },
+  "migrationResetFailed": {
+    "message": "Nabigo ang pag-reset: $1"
+  },
+  "migrationResetError": {
+    "message": "Error sa pag-reset: $1"
+  },
+  "migrationGroup": {
+    "message": "Grupo $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Nailipat (Native ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Hindi nailipat"
+  },
+  "migrationGroupStatus": {
+    "message": "Katayuan: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "View ng mga grupo ng tab"
+  }
+}

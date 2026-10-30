@@ -7,8 +7,10 @@ import { createStatistics } from '../../../src/js/options/statistics.js';
 import type { ViewState } from '../../../src/js/ports/view-state.js';
 import type { ViewTab } from '../../../src/js/ports/view-tabs.js';
 import { createFakeSessions } from '../../support/fake-sessions.js';
+import { englishMessage } from '../../support/messages.js';
 
-const getMessage = vi.fn<(messageName: string) => string>();
+const getMessage =
+  vi.fn<(messageName: string, substitutions?: readonly string[]) => string>();
 
 const text = (id: string) => document.getElementById(id)?.textContent;
 
@@ -46,7 +48,11 @@ function statisticsOf(
 
 describe('options/statistics.ts', () => {
   beforeEach(() => {
-    getMessage.mockReset().mockReturnValue('active');
+    getMessage
+      .mockReset()
+      .mockImplementation((name, substitutions) =>
+        englishMessage(name, substitutions),
+      );
     document.body.innerHTML = `
       <span id="thumbnailCacheSize">old size</span>
       <span id="numberOfTabs">old tabs</span>
@@ -117,9 +123,21 @@ describe('options/statistics.ts', () => {
     await show();
 
     expect(getMessage).toHaveBeenCalledWith(
-      'optionsStatisticsNumberOfTabsActive',
+      'optionsStatisticsNumberOfTabsAndActive',
+      ['3', '2'],
     );
-    expect(text('numberOfTabs')).toBe('3 (active 2)');
+    expect(text('numberOfTabs')).toBe('3 (Active: 2)');
+  });
+
+  it('writes the counts in the digits and grouping of the language of the browser', async () => {
+    getMessage.mockImplementation((name, substitutions) =>
+      name === '@@ui_locale' ? 'fa' : englishMessage(name, substitutions),
+    );
+    const { show } = statisticsOf([tab(1), tab(2, true), tab(3)]);
+
+    await show();
+
+    expect(text('numberOfTabs')).toBe('۳ (Active: ۲)');
   });
 
   it('reports zero when there are no tabs', async () => {
@@ -127,7 +145,7 @@ describe('options/statistics.ts', () => {
 
     await show();
 
-    expect(text('numberOfTabs')).toBe('0 (active 0)');
+    expect(text('numberOfTabs')).toBe('0 (Active: 0)');
     expect(text('thumbnailCacheSize')).toBe('0 bytes');
   });
 

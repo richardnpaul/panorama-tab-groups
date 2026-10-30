@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "नवीन गट जोडा"
+  },
+  "freeformButton": {
+    "message": "मुक्त मांडणी"
+  },
+  "tilingButton": {
+    "message": "स्वयंचलित (टाइलिंग) मांडणी"
+  },
+  "settingsButton": {
+    "message": "सेटिंग्ज"
+  },
+  "defaultGroupName": {
+    "message": "गट"
+  },
+  "dragGroup": {
+    "message": "गट ओढा"
+  },
+  "closeGroup": {
+    "message": "गट बंद करा"
+  },
+  "closeGroupWarning": {
+    "message": "one=हा गट बंद केल्यास त्यातील $1 टॅब बंद होईल. तुम्हाला खात्री आहे की तुम्हाला हे करायचे आहे?|other=हा गट बंद केल्यास त्यातील $1 टॅब बंद होतील. तुम्हाला खात्री आहे की तुम्हाला हे करायचे आहे?"
+  },
+  "editGroup": {
+    "message": "गट संपादित करा"
+  },
+  "closeTab": {
+    "message": "टॅब बंद करा"
+  },
+  "openNewTab": {
+    "message": "नवीन टॅब उघडा"
+  },
+  "tabCount": {
+    "message": "one=$1 टॅब|other=$1 टॅब"
+  },
+  "searchForTab_placeholder": {
+    "message": "टॅब शोधा..."
+  },
+  "searchForTab_noResults": {
+    "message": "कोणतेही टॅब सापडले नाहीत"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "कीबोर्ड शॉर्टकट"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "शॉर्टकट पर्यायाचे स्वरूप येथे तपशीलवार दिले आहे."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "अद्यतनित करा"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "रीसेट करा"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "अक्षम करा"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "सक्षम करा"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "टॅब गट दृश्य टॉगल करा"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "पुढील टॅब गट सक्रिय करा"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "मागील टॅब गट सक्रिय करा"
+  },
+  "optionsView": {
+    "message": "दृश्य"
+  },
+  "optionsViewFreeform": {
+    "message": "मुक्त (क्लासिक)"
+  },
+  "optionsViewPopup": {
+    "message": "पॉपअप"
+  },
+  "optionsTheme": {
+    "message": "थीम"
+  },
+  "optionsThemeLight": {
+    "message": "फिकट"
+  },
+  "optionsThemeDark": {
+    "message": "गडद"
+  },
+  "optionsToolbar": {
+    "message": "टूलबार"
+  },
+  "optionsToolbarPosition": {
+    "message": "स्थान"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "वर"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "उजवीकडे"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "खाली"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "डावीकडे"
+  },
+  "optionsBackup": {
+    "message": "बॅकअप"
+  },
+  "optionsBackupImport": {
+    "message": "आयात करा"
+  },
+  "optionsBackupImportText": {
+    "message": "आयात केलेले बॅकअप नवीन विंडोमध्ये उघडतील आणि काहीही अधिलिखित करणार नाहीत.\nतुम्ही जुन्या \"Tab Groups\" ॲड-ऑनमधील बॅकअपही आयात करू शकता."
+  },
+  "optionsBackupExport": {
+    "message": "निर्यात करा"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox मध्ये योग्य सत्र व्यवस्थापन शक्य झाल्यावर हा विभाग अनावश्यक होऊ शकतो."
+  },
+  "optionsBackupExportButton": {
+    "message": "बॅकअप जतन करा"
+  },
+  "optionsStatistics": {
+    "message": "आकडेवारी"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "टॅबची संख्या:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (सक्रिय: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "थंबनेल कॅशचा आकार:"
+  },
+  "refreshGroups": {
+    "message": "गट रिफ्रेश करा"
+  },
+  "sendTabToGroup": {
+    "message": "टॅब गटाकडे पाठवा"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "वापरकर्ते Firefox मधील about:addons वर \"विस्तार शॉर्टकट व्यवस्थापित करा\" या पर्यायाद्वारेही शॉर्टकट अद्यतनित करू शकतात, जसे {link} दाखवले आहे."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "उदाहरण व्हिडिओमध्ये"
+  },
+  "optionsThemeAuto": {
+    "message": "सिस्टमचे अनुसरण करा"
+  },
+  "optionsNativeGroups": {
+    "message": "ब्राउझरचे मूळ गट"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "ब्राउझरचे मूळ टॅब गट वापरा"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "दृश्य मांडणी आणि आकुंचन करण्यासाठी ब्राउझरचे मूळ टॅब गट वापरा."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "या ब्राउझर आवृत्तीमध्ये मूळ टॅब गट समर्थित नाहीत (टॅब लपवणारा API आवश्यक आहे)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "या ब्राउझर आवृत्तीमध्ये मूळ टॅब गट समर्थित नाहीत. कृपया Firefox 139+ वर अद्यतनित करा किंवा Chrome 89+ वापरा."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "तुमचा ब्राउझर टॅब गटांसाठी आवश्यक API ना समर्थन देत नाही."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "मूळ गट सक्षम केले. गट स्थलांतरित होत आहेत..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "मूळ गट अक्षम केले. साफसफाई चालू आहे..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "अवैध फाइल"
+  },
+  "byteSizeBytes": {
+    "message": "$1 बाइट"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "टॅब गट पुनर्संचयित होत आहेत..."
+  },
+  "migrationTitle": {
+    "message": "हायब्रिड टॅब गटांचे स्थलांतर"
+  },
+  "migrationChecking": {
+    "message": "स्थलांतराची स्थिती तपासली जात आहे..."
+  },
+  "migrationRun": {
+    "message": "आता स्थलांतर चालवा"
+  },
+  "migrationReset": {
+    "message": "स्थलांतर ध्वज रीसेट करा"
+  },
+  "migrationCurrentGroups": {
+    "message": "सध्याचे गट"
+  },
+  "migrationLoadingGroups": {
+    "message": "गट लोड होत आहेत..."
+  },
+  "migrationComplete": {
+    "message": "✓ स्थलांतर पूर्ण - सर्व गट हायब्रिड प्रणालीमध्ये स्थलांतरित झाले आहेत"
+  },
+  "migrationPending": {
+    "message": "⚠ स्थलांतर प्रलंबित - गट अजून स्थलांतरित झालेले नाहीत"
+  },
+  "migrationStatusError": {
+    "message": "स्थलांतराची स्थिती तपासताना त्रुटी: $1"
+  },
+  "migrationNoGroups": {
+    "message": "सध्याच्या विंडोमध्ये कोणतेही गट सापडले नाहीत"
+  },
+  "migrationGroupsError": {
+    "message": "गट लोड करताना त्रुटी: $1"
+  },
+  "migrationRunning": {
+    "message": "स्थलांतर चालू आहे..."
+  },
+  "migrationSucceeded": {
+    "message": "स्थलांतर यशस्वीरीत्या पूर्ण झाले!"
+  },
+  "migrationFailed": {
+    "message": "स्थलांतर अयशस्वी: $1"
+  },
+  "migrationNoResponse": {
+    "message": "प्रतिसाद नाही"
+  },
+  "migrationRunError": {
+    "message": "स्थलांतर त्रुटी: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "स्थलांतर ध्वज रीसेट करायचा? यामुळे स्थलांतर पुन्हा चालवता येईल."
+  },
+  "migrationResetSucceeded": {
+    "message": "स्थलांतर ध्वज यशस्वीरीत्या रीसेट झाला!"
+  },
+  "migrationResetFailed": {
+    "message": "रीसेट अयशस्वी: $1"
+  },
+  "migrationResetError": {
+    "message": "रीसेट त्रुटी: $1"
+  },
+  "migrationGroup": {
+    "message": "गट $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ स्थलांतरित (मूळ ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ स्थलांतरित नाही"
+  },
+  "migrationGroupStatus": {
+    "message": "स्थिती: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "टॅब गट दृश्य"
+  }
+}

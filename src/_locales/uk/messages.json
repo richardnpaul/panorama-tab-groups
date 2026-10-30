@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Додати нову групу"
+  },
+  "freeformButton": {
+    "message": "Довільне розташування"
+  },
+  "tilingButton": {
+    "message": "Автоматичне розташування (плиткою)"
+  },
+  "settingsButton": {
+    "message": "Налаштування"
+  },
+  "defaultGroupName": {
+    "message": "Гр."
+  },
+  "dragGroup": {
+    "message": "Перетягнути групу"
+  },
+  "closeGroup": {
+    "message": "Закрити групу"
+  },
+  "closeGroupWarning": {
+    "message": "one=Закриття цієї групи закриє $1 вкладку в ній. Ви впевнені, що хочете це зробити?|few=Закриття цієї групи закриє $1 вкладки в ній. Ви впевнені, що хочете це зробити?|many=Закриття цієї групи закриє $1 вкладок у ній. Ви впевнені, що хочете це зробити?|other=Закриття цієї групи закриє $1 вкладки в ній. Ви впевнені, що хочете це зробити?"
+  },
+  "editGroup": {
+    "message": "Редагувати групу"
+  },
+  "closeTab": {
+    "message": "Закрити вкладку"
+  },
+  "openNewTab": {
+    "message": "Відкрити нову вкладку"
+  },
+  "tabCount": {
+    "message": "one=$1 вкладка|few=$1 вкладки|many=$1 вкладок|other=$1 вкладки"
+  },
+  "searchForTab_placeholder": {
+    "message": "Пошук вкладки..."
+  },
+  "searchForTab_noResults": {
+    "message": "Вкладок не знайдено"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Клавіатурні скорочення"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Формат параметра скорочення описано тут."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Оновити"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Скинути"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Вимкнути"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Увімкнути"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Перемкнути перегляд груп вкладок"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Активувати наступну групу вкладок"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Активувати попередню групу вкладок"
+  },
+  "optionsView": {
+    "message": "Вигляд"
+  },
+  "optionsViewFreeform": {
+    "message": "Довільний (класичний)"
+  },
+  "optionsViewPopup": {
+    "message": "Спливне вікно"
+  },
+  "optionsTheme": {
+    "message": "Тема"
+  },
+  "optionsThemeLight": {
+    "message": "світла"
+  },
+  "optionsThemeDark": {
+    "message": "темна"
+  },
+  "optionsToolbar": {
+    "message": "Панель інструментів"
+  },
+  "optionsToolbarPosition": {
+    "message": "Розташування"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "угорі"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "праворуч"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "унизу"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "ліворуч"
+  },
+  "optionsBackup": {
+    "message": "Резервна копія"
+  },
+  "optionsBackupImport": {
+    "message": "Імпорт"
+  },
+  "optionsBackupImportText": {
+    "message": "Імпортовані резервні копії відкриваються в нових вікнах і нічого не перезаписують.\nВи також можете імпортувати резервні копії зі старого додатка «Tab Groups»."
+  },
+  "optionsBackupExport": {
+    "message": "Експорт"
+  },
+  "optionsBackupExportText": {
+    "message": "Цей розділ може стати непотрібним, коли у Firefox стане можливим належне керування сеансами."
+  },
+  "optionsBackupExportButton": {
+    "message": "Зберегти резервну копію"
+  },
+  "optionsStatistics": {
+    "message": "Статистика"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Кількість вкладок:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Активні: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Розмір кешу мініатюр:"
+  },
+  "refreshGroups": {
+    "message": "Оновити групи"
+  },
+  "sendTabToGroup": {
+    "message": "Надіслати вкладку до групи"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Користувачі також можуть оновлювати скорочення за допомогою параметра «Керування скороченнями розширень» на сторінці about:addons у Firefox, як показано {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "у прикладі відео"
+  },
+  "optionsThemeAuto": {
+    "message": "Як у системі"
+  },
+  "optionsNativeGroups": {
+    "message": "Власні групи браузера"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Використовувати власні групи вкладок браузера"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Використовувати власні групи вкладок браузера для візуальної організації та згортання."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Власні групи вкладок не підтримуються в цій версії браузера (потрібен API приховування вкладок)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Власні групи вкладок не підтримуються в цій версії браузера. Оновіть Firefox до версії 139+ або скористайтеся Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Ваш браузер не підтримує API, потрібні для груп вкладок."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Власні групи ввімкнено. Міграція груп..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Власні групи вимкнено. Очищення..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Недійсний файл"
+  },
+  "byteSizeBytes": {
+    "message": "$1 байтів"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Відновлення груп вкладок..."
+  },
+  "migrationTitle": {
+    "message": "Міграція гібридних груп вкладок"
+  },
+  "migrationChecking": {
+    "message": "Перевірка стану міграції..."
+  },
+  "migrationRun": {
+    "message": "Запустити міграцію зараз"
+  },
+  "migrationReset": {
+    "message": "Скинути прапорець міграції"
+  },
+  "migrationCurrentGroups": {
+    "message": "Поточні групи"
+  },
+  "migrationLoadingGroups": {
+    "message": "Завантаження груп..."
+  },
+  "migrationComplete": {
+    "message": "✓ Міграцію завершено - усі групи перенесено до гібридної системи"
+  },
+  "migrationPending": {
+    "message": "⚠ Міграція очікує - групи ще не перенесено"
+  },
+  "migrationStatusError": {
+    "message": "Помилка перевірки стану міграції: $1"
+  },
+  "migrationNoGroups": {
+    "message": "У поточному вікні груп не знайдено"
+  },
+  "migrationGroupsError": {
+    "message": "Помилка завантаження груп: $1"
+  },
+  "migrationRunning": {
+    "message": "Виконується міграція..."
+  },
+  "migrationSucceeded": {
+    "message": "Міграцію успішно завершено!"
+  },
+  "migrationFailed": {
+    "message": "Міграція не вдалася: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Немає відповіді"
+  },
+  "migrationRunError": {
+    "message": "Помилка міграції: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Скинути прапорець міграції? Це дозволить запустити міграцію знову."
+  },
+  "migrationResetSucceeded": {
+    "message": "Прапорець міграції успішно скинуто!"
+  },
+  "migrationResetFailed": {
+    "message": "Не вдалося скинути: $1"
+  },
+  "migrationResetError": {
+    "message": "Помилка скидання: $1"
+  },
+  "migrationGroup": {
+    "message": "Група $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Перенесено (власний ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Не перенесено"
+  },
+  "migrationGroupStatus": {
+    "message": "Стан: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Перегляд груп вкладок"
+  }
+}

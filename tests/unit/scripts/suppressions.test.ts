@@ -215,6 +215,7 @@ describe('scripts/lib/suppressions.js', () => {
       expect(ALLOWED_JAVASCRIPT_FILES).toEqual([
         'stryker.config.mjs',
         'tools/adbkit-stub/index.js',
+        'tools/deepmerge-patched/index.js',
       ]);
       expect(JAVASCRIPT_EXTENSIONS).toEqual(['.js', '.mjs', '.cjs']);
     });

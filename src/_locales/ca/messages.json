@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Afegeix un grup nou"
+  },
+  "freeformButton": {
+    "message": "Disposició lliure"
+  },
+  "tilingButton": {
+    "message": "Disposició automàtica (en mosaic)"
+  },
+  "settingsButton": {
+    "message": "Configuració"
+  },
+  "defaultGroupName": {
+    "message": "Grp"
+  },
+  "dragGroup": {
+    "message": "Arrossega el grup"
+  },
+  "closeGroup": {
+    "message": "Tanca el grup"
+  },
+  "closeGroupWarning": {
+    "message": "one=Si tanqueu aquest grup, es tancarà la pestanya $1 que conté. Segur que ho voleu fer?|other=Si tanqueu aquest grup, es tancaran les $1 pestanyes que conté. Segur que ho voleu fer?"
+  },
+  "editGroup": {
+    "message": "Edita el grup"
+  },
+  "closeTab": {
+    "message": "Tanca la pestanya"
+  },
+  "openNewTab": {
+    "message": "Obre una pestanya nova"
+  },
+  "tabCount": {
+    "message": "one=$1 pestanya|other=$1 pestanyes"
+  },
+  "searchForTab_placeholder": {
+    "message": "Cerca una pestanya..."
+  },
+  "searchForTab_noResults": {
+    "message": "No s'ha trobat cap pestanya"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Dreceres de teclat"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "El format de l'opció de drecera es detalla aquí."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Actualitza"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Restableix"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Desactiva"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Activa"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Commuta la vista de grups de pestanyes"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Activa el grup de pestanyes següent"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Activa el grup de pestanyes anterior"
+  },
+  "optionsView": {
+    "message": "Vista"
+  },
+  "optionsViewFreeform": {
+    "message": "Lliure (clàssica)"
+  },
+  "optionsViewPopup": {
+    "message": "Finestra emergent"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "clar"
+  },
+  "optionsThemeDark": {
+    "message": "fosc"
+  },
+  "optionsToolbar": {
+    "message": "Barra d'eines"
+  },
+  "optionsToolbarPosition": {
+    "message": "Posició"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "a dalt"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "a la dreta"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "a baix"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "a l'esquerra"
+  },
+  "optionsBackup": {
+    "message": "Còpia de seguretat"
+  },
+  "optionsBackupImport": {
+    "message": "Importa"
+  },
+  "optionsBackupImportText": {
+    "message": "Les còpies de seguretat importades s'obriran en finestres noves i no se sobreescriurà res.\nTambé podeu importar còpies de seguretat del complement antic «Tab Groups»."
+  },
+  "optionsBackupExport": {
+    "message": "Exporta"
+  },
+  "optionsBackupExportText": {
+    "message": "Aquesta secció pot quedar obsoleta quan la gestió de sessions adequada sigui possible al Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Desa la còpia de seguretat"
+  },
+  "optionsStatistics": {
+    "message": "Estadístiques"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Nombre de pestanyes:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Actives: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Mida de la memòria cau de miniatures:"
+  },
+  "refreshGroups": {
+    "message": "Actualitza els grups"
+  },
+  "sendTabToGroup": {
+    "message": "Envia la pestanya a un grup"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Els usuaris també poden actualitzar les dreceres amb l'opció «Gestiona les dreceres de les extensions» a about:addons del Firefox, tal com es veu {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "al vídeo d'exemple"
+  },
+  "optionsThemeAuto": {
+    "message": "Segueix el sistema"
+  },
+  "optionsNativeGroups": {
+    "message": "Grups natius del navegador"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Utilitza els grups de pestanyes natius del navegador"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Utilitza els grups de pestanyes natius del navegador per a l'organització visual i el plegat."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Els grups de pestanyes natius no són compatibles amb aquesta versió del navegador (cal l'API per amagar pestanyes)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Els grups de pestanyes natius no són compatibles amb aquesta versió del navegador. Actualitzeu a Firefox 139+ o feu servir Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "El vostre navegador no admet les API necessàries per als grups de pestanyes."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Grups natius activats. S'estan migrant els grups..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Grups natius desactivats. S'està netejant..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Fitxer no vàlid"
+  },
+  "byteSizeBytes": {
+    "message": "$1 bytes"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "S'estan restaurant els grups de pestanyes..."
+  },
+  "migrationTitle": {
+    "message": "Migració de grups de pestanyes híbrids"
+  },
+  "migrationChecking": {
+    "message": "S'està comprovant l'estat de la migració..."
+  },
+  "migrationRun": {
+    "message": "Executa la migració ara"
+  },
+  "migrationReset": {
+    "message": "Restableix l'indicador de migració"
+  },
+  "migrationCurrentGroups": {
+    "message": "Grups actuals"
+  },
+  "migrationLoadingGroups": {
+    "message": "S'estan carregant els grups..."
+  },
+  "migrationComplete": {
+    "message": "✓ Migració completada - Tots els grups s'han migrat al sistema híbrid"
+  },
+  "migrationPending": {
+    "message": "⚠ Migració pendent - Els grups encara no s'han migrat"
+  },
+  "migrationStatusError": {
+    "message": "Error en comprovar l'estat de la migració: $1"
+  },
+  "migrationNoGroups": {
+    "message": "No s'ha trobat cap grup a la finestra actual"
+  },
+  "migrationGroupsError": {
+    "message": "Error en carregar els grups: $1"
+  },
+  "migrationRunning": {
+    "message": "S'està executant la migració..."
+  },
+  "migrationSucceeded": {
+    "message": "La migració s'ha completat correctament!"
+  },
+  "migrationFailed": {
+    "message": "La migració ha fallat: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Sense resposta"
+  },
+  "migrationRunError": {
+    "message": "Error de migració: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Voleu restablir l'indicador de migració? Això permetrà tornar a executar la migració."
+  },
+  "migrationResetSucceeded": {
+    "message": "L'indicador de migració s'ha restablert correctament!"
+  },
+  "migrationResetFailed": {
+    "message": "El restabliment ha fallat: $1"
+  },
+  "migrationResetError": {
+    "message": "Error de restabliment: $1"
+  },
+  "migrationGroup": {
+    "message": "Grup $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrat (ID natiu: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ No migrat"
+  },
+  "migrationGroupStatus": {
+    "message": "Estat: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Vista de grups de pestanyes"
+  }
+}

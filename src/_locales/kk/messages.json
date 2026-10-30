@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Жаңа топ қосу"
+  },
+  "freeformButton": {
+    "message": "Еркін орналастыру"
+  },
+  "tilingButton": {
+    "message": "Автоматты (тақташа) орналастыру"
+  },
+  "settingsButton": {
+    "message": "Параметрлер"
+  },
+  "defaultGroupName": {
+    "message": "Топ"
+  },
+  "dragGroup": {
+    "message": "Топты сүйреу"
+  },
+  "closeGroup": {
+    "message": "Топты жабу"
+  },
+  "closeGroupWarning": {
+    "message": "one=Бұл топты жапсаңыз, ондағы $1 бет жабылады. Мұны орындауға сенімдісіз бе?|other=Бұл топты жапсаңыз, ондағы $1 бет жабылады. Мұны орындауға сенімдісіз бе?"
+  },
+  "editGroup": {
+    "message": "Топты өңдеу"
+  },
+  "closeTab": {
+    "message": "Бетті жабу"
+  },
+  "openNewTab": {
+    "message": "Жаңа бетті ашу"
+  },
+  "tabCount": {
+    "message": "one=$1 бет|other=$1 бет"
+  },
+  "searchForTab_placeholder": {
+    "message": "Беттен іздеу..."
+  },
+  "searchForTab_noResults": {
+    "message": "Беттер табылмады"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Пернетақта жылдам пернелері"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Жылдам перне параметрінің пішімі осында сипатталған."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Жаңарту"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Бастапқы күйге келтіру"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Сөндіру"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Қосу"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Беттер топтары көрінісін ауыстыру"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Келесі беттер тобын белсендіру"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Алдыңғы беттер тобын белсендіру"
+  },
+  "optionsView": {
+    "message": "Көрініс"
+  },
+  "optionsViewFreeform": {
+    "message": "Еркін (классикалық)"
+  },
+  "optionsViewPopup": {
+    "message": "Қалқымалы терезе"
+  },
+  "optionsTheme": {
+    "message": "Тақырып"
+  },
+  "optionsThemeLight": {
+    "message": "ашық"
+  },
+  "optionsThemeDark": {
+    "message": "қою"
+  },
+  "optionsToolbar": {
+    "message": "Саймандар тақтасы"
+  },
+  "optionsToolbarPosition": {
+    "message": "Орналасуы"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "жоғарыда"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "оң жақта"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "төменде"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "сол жақта"
+  },
+  "optionsBackup": {
+    "message": "Сақтық көшірме"
+  },
+  "optionsBackupImport": {
+    "message": "Импорттау"
+  },
+  "optionsBackupImportText": {
+    "message": "Импортталған сақтық көшірмелер жаңа терезелерде ашылады және ештеңені үстінен жазбайды.\nСондай-ақ ескі «Tab Groups» қосымшасының сақтық көшірмелерін импорттай аласыз."
+  },
+  "optionsBackupExport": {
+    "message": "Экспорттау"
+  },
+  "optionsBackupExportText": {
+    "message": "Firefox-та сеанстарды дұрыс басқару мүмкін болған кезде бұл бөлім қажетсіз болуы мүмкін."
+  },
+  "optionsBackupExportButton": {
+    "message": "Сақтық көшірмені сақтау"
+  },
+  "optionsStatistics": {
+    "message": "Статистика"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Беттер саны:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Белсенді: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Нобай кэшінің өлшемі:"
+  },
+  "refreshGroups": {
+    "message": "Топтарды жаңарту"
+  },
+  "sendTabToGroup": {
+    "message": "Бетті топқа жіберу"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Пайдаланушылар жылдам пернелерді Firefox-тағы about:addons бетіндегі «Кеңейтімнің жылдам пернелерін басқару» опциясы арқылы да жаңарта алады, {link} көрсетілгендей."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "мысал бейнеде"
+  },
+  "optionsThemeAuto": {
+    "message": "Жүйеге сәйкес"
+  },
+  "optionsNativeGroups": {
+    "message": "Браузердің өз топтары"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Браузердің өз беттер топтарын қолдану"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Көрнекі ұйымдастыру және жинау үшін браузердің өз беттер топтарын қолдану."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Браузердің бұл нұсқасында өз беттер топтары қолдау таппайды (беттерді жасыру API қажет)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Браузердің бұл нұсқасында өз беттер топтары қолдау таппайды. Firefox 139+ нұсқасына жаңартыңыз немесе Chrome 89+ қолданыңыз."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Браузеріңіз беттер топтарына қажетті API-лерді қолдамайды."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Өз топтары қосылды. Топтар көшірілуде..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Өз топтары сөндірілді. Тазалануда..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Жарамсыз файл"
+  },
+  "byteSizeBytes": {
+    "message": "$1 байт"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Беттер топтары қалпына келтірілуде..."
+  },
+  "migrationTitle": {
+    "message": "Гибридті беттер топтарын көшіру"
+  },
+  "migrationChecking": {
+    "message": "Көшіру күйі тексерілуде..."
+  },
+  "migrationRun": {
+    "message": "Көшіруді қазір іске қосу"
+  },
+  "migrationReset": {
+    "message": "Көшіру жалауын бастапқы күйге келтіру"
+  },
+  "migrationCurrentGroups": {
+    "message": "Ағымдағы топтар"
+  },
+  "migrationLoadingGroups": {
+    "message": "Топтар жүктелуде..."
+  },
+  "migrationComplete": {
+    "message": "✓ Көшіру аяқталды - Барлық топтар гибридті жүйеге көшірілді"
+  },
+  "migrationPending": {
+    "message": "⚠ Көшіру күтуде - Топтар әлі көшірілмеген"
+  },
+  "migrationStatusError": {
+    "message": "Көшіру күйін тексеру қатесі: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Ағымдағы терезеде топтар табылмады"
+  },
+  "migrationGroupsError": {
+    "message": "Топтарды жүктеу қатесі: $1"
+  },
+  "migrationRunning": {
+    "message": "Көшіру орындалуда..."
+  },
+  "migrationSucceeded": {
+    "message": "Көшіру сәтті аяқталды!"
+  },
+  "migrationFailed": {
+    "message": "Көшіру орындалмады: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Жауап жоқ"
+  },
+  "migrationRunError": {
+    "message": "Көшіру қатесі: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Көшіру жалауын бастапқы күйге келтіру керек пе? Бұл көшіруді қайта іске қосуға мүмкіндік береді."
+  },
+  "migrationResetSucceeded": {
+    "message": "Көшіру жалауы сәтті бастапқы күйге келтірілді!"
+  },
+  "migrationResetFailed": {
+    "message": "Бастапқы күйге келтіру орындалмады: $1"
+  },
+  "migrationResetError": {
+    "message": "Бастапқы күйге келтіру қатесі: $1"
+  },
+  "migrationGroup": {
+    "message": "Топ $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Көшірілді (өз ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Көшірілмеген"
+  },
+  "migrationGroupStatus": {
+    "message": "Күйі: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Беттер топтарының көрінісі"
+  }
+}

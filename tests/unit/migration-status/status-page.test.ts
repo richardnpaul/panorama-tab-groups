@@ -10,6 +10,7 @@ import {
   REFRESH_MS,
 } from '../../../src/js/migration-status/status-page.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
+import { englishMessage } from '../../support/messages.js';
 import { flush } from '../../support/popup-page.js';
 
 const WINDOW = 4;
@@ -29,6 +30,8 @@ const stored = (
 function setUp(options: { complete?: boolean; groups?: Group[] | null } = {}) {
   const { complete = false, groups = [] } = options;
   document.body.innerHTML = `
+    <h1 id="migration-title">Hybrid Tab Groups Migration</h1>
+    <h2 id="groups-title">Current Groups</h2>
     <div id="migration-status" class="status-box info">Checking...</div>
     <div id="groups-container">Loading groups...</div>
     <button id="run-migration">Run Migration Now</button>
@@ -41,6 +44,8 @@ function setUp(options: { complete?: boolean; groups?: Group[] | null } = {}) {
     return found;
   };
   const nodes = {
+    heading: element('migration-title', HTMLElement),
+    groupsHeading: element('groups-title', HTMLElement),
     status: element('migration-status', HTMLElement),
     groups: element('groups-container', HTMLElement),
     runButton: element('run-migration', HTMLButtonElement),
@@ -55,8 +60,11 @@ function setUp(options: { complete?: boolean; groups?: Group[] | null } = {}) {
   const alert = vi.fn();
   const confirm = vi.fn().mockReturnValue(true);
   const logger = { error: vi.fn() };
+  const tab = { title: 'about:blank' };
   const page = createMigrationStatusPage({
     nodes,
+    page: tab,
+    i18n: { getMessage: englishMessage },
     migrationFlag,
     groupState,
     windows,
@@ -71,6 +79,7 @@ function setUp(options: { complete?: boolean; groups?: Group[] | null } = {}) {
   return {
     ...page,
     nodes,
+    tab,
     migrationFlag,
     groupState,
     windows,
@@ -90,9 +99,42 @@ const started = async (options: Parameters<typeof setUp>[0] = {}) => {
   return env;
 };
 
+/** The work of a promise that is never kept */
+function neverSettles(): void {
+  // Neither resolves nor rejects
+}
+
 describe('migration-status/status-page.ts', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe('the texts of the page itself', () => {
+    it('are in the language of the browser: the title, the headings and the buttons', async () => {
+      const env = await started();
+
+      expect(env.tab.title).toBe('Hybrid Tab Groups Migration');
+      expect(env.nodes.heading.textContent).toBe('Hybrid Tab Groups Migration');
+      expect(env.nodes.groupsHeading.textContent).toBe('Current Groups');
+      expect(env.nodes.runButton.textContent).toBe('Run Migration Now');
+      expect(env.nodes.resetButton.textContent).toBe('Reset Migration Flag');
+    });
+
+    it('say that the status and the groups are being looked at, until they are known', async () => {
+      const env = setUp();
+      await env.ready;
+      // A promise that nothing settles, as the browser not answering shows
+      vi.spyOn(env.migrationFlag, 'isComplete').mockReturnValue(
+        new Promise<boolean>(neverSettles),
+      );
+
+      // The start does not finish while the status is not known
+      env.start().catch(() => undefined);
+      await flush();
+
+      expect(env.nodes.status.textContent).toBe('Checking migration status...');
+      expect(env.nodes.groups.textContent).toBe('Loading groups...');
+    });
   });
 
   describe('the status', () => {

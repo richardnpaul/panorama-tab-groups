@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "إضافة مجموعة جديدة"
+  },
+  "freeformButton": {
+    "message": "ترتيب حر"
+  },
+  "tilingButton": {
+    "message": "ترتيب تلقائي (متجاور)"
+  },
+  "settingsButton": {
+    "message": "الإعدادات"
+  },
+  "defaultGroupName": {
+    "message": "مج"
+  },
+  "dragGroup": {
+    "message": "اسحب المجموعة"
+  },
+  "closeGroup": {
+    "message": "إغلاق المجموعة"
+  },
+  "closeGroupWarning": {
+    "message": "zero=سيؤدي إغلاق هذه المجموعة إلى إغلاق $1 ألسنة فيها. هل أنت متأكد أنك تريد ذلك؟|one=سيؤدي إغلاق هذه المجموعة إلى إغلاق اللسان $1 الموجود فيها. هل أنت متأكد أنك تريد ذلك؟|two=سيؤدي إغلاق هذه المجموعة إلى إغلاق اللسانين الموجودين فيها ($1). هل أنت متأكد أنك تريد ذلك؟|few=سيؤدي إغلاق هذه المجموعة إلى إغلاق $1 ألسنة فيها. هل أنت متأكد أنك تريد ذلك؟|many=سيؤدي إغلاق هذه المجموعة إلى إغلاق $1 لسانًا فيها. هل أنت متأكد أنك تريد ذلك؟|other=سيؤدي إغلاق هذه المجموعة إلى إغلاق $1 لسان فيها. هل أنت متأكد أنك تريد ذلك؟"
+  },
+  "editGroup": {
+    "message": "تحرير المجموعة"
+  },
+  "closeTab": {
+    "message": "إغلاق اللسان"
+  },
+  "openNewTab": {
+    "message": "فتح لسان جديد"
+  },
+  "tabCount": {
+    "message": "zero=لا ألسنة ($1)|one=لسان واحد ($1)|two=لسانان ($1)|few=$1 ألسنة|many=$1 لسانًا|other=$1 لسان"
+  },
+  "searchForTab_placeholder": {
+    "message": "البحث عن لسان..."
+  },
+  "searchForTab_noResults": {
+    "message": "لم يتم العثور على أي ألسنة"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "اختصارات لوحة المفاتيح"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "صيغة خيار الاختصار موضحة هنا."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "تحديث"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "إعادة تعيين"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "تعطيل"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "تفعيل"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "تبديل عرض مجموعات الألسنة"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "تفعيل مجموعة الألسنة التالية"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "تفعيل مجموعة الألسنة السابقة"
+  },
+  "optionsView": {
+    "message": "العرض"
+  },
+  "optionsViewFreeform": {
+    "message": "حر (كلاسيكي)"
+  },
+  "optionsViewPopup": {
+    "message": "نافذة منبثقة"
+  },
+  "optionsTheme": {
+    "message": "السمة"
+  },
+  "optionsThemeLight": {
+    "message": "فاتحة"
+  },
+  "optionsThemeDark": {
+    "message": "داكنة"
+  },
+  "optionsToolbar": {
+    "message": "شريط الأدوات"
+  },
+  "optionsToolbarPosition": {
+    "message": "الموضع"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "أعلى"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "يمين"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "أسفل"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "يسار"
+  },
+  "optionsBackup": {
+    "message": "النسخ الاحتياطي"
+  },
+  "optionsBackupImport": {
+    "message": "استيراد"
+  },
+  "optionsBackupImportText": {
+    "message": "ستُفتح النسخ الاحتياطية المستوردة في نوافذ جديدة دون استبدال أي شيء.\nيمكنك أيضًا استيراد نسخ احتياطية من الإضافة القديمة \"Tab Groups\"."
+  },
+  "optionsBackupExport": {
+    "message": "تصدير"
+  },
+  "optionsBackupExportText": {
+    "message": "قد يصبح هذا القسم غير ضروري عندما تتوفر إدارة جلسات مناسبة في Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "حفظ النسخة الاحتياطية"
+  },
+  "optionsStatistics": {
+    "message": "الإحصاءات"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "عدد الألسنة:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (النشطة: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "حجم ذاكرة التخزين المؤقت للصور المصغرة:"
+  },
+  "refreshGroups": {
+    "message": "تحديث المجموعات"
+  },
+  "sendTabToGroup": {
+    "message": "إرسال اللسان إلى مجموعة"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "يمكن للمستخدمين أيضًا تحديث الاختصارات عبر خيار \"إدارة اختصارات الإضافات\" في about:addons في Firefox كما هو موضح {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "في الفيديو التوضيحي"
+  },
+  "optionsThemeAuto": {
+    "message": "اتباع النظام"
+  },
+  "optionsNativeGroups": {
+    "message": "مجموعات المتصفح الأصلية"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "استخدام مجموعات ألسنة المتصفح الأصلية"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "استخدام مجموعات ألسنة المتصفح الأصلية للتنظيم المرئي والطي."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "مجموعات الألسنة الأصلية غير مدعومة في إصدار المتصفح هذا (تتطلب واجهة إخفاء الألسنة)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "مجموعات الألسنة الأصلية غير مدعومة في إصدار المتصفح هذا. يُرجى التحديث إلى Firefox 139 أو أحدث أو استخدام Chrome 89 أو أحدث."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "متصفحك لا يدعم واجهات البرمجة المطلوبة لمجموعات الألسنة."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "تم تفعيل المجموعات الأصلية. جارٍ ترحيل المجموعات..."
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "تم تعطيل المجموعات الأصلية. جارٍ التنظيف..."
+  },
+  "optionsBackupInvalidFile": {
+    "message": "ملف غير صالح"
+  },
+  "byteSizeBytes": {
+    "message": "$1 بايت"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "جارٍ استعادة مجموعات الألسنة..."
+  },
+  "migrationTitle": {
+    "message": "ترحيل مجموعات الألسنة الهجينة"
+  },
+  "migrationChecking": {
+    "message": "جارٍ التحقق من حالة الترحيل..."
+  },
+  "migrationRun": {
+    "message": "تشغيل الترحيل الآن"
+  },
+  "migrationReset": {
+    "message": "إعادة تعيين علامة الترحيل"
+  },
+  "migrationCurrentGroups": {
+    "message": "المجموعات الحالية"
+  },
+  "migrationLoadingGroups": {
+    "message": "جارٍ تحميل المجموعات..."
+  },
+  "migrationComplete": {
+    "message": "✓ اكتمل الترحيل - تم ترحيل جميع المجموعات إلى النظام الهجين"
+  },
+  "migrationPending": {
+    "message": "⚠ الترحيل معلّق - لم يتم ترحيل المجموعات بعد"
+  },
+  "migrationStatusError": {
+    "message": "خطأ في التحقق من حالة الترحيل: $1"
+  },
+  "migrationNoGroups": {
+    "message": "لم يتم العثور على مجموعات في النافذة الحالية"
+  },
+  "migrationGroupsError": {
+    "message": "خطأ في تحميل المجموعات: $1"
+  },
+  "migrationRunning": {
+    "message": "جارٍ تشغيل الترحيل..."
+  },
+  "migrationSucceeded": {
+    "message": "اكتمل الترحيل بنجاح!"
+  },
+  "migrationFailed": {
+    "message": "فشل الترحيل: $1"
+  },
+  "migrationNoResponse": {
+    "message": "لا توجد استجابة"
+  },
+  "migrationRunError": {
+    "message": "خطأ في الترحيل: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "هل تريد إعادة تعيين علامة الترحيل؟ سيسمح ذلك بتشغيل الترحيل مرة أخرى."
+  },
+  "migrationResetSucceeded": {
+    "message": "تمت إعادة تعيين علامة الترحيل بنجاح!"
+  },
+  "migrationResetFailed": {
+    "message": "فشلت إعادة التعيين: $1"
+  },
+  "migrationResetError": {
+    "message": "خطأ في إعادة التعيين: $1"
+  },
+  "migrationGroup": {
+    "message": "المجموعة $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ تم الترحيل (المعرّف الأصلي: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ لم يتم الترحيل"
+  },
+  "migrationGroupStatus": {
+    "message": "الحالة: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "عرض مجموعات الألسنة"
+  }
+}

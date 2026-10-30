@@ -1,0 +1,275 @@
+{
+  "newGroupButton": {
+    "message": "Legg til ny gruppe"
+  },
+  "freeformButton": {
+    "message": "Fri plassering"
+  },
+  "tilingButton": {
+    "message": "Automatisk plassering (flisar)"
+  },
+  "settingsButton": {
+    "message": "Innstillingar"
+  },
+  "defaultGroupName": {
+    "message": "Gr."
+  },
+  "dragGroup": {
+    "message": "Dra gruppe"
+  },
+  "closeGroup": {
+    "message": "Lat att gruppe"
+  },
+  "closeGroupWarning": {
+    "message": "one=Viss du lèt att denne gruppa, blir den $1 fana i ho lukka. Er du sikker på at du vil gjere dette?|other=Viss du lèt att denne gruppa, blir dei $1 fanene i ho lukka. Er du sikker på at du vil gjere dette?"
+  },
+  "editGroup": {
+    "message": "Rediger gruppe"
+  },
+  "closeTab": {
+    "message": "Lat att fane"
+  },
+  "openNewTab": {
+    "message": "Opne ny fane"
+  },
+  "tabCount": {
+    "message": "one=$1 fane|other=$1 faner"
+  },
+  "searchForTab_placeholder": {
+    "message": "Søk etter ei fane …"
+  },
+  "searchForTab_noResults": {
+    "message": "Fann ingen faner"
+  },
+  "optionKeyboardShortcuts": {
+    "message": "Tastatursnarvegar"
+  },
+  "optionKeyboardShortcutsHelpLink": {
+    "message": "https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/commands#Key_combinations"
+  },
+  "optionKeyboardShortcutsHelpLinkText": {
+    "message": "Formatet for snarvegvalet er skildra her."
+  },
+  "optionKeyboardShortcutsButtonsUpdate": {
+    "message": "Oppdater"
+  },
+  "optionKeyboardShortcutsButtonsReset": {
+    "message": "Tilbakestill"
+  },
+  "optionKeyboardShortcutsButtonsDisable": {
+    "message": "Slå av"
+  },
+  "optionKeyboardShortcutsButtonsEnable": {
+    "message": "Slå på"
+  },
+  "optionKeyboardShortcutsToggle": {
+    "message": "Byt visning av fanegrupper"
+  },
+  "optionKeyboardShortcutsNextGroup": {
+    "message": "Aktiver neste fanegruppe"
+  },
+  "optionKeyboardShortcutsPreviousGroup": {
+    "message": "Aktiver førre fanegruppe"
+  },
+  "optionsView": {
+    "message": "Visning"
+  },
+  "optionsViewFreeform": {
+    "message": "Fri (klassisk)"
+  },
+  "optionsViewPopup": {
+    "message": "Sprettoppvindauge"
+  },
+  "optionsTheme": {
+    "message": "Tema"
+  },
+  "optionsThemeLight": {
+    "message": "lyst"
+  },
+  "optionsThemeDark": {
+    "message": "mørkt"
+  },
+  "optionsToolbar": {
+    "message": "Verktøylinje"
+  },
+  "optionsToolbarPosition": {
+    "message": "Plassering"
+  },
+  "optionsToolbarPositionTop": {
+    "message": "øvst"
+  },
+  "optionsToolbarPositionRight": {
+    "message": "til høgre"
+  },
+  "optionsToolbarPositionBottom": {
+    "message": "nedst"
+  },
+  "optionsToolbarPositionLeft": {
+    "message": "til venstre"
+  },
+  "optionsBackup": {
+    "message": "Tryggingskopi"
+  },
+  "optionsBackupImport": {
+    "message": "Importer"
+  },
+  "optionsBackupImportText": {
+    "message": "Importerte tryggingskopiar blir opna i nye vindauge og skriv ikkje over noko.\nDu kan òg importere tryggingskopiar frå det gamle tillegget «Tab Groups»."
+  },
+  "optionsBackupExport": {
+    "message": "Eksporter"
+  },
+  "optionsBackupExportText": {
+    "message": "Denne delen kan bli overflødig når skikkeleg øktbehandling blir mogleg i Firefox."
+  },
+  "optionsBackupExportButton": {
+    "message": "Lagre tryggingskopi"
+  },
+  "optionsStatistics": {
+    "message": "Statistikk"
+  },
+  "optionsStatisticsNumberOfTabs": {
+    "message": "Tal på faner:"
+  },
+  "optionsStatisticsNumberOfTabsAndActive": {
+    "message": "$1 (Aktive: $2)"
+  },
+  "optionsStatisticsThumbnailCacheSize": {
+    "message": "Storleik på miniatyrbiletbuffer:"
+  },
+  "refreshGroups": {
+    "message": "Oppdater grupper"
+  },
+  "sendTabToGroup": {
+    "message": "Send fane til gruppe"
+  },
+  "optionKeyboardShortcutsManage": {
+    "message": "Brukarar kan òg oppdatere snarvegar via valet «Handsam utvidingssnarvegar» på about:addons i Firefox, som vist {link}."
+  },
+  "optionKeyboardShortcutsManageLinkText": {
+    "message": "i eksempelvideoen"
+  },
+  "optionsThemeAuto": {
+    "message": "Følg systemet"
+  },
+  "optionsNativeGroups": {
+    "message": "Nettlesaren sine eigne grupper"
+  },
+  "optionsNativeGroupsUse": {
+    "message": "Bruk nettlesaren sine eigne fanegrupper"
+  },
+  "optionsNativeGroupsHybrid": {
+    "message": "Bruk nettlesaren sine eigne fanegrupper til visuell organisering og samanfelling."
+  },
+  "optionsNativeGroupsCollapseOnly": {
+    "message": "Nettlesaren sine eigne fanegrupper er ikkje støtta i denne nettlesarversjonen (krev API-et for skjuling av faner)."
+  },
+  "optionsNativeGroupsLegacy": {
+    "message": "Nettlesaren sine eigne fanegrupper er ikkje støtta i denne nettlesarversjonen. Oppdater til Firefox 139+ eller bruk Chrome 89+."
+  },
+  "optionsNativeGroupsUnsupported": {
+    "message": "Nettlesaren din støttar ikkje API-a som trengst for fanegrupper."
+  },
+  "optionsNativeGroupsEnabled": {
+    "message": "Nettlesaren sine eigne grupper er slått på. Migrerer grupper …"
+  },
+  "optionsNativeGroupsDisabled": {
+    "message": "Nettlesaren sine eigne grupper er slått av. Ryddar opp …"
+  },
+  "optionsBackupInvalidFile": {
+    "message": "Ugyldig fil"
+  },
+  "byteSizeBytes": {
+    "message": "$1 byte"
+  },
+  "byteSizeKiB": {
+    "message": "$1 KiB"
+  },
+  "byteSizeMiB": {
+    "message": "$1 MiB"
+  },
+  "byteSizeGiB": {
+    "message": "$1 GiB"
+  },
+  "initializationRestoring": {
+    "message": "Gjenoppretter fanegrupper …"
+  },
+  "migrationTitle": {
+    "message": "Migrering av hybride fanegrupper"
+  },
+  "migrationChecking": {
+    "message": "Sjekkar migreringsstatus …"
+  },
+  "migrationRun": {
+    "message": "Køyr migrering no"
+  },
+  "migrationReset": {
+    "message": "Tilbakestill migreringsflagg"
+  },
+  "migrationCurrentGroups": {
+    "message": "Gjeldande grupper"
+  },
+  "migrationLoadingGroups": {
+    "message": "Lastar grupper …"
+  },
+  "migrationComplete": {
+    "message": "✓ Migrering fullført – alle grupper er migrerte til det hybride systemet"
+  },
+  "migrationPending": {
+    "message": "⚠ Migrering ventar – gruppene er ikkje migrerte enno"
+  },
+  "migrationStatusError": {
+    "message": "Feil ved sjekking av migreringsstatus: $1"
+  },
+  "migrationNoGroups": {
+    "message": "Fann ingen grupper i gjeldande vindauge"
+  },
+  "migrationGroupsError": {
+    "message": "Feil ved lasting av grupper: $1"
+  },
+  "migrationRunning": {
+    "message": "Køyrer migrering …"
+  },
+  "migrationSucceeded": {
+    "message": "Migreringa er fullført!"
+  },
+  "migrationFailed": {
+    "message": "Migreringa mislukkast: $1"
+  },
+  "migrationNoResponse": {
+    "message": "Ingen respons"
+  },
+  "migrationRunError": {
+    "message": "Migreringsfeil: $1"
+  },
+  "migrationResetConfirm": {
+    "message": "Tilbakestille migreringsflagget? Då kan migreringa køyrast på nytt."
+  },
+  "migrationResetSucceeded": {
+    "message": "Migreringsflagget er tilbakestilt!"
+  },
+  "migrationResetFailed": {
+    "message": "Tilbakestillinga mislukkast: $1"
+  },
+  "migrationResetError": {
+    "message": "Feil ved tilbakestilling: $1"
+  },
+  "migrationGroup": {
+    "message": "Gruppe $1:"
+  },
+  "migrationGroupMigrated": {
+    "message": "✓ Migrert (eigen ID: $1)"
+  },
+  "migrationGroupNotMigrated": {
+    "message": "✗ Ikkje migrert"
+  },
+  "migrationGroupStatus": {
+    "message": "Status: $1"
+  },
+  "extensionName": {
+    "message": "Tab Groups Viewer"
+  },
+  "viewTitle": {
+    "message": "Visning av fanegrupper"
+  }
+}

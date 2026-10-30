@@ -36,3 +36,5 @@ jobs:
       - run: npm ci
       - run: npm run audit:check
       - run: npm test
+      # How much of English each language has, on the page of the run
+      - run: npm run --silent report:locales >> "$GITHUB_STEP_SUMMARY"
