@@ -58,6 +58,7 @@ describe('scripts/build-firefox.ts', () => {
     expect(path).toBe('dist-firefox/manifest.json');
     expect(JSON.parse(text ?? '')).toEqual({
       background: { scripts: ['a.js'] },
+      host_permissions: ['<all_urls>'],
     });
   });
 });
