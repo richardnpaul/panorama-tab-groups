@@ -17,6 +17,7 @@ export interface CreatedTab {
   id: number;
   windowId: number;
   active?: boolean | undefined;
+  pinned?: boolean | undefined;
   url?: string | undefined;
   pendingUrl?: string | undefined;
 }
@@ -242,7 +243,8 @@ export function createTabLifecycle({
 
     let outcome: Awaited<ReturnType<typeof assignNewTabToNativeGroup>> =
       'as-is';
-    if (await useNativeGroups()) {
+    // A pinned tab is never put in a native group: the browser would unpin it
+    if (tab.pinned !== true && (await useNativeGroups())) {
       try {
         outcome = await assignNewTabToNativeGroup(tab, groupId);
       } catch (error) {

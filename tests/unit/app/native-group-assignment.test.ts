@@ -92,6 +92,41 @@ describe('app/native-group-assignment.ts', () => {
     );
   });
 
+  it('leaves pinned tabs out of the native group, since the browser would unpin them', async () => {
+    const env = await setUp([
+      { tab: { ...tab(1), pinned: true }, group: 1 },
+      { tab: tab(2), group: 1 },
+      { tab: tab(3), group: 1 },
+    ]);
+
+    const outcome = await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(1, 'Work'),
+      groups: env.groups,
+      label: 'TabActivated',
+    });
+
+    expect(outcome).toEqual({ kind: 'created', nativeGroupId: 1000 });
+    expect(await env.nativeGroups.tabIdsIn(1000)).toEqual([2, 3]);
+  });
+
+  it('makes no native group when the only tabs of the group are pinned', async () => {
+    const env = await setUp([
+      { tab: { ...tab(1), pinned: true }, group: 1 },
+      { tab: tab(2), group: 2 },
+    ]);
+
+    const outcome = await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(1, 'Work'),
+      groups: env.groups,
+      label: 'TabActivated',
+    });
+
+    expect(outcome).toEqual({ kind: 'no-tabs' });
+    expect(env.nativeGroups.calls).toEqual([]);
+  });
+
   it('gives the native group the name and colour of the group', async () => {
     const env = await setUp([
       { tab: tab(1), group: 1 },

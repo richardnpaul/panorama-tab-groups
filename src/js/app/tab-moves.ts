@@ -12,6 +12,7 @@ const REFRESH_GROUPS = 'refresh-groups';
 export interface TabMovesDeps {
   tabs: Pick<
     Tabs,
+    | 'get'
     | 'moveToEnd'
     | 'activate'
     | 'highlightedIdsInWindow'
@@ -78,6 +79,11 @@ export function createTabMoves({
   }
 
   async function moveTab(tabId: number, groupId: number): Promise<void> {
+    // Pinned tabs belong to no group, and moving one would unpin it
+    if ((await tabs.get(tabId)).pinned) {
+      logger.debug(`Ignored moving the pinned tab ${String(tabId)}`);
+      return;
+    }
     const windowId = await windows.currentWindowId();
     await groupState.setTabGroup(tabId, groupId);
     const activeGroup = await groupState.getActiveGroup(windowId);
