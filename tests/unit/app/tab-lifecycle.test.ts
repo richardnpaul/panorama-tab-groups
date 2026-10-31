@@ -500,6 +500,17 @@ describe('app/tab-lifecycle.ts', () => {
         );
       });
 
+      it('leaves a pinned tab out of it, since the browser would unpin it', async () => {
+        const env = await setUpWithNative({
+          tabs: [{ tab: details(5, { pinned: true }), group: 1 }],
+        });
+
+        await env.lifecycle.tabCreated(created(5, { pinned: true }));
+
+        expect(env.nativeGroups.calls).toEqual([]);
+        expect(await env.nativeGroups.tabIdsIn(50)).toEqual([]);
+      });
+
       it('shows the group when that tab is active', async () => {
         const env = await setUpWithNative();
 

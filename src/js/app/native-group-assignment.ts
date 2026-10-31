@@ -81,11 +81,15 @@ export function createNativeGroupAssignment({
   return {
     async createNativeGroup({ windowId, group, groups, label }) {
       const windowTabs = await tabs.listInWindow(windowId);
+      // Pinned tabs belong to no group, and the browser unpins a tab that is
+      // put into a native group, so they are left out
       const memberships = await Promise.all(
-        windowTabs.map(async ({ id }) => ({
-          id,
-          groupId: await groupState.getTabGroup(id),
-        })),
+        windowTabs
+          .filter(({ pinned }) => !pinned)
+          .map(async ({ id }) => ({
+            id,
+            groupId: await groupState.getTabGroup(id),
+          })),
       );
       const tabIds = memberships
         .filter(({ groupId }) => groupId === group.id)

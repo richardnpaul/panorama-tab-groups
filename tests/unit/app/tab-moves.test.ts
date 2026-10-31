@@ -107,6 +107,19 @@ describe('app/tab-moves.ts', () => {
       expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
     });
 
+    it('does nothing for a pinned tab, which belongs to no group and would be unpinned', async () => {
+      const env = await setUp({
+        tabs: [tab(10, { active: true }), tab(11, { pinned: true })],
+      });
+
+      await env.moves.moveTab(11, 1);
+
+      expect(await env.groupState.getTabGroup(11)).toBeUndefined();
+      expect(env.tabs.calls).toEqual([]);
+      expect(env.nativeGroups.calls).toEqual([]);
+      expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
+    });
+
     it('moves the tab before showing the active group', async () => {
       const env = await setUp({ useNative: false });
       const move = env.tabs.moveToEnd.bind(env.tabs);
