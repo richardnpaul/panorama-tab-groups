@@ -1,9 +1,13 @@
 import { isRecord } from '../../src/js/share/guards.js';
 
+const CAPTURE_HOST_PERMISSION = '<all_urls>';
+
 /**
  * The manifest as Firefox should have it: Firefox runs the background from
  * `scripts` and ignores `service_worker`, which only Chromium uses, so it is
- * left out rather than reported by `web-ext lint` and by the add-on store
+ * left out rather than reported by `web-ext lint` and by the add-on store.
+ * It also asks for the host permission that thumbnails need, which only
+ * Firefox has a capture function for, so Chromium is not asked for it.
  */
 export function firefoxManifestOf(manifest: unknown): Record<string, unknown> {
   if (!isRecord(manifest) || !isRecord(manifest.background)) {
@@ -13,7 +17,16 @@ export function firefoxManifestOf(manifest: unknown): Record<string, unknown> {
   if (!Array.isArray(background.scripts)) {
     throw new Error('The manifest has no background.scripts for Firefox');
   }
-  return { ...manifest, background };
+  const hosts: unknown[] = Array.isArray(manifest.host_permissions)
+    ? manifest.host_permissions
+    : [];
+  return {
+    ...manifest,
+    background,
+    host_permissions: hosts.includes(CAPTURE_HOST_PERMISSION)
+      ? hosts
+      : [...hosts, CAPTURE_HOST_PERMISSION],
+  };
 }
 
 export interface FirefoxBuildDeps {
