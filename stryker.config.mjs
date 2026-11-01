@@ -16,6 +16,7 @@ export default {
     'scripts/**/*.ts',
     'tools/adbkit-stub/index.js',
     'tools/deepmerge-patched/index.js',
+    'tools/minimatch-compat/index.js',
     'tools/oxlint/**/*.ts',
     'src/**/*.ts',
   ],
