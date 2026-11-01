@@ -216,6 +216,7 @@ describe('scripts/lib/suppressions.js', () => {
         'stryker.config.mjs',
         'tools/adbkit-stub/index.js',
         'tools/deepmerge-patched/index.js',
+        'tools/minimatch-compat/index.js',
       ]);
       expect(JAVASCRIPT_EXTENSIONS).toEqual(['.js', '.mjs', '.cjs']);
     });

@@ -59,6 +59,7 @@ export const ALLOWED_JAVASCRIPT_FILES = [
   'stryker.config.mjs',
   'tools/adbkit-stub/index.js',
   'tools/deepmerge-patched/index.js',
+  'tools/minimatch-compat/index.js',
 ];
 export const JAVASCRIPT_EXTENSIONS = ['.js', '.mjs', '.cjs'];
 
