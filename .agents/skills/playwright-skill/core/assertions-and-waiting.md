@@ -528,14 +528,15 @@ test('product prices are valid', async ({ page }) => {
 **Use when**: You don't need to "use" this — understand it. Every Playwright action (`click`, `fill`, `check`, `selectOption`, etc.) auto-waits for the target element to be actionable before proceeding.
 
 Playwright checks before acting:
-| Action | Waits for |
-|---|---|
-| `click()` | Attached, visible, stable (no animation), enabled, not obscured by another element |
-| `fill()` | Attached, visible, enabled, editable |
-| `check()` | Attached, visible, stable, enabled |
-| `selectOption()` | Attached, visible, enabled |
-| `hover()` | Attached, visible, stable |
-| `type()` | Attached, visible, enabled, editable |
+
+| Action           | Waits for                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------- |
+| `click()`        | Attached, visible, stable (no animation), enabled, not obscured by another element |
+| `fill()`         | Attached, visible, enabled, editable                                               |
+| `check()`        | Attached, visible, stable, enabled                                                 |
+| `selectOption()` | Attached, visible, enabled                                                         |
+| `hover()`        | Attached, visible, stable                                                          |
+| `type()`         | Attached, visible, enabled, editable                                               |
 
 This means you almost never need explicit waits before actions. Do NOT write `await expect(button).toBeVisible()` before `await button.click()` — the click already waits for visibility.
 

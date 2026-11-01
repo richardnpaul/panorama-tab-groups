@@ -10,11 +10,7 @@ interface Emitter<Args extends unknown[], Extra extends unknown[] = []> {
 // The changes to a tab that the view shows. Not every property is listened
 // to: the tab hiding and showing as the group changes would give a great many.
 type UpdatedProperty =
-  | 'discarded'
-  | 'favIconUrl'
-  | 'pinned'
-  | 'title'
-  | 'status';
+  'discarded' | 'favIconUrl' | 'pinned' | 'title' | 'status';
 
 /** The tab events of the browser that the view listens to */
 export interface ViewEventsApi {

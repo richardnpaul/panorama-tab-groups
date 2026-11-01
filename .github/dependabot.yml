@@ -4,6 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # A release is proposed once it is 14 days old (the repository's rule for what it
+    # pins); security updates are not held back
+    cooldown:
+      default-days: 14
     groups:
       dev-dependencies:
         dependency-type: development
@@ -25,6 +29,8 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14
     groups:
       github-actions:
         patterns: ['*']
@@ -40,3 +46,5 @@ updates:
     directory: /.devcontainer
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 14

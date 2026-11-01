@@ -113,16 +113,14 @@ export function createMemoryTabs(
     },
     snapshotsInWindow: (windowId) =>
       Promise.resolve(
-        inWindow(windowId).map(
-          (tab, index): TabSnapshot => ({
-            id: tab.id,
-            url: tab.url,
-            title: tab.title,
-            index,
-            lastAccessed: lastAccessed.get(tab.id) ?? 0,
-            pinned: tab.pinned,
-          }),
-        ),
+        inWindow(windowId).map((tab, index): TabSnapshot => ({
+          id: tab.id,
+          url: tab.url,
+          title: tab.title,
+          index,
+          lastAccessed: lastAccessed.get(tab.id) ?? 0,
+          pinned: tab.pinned,
+        })),
       ),
     create(options) {
       calls.push(

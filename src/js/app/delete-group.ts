@@ -19,8 +19,7 @@ export interface DeleteGroupDeps {
 }
 
 export type DeletionResult =
-  | { success: true }
-  | { success: false; error: string };
+  { success: true } | { success: false; error: string };
 
 /**
  * Delete a group completely: take its tabs out of its native group, close

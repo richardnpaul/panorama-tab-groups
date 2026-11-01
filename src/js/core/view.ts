@@ -10,8 +10,11 @@ export function mostRecentOtherTab(
 ): number | undefined {
   return tabs
     .filter(({ id }) => id !== viewTabId)
-    .reduce<
-      TabSummary | undefined
-    >((latest, tab) => (latest === undefined || tab.lastAccessed > latest.lastAccessed ? tab : latest), undefined)
-    ?.id;
+    .reduce<TabSummary | undefined>(
+      (latest, tab) =>
+        latest === undefined || tab.lastAccessed > latest.lastAccessed
+          ? tab
+          : latest,
+      undefined,
+    )?.id;
 }
