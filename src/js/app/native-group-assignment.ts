@@ -1,4 +1,3 @@
-import { checkWindowSurvives } from '../core/grouping-safety.js';
 import { getColorForGroupId } from '../core/utils.js';
 import type { Group, GroupState } from '../ports/group-state.js';
 import type { I18n } from '../ports/i18n.js';
@@ -10,13 +9,11 @@ import type { Windows } from '../ports/windows.js';
 export interface NativeGroupAssignmentDeps {
   tabs: Pick<Tabs, 'listInWindow'>;
   windows: Pick<Windows, 'exists'>;
-  groupState: Pick<GroupState, 'getTabGroup' | 'setGroups'>;
+  groupState: Pick<GroupState, 'getTabGroup' | 'getGroups' | 'setGroups'>;
   nativeGroups: Pick<
     NativeGroups,
     'createFromTabs' | 'setAppearance' | 'get' | 'removeTabs'
   >;
-  // The address of the view page
-  viewUrl: string;
   // For the title of a group that has no name
   i18n: Pick<I18n, 'getMessage'>;
   logger: Pick<Logger, 'debug' | 'error' | 'warn'>;
@@ -26,13 +23,15 @@ export type NativeGroupCreation =
   | { kind: 'created'; nativeGroupId: number }
   // The group has no tab in the window, so there is nothing to group
   | { kind: 'no-tabs' }
-  // Grouping was not safe, or went wrong; the reason has been logged
+  // The group could not be made; the reason has been logged
   | { kind: 'aborted' };
 
 export interface NativeGroupAssignment {
   /**
    * Put the tabs of a group that are in a window into a new native tab group,
    * style it like the group, and record it as the group's native group.
+   * `groups` are the groups of the window as the caller saw them, which are
+   * what is recorded in if none are stored by then.
    * `label` starts the log messages: the event that led to this.
    */
   createNativeGroup: (options: {
@@ -48,7 +47,6 @@ export function createNativeGroupAssignment({
   windows,
   groupState,
   nativeGroups,
-  viewUrl,
   i18n,
   logger,
 }: NativeGroupAssignmentDeps): NativeGroupAssignment {
@@ -98,14 +96,6 @@ export function createNativeGroupAssignment({
         return { kind: 'no-tabs' };
       }
 
-      const safety = checkWindowSurvives(tabIds.length, windowTabs, viewUrl);
-      if (!safety.safe) {
-        logger.debug(
-          `[${label}] Skipping native group creation: ${safety.reason}`,
-        );
-        return { kind: 'aborted' };
-      }
-
       if (!(await windows.exists(windowId))) {
         logger.warn(
           `[${label}] Window ${String(windowId)} was closed before creating native group`,
@@ -127,9 +117,13 @@ export function createNativeGroupAssignment({
         return { kind: 'aborted' };
       }
 
+      // The groups are read again: making the group may have emptied another,
+      // which the browser then removed, and the groups as they were seen before
+      // would bring back the reference to it
+      const current = (await groupState.getGroups(windowId)) ?? groups;
       await groupState.setGroups(
         windowId,
-        groups.map((each) =>
+        current.map((each) =>
           each.id === group.id ? { ...each, nativeGroupId } : each,
         ),
       );

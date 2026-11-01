@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Obnavljanje skupin zavihkov ..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Vaši odprti zavihki so ostali, kot so bili. Odprite nastavitve, da vklopite izvorne skupine zavihkov brskalnika ali uvozite skupine drugega dodatka iz njegove datoteke z varnostno kopijo."
+  },
   "migrationTitle": {
     "message": "Selitev hibridnih skupin zavihkov"
   },

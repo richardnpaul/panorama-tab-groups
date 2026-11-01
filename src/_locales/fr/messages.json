@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Restauration des groupes d'onglets..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Vos onglets ouverts ont été laissés tels quels. Ouvrez les options pour activer les groupes d'onglets natifs du navigateur, ou pour importer les groupes d'une autre extension à partir de son fichier de sauvegarde."
+  },
   "migrationTitle": {
     "message": "Migration des groupes d'onglets hybrides"
   },

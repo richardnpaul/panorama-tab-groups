@@ -1,7 +1,8 @@
 # Implementation Plan: Native Tab Groups and Existing Groups: Behaviour, User Journeys and Integration Tests
 
 > **Status: Phases 1, 2 and 3 are done** on the branch `fix/native-groups-migration-user-journeys`, except what is marked as the
-> owner's to decide (Decision 3 and 4); see "Result". Written after a manual test in Firefox. **The cause below was
+> owner's to decide (Decision 3); the owner's answers on the five open questions are in "Decisions taken after the first
+> pass" at the end. Written after a manual test in Firefox. **The cause below was
 > reproduced in a real Firefox, and was not what the plan guessed: it was worse** (see "Result").
 
 ## Overview
@@ -72,8 +73,9 @@ writes it as tests, and fixes the code to match.
   group and the group be collapsed (`firefox-facts.spec.ts`), so it is possible; what it looks like to a person, where the tabs
   of a group are all hidden, could not be asked of the browser, and the code says that is why only the shown group has one
   ("the others have theirs hidden, which would clash"). `TESTING.md` has the look-and-see that decides it.
-- **Decision 4, importing another add-on's groups: not done.** It stays a `it.todo` of J4. What exists is the import of its
-  backup file from the options page (`core/backup.ts`).
+- **Decision 4, importing another add-on's groups: done, as a notice and the file import** (see "Decisions taken after the
+  first pass"). The other add-on's groups cannot be read (each extension has its own session values), so the way in is its
+  export file, which the options page imports (`core/backup.ts`).
 - **Decision 5, reading the old backup type: done earlier.**
 
 The questions, as they were asked:
@@ -101,7 +103,7 @@ The questions, as they were asked:
 | J1  | First run, Firefox 139+, one window with a new tab                  | One group, native on                                                                                   |
 | J2  | First run, Firefox 139+, windows with many tabs, no groups known    | One group per window with its tabs; native **off**; one notice offers to switch on                     |
 | J3  | Update from an earlier version of this extension with groups stored | Groups kept; the native option keeps its earlier value (default off for existing users)                |
-| J4  | First run next to the old add-on                                    | As J2; the migration page offers the import of the old add-on's export                                 |
+| J4  | First run next to the old add-on                                    | As J2; a notice leads to the options, which offer the switch and the import of the old add-on's export |
 | J5  | Switch native on with three groups, tabs in each                    | A native group per group (or lazily; Decision 3), titled and coloured, each with its tabs; no tab lost |
 | J6  | Switch native off                                                   | Tabs leave the native groups; legacy groups intact; the next switch-on migrates again                  |
 | J7  | Several windows, native on                                          | Each window has its own native groups; no tab moves between windows                                    |
@@ -112,7 +114,7 @@ The questions, as they were asked:
 | J12 | Delete a group with native on                                       | Its native group goes; tabs go to the other group as today                                             |
 | J13 | Chromium (collapse-only)                                            | Native always on; collapse instead of hide; no migration prompt                                        |
 | J14 | Firefox older than 139                                              | Legacy mode only; the option is disabled and says why                                                  |
-| J15 | A window whose only tab is grouped                                  | Refused by the safety rule, no window closes                                                           |
+| J15 | A window whose only tab is grouped                                  | Grouped like any other; the window stays (the safety rule was removed)                                 |
 
 ## Test strategy (three levels)
 
@@ -173,7 +175,7 @@ Each step ends with `npm run typecheck`, `npm run lint`, the tests it touched an
 ## Success Criteria
 
 - [x] The report is reproduced and its cause recorded in this plan (in a real Firefox: see "Result")
-- [x] J1 to J15 each have a test (J4's import offer is a `todo`) and the agreed behaviour
+- [x] J1 to J15 each have a test and the agreed behaviour
 - [x] First run over existing tabs or groups does not turn native groups on by itself
 - [ ] Switching on gives a native group per group (or the lazy behaviour is the agreed, explained one) with no lost tab:
       the lazy behaviour is pinned and no tab is lost; **whether it is the wanted one is Decision 3, the owner's**
@@ -209,7 +211,7 @@ Done on `fix/native-groups-migration-user-journeys`; nothing is committed.
 - **A world of fakes** (`tests/support/world`): a model of the browser that follows those facts, ports on it, and the whole
   background of the add-on built by `composeBackgroundFrom(ports)` (the one refactor the plan named; `composeBackground()` is
   the same with the browser's ports). 38 tests of the model, one for each fact it follows.
-- **J1 to J16** (`tests/unit/journeys/native-groups.test.ts`), 27 tests and 2 `todo`, in `npm test`.
+- **J1 to J16** (`tests/unit/journeys/native-groups.test.ts`), 28 tests and 1 `todo` (Decision 3), in `npm test`.
 - **A property test of any run of actions** (`tests/unit/journeys/random-actions.property.test.ts`, fast-check): tabs and windows
   opened, closed, moved, activated and restored, tabs sent to groups, groups deleted, native groups ungrouped or switched on and
   off, restarts, in any order, with the invariants of the data checked after each step and the add-on's own errors counted as
@@ -235,24 +237,91 @@ Done on `fix/native-groups-migration-user-journeys`; nothing is committed.
   about, so a tab moved or opened in a window that was not in front hid or showed tabs of the wrong window (fixed: the tab's
   window is passed through `tab-lifecycle`, `tab-moves` and `visibility-service`); and activating a tab that had been closed
   by then logged an error (fixed: it is tolerated).
-- **Not fixed, for the owner**
-  - **Sending the last tab of the shown group to another group** leaves nothing to show. The add-on refuses to hide every tab,
-    so it logs "No tabs will be shown!" and changes nothing: the tab that was sent stays visible, in a group that is not shown,
-    until the user switches group. Nothing is lost, but the window does not follow the tab. The property test does not do this
-    (it says so); the choice is the owner's (switch to the group the tab went to, or keep as it is).
-  - `migrate` answers success, and marks the migration done, when every group failed to get a native group (the failures are
-    caught and logged one by one). In a browser without native groups the options page does not offer the switch, so the harm is
-    small, but the answer is wrong. (From the silent-failure review.)
-  - **The notification "Restoring tab groups..." cannot show:** the manifest has no `notifications` permission, and the adapter
-    calls `browser.notifications.create` without a guard. Read from the code, not looked at in a browser. A first-run notice
-    (the plan's step 7) would fail the same way, so the decision is silent and the options page is where it is explained.
-  - **The safety rule that refuses to group the only tab of a window** ("window closure risk") is not what Firefox does: it
-    makes the group and keeps the window (a fact). It may be an old worry, or about Chromium; with the window now said to the
-    browser it may not be needed. J15 pins it as it is.
-  - A first-run **notice** and the **import** of another add-on's groups (J4) are not done.
+- **Raised for the owner, and answered** (see "Decisions taken after the first pass"): sending the last tab of the shown
+  group to another group; `migrate` answering success when every group failed; the notification that could not show; the
+  safety rule about the only tab of a window; the first-run notice and the import of another add-on's groups (J4).
 
 ### Checks
 
 `npm test`: 2,895 tests (and 2 `todo`), 100% on every metric, 0 lint findings; the mutation run 100%; the E2E suite on both browsers
 (80 passed, 24 skipped: the Chromium and Firefox specs as before, plus 14 Firefox lab tests). Each fix was reverted in turn, and the journeys it belongs
 to failed.
+
+## Decisions taken after the first pass
+
+The owner answered the five questions that the first pass left open. Done on the same branch; nothing is committed.
+
+1. **A tab sent to another group that was the last one the window showed: the window follows it.** When the tab leaves a
+   group and no other tab (pinned tabs do not count, every group shows them) is left in the shown group, the window
+   switches to the group the tab went to: the group is made the shown one, gets a native group if native groups are on
+   and it has none, and the tabs are shown and hidden for it. Where other tabs of the shown group are left, nothing
+   changes, as before (`app/tab-moves.ts`, tests in `tab-moves.test.ts`, J11, and a Chromium E2E in
+   `group-switching.spec.ts`). The property test now sends tabs there too (the exclusion is gone) and ran 3,000 times.
+2. **`migrate` no longer says it worked when nothing was made.** It answers `false`, writes an error to the log and does not
+   mark the migration done when it tried to make native groups and not one window got one (a browser without native
+   groups, or one that refuses). A window with nothing to make (no groups, or the active group has no tabs) is not a
+   failure, and when some windows got theirs and others did not it is done: a group that has none gets one when it is
+   shown. It does not stop at the first window that fails (the windows are independent and are tried together): it gives
+   its answer when all have been tried, and none is tried again until the next start or the next press of the button. The
+   migration page and the options page show the answer as before. J14.
+3. **The `notifications` permission is asked for, and said why.** `notifications` is in the manifest, and the README has a
+   "Permissions" table with the reason for each permission; a test (`manifest-permissions.test.ts`) fails for a
+   permission that the README does not explain, or explains and the manifest does not ask for. It is a required
+   permission, not an optional one: both notifications come from the background with no user action, and an optional
+   permission can only be asked for from one. The cost is that the browsers show it in the permission prompt of the
+   install, and of the update that brings it. "Restoring tab groups..." can now show (it could not before). A notice that
+   cannot be shown (the user took the permission away) is logged and does not stop the start-up.
+4. **The safety rule is gone.** `core/grouping-safety.ts` and its tests are deleted; the only tab of a window is grouped
+   like any other (a fact of Firefox: it makes the group and keeps the window; in Chromium the E2E shows the same). J15, the
+   assignment tests, the E2E of the only tab of a window and the lab test of the first run (three groups, one per window,
+   where there were two) were changed to say so.
+5. **A first-run notice, and the import (J4).** When the first run leaves native groups off because tabs or groups are in
+   place, one notification says so (`firstRunNativeGroupsOff`): the tabs were left as they are, and the options turn on
+   native groups and import the groups of another add-on from its backup file. Clicking it opens the options page. It is
+   decided once with the choice, so it is shown once. The other add-on's groups cannot be read, so the import is its
+   backup file, which the options page already read (`panoramaView` and the old add-on's format). **Deviation from the
+   plan's wording, for the owner to veto:** the offer is on the options page, not on the migration status page, which no
+   page of the add-on links to; adding the import to it would put it where nobody goes.
+
+### Found on the way, and fixed
+
+- **Sending a tab from the menu failed in Chromium.** `visibleIdsInWindow` asked for `hidden: false`, which Chromium
+  refuses ("Unexpected property: 'hidden'"), so the menu did nothing for the active tab. Found by the E2E. It reads the
+  tabs and leaves out those that say `hidden`.
+- **In a browser that cannot hide tabs the neighbour handed the window to another group.** The tab "before" the one sent
+  away was taken among all tabs, which in Chromium are all visible, so the window could jump to another group. It is now
+  chosen among the tabs of the group the tab leaves.
+- **Chromium took the tab out of its native group again.** The tab was put in the native group and then moved to the end of
+  the window, which Chromium treats as leaving the group. It is moved first.
+- **The menu used the window the code runs in, not the window of the tab.** The click says the tab's window; `moveTab` uses
+  it. (In a service worker "the current window" is whichever is in front.)
+- **A race in recording a new native group.** Making the group for the tab that was sent empties the native group it left,
+  which the browser removes and the add-on forgets, and the write that recorded the new group then brought back the
+  reference to the removed one. The property test found it. The groups are read again before they are written.
+
+- **A window closed with native groups came back with them when native groups had been switched off since.** Firefox
+  restores the group (a fact), and nothing took the tabs out of it. Found by the property test (on the commit before these
+  changes as well), which skipped restoring a window while native groups were off. A tab that is created in a native group
+  while native groups are off is now taken out of it (`tabCreated`: a restored window's tabs arrive that way, and its
+  window event comes before they are in their groups). The groups of the add-on and the group of each tab are kept: they
+  are session values, which a restored window and its tabs bring back, so the window is a legacy one again. The property
+  test restores windows whatever the setting. What it relies on, that a real restore brings the session values back, is
+  the model's reading of Firefox; `TESTING.md` has it as a manual check. The same applies to a tab that arrives in a
+  native group any other way while the feature is off (dragged in from a window of another add-on, say): it is taken out.
+
+- **The badge on the toolbar button counted one group too many.** The window keeps the group for ungrouped tabs among its
+  groups, and the count included it (one group showed 2, two showed 3). It counts the groups of the user. Found by the
+  owner, with native groups off; the count never depended on them. Pinned by a unit test, by J14 and by the Chromium
+  `group-switching` E2E.
+
+### Not fixed, for the owner
+
+- The Chromium E2E "activating a tab of another group" failed once in the first run after a build and passed in the
+  runs that followed; not looked into.
+
+### Checks
+
+`npm run test:coverage`: 3,976 tests (and 1 `todo`, Decision 3), 100% on every metric; lint, knip, the type check, the
+suppression check and `web-ext lint` pass. The Chromium `group-switching` E2E (3 tests) and the Firefox lab specs
+(`native-groups-first-run`, `firefox-facts`: 16 tests) pass; the first-run lab test was shown to fail with the permission
+taken out of the manifest.

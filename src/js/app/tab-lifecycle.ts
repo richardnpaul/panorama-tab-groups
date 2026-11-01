@@ -19,6 +19,8 @@ export interface CreatedTab {
   active?: boolean | undefined;
   url?: string | undefined;
   pendingUrl?: string | undefined;
+  // The browser's own tab group of the tab; -1 or nothing means it is in none
+  browserGroupId?: number | undefined;
 }
 
 export interface TabLifecycleDeps {
@@ -33,7 +35,10 @@ export interface TabLifecycleDeps {
     | 'setGroups'
   >;
   tabs: Pick<Tabs, 'get'>;
-  nativeGroups: Pick<NativeGroups, 'addTabs' | 'listIdsInWindow' | 'tabIdsIn'>;
+  nativeGroups: Pick<
+    NativeGroups,
+    'addTabs' | 'removeTabs' | 'listIdsInWindow' | 'tabIdsIn'
+  >;
   assignment: NativeGroupAssignment;
   // Shows the tabs of the group in the window, and hides the rest
   toggleVisibleTabs: (activeGroup: number, windowId: number) => Promise<void>;
@@ -166,6 +171,23 @@ export function createTabLifecycle({
     )?.nativeGroupId;
   }
 
+  // With native groups off, a tab that arrives in one (a window the user
+  // restores comes back with the groups it was closed with) is taken out: its
+  // group is the add-on's own, which the tab keeps
+  async function leaveNativeGroup(tab: CreatedTab): Promise<void> {
+    if (tab.browserGroupId === undefined || tab.browserGroupId <= 0) {
+      return;
+    }
+    try {
+      await nativeGroups.removeTabs([tab.id]);
+    } catch (error) {
+      logger.warn(
+        `Could not take tab ${String(tab.id)} out of its native group:`,
+        error,
+      );
+    }
+  }
+
   const withNativeGroup = (
     groups: readonly Group[],
     groupId: number,
@@ -249,6 +271,8 @@ export function createTabLifecycle({
       } catch (error) {
         logger.warn('Could not assign new tab to native group:', error);
       }
+    } else {
+      await leaveNativeGroup(tab);
     }
 
     // The view must give way to a new tab that is active, native groups or not

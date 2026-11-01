@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Przywracanie grup kart..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Otwarte karty pozostały bez zmian. Otwórz opcje, aby włączyć natywne grupy kart przeglądarki lub zaimportować grupy innego rozszerzenia z jego pliku kopii zapasowej."
+  },
   "migrationTitle": {
     "message": "Migracja hybrydowych grup kart"
   },

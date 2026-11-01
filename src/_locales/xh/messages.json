@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Kubuyiselwa amaqela eethebhu..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Iithebhu zakho ezivuliweyo zishiyiwe njengoko zinjalo. Vula iinketho ukuze uvule amaqela eethebhu esiXelisi ngokwaso, okanye ungenise amaqela e-add-on enye kwifayile yayo yezitshixo zokukhuseleka."
+  },
   "migrationTitle": {
     "message": "Ukuhanjiswa kwamaqela eethebhu ahlanganisiweyo"
   },

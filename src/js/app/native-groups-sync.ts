@@ -37,7 +37,10 @@ export interface NativeGroupsSync {
   relink: () => Promise<void>;
   /**
    * Give the groups of existing users native tab groups, once. Gives false if
-   * it failed, and then it is tried again next time.
+   * it failed, and then it is tried again next time. It failed if it tried to
+   * make native groups and not one could be made (a browser that has none, or
+   * that refuses): saying it was done then would be wrong, and would stop it
+   * being tried again.
    */
   migrate: () => Promise<boolean>;
   /**
@@ -50,6 +53,9 @@ export interface NativeGroupsSync {
   /** The user changed a native tab group: follow its name */
   onUpdated: (group: NativeGroupEvent) => Promise<void>;
 }
+
+/** What came of the attempt to give the active group of a window a native group */
+type WindowMigration = 'created' | 'failed' | 'nothing-to-do';
 
 const withoutNativeGroup = (group: Group): Group => {
   const { nativeGroupId, ...rest } = group;
@@ -91,14 +97,19 @@ export function createNativeGroupsSync({
     }
   }
 
-  async function migrateWindow(windowId: number): Promise<void> {
+  async function migrateWindow(windowId: number): Promise<WindowMigration> {
     const groups = await groupState.getGroups(windowId);
     if (groups === undefined || groups.length === 0) {
       logger.debug(`No groups to migrate for window ${String(windowId)}`);
-      return;
+      return 'nothing-to-do';
     }
 
     const valid = await Promise.all(groups.map(withoutStaleReference));
+    // Saved before the native group is made, which records its reference in
+    // what is stored
+    if (valid.some((group, index) => group !== groups[index])) {
+      await groupState.setGroups(windowId, valid);
+    }
 
     // Only the active group gets a native group now: the others get theirs
     // when they become active
@@ -107,6 +118,7 @@ export function createNativeGroupsSync({
       (group) =>
         group.id === activeGroup && nativeGroupIdOf(group) === undefined,
     );
+    let outcome: WindowMigration = 'nothing-to-do';
     if (target !== undefined) {
       try {
         const creation = await assignment.createNativeGroup({
@@ -116,17 +128,20 @@ export function createNativeGroupsSync({
           label: 'Migration',
         });
         if (creation.kind === 'created') {
-          return;
+          return 'created';
         }
+        // A group with no tabs in the window has nothing to be made of
+        outcome = creation.kind === 'aborted' ? 'failed' : 'nothing-to-do';
       } catch (error) {
         logger.warn(
           `Failed to create native group for group ${String(target.id)}:`,
           error,
         );
+        outcome = 'failed';
       }
     }
 
-    await groupState.setGroups(windowId, valid);
+    return outcome;
   }
 
   async function relinkWindow(windowId: number): Promise<void> {
@@ -189,8 +204,15 @@ export function createNativeGroupsSync({
         return true;
       }
 
-      const windowIds = await windows.listIds();
-      await Promise.all(windowIds.map(migrateWindow));
+      const outcomes = await Promise.all(
+        (await windows.listIds()).map(migrateWindow),
+      );
+      if (outcomes.includes('failed') && !outcomes.includes('created')) {
+        logger.error(
+          'Migration to hybrid groups failed: no window could be given a native tab group',
+        );
+        return false;
+      }
       await migrationFlag.setComplete(true);
       return true;
     } catch (error) {

@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Lapcsoportok visszaállítása..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "A megnyitott lapok változatlanok maradtak. A beállításokat megnyitva be lehet kapcsolni a böngésző natív lapcsoportjait, vagy be lehet importálni egy másik kiegészítő csoportjait a biztonsági mentési fájljából."
+  },
   "migrationTitle": {
     "message": "Hibrid lapcsoportok átvitele"
   },

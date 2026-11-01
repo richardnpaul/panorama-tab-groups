@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Tabbladgroepen herstellen..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Je geopende tabbladen zijn ongewijzigd gelaten. Open de opties om de eigen tabbladgroepen van de browser in te schakelen, of om de groepen van een andere add-on te importeren uit het back-upbestand ervan."
+  },
   "migrationTitle": {
     "message": "Migratie van hybride tabbladgroepen"
   },

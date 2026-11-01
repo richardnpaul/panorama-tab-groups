@@ -40,6 +40,26 @@ describe('app/toolbar-service.ts', () => {
       expect(toolbar.badgeColor).toBe('#666666');
     });
 
+    it('does not count the system groups, which the window keeps besides the groups of the user', async () => {
+      const { service, toolbar } = await setUp([
+        group(-2, 'Ungrouped Tabs'),
+        group(-1, 'Viewer'),
+        group(0, 'Work'),
+      ]);
+
+      await service.updateActionTitle(3, 0);
+
+      expect(toolbar.badgeTexts.get(3)).toBe('1');
+    });
+
+    it('counts a window with only the system group as having no groups', async () => {
+      const { service, toolbar } = await setUp([group(-2, 'Ungrouped Tabs')]);
+
+      await service.updateActionTitle(3, 0);
+
+      expect(toolbar.badgeTexts.get(3)).toBe('0');
+    });
+
     it('looks up the active group of the window when it is not given', async () => {
       const { service, toolbar, groupState } = await setUp();
       await groupState.setActiveGroup(3, 1);

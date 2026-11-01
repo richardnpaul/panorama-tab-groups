@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Restaurando os grupos de lapelas..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "As túas lapelas abertas deixáronse como estaban. Abre as opcións para activar os grupos de lapelas nativos do navegador ou para importar os grupos doutro complemento desde o seu ficheiro de copia de seguranza."
+  },
   "migrationTitle": {
     "message": "Migración de grupos de lapelas híbridos"
   },

@@ -30,8 +30,8 @@ describe('user journeys with native tab groups', () => {
         (await world.groupsOf(windowId)).filter(({ id }) => id >= 0),
       ).toMatchObject([{ id: 0, name: 'Grp0' }]);
       expect(await world.groupState.getTabGroup(tabIds[0] ?? 0)).toBe(0);
-      // The only tab of a window is not put in a native group
-      expect(world.model.groups.size).toBe(0);
+      // The only tab of a window is put in a native group like any other (J15)
+      expect(world.model.groups.size).toBe(1);
       expect(world.logs.error).toEqual([]);
     });
   });
@@ -121,9 +121,30 @@ describe('user journeys with native tab groups', () => {
       expect(await tabsThatMoved(world, before)).toEqual([]);
     });
 
-    it.todo(
-      'offers to import the groups of the other add-on from its export, on the migration status page (Decision 4 of the plan)',
-    );
+    // The groups of the other add-on cannot be read (each extension has its own session values), so the way in
+    // is its export file, which the options page imports (core/backup.ts reads that format)
+    it("tells the user once that the tabs were left as they are, and the notice leads to the options, where the switch and the import of the other add-on's backup are", async () => {
+      const world = createWorld();
+      world.seedWindow(['a', 'b', 'c', 'd']);
+
+      await world.start();
+      await world.restart();
+
+      expect([...world.notifications.shown.keys()]).toEqual([
+        'first-run-native-groups-off',
+      ]);
+      expect(
+        world.notifications.shown.get('first-run-native-groups-off'),
+      ).toMatchObject({
+        message: 'firstRunNativeGroupsOff',
+      });
+
+      await world.clickNotification('first-run-native-groups-off');
+
+      expect(world.extension.optionsOpened).toBe(1);
+      expect(world.notifications.shown.size).toBe(0);
+      expect(world.logs.error).toEqual([]);
+    });
   });
 
   describe('J5 switching native groups on, with three groups and tabs in each', () => {
@@ -217,6 +238,39 @@ describe('user journeys with native tab groups', () => {
       expect(
         await Promise.all(tabIds.map((id) => world.groupState.getTabGroup(id))),
       ).toEqual([1, 1, 2, 2]);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('takes a window out of its native groups that is restored after, and its groups are as they were', async () => {
+      const world = createWorld({ stored: { useNativeGroups: true } });
+      world.seedWindow(['keep']);
+      const closing = world.seedWindow(['a1', 'a2', 'a3', 'a4']);
+      await arrangeGroups(
+        world,
+        closing.windowId,
+        closing.tabIds,
+        [1, 1, 2, 2],
+        1,
+      );
+      await world.start();
+      await world.closeWindow(closing.windowId);
+      await world.setNativeGroups(false);
+
+      const restored = await world.restoreWindow();
+
+      expect(world.model.groups.size).toBe(0);
+      expect(
+        await Promise.all(
+          (restored?.tabIds ?? []).map((id) =>
+            world.groupState.getTabGroup(id),
+          ),
+        ),
+      ).toEqual([1, 1, 2, 2]);
+      expect(
+        (await world.groupsOf(restored?.windowId ?? 0))
+          .filter(({ id }) => id >= 0)
+          .map(({ id }) => id),
+      ).toEqual([1, 2]);
       expect(world.logs.error).toEqual([]);
     });
 
@@ -397,6 +451,28 @@ describe('user journeys with native tab groups', () => {
       expect(world.logs.error).toEqual([]);
     });
 
+    it('switches the window to the group it goes to when it was the last tab of the shown group, and keeps it in a native group', async () => {
+      const world = createWorld({ stored: { useNativeGroups: true } });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c']);
+      await arrangeGroups(world, windowId, tabIds, [1, 2, 2], 1);
+      await world.start();
+
+      await world.sendTabToGroup(tabIds[0] ?? 0, 2);
+
+      expect(await world.groupState.getActiveGroup(windowId)).toBe(2);
+      expect(world.model.tabsOf(windowId).map(({ hidden }) => hidden)).toEqual([
+        false,
+        false,
+        false,
+      ]);
+      const natives = new Set(
+        world.model.tabsOf(windowId).map(({ groupId }) => groupId),
+      );
+      expect(natives.size).toBe(1);
+      expect(natives.has(-1)).toBe(false);
+      expect(world.logs.error).toEqual([]);
+    });
+
     it('takes it out of the native group of the group it left, where the group it goes to has none, for it is hidden', async () => {
       const { world, tabIds } = await twoGroups();
 
@@ -472,13 +548,26 @@ describe('user journeys with native tab groups', () => {
       expect(world.logs.error).toEqual([]);
     });
 
-    it('does no harm when it is asked to migrate, though the options page does not offer it', async () => {
+    it('shows on the toolbar button the number of groups of the window, not counting the group for ungrouped tabs', async () => {
       const world = createWorld({ hasTabGroups: false });
       const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
       await arrangeGroups(world, windowId, tabIds, [1, 1, 2, 2], 1);
       await world.start();
 
-      await world.message({ action: 'migrateToHybridGroups' });
+      await world.activateTab(tabIds[2] ?? 0);
+
+      expect(world.toolbar.titles.get(windowId)).toBe('Active Group: G2');
+      expect(world.toolbar.badgeTexts.get(windowId)).toBe('2');
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('does no harm when it is asked to migrate, though the options page does not offer it, and answers that it failed', async () => {
+      const world = createWorld({ hasTabGroups: false });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
+      await arrangeGroups(world, windowId, tabIds, [1, 1, 2, 2], 1);
+      await world.start();
+
+      const answer = await world.message({ action: 'migrateToHybridGroups' });
 
       expect(world.model.groups.size).toBe(0);
       expect(world.model.tabsOf(windowId)).toHaveLength(4);
@@ -489,18 +578,22 @@ describe('user journeys with native tab groups', () => {
       expect(world.logs.warn.join(' ')).toContain(
         'browser.tabs.group is undefined',
       );
+      // and it does not say that the migration was done, which it was not
+      expect(answer).toEqual({ success: false, message: 'Migration failed' });
+      expect(await world.migrationFlag.isComplete()).toBe(false);
     });
   });
 
   describe('J15 a window whose only tab is in a group', () => {
-    it('is not given a native group, which the browser might close the window over, and the window stays', async () => {
+    // Firefox makes the group and keeps the window (firefox-facts.spec.ts), so there is nothing to refuse
+    it('is given a native group, and the window stays', async () => {
       const world = createWorld({ stored: { useNativeGroups: true } });
       const { windowId, tabIds } = world.seedWindow(['solo']);
       await arrangeGroups(world, windowId, tabIds, [1], 1);
 
       await world.start();
 
-      expect(world.model.groups.size).toBe(0);
+      expect(world.model.groups.size).toBe(1);
       expect(world.model.windows.has(windowId)).toBe(true);
       expect(world.model.tabsOf(windowId)).toHaveLength(1);
       expect(world.logs.error).toEqual([]);

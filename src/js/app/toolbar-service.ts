@@ -1,3 +1,4 @@
+import { isReservedGroupId } from '../core/constants.js';
 import type { GroupState } from '../ports/group-state.js';
 import type { Logger } from '../ports/logger.js';
 import type { Toolbar } from '../ports/toolbar.js';
@@ -43,7 +44,10 @@ export function createToolbarService({
       const active = activeGroup ?? (await groupState.getActiveGroup(windowId));
       const name = groups.find(({ id }) => id === active)?.name ?? 'None';
 
-      await show(windowId, `Active Group: ${name}`, String(groups.length));
+      // The system group for ungrouped tabs is kept with the groups, but is not one the user has
+      const shown = groups.filter(({ id }) => !isReservedGroupId(id)).length;
+
+      await show(windowId, `Active Group: ${name}`, String(shown));
     },
 
     showNoActiveGroup: (windowId) => show(windowId, 'Active Group: None', '1'),

@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Obnovují se skupiny karet..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Vaše otevřené karty zůstaly beze změny. Otevřete nastavení, kde můžete zapnout nativní skupiny karet prohlížeče nebo importovat skupiny jiného doplňku z jeho souboru se zálohou."
+  },
   "migrationTitle": {
     "message": "Migrace hybridních skupin karet"
   },

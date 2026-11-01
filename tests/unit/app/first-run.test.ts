@@ -1,11 +1,14 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMemoryGroupState } from '../../../src/js/adapters/memory/group-state.js';
+import { createMemoryExtension } from '../../../src/js/adapters/memory/extension.js';
+import { createMemoryNotifications } from '../../../src/js/adapters/memory/notifications.js';
 import { createMemoryOptions } from '../../../src/js/adapters/memory/options.js';
 import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createMemoryWindows } from '../../../src/js/adapters/memory/windows.js';
 import { createFirstRun } from '../../../src/js/app/first-run.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
 import type { TabDetails } from '../../../src/js/ports/tabs.js';
+import { englishMessage } from '../../support/messages.js';
 
 const tab = (id: number, windowId: number): TabDetails => ({
   id,
@@ -62,16 +65,21 @@ async function setUp({
       groupState.setGroups(Number(windowId), inWindow),
     ),
   );
-  const logger = { debug: vi.fn() };
+  const logger = { debug: vi.fn(), warn: vi.fn() };
+  const notifications = createMemoryNotifications();
+  const extension = createMemoryExtension();
   const firstRun = createFirstRun({
     options,
     windows,
     tabs,
     groupState,
     capabilities: { hasTabHide, hasTabGroups },
+    notifications,
+    extension,
+    i18n: { getMessage: englishMessage },
     logger,
   });
-  return { firstRun, options, logger };
+  return { firstRun, options, logger, notifications, extension };
 }
 
 describe('app/first-run.ts', () => {
@@ -169,12 +177,101 @@ describe('app/first-run.ts', () => {
         })(),
         groupState: createMemoryGroupState(),
         capabilities: { hasTabHide: true, hasTabGroups: true },
-        logger: { debug: vi.fn() },
+        notifications: createMemoryNotifications(),
+        extension: createMemoryExtension(),
+        i18n: { getMessage: englishMessage },
+        logger: { debug: vi.fn(), warn: vi.fn() },
       });
 
       await later.decideNativeGroups();
 
       expect(env.options.stored.useNativeGroups).toBe(true);
+    });
+  });
+
+  describe('the notice that tabs were left as they are', () => {
+    const notice = 'first-run-native-groups-off';
+
+    it('is shown once, when native groups are left off over tabs that are in place', async () => {
+      const env = await setUp({ windows: { 1: 4 } });
+
+      await env.firstRun.decideNativeGroups();
+      await env.firstRun.decideNativeGroups();
+
+      expect(env.notifications.shown.get(notice)).toEqual({
+        title: 'Tab Groups Viewer',
+        message: englishMessage('firstRunNativeGroupsOff'),
+        iconUrl: 'moz-extension://id/icons/logo/logo-128.png',
+      });
+      expect(env.notifications.shown.size).toBe(1);
+    });
+
+    it('is not shown when there was nothing to keep, and native groups went on', async () => {
+      const env = await setUp({ windows: { 1: 1 } });
+
+      await env.firstRun.decideNativeGroups();
+
+      expect(env.notifications.shown.size).toBe(0);
+    });
+
+    it('is not shown where native groups are not a choice', async () => {
+      const env = await setUp({ windows: { 1: 5 }, hasTabHide: false });
+
+      await env.firstRun.decideNativeGroups();
+
+      expect(env.notifications.shown.size).toBe(0);
+    });
+
+    it('is not shown again once the choice has been made', async () => {
+      const env = await setUp({
+        windows: { 1: 5 },
+        stored: { useNativeGroups: false },
+      });
+
+      await env.firstRun.decideNativeGroups();
+
+      expect(env.notifications.shown.size).toBe(0);
+    });
+
+    it('does not stop the start-up when the browser would not show it', async () => {
+      const env = await setUp({ windows: { 1: 4 } });
+      const failure = new Error('no permission');
+      env.notifications.show = () => Promise.reject(failure);
+
+      await expect(env.firstRun.decideNativeGroups()).resolves.toBeUndefined();
+
+      expect(env.options.stored.useNativeGroups).toBe(false);
+      expect(env.logger.warn).toHaveBeenCalledWith(
+        '[FirstRun] The notice could not be shown:',
+        failure,
+      );
+    });
+
+    it('opens the options, and takes itself away, when it is clicked', async () => {
+      const env = await setUp({ windows: { 1: 4 } });
+      await env.firstRun.decideNativeGroups();
+
+      await env.firstRun.noticeClicked(notice);
+
+      expect(env.extension.optionsOpened).toBe(1);
+      expect(env.notifications.shown.size).toBe(0);
+    });
+
+    it('opens the options even if the browser has already taken the notice away', async () => {
+      const env = await setUp({ windows: { 1: 4 } });
+      env.notifications.clear = () => Promise.reject(new Error('gone'));
+
+      await env.firstRun.noticeClicked(notice);
+
+      expect(env.extension.optionsOpened).toBe(1);
+    });
+
+    it('leaves alone the click on any other notification', async () => {
+      const env = await setUp({ windows: { 1: 4 } });
+
+      await env.firstRun.noticeClicked('viewer-initializing');
+
+      expect(env.extension.optionsOpened).toBe(0);
     });
   });
 

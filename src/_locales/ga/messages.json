@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Grúpaí cluaisíní á gcur ar ais..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Fágadh do chluaisíní oscailte mar a bhí siad. Oscail na roghanna chun grúpaí cluaisíní dúchasacha an bhrabhsálaí a chur ar siúl, nó chun grúpaí forlíonaidh eile a iompórtáil óna chomhad cúltaca."
+  },
   "migrationTitle": {
     "message": "Aistriú ar ghrúpaí cluaisíní hibrideacha"
   },

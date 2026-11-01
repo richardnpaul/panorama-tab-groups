@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "S'estan restaurant els grups de pestanyes..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Les pestanyes obertes s'han deixat tal com estaven. Obriu les opcions per activar els grups de pestanyes natius del navegador o per importar els grups d'un altre complement des del seu fitxer de còpia de seguretat."
+  },
   "migrationTitle": {
     "message": "Migració de grups de pestanyes híbrids"
   },

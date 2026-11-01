@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Restaurando grupos de abas..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Suas abas abertas foram deixadas como estavam. Abra as opções para ativar os grupos de abas nativos do navegador ou para importar os grupos de outra extensão a partir do arquivo de cópia de segurança dela."
+  },
   "migrationTitle": {
     "message": "Migração de grupos de abas híbridos"
   },

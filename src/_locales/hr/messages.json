@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Vraćanje grupa kartica..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Vaše otvorene kartice ostavljene su kakve jesu. Otvorite postavke kako biste uključili izvorne grupe kartica preglednika ili uvezli grupe drugog dodatka iz njegove datoteke sigurnosne kopije."
+  },
   "migrationTitle": {
     "message": "Migracija hibridnih grupa kartica"
   },

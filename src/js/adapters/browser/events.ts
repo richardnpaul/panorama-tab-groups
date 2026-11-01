@@ -15,6 +15,7 @@ interface RawTab {
   active?: boolean | undefined;
   url?: string | undefined;
   pendingUrl?: string | undefined;
+  groupId?: number | undefined;
 }
 
 interface RawNativeGroup {
@@ -58,6 +59,7 @@ export interface EventsApi {
       [{ menuItemId: string | number }, ClickedTab | undefined]
     >;
   };
+  notifications: { onClicked: Emitter<[string]> };
 }
 
 /** What the extension does when the browser tells it something */
@@ -83,6 +85,7 @@ export interface BackgroundHandlers {
   storageChanged: BrowserEvents['onStorageChanged'];
   nativeGroupRemoved: (group: NativeGroupEvent) => Promise<void>;
   nativeGroupUpdated: (group: NativeGroupEvent) => Promise<void>;
+  notificationClicked: (id: string) => Promise<void>;
 }
 
 /** The tab, if the browser has said which one it is and where */
@@ -96,6 +99,7 @@ function createdTabOf(tab: RawTab): CreatedTab | undefined {
         active: tab.active,
         url: tab.url,
         pendingUrl: tab.pendingUrl,
+        browserGroupId: tab.groupId,
       };
 }
 
@@ -178,5 +182,9 @@ export function registerListeners(
 
   api.contextMenus.onClicked.addListener((info, tab) => {
     run('contextMenus.onClicked', handlers.menuClicked(info, tab));
+  });
+
+  api.notifications.onClicked.addListener((id) => {
+    run('notifications.onClicked', handlers.notificationClicked(id));
   });
 }

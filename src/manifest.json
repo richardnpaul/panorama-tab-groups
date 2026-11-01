@@ -82,7 +82,8 @@
     "storage",
     "sessions",
     "downloads",
-    "contextMenus"
+    "contextMenus",
+    "notifications"
   ],
   "optional_permissions": []
 }

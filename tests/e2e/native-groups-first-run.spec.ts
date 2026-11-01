@@ -59,9 +59,13 @@ test.describe('First run over tabs that are already open', () => {
     expect(lab.logs().join('\n')).toContain(
       'native tab groups stay off until the user turns them on',
     );
+    // and it told the user so, with the permission to: without it the browser has no notifications to show
+    expect(lab.logs().join('\n')).not.toContain(
+      '[FirstRun] The notice could not be shown',
+    );
   });
 
-  test('keeps every tab in the window it was in, and makes a native group in each window that has tabs to group, when the user has chosen native groups', async () => {
+  test('keeps every tab in the window it was in, and makes a native group in each window, when the user has chosen native groups', async () => {
     test.setTimeout(90000);
     const { world, first, second, third, before } = await threeWindows();
 
@@ -69,10 +73,10 @@ test.describe('First run over tabs that are already open', () => {
       useNativeGroups: true,
     });
 
-    // The extension sets itself up, and makes a native group in each window
+    // The extension sets itself up, and makes a native group in each window, the one with a single tab too
     await expect
       .poll(async () => (await world.groups()).length, { timeout: 30000 })
-      .toBe(2);
+      .toBe(3);
 
     const tabs = await world.tabs();
     const groups = await world.groups();
@@ -86,24 +90,18 @@ test.describe('First run over tabs that are already open', () => {
       expect.arrayContaining([first, second.windowId, third.windowId]),
     );
 
-    // Each window with tabs to group has a group of its own, with all of them in it
+    // Each window has a group of its own, with all of its tabs in it
     const groupOf = (windowId: number) =>
       groups.find((group) => group.windowId === windowId)?.id;
     expect(groups.map(({ windowId }) => windowId).sort()).toEqual(
-      [first, second.windowId].sort(),
+      [first, second.windowId, third.windowId].sort(),
     );
-    [first, second.windowId].forEach((windowId) => {
+    [first, second.windowId, third.windowId].forEach((windowId) => {
       expect(
         tabs
           .filter((tab) => tab.windowId === windowId)
           .every(({ groupId }) => groupId === groupOf(windowId)),
       ).toBe(true);
     });
-    // and the window with one tab is left as it was: a group of the only tab of a window is not made
-    expect(
-      tabs
-        .filter(({ windowId }) => windowId === third.windowId)
-        .map(({ groupId }) => groupId),
-    ).toEqual([-1]);
   });
 });

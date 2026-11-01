@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Ripristino dei gruppi di schede..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Le tue schede aperte sono state lasciate così come sono. Apri le opzioni per attivare i gruppi di schede nativi del browser o per importare i gruppi di un altro componente aggiuntivo dal relativo file di backup."
+  },
   "migrationTitle": {
     "message": "Migrazione dei gruppi di schede ibridi"
   },

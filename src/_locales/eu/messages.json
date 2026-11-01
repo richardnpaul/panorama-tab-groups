@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Fitxa-taldeak leheneratzen..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Irekita zeuden fitxak lehen bezala utzi dira. Ireki aukerak nabigatzailearen fitxa-talde natiboak aktibatzeko edo beste gehigarri baten taldeak bere babeskopia-fitxategitik inportatzeko."
+  },
   "migrationTitle": {
     "message": "Fitxa-talde hibridoen migrazioa"
   },

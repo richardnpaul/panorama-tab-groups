@@ -270,14 +270,22 @@ describe('adapters/browser/tabs.ts', () => {
       expect(query).toHaveBeenCalledWith({ windowId: 3, highlighted: true });
     });
 
-    it('asks for the tabs of the window that are not hidden', async () => {
-      const query = vi.fn().mockResolvedValue([{ id: 2 }, { id: 0 }, {}]);
+    it('gives the tabs of the window that are not hidden', async () => {
+      const query = vi
+        .fn()
+        .mockResolvedValue([
+          { id: 2 },
+          { id: 5, hidden: true },
+          { id: 0, hidden: false },
+          {},
+        ]);
       const tabs = createBrowserTabs(() => api({ query }));
 
       await expect(tabs.visibleIdsInWindow(3)).resolves.toEqual([2, 0]);
 
+      // Chromium refuses a query that has `hidden` in it
       expect(query).toHaveBeenCalledTimes(1);
-      expect(query).toHaveBeenCalledWith({ windowId: 3, hidden: false });
+      expect(query).toHaveBeenCalledWith({ windowId: 3 });
     });
   });
 

@@ -32,6 +32,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
           active?: boolean;
           url?: string;
           pendingUrl?: string;
+          groupId?: number;
         },
       ]
     >(),
@@ -51,6 +52,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
       boolean
     >(),
     external: emitter<[unknown]>(),
+    notificationClicked: emitter<[string]>(),
     menuClicked:
       emitter<
         [
@@ -85,6 +87,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
       onMessageExternal: events.external,
     },
     contextMenus: { onClicked: events.menuClicked },
+    notifications: { onClicked: events.notificationClicked },
   };
   const handlers = {
     toggleView: vi.fn().mockResolvedValue(undefined),
@@ -102,6 +105,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     storageChanged: vi.fn().mockResolvedValue(undefined),
     nativeGroupRemoved: vi.fn().mockResolvedValue(undefined),
     nativeGroupUpdated: vi.fn().mockResolvedValue(undefined),
+    notificationClicked: vi.fn().mockResolvedValue(undefined),
   } satisfies BackgroundHandlers;
   const logger = { error: vi.fn() };
   registerListeners(api, handlers, logger);
@@ -121,6 +125,14 @@ describe('adapters/browser/events.ts', () => {
     Object.values(events).forEach((event) => {
       expect(event.listeners).toHaveLength(1);
     });
+  });
+
+  it('hands the notification that was clicked to what handles it', () => {
+    const { events, handlers } = setUp();
+
+    events.notificationClicked.fire('first-run');
+
+    expect(handlers.notificationClicked).toHaveBeenCalledWith('first-run');
   });
 
   it('adds the listeners at once, before anything has been awaited', () => {
@@ -174,7 +186,18 @@ describe('adapters/browser/events.ts', () => {
       active: true,
       url: 'https://a/',
       pendingUrl: 'https://b/',
+      browserGroupId: undefined,
     });
+  });
+
+  it('gives the native group a created tab is in', () => {
+    const { events, handlers } = setUp();
+
+    events.tabCreated.fire({ id: 7, windowId: 2, groupId: 12 });
+
+    expect(handlers.tabCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ browserGroupId: 12 }),
+    );
   });
 
   it('gives a tab with the id 0 and the window 0', () => {
@@ -357,6 +380,7 @@ describe('adapters/browser/events.ts', () => {
       events.storageChanged.fire({}, 'sync');
       events.external.fire('x');
       events.menuClicked.fire({ menuItemId: '1' }, undefined);
+      events.notificationClicked.fire('n');
       await settle();
 
       expect(logger.error.mock.calls.map((call) => String(call[0]))).toEqual([
@@ -372,6 +396,7 @@ describe('adapters/browser/events.ts', () => {
         '[storage.onChanged] handler failed:',
         '[runtime.onMessageExternal] handler failed:',
         '[contextMenus.onClicked] handler failed:',
+        '[notifications.onClicked] handler failed:',
       ]);
     });
   });

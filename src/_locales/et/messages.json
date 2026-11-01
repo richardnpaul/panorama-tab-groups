@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Vahelehtede rühmi taastatakse..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Sinu avatud vahelehed jäeti samaks. Ava suvandid, et lülitada sisse brauseri enda vahelehtede rühmad või importida teise lisandmooduli rühmad selle varukoopia failist."
+  },
   "migrationTitle": {
     "message": "Hübriidsete vahelehtede rühmade üleviimine"
   },

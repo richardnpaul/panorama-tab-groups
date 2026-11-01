@@ -112,6 +112,7 @@ export function createWorld({
             active: event.tab.active,
             url: event.tab.url,
             pendingUrl: undefined,
+            browserGroupId: event.tab.groupId,
           }),
         );
         break;
@@ -158,6 +159,9 @@ export function createWorld({
   const messaging = createMemoryMessaging();
   const migrationFlag = createMemoryMigrationFlag(migrated);
   const menus = createMemoryMenus();
+  const toolbar = createMemoryToolbar();
+  const notifications = createMemoryNotifications();
+  const extension = createMemoryExtension();
   const groupState = withUngroupedGroup(
     createBrowserGroupState(() => sessionsOfModel(model)),
     clock,
@@ -192,15 +196,15 @@ export function createWorld({
     nativeGroups: hasTabGroups
       ? nativeGroupsOfModel(model)
       : withoutNativeGroups(),
-    toolbar: createMemoryToolbar(),
-    extension: createMemoryExtension(),
+    toolbar,
+    extension,
     menus,
     options,
     migrationFlag,
     i18n: {
       getMessage: (name) => (name === 'defaultGroupName' ? 'Grp' : name),
     },
-    notifications: createMemoryNotifications(),
+    notifications,
     messaging,
     sessionHistory: createMemorySessionHistory(),
     groupState,
@@ -228,6 +232,14 @@ export function createWorld({
     options,
     messaging,
     menus,
+    /** What the toolbar button shows: its title and badge for each window */
+    toolbar,
+    /** Whether the migration to native groups was done */
+    migrationFlag,
+    /** The notifications on show */
+    notifications,
+    /** The extension, as the browser knows it: it counts the times the options page was opened */
+    extension,
     groupState,
     /** What the add-on logged; an error here is a bug found */
     logs,
@@ -378,6 +390,12 @@ export function createWorld({
       const answer = await handlers?.handleMessage(message);
       await settled();
       return answer;
+    },
+
+    /** The user clicks a notification of the add-on */
+    async clickNotification(id: string): Promise<void> {
+      await handlers?.notificationClicked(id);
+      await settled();
     },
 
     /** The user presses a keyboard shortcut of the add-on */

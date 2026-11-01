@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Memulihkan grup tab..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Tab Anda yang terbuka dibiarkan apa adanya. Buka opsi untuk mengaktifkan grup tab asli peramban, atau untuk mengimpor grup dari pengaya lain melalui berkas cadangannya."
+  },
   "migrationTitle": {
     "message": "Migrasi Grup Tab Hibrida"
   },

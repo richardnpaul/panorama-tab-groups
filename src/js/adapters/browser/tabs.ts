@@ -16,6 +16,8 @@ interface QueriedTab {
   title?: string | undefined;
   groupId?: number | undefined;
   index?: number | undefined;
+  // Only browsers that can hide tabs say so
+  hidden?: boolean | undefined;
 }
 
 /** The part of `browser.tabs` the extension uses */
@@ -25,7 +27,6 @@ export interface TabsApi {
       currentWindow?: boolean;
       windowId?: number;
       highlighted?: boolean;
-      hidden?: boolean;
     }): Promise<QueriedTab[]>;
     get(tabId: number): Promise<QueriedTab>;
     update(
@@ -123,7 +124,9 @@ export function createBrowserTabs(getApi: () => TabsApi): Tabs {
     },
 
     async visibleIdsInWindow(windowId) {
-      return idsOf(await getApi().tabs.query({ windowId, hidden: false }));
+      // Not asked of the browser: Chromium refuses a query for hidden tabs, as it has none
+      const found = await getApi().tabs.query({ windowId });
+      return idsOf(found.filter(({ hidden }) => hidden !== true));
     },
 
     async activate(tabId) {

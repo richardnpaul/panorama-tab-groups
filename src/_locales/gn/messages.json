@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Ojeguerujey tendayke atyha..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Nde tendayke ojepe'áva opyta ko'ágaicha. Embojuruja jeporavorã emoñepyrũ hag̃ua kundaha tendayke atyha ijehegui, térã reguerú hag̃ua ambue tembipuru'i atyha ijñeñongatu ñongatupyrã guive."
+  },
   "migrationTitle": {
     "message": "Tendayke atyha hibrido jehasa"
   },

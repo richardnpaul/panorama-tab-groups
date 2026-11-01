@@ -30,6 +30,21 @@ made before the add-on was renamed (their file name starts with `panoramaView-ba
 `"type": "panoramaView"` inside) still import as they are; new backups are always saved under the new name. Backups
 from the older Tab Groups add-on are converted when they are imported.
 
+## Permissions
+
+The add-on asks the browser for these, and for nothing else. It sends nothing off your computer.
+
+| Permission      | Why                                                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tabs`          | To read the address and title of the tabs, so that the view can show them and a backup can save them                                        |
+| `tabGroups`     | To make, name and colour the browser's own tab groups (Firefox 139 and later, Chrome and Edge)                                              |
+| `tabHide`       | To hide the tabs of the groups that are not shown (Firefox)                                                                                 |
+| `storage`       | To keep your settings                                                                                                                       |
+| `sessions`      | To remember which group each tab and window belongs to, so that it survives a restart and a restored window                                 |
+| `downloads`     | To save a backup file                                                                                                                       |
+| `contextMenus`  | For the menu item that sends a tab to a group                                                                                               |
+| `notifications` | To show a system notification while your tab groups are being restored at startup, and once on first run if native tab groups were left off |
+
 ## Contribution
 
 Contributions of all kind are welcome. For example:

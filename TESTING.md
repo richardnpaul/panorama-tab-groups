@@ -126,7 +126,15 @@ Playwright's Firefox has no tab strip a person sees and does not restore its ses
    whether a native group for every group at once (Decision 3 of `docs/plans/native-groups-migration-and-user-journeys.md`)
    is wanted.
 3. **The first run with another add-on's groups.** Install the older add-on, make groups, then this one: native groups should
-   be off, and the options page should offer them.
+   be off, one system notification should say the tabs were left as they are, and clicking it should open the options page,
+   which offers the switch and the import of the older add-on's backup file. (The tests check that the notification is
+   asked for and that the click opens the options; whether the system shows it is the system's perview.)
+4. **Restoring a window after switching native groups off.** With native groups on, close a window that has two groups;
+   switch native groups off in the options; restore the window (Ctrl+Shift+N). It should come back with no tab group of
+   Firefox, and with the groups of the add-on as they were. (The tests take it that a restore brings back the session values
+   of the window and its tabs; this is the check of that.)
+5. **"Restoring tab groups..."** Start Firefox with many tabs so that the start takes long: the same kind of notification
+   should show while it restores, and go when it is done. It could not show before the `notifications` permission was added.
 
 ## Debugging
 

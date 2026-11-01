@@ -10,8 +10,6 @@ import type { Group } from '../../../src/js/ports/group-state.js';
 import type { TabDetails } from '../../../src/js/ports/tabs.js';
 import { englishMessage } from '../../support/messages.js';
 
-const VIEW = 'moz-extension://id/view.html';
-
 const group = (id: number, nativeGroupId?: number | null): Group => ({
   id,
   name: `G${String(id)}`,
@@ -61,7 +59,6 @@ function setUp({
     windows,
     groupState,
     nativeGroups,
-    viewUrl: VIEW,
     i18n: { getMessage: englishMessage },
     logger,
   });
@@ -392,26 +389,35 @@ describe('app/native-groups-sync.ts', () => {
       await env.groupState.setGroups(1, [group(1), group(2, 50)]);
       await env.groupState.setActiveGroup(1, 1);
 
-      await env.sync.migrate();
+      await expect(env.sync.migrate()).resolves.toBe(true);
 
       expect(await nativeIds(env)).toEqual([undefined, 50]);
       expect(env.nativeGroups.calls).toEqual([]);
     });
 
-    it('saves the groups cleaned when grouping is not safe', async () => {
+    it('does not write the groups when none has anything to be cleaned', async () => {
+      const env = setUp({ existingNativeGroups: [50] });
+      await env.groupState.setGroups(1, [group(1), group(2, 50)]);
+      const write = vi.spyOn(env.groupState, 'setGroups');
+
+      await env.sync.migrate();
+
+      expect(write).not.toHaveBeenCalled();
+    });
+
+    it('groups the only tab of a window, and drops the reference of a group that has gone', async () => {
       const env = setUp();
       await env.groupState.setGroups(1, [group(1), group(2, 99)]);
       await env.groupState.setActiveGroup(1, 1);
       env.tabs.setDetails([tab(10, 1)]);
       await env.groupState.setTabGroup(10, 1);
 
-      await env.sync.migrate();
+      await expect(env.sync.migrate()).resolves.toBe(true);
 
-      expect(await nativeIds(env)).toEqual([undefined, undefined]);
-      expect(env.nativeGroups.calls).toEqual([]);
+      expect(await nativeIds(env)).toEqual([1000, undefined]);
     });
 
-    it('carries on when making the native group fails', async () => {
+    it('says it failed, and is not done, when no native group could be made', async () => {
       const env = setUp();
       await env.groupState.setGroups(1, [group(1), group(2, 99)]);
       await env.groupState.setActiveGroup(1, 1);
@@ -420,13 +426,55 @@ describe('app/native-groups-sync.ts', () => {
       const failure = new Error('refused');
       env.nativeGroups.createFromTabs = () => Promise.reject(failure);
 
-      await expect(env.sync.migrate()).resolves.toBe(true);
+      await expect(env.sync.migrate()).resolves.toBe(false);
 
       expect(env.logger.warn).toHaveBeenCalledWith(
         'Failed to create native group for group 1:',
         failure,
       );
+      expect(env.logger.error).toHaveBeenCalledWith(
+        'Migration to hybrid groups failed: no window could be given a native tab group',
+      );
+      // What was found out on the way is kept
       expect(await nativeIds(env)).toEqual([undefined, undefined]);
+      expect(await env.migrationFlag.isComplete()).toBe(false);
+    });
+
+    it('says it failed when the browser made the group in another window', async () => {
+      const env = setUp();
+      await env.groupState.setGroups(1, [group(1)]);
+      await env.groupState.setActiveGroup(1, 1);
+      env.tabs.setDetails([tab(10, 1), tab(11, 1)]);
+      await env.groupState.setTabGroup(10, 1);
+      env.nativeGroups.moveNextGroupToWindow(9);
+
+      await expect(env.sync.migrate()).resolves.toBe(false);
+
+      expect(await env.migrationFlag.isComplete()).toBe(false);
+    });
+
+    it('is done when one window got a native group and another did not', async () => {
+      const env = setUp({ windowIds: [1, 2] });
+      const createFromTabs = env.nativeGroups.createFromTabs.bind(
+        env.nativeGroups,
+      );
+      env.nativeGroups.createFromTabs = (tabIds, windowId) =>
+        windowId === 2
+          ? Promise.reject(new Error('refused'))
+          : createFromTabs(tabIds, windowId);
+      await Promise.all(
+        [1, 2].map(async (windowId) => {
+          await env.groupState.setGroups(windowId, [group(1)]);
+          await env.groupState.setActiveGroup(windowId, 1);
+          await env.groupState.setTabGroup(windowId * 10, 1);
+        }),
+      );
+      env.tabs.setDetails([tab(10, 1), tab(20, 2)]);
+
+      await expect(env.sync.migrate()).resolves.toBe(true);
+
+      expect(await nativeIds(env, 1)).toEqual([1000]);
+      expect(await nativeIds(env, 2)).toEqual([undefined]);
       expect(await env.migrationFlag.isComplete()).toBe(true);
     });
 

@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Tab-Gruppen werden wiederhergestellt..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Die geöffneten Tabs wurden unverändert gelassen. In den Einstellungen lassen sich die nativen Tab-Gruppen des Browsers aktivieren oder die Gruppen einer anderen Erweiterung aus deren Sicherungsdatei importieren."
+  },
   "migrationTitle": {
     "message": "Migration hybrider Tab-Gruppen"
   },

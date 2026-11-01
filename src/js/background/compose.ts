@@ -178,7 +178,6 @@ export function composeBackgroundFrom({
     windows,
     groupState,
     nativeGroups,
-    viewUrl,
     i18n,
     logger,
   });
@@ -234,6 +233,7 @@ export function composeBackgroundFrom({
     windows,
     groupState,
     nativeGroups,
+    assignment,
     menus,
     createMenuList,
     toggleVisibleTabs: (activeGroup, windowId) =>
@@ -268,6 +268,18 @@ export function composeBackgroundFrom({
     logger,
   });
 
+  const firstRun = createFirstRun({
+    options,
+    windows,
+    tabs,
+    groupState,
+    capabilities,
+    notifications,
+    extension,
+    i18n,
+    logger,
+  });
+
   return {
     handlers: {
       toggleView: createViewToggle({ tabs, windows, extension, viewOpening }),
@@ -298,16 +310,10 @@ export function composeBackgroundFrom({
       storageChanged: events.onStorageChanged,
       nativeGroupRemoved: nativeGroupsSync.onRemoved,
       nativeGroupUpdated: nativeGroupsSync.onUpdated,
+      notificationClicked: firstRun.noticeClicked,
     },
     init: createStartup({
-      firstRun: createFirstRun({
-        options,
-        windows,
-        tabs,
-        groupState,
-        capabilities,
-        logger,
-      }),
+      firstRun,
       recovery,
       windowGroups,
       nativeGroupsSync,

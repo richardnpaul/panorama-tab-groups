@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Skirtukų grupės atkuriamos..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Jūsų atidaryti skirtukai palikti tokie, kokie buvo. Atverkite parinktis, kad įjungtumėte naršyklės savąsias skirtukų grupes arba importuotumėte kito priedo grupes iš jo atsarginės kopijos failo."
+  },
   "migrationTitle": {
     "message": "Hibridinių skirtukų grupių perkėlimas"
   },

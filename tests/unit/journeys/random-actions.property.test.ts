@@ -139,20 +139,6 @@ async function perform(
       if (group === undefined) {
         return undefined;
       }
-      // Sending away the last tab of the shown group leaves nothing to show, which the add-on refuses to
-      // do (it logs, and changes nothing); that is recorded in the plan as found, so it is not made here
-      const active = await world.groupState.getActiveGroup(tab.windowId);
-      const staying = (
-        await Promise.all(
-          world.model
-            .tabsOf(tab.windowId)
-            .filter(({ id: other }) => other !== tab.id)
-            .map(({ id: other }) => world.groupState.getTabGroup(other)),
-        )
-      ).filter((each) => each === active);
-      if (group.id !== active && staying.length === 0) {
-        return undefined;
-      }
       await world.sendTabToGroup(tab.id, group.id);
       return `sendTabToGroup ${String(tab.id)} (w${String(tab.windowId)}) to group ${String(group.id)}`;
     }

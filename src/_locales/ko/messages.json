@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "탭 그룹을 복원하는 중..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "열려 있는 탭은 그대로 두었습니다. 브라우저 기본 탭 그룹을 켜거나 다른 확장기능의 그룹을 백업파일에서 들여오려면 옵션을 여세요."
+  },
   "migrationTitle": {
     "message": "하이브리드 탭 그룹 이전"
   },

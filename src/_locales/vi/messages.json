@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Đang khôi phục các nhóm thẻ..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Các thẻ đang mở của bạn được giữ nguyên. Hãy mở tùy chọn để bật nhóm thẻ gốc của trình duyệt, hoặc để nhập nhóm của tiện ích khác từ tệp sao lưu của nó."
+  },
   "migrationTitle": {
     "message": "Di chuyển nhóm thẻ kết hợp"
   },
