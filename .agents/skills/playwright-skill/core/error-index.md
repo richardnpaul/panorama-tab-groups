@@ -828,9 +828,7 @@ If using JavaScript without TypeScript:
 
 // In playwright.config.js — use require if package.json lacks "type": "module"
 const { defineConfig } = require('@playwright/test');
-module.exports = defineConfig({
-  /* ... */
-});
+module.exports = defineConfig({/* ... */});
 ```
 
 **Related**: [core/configuration.md](configuration.md)

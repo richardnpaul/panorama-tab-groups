@@ -25,9 +25,13 @@ export function createMemoryScheduler(): MemoryScheduler {
   const nextDue = (until: number): Timer | undefined =>
     timers
       .filter(({ dueAt }) => dueAt <= until)
-      .reduce<
-        Timer | undefined
-      >((earliest, timer) => (earliest === undefined || timer.dueAt < earliest.dueAt ? timer : earliest), undefined);
+      .reduce<Timer | undefined>(
+        (earliest, timer) =>
+          earliest === undefined || timer.dueAt < earliest.dueAt
+            ? timer
+            : earliest,
+        undefined,
+      );
 
   const remove = (handle: TimerHandle): void => {
     const index = timers.findIndex((timer) => timer.handle === handle);

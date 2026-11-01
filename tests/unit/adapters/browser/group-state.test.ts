@@ -53,17 +53,15 @@ describe('adapters/browser/group-state.ts', () => {
 
     it('forgets a tab’s group by removing the groupId value', async () => {
       const removeTabValue = vi.fn().mockResolvedValue(undefined);
-      const state = createBrowserGroupState(
-        (): SessionsApi => ({
-          sessions: {
-            getWindowValue: vi.fn(),
-            setWindowValue: vi.fn(),
-            getTabValue: vi.fn(),
-            setTabValue: vi.fn(),
-            removeTabValue,
-          },
-        }),
-      );
+      const state = createBrowserGroupState((): SessionsApi => ({
+        sessions: {
+          getWindowValue: vi.fn(),
+          setWindowValue: vi.fn(),
+          getTabValue: vi.fn(),
+          setTabValue: vi.fn(),
+          removeTabValue,
+        },
+      }));
 
       await state.clearTabGroup(5);
 
@@ -74,17 +72,15 @@ describe('adapters/browser/group-state.ts', () => {
     it('asks the browser for the right window and key', async () => {
       const getWindowValue = vi.fn().mockResolvedValue(undefined);
       const getTabValue = vi.fn().mockResolvedValue(undefined);
-      const state = createBrowserGroupState(
-        (): SessionsApi => ({
-          sessions: {
-            getWindowValue,
-            setWindowValue: vi.fn(),
-            getTabValue,
-            setTabValue: vi.fn(),
-            removeTabValue: vi.fn(),
-          },
-        }),
-      );
+      const state = createBrowserGroupState((): SessionsApi => ({
+        sessions: {
+          getWindowValue,
+          setWindowValue: vi.fn(),
+          getTabValue,
+          setTabValue: vi.fn(),
+          removeTabValue: vi.fn(),
+        },
+      }));
 
       await state.getGroups(3);
       await state.getActiveGroup(4);
