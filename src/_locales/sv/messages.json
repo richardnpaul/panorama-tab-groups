@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Återställer flikgrupper..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Dina öppna flikar lämnades som de var. Öppna inställningarna för att slå på webbläsarens egna flikgrupper, eller för att importera ett annat tilläggs grupper från dess säkerhetskopieringsfil."
+  },
   "migrationTitle": {
     "message": "Migrering av hybrida flikgrupper"
   },

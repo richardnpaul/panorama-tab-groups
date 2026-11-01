@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "正在還原標籤頁組..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "您已開啟的標籤頁保持原樣。開啟選項，即可啟用瀏覽器原生標籤頁組，或從其他擴充套件的備份檔案恢復其標籤頁組。"
+  },
   "migrationTitle": {
     "message": "混合標籤頁組遷移"
   },

@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Oortjiegroepe word herstel..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Jou oop oortjies is gelaat soos hulle was. Maak die opsies oop om die blaaier se eie oortjiegroepe aan te skakel, of om die groepe van 'n ander byvoeging uit sy rugsteenlêer in te voer."
+  },
   "migrationTitle": {
     "message": "Hibriede oortjiegroepe-migrasie"
   },

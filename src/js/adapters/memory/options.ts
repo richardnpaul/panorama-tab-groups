@@ -26,6 +26,7 @@ export function createMemoryOptions({
       Promise.resolve(
         parseOptions(structuredClone({ ...defaults, ...kept }), defaults),
       ),
+    isSet: (name) => Promise.resolve(name in kept),
     save(changes) {
       Object.assign(kept, structuredClone(changes));
       return Promise.resolve();

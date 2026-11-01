@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "タブグループを復元しています..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "開いているタブはそのままにしてあります。ブラウザー標準のタブグループを有効にしたり、別のアドオンのグループをそのバックアップファイルからインポートしたりするには、オプションを開いてください。"
+  },
   "migrationTitle": {
     "message": "ハイブリッドタブグループの移行"
   },

@@ -1,4 +1,9 @@
-import type { TabDetails, Tabs, TabSnapshot } from '../../ports/tabs.js';
+import type {
+  TabDetails,
+  Tabs,
+  TabSnapshot,
+  TabSummary,
+} from '../../ports/tabs.js';
 
 interface QueriedTab {
   id?: number | undefined;
@@ -11,6 +16,8 @@ interface QueriedTab {
   title?: string | undefined;
   groupId?: number | undefined;
   index?: number | undefined;
+  // Only browsers that can hide tabs say so
+  hidden?: boolean | undefined;
 }
 
 /** The part of `browser.tabs` the extension uses */
@@ -20,7 +27,6 @@ export interface TabsApi {
       currentWindow?: boolean;
       windowId?: number;
       highlighted?: boolean;
-      hidden?: boolean;
     }): Promise<QueriedTab[]>;
     get(tabId: number): Promise<QueriedTab>;
     update(
@@ -76,6 +82,13 @@ async function createdTabId(
 const idsOf = (tabs: readonly QueriedTab[]): number[] =>
   tabs.flatMap(({ id }) => (id === undefined ? [] : [id]));
 
+const summariesOf = (tabs: readonly QueriedTab[]): TabSummary[] =>
+  tabs.flatMap(({ id, pinned, lastAccessed }) =>
+    id === undefined
+      ? []
+      : [{ id, pinned: pinned === true, lastAccessed: lastAccessed ?? 0 }],
+  );
+
 export function createBrowserTabs(getApi: () => TabsApi): Tabs {
   const queryCurrentWindow = () => getApi().tabs.query({ currentWindow: true });
 
@@ -85,12 +98,11 @@ export function createBrowserTabs(getApi: () => TabsApi): Tabs {
     },
 
     async listInCurrentWindow() {
-      const tabs = await queryCurrentWindow();
-      return tabs.flatMap(({ id, pinned, lastAccessed }) =>
-        id === undefined
-          ? []
-          : [{ id, pinned: pinned === true, lastAccessed: lastAccessed ?? 0 }],
-      );
+      return summariesOf(await queryCurrentWindow());
+    },
+
+    async listSummariesInWindow(windowId) {
+      return summariesOf(await getApi().tabs.query({ windowId }));
     },
 
     async get(tabId) {
@@ -112,7 +124,9 @@ export function createBrowserTabs(getApi: () => TabsApi): Tabs {
     },
 
     async visibleIdsInWindow(windowId) {
-      return idsOf(await getApi().tabs.query({ windowId, hidden: false }));
+      // Not asked of the browser: Chromium refuses a query for hidden tabs, as it has none
+      const found = await getApi().tabs.query({ windowId });
+      return idsOf(found.filter(({ hidden }) => hidden !== true));
     },
 
     async activate(tabId) {

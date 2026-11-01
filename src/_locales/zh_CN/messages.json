@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "正在恢复标签页组..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "您已打开的标签页保持原样。打开选项，即可启用浏览器原生标签页组，或从其他扩展的备份文件中恢复其标签页组。"
+  },
   "migrationTitle": {
     "message": "混合标签页组迁移"
   },

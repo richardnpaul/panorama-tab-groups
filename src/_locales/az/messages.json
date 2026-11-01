@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Vərəq qrupları bərpa olunur..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Açıq vərəqləriniz olduğu kimi saxlanıldı. Brauzerin doğma vərəq qruplarını işə salmaq və ya başqa əlavənin qruplarını ehtiyat nüsxə faylından idxal etmək üçün seçimləri açın."
+  },
   "migrationTitle": {
     "message": "Hibrid vərəq qruplarının köçürülməsi"
   },

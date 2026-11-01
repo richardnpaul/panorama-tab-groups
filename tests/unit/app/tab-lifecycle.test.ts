@@ -87,7 +87,6 @@ async function setUp(options: Options = {}) {
     windows,
     groupState,
     nativeGroups,
-    viewUrl: VIEW,
     i18n: { getMessage: englishMessage },
     logger,
   });
@@ -326,7 +325,7 @@ describe('app/tab-lifecycle.ts', () => {
         await env.lifecycle.tabCreated(created(5, { active: true }));
 
         expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
         expect(env.nativeGroups.calls).toEqual([]);
       });
 
@@ -356,6 +355,78 @@ describe('app/tab-lifecycle.ts', () => {
 
         expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
       });
+
+      it('takes a tab that comes in a native group out of it, and keeps its group', async () => {
+        const env = await setUp({
+          useNative: false,
+          tabs: [{ tab: details(5), group: 2 }],
+        });
+
+        await env.lifecycle.tabCreated(created(5, { browserGroupId: 7 }));
+
+        expect(env.nativeGroups.calls).toEqual(['remove 5']);
+        expect(await env.groupState.getTabGroup(5)).toBe(2);
+      });
+
+      it.each([[-1], [0], [undefined]])(
+        'leaves a tab alone that is in no native group (%s)',
+        async (browserGroupId) => {
+          const env = await setUp({
+            useNative: false,
+            tabs: [{ tab: details(5), group: 2 }],
+          });
+
+          await env.lifecycle.tabCreated(created(5, { browserGroupId }));
+
+          expect(env.nativeGroups.calls).toEqual([]);
+        },
+      );
+
+      it('takes the tab out of the native group first, then shows its group', async () => {
+        const env = await setUp({
+          useNative: false,
+          tabs: [{ tab: details(5), group: 2 }],
+        });
+
+        await env.lifecycle.tabCreated(
+          created(5, { browserGroupId: 7, active: true }),
+        );
+
+        expect(env.nativeGroups.calls).toEqual(['remove 5']);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
+      });
+
+      it('goes on when the tab cannot be taken out of its native group', async () => {
+        const env = await setUp({
+          useNative: false,
+          tabs: [{ tab: details(5), group: 2 }],
+        });
+        const failure = new Error('gone');
+        vi.spyOn(env.nativeGroups, 'removeTabs').mockRejectedValue(failure);
+
+        await env.lifecycle.tabCreated(
+          created(5, { browserGroupId: 7, active: true }),
+        );
+
+        expect(env.logger.warn).toHaveBeenCalledWith(
+          'Could not take tab 5 out of its native group:',
+          failure,
+        );
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
+      });
+
+      it('does not take a tab out of a native group that the add-on is using', async () => {
+        const env = await setUp({
+          useNative: true,
+          groups: [group(1, 10)],
+          nativeGroupIds: [10],
+          tabs: [{ tab: details(5), group: 1 }],
+        });
+
+        await env.lifecycle.tabCreated(created(5, { browserGroupId: 10 }));
+
+        expect(env.nativeGroups.calls).not.toContain('remove 5');
+      });
     });
 
     describe('with native groups, for a group that has none yet', () => {
@@ -374,7 +445,7 @@ describe('app/tab-lifecycle.ts', () => {
           (await env.groupState.getGroups(WINDOW))?.[0]?.nativeGroupId,
         ).toBe(1000);
         expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
       });
 
       it('shows it for a tab in the background when the group is the active one', async () => {
@@ -383,7 +454,7 @@ describe('app/tab-lifecycle.ts', () => {
         await env.lifecycle.tabCreated(created(5));
 
         expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
       });
 
       it('does not show it for a tab in the background of another group', async () => {
@@ -409,28 +480,20 @@ describe('app/tab-lifecycle.ts', () => {
         await env.lifecycle.tabCreated(created(5, { active: true }));
 
         expect(env.nativeGroups.calls).toEqual([]);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
       });
 
-      it('still shows the group of an active tab when grouping is not safe', async () => {
+      it('groups an active tab that is the only one of its window, and shows its group', async () => {
         const env = await setUp({ tabs: [{ tab: details(5), group: 1 }] });
 
         await env.lifecycle.tabCreated(created(5, { active: true }));
 
-        expect(env.nativeGroups.calls).toEqual([]);
+        expect(await env.nativeGroups.tabIdsIn(1000)).toEqual([5]);
         expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
         expect(env.logger.debug).toHaveBeenCalledWith(
-          '[TabCreated] Skipping native group creation: Would group only tab in window (window closure risk)',
+          expect.stringMatching(/^\[TabCreated\] Created native group 1000 /u),
         );
-      });
-
-      it('leaves the visibility alone for a tab in the background when grouping is not safe', async () => {
-        const env = await setUp({ tabs: [{ tab: details(5), group: 1 }] });
-
-        await env.lifecycle.tabCreated(created(5));
-
-        expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
       });
 
       it('shows the group of an active tab although making the native group failed', async () => {
@@ -444,7 +507,7 @@ describe('app/tab-lifecycle.ts', () => {
           'Could not assign new tab to native group:',
           failure,
         );
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
       });
 
       it('does not show the group for a tab in the background when none of its tabs is there to group', async () => {
@@ -506,7 +569,7 @@ describe('app/tab-lifecycle.ts', () => {
         await env.lifecycle.tabCreated(created(5, { active: true }));
 
         expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
       });
 
       it('leaves the tab out of it when the group is not the active one', async () => {
@@ -525,7 +588,7 @@ describe('app/tab-lifecycle.ts', () => {
 
         expect(env.nativeGroups.calls).toEqual([]);
         expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
       });
 
       it('does not take a native group with the id 0 for one', async () => {
@@ -555,7 +618,7 @@ describe('app/tab-lifecycle.ts', () => {
       await env.lifecycle.tabAttached(5, { newWindowId: WINDOW });
 
       expect(await env.groupState.getTabGroup(5)).toBe(2);
-      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
     });
 
     it('waits for the extension to start up first', async () => {
@@ -666,7 +729,7 @@ describe('app/tab-lifecycle.ts', () => {
 
       expect(await env.groupState.getActiveGroup(WINDOW)).toBe(1);
       expect(env.nativeGroups.calls).toEqual([]);
-      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(-1);
+      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(-1, WINDOW);
     });
 
     it('makes the group of the tab the active group of its window and shows it', async () => {
@@ -679,7 +742,36 @@ describe('app/tab-lifecycle.ts', () => {
 
       expect(await env.groupState.getActiveGroup(WINDOW)).toBe(2);
       expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
-      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
+    });
+
+    it('does nothing for a tab that was closed before it could be looked at, and does not call it an error', async () => {
+      const env = await setUp({ tabs: [] });
+
+      await expect(
+        env.lifecycle.tabActivated({ tabId: 99 }),
+      ).resolves.toBeUndefined();
+
+      expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
+      expect(env.logger.error).not.toHaveBeenCalled();
+      expect(env.logger.warn).not.toHaveBeenCalled();
+      expect(env.logger.debug).toHaveBeenCalledWith(
+        '[TabActivated] Tab 99 was closed before it could be looked at',
+      );
+    });
+
+    it('switches the window the tab is in, not the one the user is in, when they are not the same', async () => {
+      const env = await setUp({
+        useNative: false,
+        tabs: [{ tab: details(5, { windowId: 7 }), group: 2 }],
+      });
+
+      await env.lifecycle.tabActivated({ tabId: 5 });
+
+      // The active group is recorded for the window of the tab, and that window is the one switched
+      expect(await env.groupState.getActiveGroup(7)).toBe(2);
+      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, 7);
+      expect(env.toggleVisibleTabs).not.toHaveBeenCalledWith(2, WINDOW);
     });
 
     it('carries on when the active group cannot be stored', async () => {
@@ -696,7 +788,7 @@ describe('app/tab-lifecycle.ts', () => {
         '[TabActivated] ERROR in setActiveGroup(1, 2):',
         failure,
       );
-      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
     });
 
     describe('with native groups', () => {
@@ -711,7 +803,7 @@ describe('app/tab-lifecycle.ts', () => {
         await env.lifecycle.tabActivated({ tabId: 5 });
 
         expect(env.nativeGroups.calls).toEqual([]);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
       });
 
       it('makes a native group for a group that has none', async () => {
@@ -723,7 +815,7 @@ describe('app/tab-lifecycle.ts', () => {
         expect(
           (await env.groupState.getGroups(WINDOW))?.[1]?.nativeGroupId,
         ).toBe(1000);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
       });
 
       it('links the native group the tab is already in instead', async () => {
@@ -739,7 +831,7 @@ describe('app/tab-lifecycle.ts', () => {
         expect(env.logger.debug).toHaveBeenCalledWith(
           'Linked existing native group 71 to group 2',
         );
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
       });
 
       it('does not link a native group that another group already has', async () => {
@@ -793,7 +885,7 @@ describe('app/tab-lifecycle.ts', () => {
         await env.lifecycle.tabActivated({ tabId: 5 });
 
         expect(env.nativeGroups.calls).toEqual([]);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
       });
 
       it('treats a native group with the id 0 as none', async () => {
@@ -813,7 +905,7 @@ describe('app/tab-lifecycle.ts', () => {
         await env.lifecycle.tabActivated({ tabId: 5 });
 
         expect(env.nativeGroups.calls).toEqual([]);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
       });
 
       it('shows the group even when the window has no groups stored', async () => {
@@ -822,19 +914,21 @@ describe('app/tab-lifecycle.ts', () => {
         await env.lifecycle.tabActivated({ tabId: 5 });
 
         expect(env.nativeGroups.calls).toEqual([]);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
       });
 
-      it('still shows the group when grouping is not safe', async () => {
+      it('groups the only tab of the window, and shows its group', async () => {
         const env = await setUp({ tabs: [{ tab: details(5), group: 2 }] });
 
         await env.lifecycle.tabActivated({ tabId: 5 });
 
-        expect(env.nativeGroups.calls).toEqual([]);
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(await env.nativeGroups.tabIdsIn(1000)).toEqual([5]);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
         expect(await env.groupState.getActiveGroup(WINDOW)).toBe(2);
         expect(env.logger.debug).toHaveBeenCalledWith(
-          '[TabActivated] Skipping native group creation: Would group only tab in window (window closure risk)',
+          expect.stringMatching(
+            /^\[TabActivated\] Created native group 1000 /u,
+          ),
         );
       });
 
@@ -858,7 +952,7 @@ describe('app/tab-lifecycle.ts', () => {
           '[TabActivated] Could not create native tab group in window 1:',
           failure,
         );
-        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
       });
     });
   });

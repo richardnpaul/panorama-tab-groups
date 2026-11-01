@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Varaq guruhlari tiklanmoqda..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Ochiq varaqlaringiz avvalgidek qoldirildi. Brauzerning oʻz varaq guruhlarini yoqish yoki boshqa qoʻshimchaning guruhlarini uning zaxira nusxa faylidan import qilish uchun sozlamalarni oching."
+  },
   "migrationTitle": {
     "message": "Gibrid varaq guruhlarini koʻchirish"
   },

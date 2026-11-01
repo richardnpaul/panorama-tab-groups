@@ -18,8 +18,12 @@ export interface NativeGroups {
   listIdsInWindow(windowId: number): Promise<number[]>;
   /** The ids of the tabs in a group */
   tabIdsIn(nativeGroupId: number): Promise<number[]>;
-  /** Put the tabs in a new group and give back its id */
-  createFromTabs(tabIds: readonly number[]): Promise<number>;
+  /**
+   * Put the tabs, which are all in this window, in a new group in it, and give
+   * back its id. The window has to be said: left to itself the browser makes the
+   * group in the window that has the focus, and moves the tabs there.
+   */
+  createFromTabs(tabIds: readonly number[], windowId: number): Promise<number>;
   /** Put the tabs in an existing group */
   addTabs(tabIds: readonly number[], nativeGroupId: number): Promise<void>;
   /** Take the tabs out of whatever native group they are in */

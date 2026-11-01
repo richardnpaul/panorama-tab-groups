@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Se restaurează grupurile de file..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Filele tale deschise au fost lăsate așa cum erau. Deschide opțiunile pentru a activa grupurile de file native ale browserului sau pentru a importa grupurile unui alt supliment din fișierul lui de copie de siguranță."
+  },
   "migrationTitle": {
     "message": "Migrarea grupurilor de file hibride"
   },

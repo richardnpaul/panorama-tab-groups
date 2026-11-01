@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Gjenoppretter fanegrupper …"
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Dei opne fanene dine vart lagde att slik dei var. Opne innstillingane for å slå på nettlesaren sine eigne fanegrupper, eller for å importere gruppene frå eit anna tillegg frå tryggingskopifila til det."
+  },
   "migrationTitle": {
     "message": "Migrering av hybride fanegrupper"
   },

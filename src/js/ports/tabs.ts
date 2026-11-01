@@ -35,6 +35,8 @@ export interface Tabs {
   listIdsInCurrentWindow(): Promise<number[]>;
   /** The tabs of that window, in the order the browser has them */
   listInCurrentWindow(): Promise<TabSummary[]>;
+  /** The tabs of a window, in the order the browser has them; rejects if there is no such window */
+  listSummariesInWindow(windowId: number): Promise<TabSummary[]>;
   /** Rejects if the tab no longer exists */
   get(tabId: number): Promise<TabDetails>;
   listInWindow(windowId: number): Promise<TabDetails[]>;

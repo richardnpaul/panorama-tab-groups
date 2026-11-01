@@ -17,6 +17,7 @@ import { createBrowserEvents } from '../app/browser-events.js';
 import { createCommands } from '../app/commands.js';
 import { createGroupDeletion } from '../app/delete-group.js';
 import { createExternalMessageHandler } from '../app/external-messages.js';
+import { createFirstRun } from '../app/first-run.js';
 import { createGroupRecovery } from '../app/group-recovery.js';
 import { createInitialization } from '../app/initialization.js';
 import { createInitializationUi } from '../app/initialization-ui.js';
@@ -34,7 +35,24 @@ import { createViewToggle } from '../app/view-toggle.js';
 import { createVisibilityService } from '../app/visibility-service.js';
 import { createWindowGroups } from '../app/window-groups.js';
 import { browserModeOf, detectCapabilities } from '../share/capabilities.js';
-import { createMenuList, handleMenuChange } from './menu-manager.js';
+import { createMenuManager } from '../app/menu-manager.js';
+import type { Clock } from '../ports/clock.js';
+import type { Extension } from '../ports/extension.js';
+import type { GroupState } from '../ports/group-state.js';
+import type { I18n } from '../ports/i18n.js';
+import type { Logger } from '../ports/logger.js';
+import type { Menus } from '../ports/menus.js';
+import type { Messaging } from '../ports/messaging.js';
+import type { MigrationFlag } from '../ports/migration-flag.js';
+import type { NativeGroups } from '../ports/native-groups.js';
+import type { Notifications } from '../ports/notifications.js';
+import type { OptionsStore } from '../ports/options.js';
+import type { Scheduler } from '../ports/scheduler.js';
+import type { SessionHistory } from '../ports/session-history.js';
+import type { Tabs } from '../ports/tabs.js';
+import type { Toolbar } from '../ports/toolbar.js';
+import type { Windows } from '../ports/windows.js';
+import type { Capabilities } from '../share/capabilities.js';
 import { stateManager } from './StateManager.js';
 
 export interface Background {
@@ -44,28 +62,84 @@ export interface Background {
   init: () => Promise<void>;
 }
 
-/** Build everything the background does out of the browser it runs in */
-export function composeBackground(): Background {
-  const logger = console;
-  const clock = systemClock;
-  const scheduler = createSystemScheduler();
-  const groupState = stateManager;
+/** Everything the background is built out of: each is a port, which a browser or a test can give */
+export interface BackgroundPorts {
+  capabilities: Capabilities;
+  tabs: Tabs;
+  windows: Windows;
+  nativeGroups: NativeGroups;
+  toolbar: Toolbar;
+  extension: Extension;
+  menus: Menus;
+  options: OptionsStore;
+  migrationFlag: MigrationFlag;
+  i18n: I18n;
+  notifications: Notifications;
+  messaging: Messaging;
+  sessionHistory: SessionHistory;
+  groupState: GroupState;
+  clock: Clock;
+  scheduler: Scheduler;
+  logger: Logger;
+}
 
-  const capabilities = detectCapabilities(browser);
+/** The ports of the browser the background runs in */
+function browserPorts(): BackgroundPorts {
+  return {
+    capabilities: detectCapabilities(browser),
+    tabs: createBrowserTabs(() => browser),
+    windows: createBrowserWindows(() => browser),
+    nativeGroups: createBrowserNativeGroups(() => browser),
+    toolbar: createBrowserToolbar(() => browser),
+    extension: createBrowserExtension(() => browser),
+    menus: createBrowserMenus(() => browser),
+    options: createBrowserOptions(() => browser),
+    migrationFlag: createBrowserMigrationFlag(() => browser),
+    i18n: createBrowserI18n(() => browser),
+    notifications: createBrowserNotifications(() => browser),
+    messaging: createBrowserMessaging(() => browser),
+    sessionHistory: createBrowserSessionHistory(() => browser),
+    groupState: stateManager,
+    clock: systemClock,
+    scheduler: createSystemScheduler(),
+    logger: console,
+  };
+}
+
+/** Build everything the background does out of these ports */
+export function composeBackgroundFrom({
+  capabilities,
+  tabs,
+  windows,
+  nativeGroups,
+  toolbar,
+  extension,
+  menus,
+  options,
+  migrationFlag,
+  i18n,
+  notifications,
+  messaging,
+  sessionHistory,
+  groupState,
+  clock,
+  scheduler,
+  logger,
+}: BackgroundPorts): Background {
   logger.debug('Browser capabilities:', {
     tabHide: capabilities.hasTabHide,
     tabGroups: capabilities.hasTabGroups,
     mode: browserModeOf(capabilities),
   });
 
-  const tabs = createBrowserTabs(() => browser);
-  const windows = createBrowserWindows(() => browser);
-  const nativeGroups = createBrowserNativeGroups(() => browser);
-  const toolbar = createBrowserToolbar(() => browser);
-  const extension = createBrowserExtension(() => browser);
-  const menus = createBrowserMenus(() => browser);
-  const options = createBrowserOptions(() => browser);
-  const migrationFlag = createBrowserMigrationFlag(() => browser);
+  const menuManager = createMenuManager({
+    menus,
+    groupState,
+    windows,
+    i18n,
+    logger,
+  });
+  const { createMenuList, handleMenuChange } = menuManager;
   const viewUrl = extension.urlOf('view.html');
   const useNativeGroups = createUseNativeGroups({
     hasTabGroups: capabilities.hasTabGroups,
@@ -76,12 +150,11 @@ export function composeBackground(): Background {
   let openingBackup = false;
   const isOpeningBackup = () => openingBackup;
 
-  const i18n = createBrowserI18n(() => browser);
   const initialization = createInitialization({ clock, scheduler, logger });
   const ui = createInitializationUi({
-    notifications: createBrowserNotifications(() => browser),
+    notifications,
     toolbar,
-    messaging: createBrowserMessaging(() => browser),
+    messaging,
     extension,
     i18n,
     logger,
@@ -105,7 +178,6 @@ export function composeBackground(): Background {
     windows,
     groupState,
     nativeGroups,
-    viewUrl,
     i18n,
     logger,
   });
@@ -124,7 +196,7 @@ export function composeBackground(): Background {
     groupState,
     tabs,
     windows,
-    sessionHistory: createBrowserSessionHistory(() => browser),
+    sessionHistory,
     initialization,
     ui,
     scheduler,
@@ -145,8 +217,8 @@ export function composeBackground(): Background {
     tabs,
     nativeGroups,
     assignment,
-    toggleVisibleTabs: (activeGroup) =>
-      visibility.toggleVisibleTabs(activeGroup),
+    toggleVisibleTabs: (activeGroup, windowId) =>
+      visibility.toggleVisibleTabs(activeGroup, undefined, windowId),
     useNativeGroups,
     waitForInitialization: initialization.waitForInitialization,
     isOpeningBackup,
@@ -161,10 +233,11 @@ export function composeBackground(): Background {
     windows,
     groupState,
     nativeGroups,
+    assignment,
     menus,
     createMenuList,
-    toggleVisibleTabs: (activeGroup) =>
-      visibility.toggleVisibleTabs(activeGroup),
+    toggleVisibleTabs: (activeGroup, windowId) =>
+      visibility.toggleVisibleTabs(activeGroup, undefined, windowId),
     useNativeGroups,
     logger,
   });
@@ -192,6 +265,18 @@ export function composeBackground(): Background {
     windowGroups,
     menus,
     hasTabGroups: capabilities.hasTabGroups,
+    logger,
+  });
+
+  const firstRun = createFirstRun({
+    options,
+    windows,
+    tabs,
+    groupState,
+    capabilities,
+    notifications,
+    extension,
+    i18n,
     logger,
   });
 
@@ -225,15 +310,22 @@ export function composeBackground(): Background {
       storageChanged: events.onStorageChanged,
       nativeGroupRemoved: nativeGroupsSync.onRemoved,
       nativeGroupUpdated: nativeGroupsSync.onUpdated,
+      notificationClicked: firstRun.noticeClicked,
     },
     init: createStartup({
+      firstRun,
       recovery,
       windowGroups,
       nativeGroupsSync,
       menuManager: { createMenuList },
       viewRefresh,
-      hasTabGroups: capabilities.hasTabGroups,
+      useNativeGroups,
       logger,
     }),
   };
+}
+
+/** Build everything the background does out of the browser it runs in */
+export function composeBackground(): Background {
+  return composeBackgroundFrom(browserPorts());
 }

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createStartup } from '../../../src/js/app/startup.js';
 
-function setUp(hasTabGroups = true) {
+function setUp(useNativeGroups = true) {
   const order: string[] = [];
   const step = (name: string) =>
     vi.fn(() => {
@@ -9,12 +9,14 @@ function setUp(hasTabGroups = true) {
       return Promise.resolve();
     });
   const deps = {
+    firstRun: { decideNativeGroups: step('firstRun') },
     recovery: {
       initializeTabGroupAssignments: step('recover'),
       salvageGrouplessTabs: step('salvage'),
     },
     windowGroups: { setupWindows: step('setupWindows') },
     nativeGroupsSync: {
+      relink: step('relink'),
       migrate: vi.fn(() => {
         order.push('migrate');
         return Promise.resolve(true);
@@ -22,7 +24,7 @@ function setUp(hasTabGroups = true) {
     },
     menuManager: { createMenuList: step('menu') },
     viewRefresh: { applyPopup: step('popup') },
-    hasTabGroups,
+    useNativeGroups: vi.fn(() => Promise.resolve(useNativeGroups)),
     logger: {
       debug: vi.fn((message: string) => {
         order.push(message);
@@ -33,16 +35,18 @@ function setUp(hasTabGroups = true) {
 }
 
 describe('app/startup.ts', () => {
-  it('recovers the groups of the tabs first, then builds on them', async () => {
+  it('decides about native groups first, then recovers the groups of the tabs, then builds on them', async () => {
     const env = setUp();
 
     await env.init();
 
     expect(env.order).toEqual([
       'Initializing Tab Groups Viewer',
+      'firstRun',
       'recover',
       'setupWindows',
       'salvage',
+      'relink',
       'migrate',
       'menu',
       'popup',
@@ -50,20 +54,23 @@ describe('app/startup.ts', () => {
     ]);
   });
 
-  it('does not migrate to native groups where there are none', async () => {
+  it('does not migrate to native groups where there are none, or where the user does not want them', async () => {
     const env = setUp(false);
 
     await env.init();
 
+    expect(env.deps.nativeGroupsSync.relink).not.toHaveBeenCalled();
     expect(env.deps.nativeGroupsSync.migrate).not.toHaveBeenCalled();
     expect(env.order).toContain('menu');
   });
 
   type Deps = ReturnType<typeof setUp>['deps'];
   const steps: [string, (deps: Deps) => ReturnType<typeof vi.fn>][] = [
+    ['firstRun', (deps) => deps.firstRun.decideNativeGroups],
     ['recover', (deps) => deps.recovery.initializeTabGroupAssignments],
     ['setupWindows', (deps) => deps.windowGroups.setupWindows],
     ['salvage', (deps) => deps.recovery.salvageGrouplessTabs],
+    ['relink', (deps) => deps.nativeGroupsSync.relink],
     ['menu', (deps) => deps.menuManager.createMenuList],
     ['popup', (deps) => deps.viewRefresh.applyPopup],
   ];

@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Palautetaan välilehtiryhmiä..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Avoimet välilehtesi jätettiin ennalleen. Avaa asetukset, jos haluat ottaa selaimen omat välilehtiryhmät käyttöön tai tuoda toisen lisäosan ryhmät sen varmuuskopiotiedostosta."
+  },
   "migrationTitle": {
     "message": "Hybridivälilehtiryhmien siirto"
   },

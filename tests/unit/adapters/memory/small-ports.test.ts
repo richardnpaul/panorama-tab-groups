@@ -70,6 +70,28 @@ describe('adapters/memory/tabs.ts', () => {
     ]);
   });
 
+  it('lists the tabs of a window it was given details of, with the time each was last used', async () => {
+    const tabs = createMemoryTabs();
+    const detail = (id: number, windowId: number, pinned = false) => ({
+      id,
+      windowId,
+      active: false,
+      pinned,
+      url: undefined,
+      pendingUrl: undefined,
+      title: undefined,
+      browserGroupId: undefined,
+    });
+    tabs.setDetails([detail(1, 7), detail(2, 8), detail(3, 7, true)]);
+    tabs.setLastAccessed({ 3: 40 });
+
+    await expect(tabs.listSummariesInWindow(7)).resolves.toEqual([
+      { id: 1, pinned: false, lastAccessed: 0 },
+      { id: 3, pinned: true, lastAccessed: 40 },
+    ]);
+    await expect(tabs.listSummariesInWindow(9)).resolves.toEqual([]);
+  });
+
   it('lists the tab ids it was last told to have', async () => {
     const tabs = createMemoryTabs([1]);
 

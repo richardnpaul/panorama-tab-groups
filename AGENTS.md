@@ -74,6 +74,11 @@ Agents use HTML comment tokens to communicate completion status. The coordinator
 4. Plans in `docs/plans/` serve as the authoritative record of design decisions
 5. Always write tests to debug unexpected behaviour rather than writing adhoc scripts
 
+## Agent Rules
+
+1. Agents **MUST** not make commits
+2. Where a tool can enforce the rule, the repository configures it to: [.claude/settings.json](.claude/settings.json) (Claude Code), [.codex/rules/no-commits.rules](.codex/rules/no-commits.rules) (Codex), [.gemini/settings.json](.gemini/settings.json) (Gemini CLI) and [.vscode/settings.json](.vscode/settings.json) (Copilot in VS Code). Keep them in step with item 1
+
 ## Plans as ADRs
 
 Plan files in `docs/plans/` are permanent Architectural Decision Records. Once implemented, they should **not** be deleted — they document why decisions were made, not just what was done.

@@ -14,7 +14,7 @@ export interface OptionsApi extends CapabilityApi {
   runtime: { getManifest(): { version: string } };
   storage: {
     sync: {
-      get(keys: Options): Promise<Record<string, unknown>>;
+      get(keys: Options | string): Promise<Record<string, unknown>>;
       set(items: Partial<Options>): Promise<void>;
     };
   };
@@ -29,6 +29,10 @@ export function createBrowserOptions(getApi: () => OptionsApi): OptionsStore {
         detectCapabilities(api).hasTabGroups,
       );
       return parseOptions(await api.storage.sync.get(defaults), defaults);
+    },
+    // Asked for by name alone, storage gives only what is stored, with no default
+    async isSet(name) {
+      return name in (await getApi().storage.sync.get(name));
     },
     save: (changes) => getApi().storage.sync.set(changes),
   };

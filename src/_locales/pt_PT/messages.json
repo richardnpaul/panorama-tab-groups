@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "A restaurar os grupos de separadores..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Os seus separadores abertos foram deixados como estavam. Abra as opções para ativar os grupos de separadores nativos do navegador ou para importar os grupos de outro suplemento a partir do respetivo ficheiro de cópia de segurança."
+  },
   "migrationTitle": {
     "message": "Migração de grupos de separadores híbridos"
   },

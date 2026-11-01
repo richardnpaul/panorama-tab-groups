@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Ibinabalik ang mga grupo ng tab..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Naiwan ang iyong mga bukas na tab kung paano ang mga ito. Buksan ang mga opsyon para i-on ang mga native na grupo ng tab ng browser, o para mag-import ng mga grupo ng ibang add-on mula sa backup file nito."
+  },
   "migrationTitle": {
     "message": "Paglilipat ng mga hybrid na grupo ng tab"
   },

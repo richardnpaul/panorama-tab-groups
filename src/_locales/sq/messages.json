@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Po rikthehen grupet e skedave..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Skedat tuaja të hapura u lanë siç ishin. Hapni opsionet për të aktivizuar grupet e brendshme të skedave të shfletuesit ose për të importuar grupet e një shtese tjetër nga skedari i saj i kopjeruajtjes."
+  },
   "migrationTitle": {
     "message": "Migrim i grupeve hibride të skedave"
   },

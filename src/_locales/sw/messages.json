@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Inarejesha vikundi vya vichupo..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Vichupo vyako vilivyofunguliwa vimeachwa kama vilivyo. Fungua mipangilio ili kuwasha vikundi asilia vya vichupo vya kivinjari, au kuingiza vikundi vya programu jalizi nyingine kutoka kwenye faili yake ya nakala rudufu."
+  },
   "migrationTitle": {
     "message": "Uhamishaji wa vikundi mseto vya vichupo"
   },

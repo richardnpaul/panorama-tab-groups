@@ -3,7 +3,7 @@
   "ignoreBinaries": ["act", "pre-commit", "pkill"],
   "workspaces": {
     ".": {
-      "entry": ["tests/unit/scripts/fixtures/*.ts"]
+      "entry": ["tests/unit/scripts/fixtures/*.ts", "tests/e2e/lab/probe.ts"]
     },
     "tools/adbkit-stub": {},
     "tools/deepmerge-patched": {},

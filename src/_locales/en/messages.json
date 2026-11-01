@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Restoring tab groups..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Your open tabs were left as they are. Open the options to turn on native tab groups, or to import the groups of another add-on from its backup file."
+  },
   "migrationTitle": {
     "message": "Hybrid Tab Groups Migration"
   },

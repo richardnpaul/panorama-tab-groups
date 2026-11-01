@@ -1,0 +1,14 @@
+# Agents do not make commits (AGENTS.md); the person who owns the change does.
+prefix_rule(
+    pattern = ["git", "commit"],
+    decision = "forbidden",
+    justification = "Agents must not commit. Leave the changes in the working tree and suggest a commit message instead.",
+    match = [
+        "git commit -m message",
+        "git commit --amend --no-edit",
+    ],
+    not_match = [
+        "git status",
+        "git diff",
+    ],
+)

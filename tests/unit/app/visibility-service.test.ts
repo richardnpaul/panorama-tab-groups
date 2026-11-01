@@ -61,10 +61,17 @@ async function setUp({
   // One list of what happened, to check the order across the different parts
   const order: string[] = [];
   let listings = 0;
+  // The windows whose tabs were asked for by their id
+  const windowsListed: number[] = [];
   const deps: VisibilityDeps = {
     tabs: {
       listInCurrentWindow: () => {
         listings += 1;
+        return tabs.listInCurrentWindow();
+      },
+      // The fake knows the tabs of one window, which are the ones to hide and show here
+      listSummariesInWindow: (windowId) => {
+        windowsListed.push(windowId);
         return tabs.listInCurrentWindow();
       },
       activate: async (tabId) => {
@@ -105,6 +112,7 @@ async function setUp({
     useNative,
     order,
     listings: () => listings,
+    windowsListed,
     getTabGroup: vi.spyOn(groupState, 'getTabGroup'),
     getGroups: vi.spyOn(groupState, 'getGroups'),
     groupState,
@@ -451,6 +459,50 @@ describe('app/visibility-service.ts', () => {
       });
 
       await expect(service.toggleVisibleTabs(1, true)).rejects.toBe(failure);
+    });
+  });
+
+  describe('a window that is said', () => {
+    // The browser's events say which window they are about; the window the user is in may be another
+    it('works on the tabs of that window, not of the one the user is in', async () => {
+      const ctx = await setUp({
+        tabs: [tab(1), tab(2)],
+        tabGroups: { 1: 1, 2: 2 },
+      });
+
+      await ctx.service.toggleVisibleTabs(1, false, 5);
+
+      expect(ctx.windowsListed).toEqual([5]);
+      expect(ctx.listings()).toBe(0);
+      expect(ctx.order).toContain('hide 2');
+    });
+
+    it('reads the groups of that window, for the native groups to follow', async () => {
+      const ctx = await setUp({ tabs: [tab(1)], tabGroups: { 1: 1 } });
+
+      await ctx.service.toggleVisibleTabs(1, false, 5);
+
+      expect(ctx.getGroups).toHaveBeenCalledWith(5);
+      expect(ctx.getGroups).not.toHaveBeenCalledWith(WINDOW);
+    });
+
+    it('works on the window the user is in when none is said', async () => {
+      const ctx = await setUp({ tabs: [tab(1)], tabGroups: { 1: 1 } });
+
+      await ctx.service.toggleVisibleTabs(1);
+
+      expect(ctx.windowsListed).toEqual([]);
+      expect(ctx.listings()).toBe(1);
+      expect(ctx.getGroups).toHaveBeenCalledWith(WINDOW);
+    });
+
+    it('shows the group in the toolbar of that window, not of the window used last', async () => {
+      const ctx = await setUp({ tabs: [tab(1)], tabGroups: { 1: 2 } });
+
+      await ctx.service.toggleVisibleTabs(2, false, 5);
+
+      expect(ctx.updateActionTitle).toHaveBeenCalledTimes(1);
+      expect(ctx.updateActionTitle).toHaveBeenCalledWith(5, 2);
     });
   });
 

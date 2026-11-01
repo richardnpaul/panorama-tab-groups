@@ -492,6 +492,7 @@ describe('scripts/lib/suppressions.js', () => {
       expect(ALLOWED_KNIP_BINARIES).toEqual(['act', 'pre-commit', 'pkill']);
       expect(ALLOWED_KNIP_ENTRIES).toEqual([
         'tests/unit/scripts/fixtures/*.ts',
+        'tests/e2e/lab/probe.ts',
       ]);
       expect(FORBIDDEN_KNIP_KEYS).toEqual([
         'ignore',

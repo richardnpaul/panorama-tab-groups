@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Gendanner fanegrupper..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Dine åbne faner blev ladet, som de var. Åbn indstillingerne for at slå browserens egne fanegrupper til eller for at importere en anden tilføjelses grupper fra dens sikkerhedskopifil."
+  },
   "migrationTitle": {
     "message": "Migrering af hybride fanegrupper"
   },

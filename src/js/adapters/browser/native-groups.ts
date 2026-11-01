@@ -24,7 +24,11 @@ export interface NativeGroupsApi {
     query(queryInfo: {
       groupId: number;
     }): Promise<{ id?: number | undefined }[]>;
-    group(options: { tabIds: number[]; groupId?: number }): Promise<number>;
+    group(options: {
+      tabIds: number[];
+      groupId?: number;
+      createProperties?: { windowId: number };
+    }): Promise<number>;
     ungroup(tabIds: number[]): Promise<unknown>;
   };
 }
@@ -47,7 +51,11 @@ export function createBrowserNativeGroups(
       return tabs.flatMap(({ id }) => (id === undefined ? [] : [id]));
     },
 
-    createFromTabs: (tabIds) => getApi().tabs.group({ tabIds: [...tabIds] }),
+    createFromTabs: (tabIds, windowId) =>
+      getApi().tabs.group({
+        tabIds: [...tabIds],
+        createProperties: { windowId },
+      }),
 
     async addTabs(tabIds, nativeGroupId) {
       await getApi().tabs.group({

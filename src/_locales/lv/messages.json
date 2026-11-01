@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Notiek cilņu grupu atjaunošana..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Jūsu atvērtās cilnes ir atstātas tādas, kādas tās bija. Atveriet iestatījumus, lai ieslēgtu pārlūka pašu cilņu grupas vai importētu cita papildinājuma grupas no tā dublējuma faila."
+  },
   "migrationTitle": {
     "message": "Hibrīdo cilņu grupu migrācija"
   },

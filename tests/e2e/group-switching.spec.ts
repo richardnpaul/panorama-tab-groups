@@ -195,8 +195,8 @@ test.describe('Switching groups by activating tabs', () => {
           : undefined;
       };
 
-      // A window of its own, with one tab: grouping that tab would leave
-      // nothing outside the group, so no native group is made for it
+      // A window of its own, with one tab: it is given a native group like
+      // any other, and the window stays
       const created = await browser.windows.create({ url: 'about:blank' });
       const windowId = idOf(created);
       const [lone] = created.tabs ?? [];
@@ -245,8 +245,245 @@ test.describe('Switching groups by activating tabs', () => {
     expect(result).toEqual({
       switched: true,
       title: 'Active Group: Lone B',
-      nativeGroupOfSecond: undefined,
-      groupedTabs: 0,
+      nativeGroupOfSecond: expect.any(Number),
+      groupedTabs: 1,
     });
+  });
+
+  test('sending the last tab of the shown group to another group switches the window to that group', async ({
+    page,
+    context,
+  }) => {
+    const sent = await page.evaluate(async () => {
+      const sleep = (ms: number) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      const isTruthy = (value: unknown): boolean => Boolean(value);
+      // Tries again until the background has caught up
+      const until = async <T>(
+        read: () => Promise<T>,
+        attempts = 50,
+      ): Promise<T> => {
+        const value = await read();
+        if (isTruthy(value) || attempts <= 1) return value;
+        await sleep(100);
+        return until(read, attempts - 1);
+      };
+      const group = (id: number, name: string) => ({
+        id,
+        name,
+        containerId: 'browser-default',
+        rect: { x: 0, y: 0, w: 0.5, h: 0.5 },
+      });
+      // The id of a tab or window the browser made, which always has one
+      const idOf = ({ id }: { id?: number | undefined }): number => {
+        if (id === undefined) throw new Error('The browser gave no id');
+        return id;
+      };
+
+      // A window of its own with two tabs, one in each of two groups, the
+      // first of which is shown
+      const created = await browser.windows.create({ url: 'about:blank' });
+      const windowId = idOf(created);
+      const [lone] = created.tabs ?? [];
+      if (lone === undefined) throw new Error('The new window has no tab');
+      await until(() => browser.sessions.getTabValue(idOf(lone), 'groupId'));
+      await browser.sessions.setWindowValue(windowId, 'groups', [
+        group(0, 'Shown'),
+        group(1, 'Other'),
+        // Every window keeps the group for ungrouped tabs, which is not one of the user's
+        { ...group(-2, 'Ungrouped Tabs'), isSystemGroup: true },
+      ]);
+      await browser.sessions.setWindowValue(windowId, 'activeGroup', 0);
+      await browser.sessions.setTabValue(idOf(lone), 'groupId', 0);
+      const other = await browser.tabs.create({
+        windowId,
+        url: 'about:blank',
+        active: false,
+      });
+      await until(() => browser.sessions.getTabValue(idOf(other), 'groupId'));
+      await sleep(1500);
+      await browser.sessions.setTabValue(idOf(other), 'groupId', 1);
+
+      return { windowId, lone: idOf(lone), other: idOf(other) };
+    });
+
+    // The menu of the tab sends it to a group; a click on it is the event the browser would send
+    const [worker] = context.serviceWorkers();
+    if (worker === undefined) {
+      throw new Error('The extension has no service worker');
+    }
+    await worker.evaluate(({ lone, windowId }) => {
+      const read = (value: unknown, key: string): unknown =>
+        typeof value === 'object' && value !== null
+          ? Reflect.get(value, key)
+          : undefined;
+      const event = read(
+        read(Reflect.get(globalThis, 'chrome'), 'contextMenus'),
+        'onClicked',
+      );
+      const dispatch = read(event, 'dispatch');
+      if (typeof dispatch !== 'function') {
+        throw new Error('The event of the menu cannot be fired from here');
+      }
+      Reflect.apply(dispatch, event, [
+        { menuItemId: '1' },
+        { id: lone, windowId },
+      ]);
+    }, sent);
+
+    const result = await page.evaluate(async (ids) => {
+      const sleep = (ms: number) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      const isTruthy = (value: unknown): boolean => Boolean(value);
+      const until = async <T>(
+        read: () => Promise<T>,
+        attempts = 50,
+      ): Promise<T> => {
+        const value = await read();
+        if (isTruthy(value) || attempts <= 1) return value;
+        await sleep(100);
+        return until(read, attempts - 1);
+      };
+      const switched = await until(async () => {
+        const activeGroup: unknown = await browser.sessions.getWindowValue(
+          ids.windowId,
+          'activeGroup',
+        );
+        return activeGroup === 1;
+      });
+      const title = await until(async () => {
+        const text = await browser.action.getTitle({});
+        return text === 'Active Group: Other' ? text : undefined;
+      });
+      const sentTabGroup: unknown = await browser.sessions.getTabValue(
+        ids.lone,
+        'groupId',
+      );
+      const badge = await browser.action.getBadgeText({});
+      const nativeOfSent = (await browser.tabs.get(ids.lone)).groupId;
+      const nativeOfOther = (await browser.tabs.get(ids.other)).groupId;
+      return {
+        switched,
+        title,
+        badge,
+        sentTabGroup,
+        nativeOfSent,
+        nativeOfOther,
+      };
+    }, sent);
+
+    expect(result).toMatchObject({
+      switched: true,
+      title: 'Active Group: Other',
+      // The two groups of the user, not the group for ungrouped tabs
+      badge: '2',
+      sentTabGroup: 1,
+    });
+    // The tab and the tab that was in the group are in the one native group
+    expect(result.nativeOfSent).toBeGreaterThan(0);
+    expect(result.nativeOfOther).toBe(result.nativeOfSent);
+  });
+  test('a tab that arrives in a native group while native groups are off is taken out of it, and keeps its group', async ({
+    page,
+    context,
+  }) => {
+    const arranged = await page.evaluate(async () => {
+      const sleep = (ms: number) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      const isTruthy = (value: unknown): boolean => Boolean(value);
+      const until = async <T>(
+        read: () => Promise<T>,
+        attempts = 50,
+      ): Promise<T> => {
+        const value = await read();
+        if (isTruthy(value) || attempts <= 1) return value;
+        await sleep(100);
+        return until(read, attempts - 1);
+      };
+      const idOf = ({ id }: { id?: number | undefined }): number => {
+        if (id === undefined) throw new Error('The browser gave no id');
+        return id;
+      };
+
+      await browser.storage.sync.set({ useNativeGroups: false });
+      const created = await browser.windows.create({ url: 'about:blank' });
+      const windowId = idOf(created);
+      const [tab] = created.tabs ?? [];
+      if (tab === undefined) throw new Error('The new window has no tab');
+      await until(() => browser.sessions.getTabValue(idOf(tab), 'groupId'));
+      await browser.sessions.setWindowValue(windowId, 'groups', [
+        {
+          id: 0,
+          name: 'Only',
+          containerId: 'browser-default',
+          rect: { x: 0, y: 0, w: 0.5, h: 0.5 },
+        },
+      ]);
+      await browser.sessions.setWindowValue(windowId, 'activeGroup', 0);
+      await browser.sessions.setTabValue(idOf(tab), 'groupId', 0);
+      // As a window comes back from being closed with a native group
+      const nativeGroupId = await browser.tabs.group({
+        tabIds: [idOf(tab)],
+        createProperties: { windowId },
+      });
+      return { tabId: idOf(tab), windowId, nativeGroupId };
+    });
+    expect(arranged.nativeGroupId).toBeGreaterThan(0);
+
+    // The browser says the tab was created, in its native group
+    const [worker] = context.serviceWorkers();
+    if (worker === undefined) {
+      throw new Error('The extension has no service worker');
+    }
+    await worker.evaluate(({ tabId, windowId, nativeGroupId }) => {
+      const read = (value: unknown, key: string): unknown =>
+        typeof value === 'object' && value !== null
+          ? Reflect.get(value, key)
+          : undefined;
+      const event = read(
+        read(Reflect.get(globalThis, 'chrome'), 'tabs'),
+        'onCreated',
+      );
+      const dispatch = read(event, 'dispatch');
+      if (typeof dispatch !== 'function') {
+        throw new Error('The event of the tabs cannot be fired from here');
+      }
+      Reflect.apply(dispatch, event, [
+        { id: tabId, windowId, groupId: nativeGroupId, active: true },
+      ]);
+    }, arranged);
+
+    const result = await page.evaluate(async (ids) => {
+      const sleep = (ms: number) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      const isTruthy = (value: unknown): boolean => Boolean(value);
+      const until = async <T>(
+        read: () => Promise<T>,
+        attempts = 50,
+      ): Promise<T> => {
+        const value = await read();
+        if (isTruthy(value) || attempts <= 1) return value;
+        await sleep(100);
+        return until(read, attempts - 1);
+      };
+      const left = await until(
+        async () => (await browser.tabs.get(ids.tabId)).groupId === -1,
+      );
+      const group: unknown = await browser.sessions.getTabValue(
+        ids.tabId,
+        'groupId',
+      );
+      return { left, group };
+    }, arranged);
+
+    expect(result).toEqual({ left: true, group: 0 });
   });
 });

@@ -26,7 +26,8 @@ const tab = (id: number, overrides: Partial<FakeTab> = {}): FakeTab => ({
 /** A browser with just enough in it for the background to run against */
 function fakeBrowser(tabs: FakeTab[], { withTabGroups = true } = {}) {
   const sessions = createFakeSessions();
-  const sync: Record<string, unknown> = {};
+  // The user has chosen native tab groups, which is what these tests are about
+  const sync: Record<string, unknown> = { useNativeGroups: true };
   const browser = {
     runtime: {
       getManifest: () => ({ version: '2.5.0' }),
@@ -40,9 +41,19 @@ function fakeBrowser(tabs: FakeTab[], { withTabGroups = true } = {}) {
     },
     storage: {
       sync: {
-        get: vi.fn((defaults: object) =>
-          Promise.resolve({ ...defaults, ...sync }),
+        get: vi.fn((keys: object | string) =>
+          Promise.resolve(
+            typeof keys === 'string'
+              ? Object.fromEntries(
+                  Object.entries(sync).filter(([key]) => key === keys),
+                )
+              : { ...keys, ...sync },
+          ),
         ),
+        set: vi.fn((items: object) => {
+          Object.assign(sync, items);
+          return Promise.resolve();
+        }),
       },
       local: {
         get: vi.fn().mockResolvedValue({}),

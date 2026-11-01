@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Endurheimti flipahópa..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Opnir flipar þínir voru skildir eftir eins og þeir voru. Opnaðu valkostina til að kveikja á eigin flipahópum vafrans eða til að flytja inn hópa úr annarri viðbót úr öryggisafritsskrá hennar."
+  },
   "migrationTitle": {
     "message": "Flutningur á blendum flipahópum"
   },

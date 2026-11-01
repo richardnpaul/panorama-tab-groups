@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Yn adfer grwpiau tabiau..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Gadawyd eich tabiau agored fel yr oeddent. Agorwch yr opsiynau i droi grwpiau tabiau brodorol y porwr ymlaen, neu i fewnforio grwpiau ychwanegyn arall o'i ffeil wrth gefn."
+  },
   "migrationTitle": {
     "message": "Mudo Grwpiau Tabiau Hybrid"
   },

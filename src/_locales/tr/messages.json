@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Sekme alanları geri yükleniyor..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Açık sekmeleriniz olduğu gibi bırakıldı. Tarayıcının yerel sekme alanlarını açmak veya başka bir eklentinin sekme alanlarını yedek dosyasından içe aktarmak için seçenekleri açın."
+  },
   "migrationTitle": {
     "message": "Karma Sekme Alanlarının Taşınması"
   },

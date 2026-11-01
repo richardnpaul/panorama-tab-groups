@@ -112,6 +112,35 @@ describe('adapters/browser/tabs.ts', () => {
     });
   });
 
+  describe('listSummariesInWindow', () => {
+    it('lists the tabs of the window that is asked for, with what is needed to show them', async () => {
+      const query = vi.fn().mockResolvedValue([
+        { id: 4, pinned: true, lastAccessed: 100, title: 'ignored' },
+        { id: 9, pinned: false, lastAccessed: 200 },
+      ]);
+      const tabs = createBrowserTabs(() => api({ query }));
+
+      await expect(tabs.listSummariesInWindow(6)).resolves.toEqual([
+        { id: 4, pinned: true, lastAccessed: 100 },
+        { id: 9, pinned: false, lastAccessed: 200 },
+      ]);
+
+      // The window is said, so it is not the one the code is running in
+      expect(query).toHaveBeenCalledWith({ windowId: 6 });
+    });
+
+    it('leaves out tabs that have no id and uses 0 for a missing time', async () => {
+      const query = vi
+        .fn()
+        .mockResolvedValue([{ pinned: false }, { id: 3, pinned: false }]);
+      const tabs = createBrowserTabs(() => api({ query }));
+
+      await expect(tabs.listSummariesInWindow(6)).resolves.toEqual([
+        { id: 3, pinned: false, lastAccessed: 0 },
+      ]);
+    });
+  });
+
   describe('get', () => {
     it('gives what is known about a tab', async () => {
       const get = vi.fn().mockResolvedValue({
@@ -241,14 +270,22 @@ describe('adapters/browser/tabs.ts', () => {
       expect(query).toHaveBeenCalledWith({ windowId: 3, highlighted: true });
     });
 
-    it('asks for the tabs of the window that are not hidden', async () => {
-      const query = vi.fn().mockResolvedValue([{ id: 2 }, { id: 0 }, {}]);
+    it('gives the tabs of the window that are not hidden', async () => {
+      const query = vi
+        .fn()
+        .mockResolvedValue([
+          { id: 2 },
+          { id: 5, hidden: true },
+          { id: 0, hidden: false },
+          {},
+        ]);
       const tabs = createBrowserTabs(() => api({ query }));
 
       await expect(tabs.visibleIdsInWindow(3)).resolves.toEqual([2, 0]);
 
+      // Chromium refuses a query that has `hidden` in it
       expect(query).toHaveBeenCalledTimes(1);
-      expect(query).toHaveBeenCalledWith({ windowId: 3, hidden: false });
+      expect(query).toHaveBeenCalledWith({ windowId: 3 });
     });
   });
 

@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "የትር ቡድኖችን በመመለስ ላይ..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "የከፈቷቸው ትሮች እንዳሉ ተትተዋል። የአሳሹን ቤተኛ የትር ቡድኖች ለማብራት ወይም የሌላ ተጨማሪን ቡድኖች ከምትኬ ፋይሉ ለማስመጣት አማራጮቹን ይክፈቱ።"
+  },
   "migrationTitle": {
     "message": "የድቅል የትር ቡድኖች ፍልሰት"
   },

@@ -80,13 +80,13 @@ export function createMemoryNativeGroups(
       ),
     tabIdsIn: (nativeGroupId) =>
       Promise.resolve([...(groups.get(nativeGroupId)?.tabIds ?? [])]),
-    createFromTabs(tabIds) {
+    createFromTabs(tabIds, forWindow) {
       calls.push(`create ${tabIds.join(',')}`);
       const id = self.nextId;
       self.nextId += 1;
       leaveGroups(tabIds);
       groups.set(id, {
-        windowId: windowForNext ?? windowId,
+        windowId: windowForNext ?? forWindow,
         tabIds: [...tabIds],
         title: undefined,
         color: undefined,

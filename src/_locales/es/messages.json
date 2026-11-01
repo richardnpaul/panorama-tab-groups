@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Restaurando grupos de pestañas..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Tus pestañas abiertas se han dejado como estaban. Abre las opciones para activar los grupos de pestañas nativos del navegador o para importar los grupos de otro complemento desde su archivo de copia de seguridad."
+  },
   "migrationTitle": {
     "message": "Migración de grupos de pestañas híbridos"
   },

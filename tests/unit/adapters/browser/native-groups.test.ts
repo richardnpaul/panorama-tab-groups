@@ -74,8 +74,12 @@ describe('adapters/browser/native-groups.ts', () => {
   it('creates a group from tabs and gives back its id', async () => {
     const api = fakeApi();
     const groups = createBrowserNativeGroups(() => api);
-    expect(await groups.createFromTabs([3, 4])).toBe(77);
-    expect(api.tabs.group).toHaveBeenCalledWith({ tabIds: [3, 4] });
+    expect(await groups.createFromTabs([3, 4], 9)).toBe(77);
+    // The window is said: left out, the browser makes the group in the window that has the focus and moves the tabs there
+    expect(api.tabs.group).toHaveBeenCalledWith({
+      tabIds: [3, 4],
+      createProperties: { windowId: 9 },
+    });
     expect(api.tabs.group.mock.calls[0]?.[0]).not.toHaveProperty('groupId');
   });
 

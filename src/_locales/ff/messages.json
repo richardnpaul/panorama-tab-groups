@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Ana ɗon hoosoo feddeeji tab..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Tab maaɗa ɗe ndeenaaka ngoni no ɗe ngoni. Uddit suɓe ngam wurtugo feddeeji tab bilaadi lowre, malla ngam ɓesdugo feddeeji ɓooyɗum feere diga fayl kopiiji maako."
+  },
   "migrationTitle": {
     "message": "Nuddugo feddeeji tab hibrid"
   },

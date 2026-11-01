@@ -194,6 +194,9 @@
   "initializationRestoring": {
     "message": "Memulihkan kumpulan tab..."
   },
+  "firstRunNativeGroupsOff": {
+    "message": "Tab anda yang dibuka dibiarkan seperti sedia ada. Buka pilihan untuk menghidupkan kumpulan tab asal pelayar, atau untuk mengimport kumpulan alat tambah lain daripada fail sandarannya."
+  },
   "migrationTitle": {
     "message": "Penghijrahan Kumpulan Tab Hibrid"
   },

@@ -101,6 +101,41 @@ This creates a `.zip` file in `web-ext-artifacts/` directory.
 3. **Permissions**: Should only request necessary permissions
 4. **API Compatibility**: All tab operations should work
 
+## Native tab groups and the journeys
+
+What a person does with the add-on and the browser's tab groups is tested at three levels:
+
+- `tests/unit/journeys/native-groups.test.ts` runs the whole background of the add-on in a model of the browser
+  (`tests/support/world`) that behaves as the real Firefox was seen to. It is fast and in `npm test`. One story to a
+  test: first run, update, switching native groups on and off, several windows, restarting, restoring a window and so on.
+- `tests/e2e/firefox-facts.spec.ts` asks the real Firefox that Playwright brings, through a probe extension
+  (`tests/e2e/lab`), what it does with tab groups. Every fact the model above relies on is one of its tests, which is how
+  the model is kept true. `tests/e2e/native-groups-first-run.spec.ts` puts the real extension into that Firefox over windows
+  that already have tabs.
+- `npx playwright test --project=firefox` runs those two; they need `npm run dist:firefox` (the `pretest:e2e` script does it).
+
+### What only a person can check, in a real Firefox 139 or later
+
+Playwright's Firefox has no tab strip a person sees and does not restore its session, so these are looked at by hand:
+
+1. **Restarting the browser.** Make native groups with the add-on, quit Firefox, open it again (with "Open previous windows and
+   tabs"). Are the groups still there, and do the tab groups and the groups of the add-on still go together? (The model takes
+   the harder case, that a group has a new id; whether Firefox gives it one is not known.)
+2. **A native group of hidden tabs.** Have two groups of the add-on with native groups switched on; look at how Firefox shows
+   a native group whose tabs are all hidden (the group that is not shown), collapsed and not collapsed. This is what decides
+   whether a native group for every group at once (Decision 3 of `docs/plans/native-groups-migration-and-user-journeys.md`)
+   is wanted.
+3. **The first run with another add-on's groups.** Install the older add-on, make groups, then this one: native groups should
+   be off, one system notification should say the tabs were left as they are, and clicking it should open the options page,
+   which offers the switch and the import of the older add-on's backup file. (The tests check that the notification is
+   asked for and that the click opens the options; whether the system shows it is the system's perview.)
+4. **Restoring a window after switching native groups off.** With native groups on, close a window that has two groups;
+   switch native groups off in the options; restore the window (Ctrl+Shift+N). It should come back with no tab group of
+   Firefox, and with the groups of the add-on as they were. (The tests take it that a restore brings back the session values
+   of the window and its tabs; this is the check of that.)
+5. **"Restoring tab groups..."** Start Firefox with many tabs so that the start takes long: the same kind of notification
+   should show while it restores, and go when it is done. It could not show before the `notifications` permission was added.
+
 ## Debugging
 
 ### Console Logs

@@ -51,7 +51,6 @@ async function setUp(
       windows,
       groupState,
       nativeGroups,
-      viewUrl: VIEW,
       i18n: { getMessage: englishMessage },
       logger,
     }),
@@ -90,6 +89,24 @@ describe('app/native-group-assignment.ts', () => {
     expect(env.logger.debug).toHaveBeenCalledWith(
       '[TabCreated] Created native group 1000 for group 1 with 2 tabs in window 3',
     );
+  });
+
+  it('asks for the group in the window of the tabs, so that the browser does not make it in the window that has the focus and move the tabs there', async () => {
+    const env = await setUp([
+      { tab: tab(1), group: 1 },
+      { tab: tab(3), group: 1 },
+    ]);
+    const create = vi.spyOn(env.nativeGroups, 'createFromTabs');
+
+    await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(1, 'Work'),
+      groups: env.groups,
+      label: 'Migration',
+    });
+
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(create).toHaveBeenCalledWith([1, 3], WINDOW);
   });
 
   it('gives the native group the name and colour of the group', async () => {
@@ -134,23 +151,79 @@ describe('app/native-group-assignment.ts', () => {
       { tab: tab(1), group: 2 },
       { tab: tab(2), group: undefined },
     ]);
-    const given = [group(1, 'Work'), group(2, ''), group(5, 'Other')];
 
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(2, ''),
-      groups: given,
+      groups: env.groups,
       label: 'TabActivated',
     });
 
     expect(
       (await env.groupState.getGroups(WINDOW))?.map((g) => g.nativeGroupId),
-    ).toEqual([undefined, 1000, undefined]);
-    expect(given.map((g) => g.nativeGroupId)).toEqual([
-      undefined,
+    ).toEqual([undefined, 1000]);
+    expect(env.groups.map((g) => g.nativeGroupId)).toEqual([
       undefined,
       undefined,
     ]);
+  });
+
+  it('keeps what became of the other groups while the native group was made', async () => {
+    const env = await setUp([
+      { tab: tab(1), group: 2 },
+      { tab: tab(2), group: undefined },
+    ]);
+    // The browser removes a native group when its last tab leaves, and the add-on forgets it
+    const createFromTabs = env.nativeGroups.createFromTabs.bind(
+      env.nativeGroups,
+    );
+    env.nativeGroups.createFromTabs = async (tabIds, windowId) => {
+      const made = await createFromTabs(tabIds, windowId);
+      await env.groupState.setGroups(WINDOW, [group(1, 'Work'), group(2, '')]);
+      return made;
+    };
+    await env.groupState.setGroups(WINDOW, [
+      { ...group(1, 'Work'), nativeGroupId: 77 },
+      group(2, ''),
+    ]);
+
+    await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(2, ''),
+      groups: [{ ...group(1, 'Work'), nativeGroupId: 77 }, group(2, '')],
+      label: 'TabMoved',
+    });
+
+    expect(
+      (await env.groupState.getGroups(WINDOW))?.map((g) => g.nativeGroupId),
+    ).toEqual([undefined, 1000]);
+  });
+
+  it('records in the groups it was given when none are stored any more', async () => {
+    const env = await setUp([
+      { tab: tab(1), group: 2 },
+      { tab: tab(2), group: undefined },
+    ]);
+    const createFromTabs = env.nativeGroups.createFromTabs.bind(
+      env.nativeGroups,
+    );
+    env.nativeGroups.createFromTabs = async (tabIds, windowId) => {
+      const made = await createFromTabs(tabIds, windowId);
+      await env.groupState.setGroups(WINDOW, []);
+      return made;
+    };
+    env.groupState.getGroups = () => Promise.resolve(undefined);
+
+    await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(2, ''),
+      groups: env.groups,
+      label: 'TabActivated',
+    });
+
+    expect(env.logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('Created native group 1000 for group 2'),
+    );
   });
 
   it('does nothing when the group has no tab in the window', async () => {
@@ -187,7 +260,7 @@ describe('app/native-group-assignment.ts', () => {
     expect(await env.nativeGroups.tabIdsIn(1000)).toEqual([1]);
   });
 
-  it('does not group the only tab of a window, which might close it', async () => {
+  it('groups the only tab of a window, which the browser does not close over', async () => {
     const env = await setUp([
       { tab: tab(1), group: 1 },
       { tab: tab(2, VIEW), group: -1 },
@@ -200,11 +273,8 @@ describe('app/native-group-assignment.ts', () => {
       label: 'TabActivated',
     });
 
-    expect(outcome).toEqual({ kind: 'aborted' });
-    expect(env.nativeGroups.calls).toEqual([]);
-    expect(env.logger.debug).toHaveBeenCalledWith(
-      '[TabActivated] Skipping native group creation: Would group only tab in window (window closure risk)',
-    );
+    expect(outcome).toEqual({ kind: 'created', nativeGroupId: 1000 });
+    expect(await env.nativeGroups.tabIdsIn(1000)).toEqual([1]);
   });
 
   it('does not group in a window that is gone', async () => {
@@ -281,12 +351,12 @@ describe('app/native-group-assignment.ts', () => {
       windows: env.windows,
       groupState: env.groupState,
       nativeGroups: {
-        createFromTabs: (ids) => env.nativeGroups.createFromTabs(ids),
+        createFromTabs: (ids, windowId) =>
+          env.nativeGroups.createFromTabs(ids, windowId),
         setAppearance: (id, look) => env.nativeGroups.setAppearance(id, look),
         get: (id) => env.nativeGroups.get(id),
         removeTabs: () => Promise.reject(failure),
       },
-      viewUrl: VIEW,
       i18n: { getMessage: englishMessage },
       logger: env.logger,
     });
@@ -334,12 +404,12 @@ describe('app/native-group-assignment.ts', () => {
       windows: env.windows,
       groupState: env.groupState,
       nativeGroups: {
-        createFromTabs: (ids) => env.nativeGroups.createFromTabs(ids),
+        createFromTabs: (ids, windowId) =>
+          env.nativeGroups.createFromTabs(ids, windowId),
         setAppearance: (id, look) => env.nativeGroups.setAppearance(id, look),
         get: () => Promise.reject(failure),
         removeTabs: (ids) => env.nativeGroups.removeTabs(ids),
       },
-      viewUrl: VIEW,
       i18n: { getMessage: englishMessage },
       logger: env.logger,
     });
@@ -377,7 +447,6 @@ describe('app/native-group-assignment.ts', () => {
         get: (id) => env.nativeGroups.get(id),
         removeTabs: (ids) => env.nativeGroups.removeTabs(ids),
       },
-      viewUrl: VIEW,
       i18n: { getMessage: englishMessage },
       logger: env.logger,
     });
