@@ -19,4 +19,5 @@ installs hooks, scripts or MCP servers. Where it disagrees with this project's o
 | `.agents/agents/a11y-architect.md`               | `agents/a11y-architect.md`               | `88e684476cbc449a`         |
 | `.agents/rules/web-testing.md`                   | `rules/web/testing.md`                   | `1ce7194c30b5cd66`         |
 | `.agents/skills/hexagonal-architecture/SKILL.md` | `skills/hexagonal-architecture/SKILL.md` | `1579f70e4cd5a2dd`         |
+| `.agents/agents/type-design-analyzer.md`         | `agents/type-design-analyzer.md`         | `753908aadd759d47`         |
 | `.agents/agents/silent-failure-hunter.md`        | `agents/silent-failure-hunter.md`        | `e5e2094c6f50cc51`         |
