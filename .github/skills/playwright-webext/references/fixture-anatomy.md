@@ -1,299 +1,99 @@
 # Reference: Fixture Anatomy
 
-Annotated walkthrough of the custom Playwright fixtures in `tests/e2e/fixtures.ts`. The snippets below explain the
-ideas; the file itself is the typed, current version (for example, the Firefox extension id is kept in a `WeakMap`
-keyed by the context rather than on the context object).
-These fixtures exist to work around Firefox MV3 + Juggler navigation quirks.
+A walkthrough of why the Playwright fixtures in `tests/e2e/fixtures.ts` are built the way they are. It
+names functions instead of copying them: read the file for the code, and trust it over this page if the
+two disagree.
 
----
+## The two problems
 
-## `createFirefoxPageProxy(initialPage)`
+1. **Playwright cannot open `moz-extension://` addresses in Firefox.** `page.goto()` to one never
+   completes. Chromium has no such problem with `chrome-extension://`.
+2. **Playwright cannot tell a test the extension's id in Firefox.** Firefox gives a temporary add-on a
+   random UUID per profile and writes it to the profile's `prefs.js`.
 
-Wraps a Playwright `Page` to patch `page.goto()` for `moz-extension://` URLs.
+Everything below works around those two, and the workaround for the first one is what limits what a
+Firefox page test proves.
 
-**Root cause of the problem:**
-With `--start-debugger-server` active (required for RDP addon install), Juggler's
-`Page.navigate` for `moz-extension://` URLs returns `{ navigationId: null }` because
-the juggler-navigation-started-browser observer fires asynchronously. Playwright's
-`goto()` then waits for a same-document navigation commit event that never fires,
-blocking the test forever.
+## Chromium: `launchChromium`
 
-**The fix — polling the frame's execution context:**
+- A persistent context (extensions need one) on the **full** Chromium binary. Playwright's headless
+  shell has no UI layer and does not register extension service workers.
+- `--load-extension` and `--disable-extensions-except` point at `dist/`.
+- The language is set with `--lang` and the `LANGUAGE` environment variable, which is what picks the
+  `_locales` folder (the `uiLanguage` option).
+- The extension id comes from the URL of the extension's service worker (`chromiumExtensionId`). The
+  worker may already be registered when the fixture runs, so it checks existing workers first and only
+  then waits for the `serviceworker` event.
+- Pages are the real extension pages; the real background runs. This is the end-to-end browser.
 
-```javascript
-function createFirefoxPageProxy(initialPage) {
-  let activePage = initialPage;
-  return new Proxy(initialPage, {
-    get(_target, prop) {
-      if (prop === 'goto') {
-        return async (url, options = {}) => {
-          // Non-extension URLs go through the normal path.
-          if (!url.startsWith('moz-extension://'))
-            return activePage.goto(url, options);
+## Firefox: `launchFirefox`
 
-          const timeout = options.timeout ?? 30000;
+1. **Start the local server** (`startLocalServer`): a small HTTP server on `127.0.0.1`, random port,
+   serving `dist/`. It refuses anything that resolves outside that folder (`servedFile`).
+2. **Launch a persistent context** with `--start-debugger-server <port>` and preferences that allow
+   remote debugging, unsigned add-ons and MV3, and set the language. Fresh profile each run.
+3. **Install over RDP.** `playwright-webextext` connects to Firefox's remote debugging protocol
+   (retrying until the server is up) and installs `dist/` as a temporary add-on.
+4. **Disconnect straight away.** An open RDP connection leaves Firefox in "debugger attached" mode,
+   which stops the navigation events Playwright waits for. The add-on stays installed.
+5. **Read the UUID** (`readFirefoxUuidFromPrefs`): poll the profile's `prefs.js` for the
+   `extensions.webextensions.uuids` entry of the extension's gecko id, every 500 ms, for up to 15 s.
+   `EXTENSION_ID` in the fixture must equal `browser_specific_settings.gecko.id` in the manifest.
 
-          // Fire the navigate command but don't await it — with RDP active,
-          // the response has navigationId=null and goto() will hang.
-          // We give it a 2s timeout so it fails fast (the navigation itself
-          // continues in Firefox regardless).
-          activePage
-            .goto(url, { waitUntil: 'commit', timeout: 2000 })
-            .catch(() => {});
+The UUID is kept per context in a `WeakMap` (`firefoxExtensionIds`).
 
-          // Access Playwright's server-side Frame via the in-process bridge.
-          // This bypasses the public API and lets us inspect the navigation
-          // state machine directly.
-          const serverFrame = activePage._connection.toImpl(
-            activePage.mainFrame(),
-          );
+## The Firefox page proxy: `createFirefoxPageProxy`
 
-          // Poll for the new execution context.
-          //
-          // Navigation sequence for moz-extension:// URLs:
-          //   1. about:blank context exists
-          //   2. Context is cleared to null (navigation started)
-          //   3. Extension page context appears (navigation committed)
-          //
-          // We wait for the null → non-null transition to confirm the page loaded.
-          let sawNullCtx = false;
-          await new Promise((resolve, reject) => {
-            const start = Date.now();
-            const poll = () => {
-              if (Date.now() - start > timeout) {
-                reject(
-                  new Error(
-                    `Extension page did not load within ${timeout}ms: ${url}`,
-                  ),
-                );
-                return;
-              }
-              const ctx = serverFrame._contextData.get('main')?.context;
-              if (!ctx) sawNullCtx = true;
-              if (sawNullCtx && ctx) {
-                // New execution context arrived after the old one was cleared.
-                // Manually commit the navigation so Playwright's pendingDocument
-                // is cleared and assertions can run.
-                const pending = serverFrame.pendingDocument();
-                if (pending) {
-                  try {
-                    serverFrame._page.frameManager.frameCommittedNewDocumentNavigation(
-                      serverFrame._id,
-                      url,
-                      '',
-                      pending.documentId ?? '',
-                      false,
-                    );
-                  } catch (_) {
-                    /* already committed or frame gone */
-                  }
-                }
-                resolve();
-                return;
-              }
-              setTimeout(poll, 100);
-            };
-            setTimeout(poll, 200); // initial delay to let navigation start
-          });
+The proxy wraps the real page. For anything that is not a `moz-extension://` address it does nothing.
+For one that is:
 
-          return null;
-        };
-      }
-      // All other page methods (click, locator, etc.) are proxied through to
-      // the underlying real page unchanged.
-      const val = activePage[prop];
-      return typeof val === 'function' ? val.bind(activePage) : val;
-    },
-  });
-}
-```
+- **`goto` is remapped.** `moz-extension://<uuid>/view.html?x` becomes
+  `http://127.0.0.1:<port>/view.html?x` on the local server, which serves the same files the add-on
+  contains.
+- **An init script runs first** and sets `window.browser` to a **stand-in**: a small hand-written fake of
+  the parts of the API the pages call (`runtime`, `storage`, `windows`, `tabs`, `sessions`, `commands`,
+  `tabGroups`, `i18n`). Its state lives in the page's `localStorage`. Messages come from the built
+  `_locales/en/messages.json`, and the commands from the built manifest.
+- **`page.url()` is mapped back** to the `moz-extension://` form, so assertions read as they would on
+  Chromium.
+- Every other property and method is forwarded to the real page.
 
----
+So on Firefox the page's own scripts run, against a fake `browser`. The real background, real tabs and
+real tab groups are not involved. Tests that need those use the lab (below).
 
-## `readFirefoxUuidFromPrefs(prefsPath, extensionId, timeoutMs)`
+When a page starts using a `browser.*` API the stand-in lacks, the Firefox run fails with it undefined.
+Add the smallest fake that makes the page behave. Keep it a stand-in: it does not need to be right
+about the browser, only enough for the page.
 
-Firefox writes each extension's UUID to `prefs.js` as a JSON-encoded string
-inside a `user_pref` call. This function polls until the UUID appears.
+## The fixtures
 
-```javascript
-async function readFirefoxUuidFromPrefs(
-  prefsPath,
-  extensionId,
-  timeoutMs = 10000,
-) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (fs.existsSync(prefsPath)) {
-      const contents = fs.readFileSync(prefsPath, 'utf8');
-      // Example line in prefs.js:
-      //   user_pref("extensions.webextensions.uuids", "{\"tab-groups-viewer@example.com\":\"abc-123\"}");
-      const match = contents.match(
-        /user_pref\("extensions\.webextensions\.uuids",\s*"(.+?)"\)/,
-      );
-      if (match) {
-        const uuids = JSON.parse(match[1].replace(/\\"/g, '"'));
-        if (uuids[extensionId]) return uuids[extensionId];
-      }
-    }
-    await new Promise((r) => setTimeout(r, 500)); // poll every 500ms
-  }
-  return null; // timed out — extension ID not registered
-}
-```
+- **`context`** launches the right browser, logs each page's console and page errors, and (Firefox only)
+  replaces `context.newPage` so that pages a test creates are proxied too. On teardown it closes the
+  context, kills any Firefox process still using this profile (matched by the profile path, so never
+  the user's own Firefox), and stops the local server.
+- **`page`** is the first page the context opened, proxied on Firefox. It deliberately does **not** use
+  Playwright's built-in `page` fixture: that one calls the wrapped `context.newPage()`, and wrapping the
+  result in a second proxy puts two `goto()` calls on one page, which cancel each other with
+  `NS_ERROR_NOT_AVAILABLE`.
+- **`extensionProtocol`** is `moz-extension` or `chrome-extension`.
+- **`extensionId`** is the Firefox UUID or the Chromium worker's id; it throws if it was not resolved,
+  with a message saying where to look.
+- **`uiLanguage`** is an option (default `en-US`), set per test file with `test.use({ uiLanguage })`.
 
-**Timeout**: 15 seconds (set in the `context` fixture call). Typically completes
-within 1-2 seconds of addon install.
+Headed or headless is decided by `shouldRunHeadless`: headless unless `PLAYWRIGHT_HEADED`,
+`PLAYWRIGHT_FIREFOX_HEADED` or `PWDEBUG` says otherwise, and always headless on CI. A headed run
+without `DISPLAY` or `WAYLAND_DISPLAY` fails with an explanation (`assertHeadedDisplayAvailable`).
 
----
+## The lab (a different thing)
 
-## `context` Fixture
+`tests/e2e/lab/` does not use these fixtures. `lab.ts` starts a real Firefox of its own and loads
+extensions as temporary add-ons. A **probe** extension (`probe.ts`) runs `browser.<api>(...)` for the
+test and reports what the browser answered, so a test can ask the real Firefox a question (can a hidden
+tab join a group? what does another extension see of my session values?) and keep the answer as a test.
+`world.ts` describes the tabs and windows it reports. Use it for behaviour only a real Firefox has;
+`firefox-facts.spec.ts` and `native-groups-first-run.spec.ts` are the examples.
 
-Provides a persistent `BrowserContext` with the extension loaded.
+## Configuration
 
-```javascript
-context: async ({ browserName }, use) => {
-  const userDataDir = path.join(process.cwd(), `test-user-data-${browserName}`);
-
-  if (browserName === 'chromium') {
-    // Chromium: load extension directly via command-line flags.
-    // No RDP required. Profile is reused across runs.
-    fs.mkdirSync(userDataDir, { recursive: true });
-    context = await chromium.launchPersistentContext(userDataDir, {
-      headless: !!process.env.CI,
-      args: [
-        `--disable-extensions-except=${pathToExtension}`,
-        `--load-extension=${pathToExtension}`,
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-      ],
-    });
-  } else if (browserName === 'firefox') {
-    // Firefox: fresh profile on every run to avoid version-mismatch errors.
-    fs.rmSync(userDataDir, { recursive: true, force: true });
-    fs.mkdirSync(userDataDir, { recursive: true });
-
-    // Start Firefox with RDP server enabled.
-    const { connectWithMaxRetries, findFreeTcpPort } =
-      await import('./node_modules/playwright-webextext/dist/firefox_remote.js');
-    const rdpPort = await findFreeTcpPort();
-
-    context = await firefox.launchPersistentContext(userDataDir, {
-      headless: !!process.env.CI,
-      args: ['--start-debugger-server', String(rdpPort)],
-      firefoxUserPrefs: {
-        'devtools.debugger.remote-enabled': true,
-        'devtools.debugger.prompt-connection': false,
-        'extensions.manifestV3.enabled': true,
-        'xpinstall.signatures.required': false,
-      },
-    });
-
-    // Install addon via RDP, then IMMEDIATELY DISCONNECT.
-    // Keeping the RDP connection open holds Firefox in "debugger-attached" mode
-    // which prevents Juggler navigation events from firing for moz-extension:// URLs.
-    const rdpClient = await connectWithMaxRetries({ port: rdpPort });
-    await rdpClient.installTemporaryAddon(pathToExtension);
-    rdpClient.disconnect(); // <-- critical: disconnect right away
-
-    // Wait for Firefox to write the UUID to prefs.js.
-    const prefsPath = path.join(userDataDir, 'prefs.js');
-    const uuid = await readFirefoxUuidFromPrefs(prefsPath, EXTENSION_ID, 15000);
-    if (uuid) console.log(`[rdp] Extension installed, UUID: ${uuid}`);
-    else
-      console.warn('[rdp] Extension UUID not found in prefs.js after install');
-  }
-
-  // Patch context.newPage() so tests that call it directly also get a proxy.
-  if (browserName === 'firefox') {
-    const origNewPage = context.newPage.bind(context);
-    context.newPage = async (opts) => {
-      const p = await origNewPage(opts);
-      return createFirefoxPageProxy(p);
-    };
-  }
-
-  try {
-    await use(context);
-  } finally {
-    try {
-      await context.close();
-    } catch (e) {}
-    // Kill any lingering Firefox process using this profile.
-    // Safe: matches on the specific test profile path, never the user's profile.
-    if (browserName === 'firefox') {
-      spawnSync('pkill', ['-f', userDataDir], { stdio: 'ignore' });
-    }
-  }
-};
-```
-
----
-
-## `page` Fixture
-
-Returns the first page in context, proxied on Firefox.
-
-```javascript
-page: async ({ context, browserName }, use) => {
-  if (browserName === 'firefox') {
-    // IMPORTANT: Do NOT use the built-in `page` fixture here.
-    // It calls the wrapped context.newPage(), producing a double-proxy which
-    // causes two simultaneous goto() calls that cancel each other
-    // (NS_ERROR_NOT_AVAILABLE).
-    // Instead take the page that launchPersistentContext already opened.
-    const initialPage = context.pages()[0];
-    await use(createFirefoxPageProxy(initialPage));
-  } else {
-    await use(context.pages()[0]);
-  }
-};
-```
-
----
-
-## `extensionId` Fixture
-
-Extracts the extension's runtime ID/UUID for constructing `moz-extension://` or `chrome-extension://` URLs.
-
-```javascript
-extensionId: async ({ context, browserName }, use) => {
-  let id = null;
-
-  if (browserName === 'chromium') {
-    // Chromium: get the extension ID from the service worker URL.
-    const workers = context.serviceWorkers();
-    if (workers.length > 0) {
-      id = workers[0].url().split('/')[2];
-    } else {
-      const worker = await context.waitForEvent('serviceworker', {
-        timeout: 15000,
-      });
-      id = worker.url().split('/')[2];
-    }
-  } else if (browserName === 'firefox') {
-    // Firefox: UUID was written to prefs.js during context fixture setup.
-    const prefsPath = path.join(
-      process.cwd(),
-      'test-user-data-firefox',
-      'prefs.js',
-    );
-    id = await readFirefoxUuidFromPrefs(prefsPath, EXTENSION_ID);
-  }
-
-  console.log(`Extension ID for ${browserName}: ${id}`);
-  await use(id);
-};
-```
-
----
-
-## `defineConfig` Settings
-
-| Setting                     | Value                    | Notes                                        |
-| --------------------------- | ------------------------ | -------------------------------------------- |
-| `workers`                   | `1`                      | Tests run serially — browser state is shared |
-| `fullyParallel`             | `false`                  | Required for single-worker serial execution  |
-| `timeout` (global)          | `60000ms`                | Default test timeout                         |
-| `timeout` (Firefox project) | `180000ms`               | Firefox installs and navigates slowly        |
-| `retries`                   | `2` on CI, `0` locally   |                                              |
-| `reporter`                  | `html` (never auto-open) | Run `npx playwright show-report` manually    |
+`playwright.config.ts` has the settings (serial run, timeout, retries, reporter, recording) and the two
+projects, `chromium` and `firefox`. Read it rather than trusting a copy.

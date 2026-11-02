@@ -1,5 +1,5 @@
 ---
-description: 'Code quality, security, and test verification specialist for tab-groups-viewer. Reviews JS/ES2022 code, audits WebExtension security (CSP, sender validation, host_permissions, DOM XSS), and runs npm run test:e2e to independently verify changes.'
+description: 'Code quality, security, and test verification specialist for tab-groups-viewer. Reviews TypeScript code, audits WebExtension security (CSP, sender validation, host_permissions, DOM XSS), and runs npm run test:e2e to independently verify changes.'
 tools: [read, search, execute]
 model: ['Claude Sonnet 4.6 (copilot)', 'Auto (copilot)']
 handoffs:
@@ -57,9 +57,10 @@ Load `#skill:webext-security` before starting.
 - JSDoc present on all exported functions?
 - Explicit `.js` extensions on all imports?
 - Named exports only (no default exports)?
-- No direct `browser.storage` calls (StateManager only)?
-- No magic numbers (all constants in `constants.js`)?
-- No TypeScript syntax?
+- No direct `browser.storage` / `browser.sessions` calls outside StateManager and the browser adapters in `src/js/adapters/browser/`?
+- No magic numbers (shared constants in `src/js/core/constants.ts`)?
+- Strict TypeScript: no `any` escapes, no `@ts-ignore` / `@ts-expect-error`?
+- Does each new feature have an E2E test that ran against the real extension (Chromium, or the Firefox lab in `tests/e2e/lab/`)? Firefox page tests run against a stand-in `browser`, so behaviour that exists only in Firefox (tab hiding, native groups, the real `sessions` API) needs a lab test. A feature whose only E2E test is a Firefox page test is a **MEDIUM** finding.
 
 ### 4. Security Audit (WebExtension-specific)
 
@@ -91,12 +92,15 @@ Report the full test output. A failing test is a **HIGH** finding.
 ## Test Results
 
 - `npm run test:e2e`: PASS / FAIL ([N] tests passed, [M] failed)
+  - Chromium (real extension): PASS / FAIL
+  - Firefox page tests (stand-in `browser`): PASS / FAIL
+  - Firefox lab tests (real Firefox): PASS / FAIL / none apply (reason)
 
 ## Findings
 
 ### CRITICAL
 
-- [ ] **[Finding title]** (`path/to/file.js:line`)
+- [ ] **[Finding title]** (`path/to/file.ts:line`)
   - Issue: [description]
   - Fix: [specific recommendation]
 
@@ -118,8 +122,8 @@ Report the full test output. A failing test is a **HIGH** finding.
 
 ## Verdict
 
-PASS — no CRITICAL or HIGH findings, tests pass.
-FAIL — [N] CRITICAL, [N] HIGH findings require resolution.
+PASS — no open CRITICAL, HIGH, MEDIUM or LOW findings, tests pass. INFO items may remain; they are listed above.
+FAIL — [N] CRITICAL, [N] HIGH, [N] MEDIUM, [N] LOW findings require resolution.
 ```
 
 ## Completion Signal
@@ -136,7 +140,8 @@ or
 <!-- REVIEW_RESULT: FAIL severity=CRITICAL -->
 ```
 
-(Use the highest severity found.)
+Use the highest severity among the open blocking findings (CRITICAL, HIGH, MEDIUM or LOW), for example
+`<!-- REVIEW_RESULT: FAIL severity=LOW -->`. Emit `PASS` only when none is open and the tests pass.
 
 ## Severity Definitions
 
@@ -148,10 +153,15 @@ or
 | LOW      | Minor style issue, suboptimal pattern                      |
 | INFO     | Observation, suggestion, no action required                |
 
+CRITICAL, HIGH, MEDIUM and LOW are **blocking**: each must be fixed, or shown to be a false positive with
+evidence, before `PASS`. INFO is advisory and never blocks. A finding that names a concrete input or
+state that goes wrong is never INFO, whatever you would like to call it. This is the threshold of
+`.agents/rules/verification-validation-rules.md`.
+
 ## Red Flags
 
 - `browser.runtime.onMessage` without sender validation → CRITICAL
 - `innerHTML = <user-controlled value>` → CRITICAL
 - Direct `browser.storage` calls (bypassing StateManager) → MEDIUM
 - Missing JSDoc on exported functions → LOW
-- Triggering PASS when tests are failing → never do this
+- Triggering PASS when tests are failing, or while any CRITICAL, HIGH, MEDIUM or LOW finding is open → never do this

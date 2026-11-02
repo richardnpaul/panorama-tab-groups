@@ -1,6 +1,7 @@
 # Implementation Plan: A Review of the Extension's Data Structures
 
-> **Status: Phase 1 is done and Phase 4 is done; Phases 2 and 3 are the owner's** (the decisions are listed under "Result").
+> **Status: Phases 1, 2 and 4 are done; Phase 3 is to do** (the decisions, taken on 2026-11-02, and the order of the work
+> are under "Result").
 > This is a review plan. The findings below were read from the code as **hypotheses**; the Result at the end says which
 > held, which did not, and what was found besides. Nothing in the product was changed by it.
 
@@ -166,7 +167,7 @@ Each step ends with `npm run typecheck`, `npm run lint`, the unit tests and Pret
 - [x] F1 and F2 are tested in Chromium and the results recorded here; **Firefox could not be asked about a restart**
       (Playwright's Firefox does not restore its session), which `native-groups-migration-and-user-journeys.md` also found
 - [ ] A property test of the invariants exists and passes: **the data layer is covered**; the invariants over what a person does
-      (no tab lost, every group exists...) need the world of fakes of the native-groups branch, and are described below
+      (no tab lost, every group exists...) are step 1 of Phase 3, below
 - [ ] Every persisted shape that remains has a version and a migration test: **not done, the owner's** (F7)
 - [x] `docs/spec.md` matches the code and a test keeps its list of stored keys true
 
@@ -245,7 +246,8 @@ Done on `review/data-structures`; nothing is committed, and **no product code wa
 - **F6, the link from a tab to its group is on the tab: confirmed, with the cost of F1 in Chromium.** There is no way to ask for
   the tabs of a group but to read each tab.
 - **F7, no version on the stored data: confirmed;** only the backup has one.
-- **F8, `containerId`: see F3,** it is not used.
+- **F8, `containerId`: see F3,** it is not used. Nothing in `src/` reads a tab's container (`cookieStoreId`), and a backup is
+  restored with `tabs.create({ url })` only, so **every restored tab opens in the default container**.
 - **F9, thumbnails as session values: Firefox only** (see F1), where the browser drops them with the tab; there is no limit
   in the extension, and the statistics page shows the total.
 - **F10, ids of different kinds are all `number`: confirmed by the types;** no test.
@@ -263,26 +265,95 @@ Done on `review/data-structures`; nothing is committed, and **no product code wa
 | After an update that changes a shape | **no version to tell which shape is stored** (F7)      | the same                                                                                   | the same, and the whole object is rewritten by the next call                                    |
 | With a backup imported               | a window of its own, groups renumbered by position     | the same                                                                                   | the same                                                                                        |
 
-### Decisions for the owner (Phase 2), with a recommendation
+### The decisions (Phase 2)
 
-1. **Chromium forgets its groups at every restart (F2). Recommended first.** Chromium does keep what it needs: the native tab
-   groups, with the title and colour the add-on gave each (`native-group-assignment` sets both). On start, in a window that has
-   native groups and none of the add-on's groups for it, **make the groups from the native groups** (title as name, the tabs in it
-   as members, the tabs in none as ungrouped). It needs no new storage and no version. A cheaper partial measure is to match
-   restored tabs to the old entries by address and place in the window.
-2. **Prune the emulation (F1), after 1.** Once restored tabs are matched or rebuilt, every entry whose tab or window is not open
-   is an orphan: remove them at start. Without 1 it throws away the only copy, so the order matters.
-3. **A version for the stored data (F7)** before any change of shape: one number under one key in `storage.local`, read at
-   start, with a migration for each step, and the backup (which already has one) written from it.
-4. **`containerId` (F3, F8):** remove it from the type and the guard, or give it its one value. It is never read.
-5. **Move `nativeGroupId` out of the stored group (F3, F2):** the groups of the add-on keep what the user owns, and the link to
-   the browser's groups is rebuilt at start (the journeys of the native-groups branch have `relink` for it).
+Taken by the owner on 2026-11-02, after three rounds of review of the first recommendations. Each says what was decided,
+why, and what is still to be shown; a fact marked **not verified** is to be settled by the first test of its step, not
+assumed.
 
-### The property test of the invariants that is still to write
+1. **Chromium rebuilds its groups after a restart (F2).** Chromium keeps the native tab groups, with the title and colour the
+   add-on gave each (`native-group-assignment` sets both), and inactive groups are collapsed native groups there, so every
+   group that has a tab has one. On start, in a window that has native groups and none of the add-on's groups, **the groups
+   are made from the native groups**: the title as name, the tabs in it as members, the tabs in none as ungrouped.
+   - **What it cannot bring back:** a group with no tabs (a native group cannot exist without one), so empty groups and the
+     order of groups are lost; and the rectangles of the layout, which start again from the defaults. Today all of it is lost,
+     so this is a gain, but the release notes say it.
+   - **When native groups are off** (the first run leaves them off in windows that already had tabs, so this is a normal
+     state, not a corner), restored tabs are matched to the old entries: first by **their order** (the stored sequence of
+     addresses against the restored one, so a tab that did not come back or a pinned tab does not shift every match after
+     it), then by an address that is **unique in the window**. Whatever is still ambiguous (duplicate addresses, new-tab
+     pages, discarded tabs) is ungrouped. A tab is never put in a group on a guess.
+   - **Not verified:** that the restored tabs and native groups are there when `startup.ts` runs recovery, window set-up and
+     `relink`. The first test is in `tests/e2e/chromium-stored-data.spec.ts`, which already restores a profile.
+2. **The emulation is pruned, with a grace period (F1).** Every entry that is removed (a closed tab, a closed window) is kept
+   for a grace period first (the last _N_ entries or the last few hours, to be set from a test), not only those of a window
+   that closes:
+   - at a restart, step 1 needs the old entries, so they are dropped by a pass after recovery has used them;
+   - when a tab is reopened (Ctrl+Shift+T, `sessions.restore()`), Chromium gives it a new id, and the entry is what says which
+     group it was in. Kept entries are dead storage unless something reads them, so **`tabCreated` looks them up** before it
+     falls back to the active group (`tab-lifecycle.ts`, `groupOfNewTab`). Today a reopened tab goes into the active group,
+     which hides the mistake in the wrong group.
+   - **`tabCreated` stops pulling a tab out of the native group Chromium put it in.** With native groups on, it moves every new
+     tab into the active group's native group (`assignNewTabToNativeGroup`, `nativeGroups.addTabs`); a tab Chromium reopened
+     into its own group is taken out of it. `unclaimedNativeGroupOfTab` covers a tab in a native group no group has claimed,
+     not this one.
+   - **Not verified:** whether `tabs.onCreated` already carries the tab's `groupId` when Chromium reopens it, or the tab joins
+     its group a moment later; and whether the removal events at quit come with `isWindowClosing`. A Chromium E2E test
+     reopens a tab with `sessions.restore()` and asserts the group it ends in, against the real extension.
+   - **Not done: splitting `__mock_sessions` into a key per window or tab.** The cost is in the writes as much as the reads:
+     every set rewrites the whole object (`sessions-emulation.ts`), and switching tabs is a set. But pruning bounds the
+     entries to the open tabs plus the grace period, and a split is a change of shape that needs step 3 and a lock per key.
+     It is done when a repeatable test (not a one-off script) shows a write past 10 ms at the size a heavy user reaches.
+3. **A version for the stored data (F7), before any change of shape:** one number under one key in `storage.local`, read at
+   start, with a migration for each step, and the backup (which already has one) written from it. **Each window value carries
+   the version too, and is migrated when it is read:** Firefox restores a closed window with the values that were written
+   when it closed, which may be weeks and versions ago, after the migration at start has run.
+4. **Containers (F3, F8): kept working, not supported.** This plan does not lose a container anywhere it does not lose one
+   today:
+   - `containerId` becomes optional in the type and is no longer written. It is not a container in any case: the group does
+     not own one (a tab does, `tab.cookieStoreId`), and `browser-default` is a made-up value while `firefox-default` is
+     Firefox's id of the default container. The migration of step 3 reads both and drops them.
+   - **Known limitation, written in the release notes:** a backup restores every tab in the default container. That undoes an
+     isolation the person chose (a tab of a banking or Facebook container comes back sharing the default container's
+     cookies), so it is a privacy limitation, not only a missing feature.
+   - **Restoring containers is a plan of its own,** because it is bigger than this one and a naive version is worse than the
+     limitation. A `cookieStoreId` such as `firefox-container-3` means whatever the third container of that profile is, so a
+     backup restored in another profile, or after containers were removed and made again, would put a banking tab in someone
+     else's container. That plan needs: a new backup version that records each container's name, colour and icon, and old
+     backups that have none; matching by those through `contextualIdentities`; `cookies` (and whatever else the lab shows is
+     needed) in `optional_permissions`, asked for by a click after the backup has been read, because `permissions.request()`
+     fails outside a user action; a choice for the person when nothing matches (make the container, use the default, skip the
+     tab); and `firefox-private`, which is never recreated as a private tab without consent. Its first step is a test in the
+     Firefox lab (`tests/e2e/lab/`) of what `tab.cookieStoreId` and `tabs.create({ cookieStoreId })` require; which
+     permissions give an install warning is checked against Mozilla's list, not assumed.
+5. **`nativeGroupId` moves out of the stored group into `storage.session` (F3, F2).** The add-on's groups keep what the user
+   owns; the link to the browser's groups, which is stale after every restart, goes to `storage.session`, which survives the
+   background being unloaded and is cleared when the browser closes. It is not kept in a module variable: an MV3 background is
+   unloaded after a short idle time, not only at a restart. `relink` (`native-groups-sync.ts`, run from `startup.ts`) is what
+   rebuilds it at start. `storage.session` is covered by the `storage` permission the manifest already asks for; the project
+   does not use it yet, so its adapter is new and has a contract test like the others.
 
-The plan asks for random sequences of what a person does (open and close tabs and windows, move tabs, make and delete groups,
-restart) with invariants: every tab has a group that exists, the active group exists, no two groups of a window share an id,
-every `nativeGroupId` is real or dropped, no tab is lost. It needs a browser that holds tabs, windows and native groups
-together, which is the world of fakes in `tests/support/world` of **`fix/native-groups-migration-user-journeys`**; with
-`createWorld()` it is about forty lines of fast-check (an action is a call of the world, the invariants are reads of it).
-It was not written here, to keep this branch independent of that one, and is the natural first test to add once it is in.
+The other findings: **F5** (ids per window) is accepted. Ids are numbers by design, are kept in the reserved ids -1 and -2, the
+ids of the context menu and the backup format, and a group never leaves its window; it is reopened when a feature moves groups
+between windows. **F10** (distinct id types) is cheap and independent, and can be done at any time. **F6** and **F9** are
+accepted as they are for now.
+
+### The order of the work (Phase 3)
+
+Each step follows step 6 above: tests first, the change behind the port, a migration with a test per old shape, a forced
+Stryker run, and the gates of `.agents/rules/verification-validation-rules.md`. Each has an E2E test against the real
+extension where its behaviour is in the browser (Chromium for steps 3 to 5).
+
+1. **The property test of the invariants.** Random sequences of what a person does (open and close tabs and windows, move
+   tabs, make and delete groups, restart) over `createWorld()` from `tests/support/world/world.ts`, which is in the tree
+   since #32: every tab has a group that exists, the active group exists, no two groups of a window share an id, every
+   `nativeGroupId` is real or dropped, no tab is lost. It comes first because it is what catches a lost tab in the steps
+   after it. Whatever it finds is fixed, or written down here, before step 2.
+2. **The version** (decision 3), with the migration that drops `containerId` (decision 4).
+3. **`nativeGroupId` to `storage.session`** (decision 5), before step 4, so the groups rebuilt there do not carry a stale
+   link.
+4. **Chromium rebuilds its groups after a restart** (decision 1).
+5. **Pruning, and reopened tabs** (decision 2): the grace period, the start-up pass, and `tabCreated` reading the kept
+   entries and leaving a tab in the native group Chromium put it in.
+
+Restoring containers is not a step here: it is a plan of its own (decision 4).
