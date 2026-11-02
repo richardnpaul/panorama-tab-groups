@@ -356,4 +356,5 @@ extension where its behaviour is in the browser (Chromium for steps 3 to 5).
 5. **Pruning, and reopened tabs** (decision 2): the grace period, the start-up pass, and `tabCreated` reading the kept
    entries and leaving a tab in the native group Chromium put it in.
 
-Restoring containers is not a step here: it is a plan of its own (decision 4).
+Restoring containers is not a step here: it is a plan of its own (decision 4),
+`docs/plans/firefox-containers-in-backups.md`.
