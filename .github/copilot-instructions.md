@@ -99,7 +99,7 @@ See `#skill:playwright-webext` for details.
 
 ## Skills
 
-- `#skill:js-codebase-patterns` — Codebase conventions (StateManager, JSDoc, exports, View models)
+- `#skill:ts-codebase-patterns` — Codebase conventions (layers, TypeScript and lint rules, group state)
 - `#skill:webext-api` — WebExtension MV3 API reference, Firefox/Chrome compat
 - `#skill:playwright-webext` — E2E testing patterns and fixture anatomy
 - `#skill:webext-security` — Security checklist for browser extensions

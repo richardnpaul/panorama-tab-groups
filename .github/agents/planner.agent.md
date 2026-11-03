@@ -35,7 +35,7 @@ Load and follow these skills before planning:
 
 - `#skill:webext-api` — WebExtension MV3 APIs, Firefox/Chrome compat, service worker catches
 - `#skill:playwright-webext` — Testing patterns and E2E fixture anatomy
-- `#skill:js-codebase-patterns` — Codebase conventions (before writing any plan steps)
+- `#skill:ts-codebase-patterns` — Codebase conventions (before writing any plan steps)
 
 ## Your Role
 
@@ -145,7 +145,7 @@ After writing the plan file, emit exactly this on a single line:
 1. **Use exact file paths** — always relative from repo root
 2. **Check permissions** — note any `src/manifest.json` changes required
 3. **Follow StateManager** — never plan direct `browser.storage` calls
-4. **Identify test gaps** — every new feature needs at least one new E2E test case
+4. **Identify test gaps** — every new feature needs at least one new E2E test case; behaviour that exists only in Firefox needs a lab test, because Firefox page tests run against a stand-in `browser` (see `#skill:playwright-webext`)
 5. **Minimize changes** — prefer extending existing patterns over rewriting
 6. **Phase independently** — each phase should be independently verifiable
 

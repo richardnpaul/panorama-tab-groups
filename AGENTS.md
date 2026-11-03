@@ -56,8 +56,8 @@ Agents use HTML comment tokens to communicate completion status. The coordinator
 | ----------- | -------------------------------------------------- | ------------------------------------------------------- |
 | Planner     | `<!-- PLAN_COMPLETE: docs/plans/<filename>.md -->` | Plan written; awaiting coordinator/user approval        |
 | Implementer | `<!-- IMPL_COMPLETE: LINT_PASS -->`                | All code written; lint and tests pass; ready for review |
-| Reviewer    | `<!-- REVIEW_RESULT: PASS -->`                     | No CRITICAL/HIGH issues; tests pass                     |
-| Reviewer    | `<!-- REVIEW_RESULT: FAIL severity=CRITICAL -->`   | Issues found; implementer must fix before merge         |
+| Reviewer    | `<!-- REVIEW_RESULT: PASS -->`                     | No open CRITICAL/HIGH/MEDIUM/LOW findings; tests pass   |
+| Reviewer    | `<!-- REVIEW_RESULT: FAIL severity=<highest> -->`  | Findings open (e.g. `severity=LOW`); implementer fixes  |
 
 ## Security Guidelines
 
@@ -70,9 +70,13 @@ Agents use HTML comment tokens to communicate completion status. The coordinator
 
 1. Always use StateManager — never call `browser.storage` or `browser.sessions` directly
 2. Always run `npm run format`, `npm run lint`, and relevant tests (unit and E2E) before finishing any implementation pass. The unit and E2E tests can be narrowed rather than running the whole suite unless the changes involved might have broader reach. You must run `npm run test:coverage` to ensure unit test coverage is maintained or improved, ideally aiming for 100% coverage on touched code using Vitest mocks for external interfaces.
-3. Every new feature must have at least one new Playwright E2E test case
+3. Every new feature must have at least one new Playwright E2E test case. Say in the report whether each ran against the real extension (Chromium, or the Firefox lab in `tests/e2e/lab/`) or only against the Firefox stand-in: the Firefox page tests run against a fake `browser`, not the real one. Behaviour that exists only in Firefox (tab hiding, native groups, the real `sessions` API) needs a lab test; a Firefox page test cannot prove it
 4. Plans in `docs/plans/` serve as the authoritative record of design decisions
 5. Always write tests to debug unexpected behaviour rather than writing adhoc scripts
+
+## Verification & Validation
+
+Before reporting any task complete, follow [.agents/rules/verification-validation-rules.md](.agents/rules/verification-validation-rules.md): run the quality gates and then the code and security reviewers together, and repeat the whole pass until one completes with zero edits. A fix made for one kind of reviewer is always re-gated and re-reviewed by both kinds.
 
 ## Agent Rules
 

@@ -10,19 +10,42 @@ The extension detects browser capabilities and operates in one of three modes:
 - **Collapse-Only** (Chrome/Edge): Relies purely on native browser tab groups. Inactive groups are collapsed but their tabs remain visible in the tab strip.
 - **Legacy** (Firefox < 139): Uses only the `tabs.hide` API to completely hide inactive tabs.
 
-## 2. State Management (`StateManager`)
+## 2. Stored data
 
-State is managed across two browser storage mechanisms to handle MV3 service worker lifecycles:
+Everything the extension keeps is in the table below. A test (`tests/unit/stored-data.test.ts`) fails when this table and the code
+disagree about which keys exist, so it is kept true.
 
-- **Ephemeral State (`browser.sessions`)**: Fast, per-window/per-tab access.
-  - Window-level: `groups` (array of group objects), `activeGroup`, `groupIndex`.
-  - Tab-level: `groupId`.
-- **Persistent State (`browser.storage.local`)**: Extension-level persistent state.
-  - `backgroundState`: Flags like `openingView`.
-  - `windowStates`: Tracks the Tab Groups `viewTabId` per window.
-- **System Groups**: Includes special internal groups:
-  - `-1`: The Tab Groups view itself.
-  - `-2` (`UNGROUPED_GROUP_ID`): A fallback/system group for tabs not assigned to any group.
+| Key                             | Kept as           | Holds                                                                                               | Notes                                                                                                    |
+| ------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `groups`                        | value of a window | the groups of the window, each with its name, place, and the native group it refers to              | the group for ungrouped tabs (`-2`) is in the list; a group id is only unique within a window            |
+| `activeGroup`                   | value of a window | the id of the group that is shown                                                                   |                                                                                                          |
+| `groupIndex`                    | value of a window | the next id for a group of the window                                                               | a counter for each window                                                                                |
+| `layoutMode`                    | value of a window | `freeform` or `tiling`                                                                              |                                                                                                          |
+| `groupId`                       | value of a tab    | the id of the group the tab is in                                                                   | `-1` is the Tab Groups view itself, `-2` a tab in no group                                               |
+| `thumbnail`                     | value of a tab    | a picture of the tab and when it was taken                                                          | only where the browser has `tabs.captureTab` (Firefox); older versions stored the picture alone          |
+| `hybridGroupsMigrationComplete` | `storage.local`   | whether the groups were given native tab groups, once                                               | switching native groups off clears it                                                                    |
+| `__mock_sessions`               | `storage.local`   | in Chromium only: every value of a window and of a tab above, under the id of the window or the tab | never cleaned of closed tabs and windows; the ids change when the browser restores a session (see below) |
+| `toolbarPosition`               | `storage.sync`    | where the toolbar of the view is                                                                    | the options are shared between devices                                                                   |
+| `useNativeGroups`               | `storage.sync`    | whether native tab groups are used                                                                  |                                                                                                          |
+| `shortcut`                      | `storage.sync`    | which keyboard shortcuts the user has switched off                                                  |                                                                                                          |
+| `theme`                         | `storage.sync`    | `auto`, `light` or `dark`                                                                           |                                                                                                          |
+| `view`                          | `storage.sync`    | `popup` or `freeform`                                                                               |                                                                                                          |
+| `useDarkTheme`                  | `storage.sync`    | what versions that had only a dark and a light theme kept; read once, then replaced by `theme`      |                                                                                                          |
+
+The values of a window and of a tab are **session values**. In Firefox they are `browser.sessions` values: the browser keeps them for
+the extension that set them (another extension cannot read them), brings them back with a window or a tab that is restored, and
+drops them with it. Chromium has none, so they are kept in `__mock_sessions`. A backup file (`type` `tgvView`, `version` 1) holds the
+groups and tabs of each window by position, and is the only data that has a version.
+
+**What was found about the stored data in a real browser** (`tests/e2e/chromium-stored-data.spec.ts`, Chromium 156): the values of
+tabs and windows that are closed stay in `__mock_sessions`; and a tab and a window that a restored session brings back have **new
+ids**, so the values under the old ids do not reach them (the extension's groups, names and places of a window are not found, and
+it makes the window one new group). Native tab groups are restored by Chromium itself.
+
+The special groups are:
+
+- `-1`: the Tab Groups view itself.
+- `-2` (`UNGROUPED_GROUP_ID`): a fallback group for tabs that are in none.
 
 ## 3. The Tab Groups View (`view.html` / `popup-view/index.html`)
 

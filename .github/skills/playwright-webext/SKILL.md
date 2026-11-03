@@ -1,105 +1,125 @@
 ---
 name: playwright-webext
-description: Playwright E2E testing patterns for the tab-groups-viewer Firefox/Chromium extension. Covers the custom Firefox fixture (createFirefoxPageProxy, RDP addon install via playwright-webextext, UUID extraction from prefs.js), fixture exports, how to add new tests, navigation URL patterns, and common pitfalls. Load before writing or modifying any test file.
+description: Playwright E2E testing for the tab-groups-viewer extension in Firefox and Chromium. Covers how differently the two browsers are set up (real extension in Chromium, extension pages over HTTP with a stand-in browser API in Firefox), what each can prove, the fixtures, where a test that needs real Firefox goes, how to add a test, running tests and common pitfalls. Load before writing or modifying any test under tests/e2e.
 ---
 
 ## When to Use
 
-Load before writing any new test, modifying an existing test, or when investigating Playwright test failures in this project.
+Load before writing a test, changing an existing one, or investigating an E2E failure. For unit tests
+see `#skill:ts-codebase-patterns` and the project rule on verification.
 
-## Why the Custom Fixture Exists
+This skill explains the setup and its limits. The mechanism is in `tests/e2e/fixtures.ts`; read it for
+the current detail, and `references/fixture-anatomy.md` for a walkthrough of why it is built this way.
 
-Firefox (MV3 + Juggler) handles `moz-extension://` URLs in a way that breaks Playwright's standard navigation:
+## The two browsers are not set up alike
 
-- Playwright's `page.goto()` waits for a navigation commit event that **never fires** for `moz-extension://` URLs when the RDP debugger server is active
-- The extension UUID must be extracted from `prefs.js` (Firefox writes it after addon install)
-- MV3 requires a persistent browser context (not `launch()`)
-- The RDP connection must be **disconnected immediately** after addon install to exit "debugger-attached" mode — keeping it open prevents Juggler navigation events from firing
+This is the most important thing to know before writing a test.
 
-The `createFirefoxPageProxy` function patches `page.goto()` to work around all of these.
+|                              | Chromium                                                                                  | Firefox                                                                                                |
+| ---------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| How the extension is loaded  | `--load-extension` on the full Chromium binary (the headless shell cannot run extensions) | Temporary add-on, installed over Firefox's remote debugging protocol                                   |
+| What a test's `page` runs    | The **real** extension page, with the real background                                     | The extension page **served over HTTP** from `dist/`, with `window.browser` replaced by a **stand-in** |
+| Where `browser.*` comes from | The real browser                                                                          | A small fake in `fixtures.ts`, keeping its state in the page's `localStorage`                          |
+| Extension id                 | Read from the service worker's URL                                                        | The UUID Firefox writes to the profile's `prefs.js`                                                    |
 
-## Key Constants
+Why: Playwright cannot open `moz-extension://` addresses in Firefox. The `page` fixture therefore maps
+`page.goto('moz-extension://<uuid>/view.html')` to `http://127.0.0.1:<port>/view.html`, served from
+`dist/`, and `page.url()` maps it back.
 
-```javascript
-const EXTENSION_ID = 'tab-groups-viewer@example.com'; // must match manifest.json gecko.id
-const pathToExtension = path.join(process.cwd(), 'src');
-```
+What that means for what a test proves:
 
-## Fixture Exports
+- **A Firefox page test checks the page's own code against a fake `browser`.** It does not exercise the
+  real background script, real `tabs`, real `sessions` or real tab groups. Do not claim it does.
+- **A Chromium test exercises the real extension.** It is the one that covers background, messaging and
+  storage end to end (`chromium-stored-data.spec.ts` asserts what a real Chromium stores).
+- **Behaviour that needs a real Firefox** (tab hiding, native groups, the real `sessions` API) is tested
+  with the **lab**: `tests/e2e/lab/` starts a real Firefox that a test can ask things of, with a probe
+  extension that calls `browser.*` for it. See `firefox-facts.spec.ts` and
+  `native-groups-first-run.spec.ts`. Do not try to make the `page` fixture do it.
+- The fake `browser` only implements what the pages call. If a page starts using a `browser.*` API the
+  fake lacks, the Firefox test fails with that API undefined; add the smallest fake that makes it
+  behave, in the fixture, and say so in the test.
 
-All fixtures are exported from `tests/e2e/fixtures.ts` (`playwright.config.ts` holds only the configuration):
+## Fixtures
 
-| Fixture             | Type                        | Value                                                                                         |
-| ------------------- | --------------------------- | --------------------------------------------------------------------------------------------- |
-| `context`           | `BrowserContext`            | Persistent context with extension loaded (Chromium: `--load-extension`, Firefox: RDP install) |
-| `page`              | `Page` (proxied on Firefox) | First page in context, wrapped with `createFirefoxPageProxy` on Firefox                       |
-| `extensionProtocol` | `string`                    | `'moz-extension'` on Firefox, `'chrome-extension'` on Chromium                                |
-| `extensionId`       | `string`                    | Extension UUID (Firefox) or service worker origin host (Chromium)                             |
+All come from `tests/e2e/fixtures.ts`. Import `test` and `expect` from `./fixtures.js` (the `.js` specifier
+resolves to the `.ts` file), never from `@playwright/test`, which has none of them.
 
-## How to Add a New Test
+| Fixture             | What it is                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| `context`           | A persistent browser context with the extension loaded. A fresh profile every run                 |
+| `page`              | The context's first page; on Firefox wrapped by the page proxy (the mapping above)                |
+| `extensionProtocol` | `moz-extension` or `chrome-extension`                                                             |
+| `extensionId`       | The extension's id in this browser                                                                |
+| `uiLanguage`        | An option, default `en-US`: the language the browser starts in, which picks the `_locales` folder |
 
-Create a new file in `tests/e2e/` ending in `.spec.ts`:
+Use the provided `page`. Make extra pages with `context.newPage()`, which is already wrapped on
+Firefox; do not wrap a page in a second proxy.
+
+## Adding a test
+
+Create `tests/e2e/<name>.spec.ts`:
 
 ```typescript
 import { test, expect } from './fixtures.js';
 
-test('my feature works', async ({ page, extensionProtocol, extensionId }) => {
-  // Navigate to an extension page
+test('shows the view', async ({ page, extensionProtocol, extensionId }) => {
   await page.goto(`${extensionProtocol}://${extensionId}/view.html`);
-
-  // Assert
-  await expect(page.locator('#my-element')).toBeVisible();
+  await expect(page.locator('body')).toHaveClass(/view-ready/);
 });
 ```
 
-> **Important**: Import `test` and `expect` from `./fixtures.js` (the `.js` specifier resolves to `fixtures.ts`), not from `@playwright/test` directly. It exports a custom `test` object with the extension fixtures.
+- **Pages and helpers.** `tests/e2e/pages.ts` knows how to open and wait for each page of the extension
+  (`pagesOfTheExtension`) and has layout helpers; reuse them before writing another wait.
+- **Page paths** are those of the built extension under `dist/` (for example `view.html`,
+  `options.html`, `migration-status.html`, `popup-view/index.html`). Check `src/` for the current set.
+- **One browser only:** skip the other with a reason, as the existing specs do:
 
-## Navigating to Extension Pages
+```typescript
+test.skip(
+  ({ browserName }) => browserName !== 'chromium',
+  'Chromium keeps these values itself; Firefox has the real API',
+);
+```
 
-| Page             | URL Pattern                                                   |
-| ---------------- | ------------------------------------------------------------- |
-| Main view        | `${extensionProtocol}://${extensionId}/view.html`             |
-| Options          | `${extensionProtocol}://${extensionId}/options.html`          |
-| Popup (view)     | `${extensionProtocol}://${extensionId}/popup-view/popup.html` |
-| Migration status | `${extensionProtocol}://${extensionId}/migration-status.html` |
+- Every new feature gets at least one E2E test (`AGENTS.md`). Say in the test which browser(s) it is
+  meaningful for, given the table above, and say in the report whether it ran against the real
+  extension or the Firefox stand-in. Behaviour that exists only in Firefox (tab hiding, native groups,
+  the real `sessions` API) needs a lab test; a Firefox page test cannot prove it.
 
-## Running Tests
+## Running
 
 ```bash
-# Run all E2E tests (both Chromium and Firefox)
-npm run test:e2e
-
-# Run only Firefox tests
-npx playwright test --project=firefox
-
-# Run only Chromium tests
+npm run test:e2e                          # builds dist/ and dist-firefox/ first, then both browsers
+npx playwright test --project=firefox     # one browser; does NOT rebuild
 npx playwright test --project=chromium
-
-# Run a specific test file
-npx playwright test tests/e2e/extension.spec.ts
-
-# Show HTML report
+npx playwright test tests/e2e/<file>.spec.ts
 npx playwright show-report
 ```
 
-Test configuration: `workers: 1`, `fullyParallel: false`. Firefox timeout: 180000ms.
+- **`npx playwright test` does not rebuild.** The `pretest:e2e` hook only runs for `npm run test:e2e`.
+  After changing `src/`, run `npm run dist && npm run dist:firefox` (or use `npm run test:e2e`), or the
+  tests run against the old build.
+- **Settings** (`playwright.config.ts`): serial (`workers: 1`, `fullyParallel: false`), one `timeout` for
+  all projects, two retries on CI and none locally, an HTML report that never opens by itself, and
+  trace, screenshot and video recording. Read the file for the values.
+- **Headless by default.** `PLAYWRIGHT_HEADED=1` (or `PLAYWRIGHT_FIREFOX_HEADED=1`, or `PWDEBUG`) runs
+  headed, which needs `DISPLAY` or `WAYLAND_DISPLAY`; `CI` forces headless.
+- **Profiles** are `test-user-data-<browser>/` in the repository root (ignored by git), deleted and
+  recreated at the start of each run. At the end the Firefox process that used the profile is killed.
 
-## Firefox-Specific Notes
+## Common pitfalls
 
-- **Profile**: The `test-user-data-firefox/` directory is **deleted on every run** (`fs.rmSync` with `recursive: true`)
-- **UUID**: Extracted by `readFirefoxUuidFromPrefs()` which polls `prefs.js` for up to 15 seconds
-- **RDP**: `playwright-webextext` library handles the RDP connection. Source: `node_modules/playwright-webextext/dist/firefox_remote.js`
-- **Proxy**: `createFirefoxPageProxy` polls the frame's execution context to detect when the extension page has loaded, then manually calls `frameCommittedNewDocumentNavigation()` to unblock Playwright's pending navigation state
-- **New pages**: `context.newPage()` is also patched — pages created inside tests automatically get the proxy wrapper
+| Pitfall                                                | Cause                                                              | Fix                                                                              |
+| ------------------------------------------------------ | ------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| A Firefox test passes but the real extension is broken | The page ran against the stand-in `browser`, not the real one      | Cover real behaviour in Chromium, or with the lab for Firefox                    |
+| `browser.x is not a function` only in Firefox tests    | The stand-in lacks that API                                        | Add the smallest fake to the fixture                                             |
+| Tests ignore your change                               | Ran `npx playwright test` against an old `dist/`                   | Rebuild, or use `npm run test:e2e`                                               |
+| `goto()` hangs or `NS_ERROR_NOT_AVAILABLE` in Firefox  | Went around the proxied `page`, or wrapped a page twice            | Use the `page` fixture and `context.newPage()` as they are                       |
+| "Extension ID for firefox was not resolved"            | `prefs.js` had no UUID within the wait; the manifest id changed    | Check `EXTENSION_ID` in the fixture matches `browser_specific_settings.gecko.id` |
+| Headed run fails at once                               | No display                                                         | Set `DISPLAY`/`WAYLAND_DISPLAY`, or run headless                                 |
+| Chromium has no service worker                         | Headless shell used instead of the full binary                     | The fixture picks the full binary; do not change it                              |
+| Stale profile errors                                   | A crashed run left a profile or process behind                     | Delete `test-user-data-*/` and kill the leftover browser                         |
+| Passes on one browser, fails on the other              | The two setups differ (table above), or an API is browser-specific | Decide which browser the test is for and skip the other with a reason            |
 
-## Common Pitfalls
-
-| Pitfall                                           | Cause                                           | Fix                                                                                                     |
-| ------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `page.goto()` hangs forever on `moz-extension://` | Playwright's navigation event never fires       | Use the proxied `page` fixture — never bypass it                                                        |
-| Extension UUID is `null`                          | prefs.js not written yet                        | `readFirefoxUuidFromPrefs` polls up to 15s; if still null, check `EXTENSION_ID` matches `manifest.json` |
-| `NS_ERROR_NOT_AVAILABLE`                          | Two `goto()` calls racing on the same real page | Don't create extra proxies; use the provided `page` fixture                                             |
-| Tests pass on Chromium but fail on Firefox        | Firefox-only API used or navigation timing      | Add a `browserName === 'firefox'` branch or increase timeout                                            |
-| `context` fixture reuse errors                    | Profile not cleaned                             | Profile is auto-deleted; if corrupt, manually delete `test-user-data-firefox/`                          |
-
-> See [.github/skills/playwright-webext/references/fixture-anatomy.md](./references/fixture-anatomy.md) for the fully annotated `createFirefoxPageProxy` and fixture setup code.
+> See [references/fixture-anatomy.md](./references/fixture-anatomy.md) for how the fixtures are built.
