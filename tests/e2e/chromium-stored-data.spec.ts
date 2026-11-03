@@ -25,8 +25,10 @@ test.describe('Values kept in Chromium', () => {
   test.beforeEach(async () => {
     profile = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-profile-'));
     server = http.createServer((request, response) => {
+      // The address is shown as text, never as markup, as in the lab's pages (`lab/lab.ts`)
+      const shown = (request.url ?? '').replace(/[<&]/gu, '');
       response.writeHead(200, { 'Content-Type': 'text/html' });
-      response.end(`<title>${request.url ?? ''}</title>${request.url ?? ''}`);
+      response.end(`<title>${shown}</title>${shown}`);
     });
     await new Promise<void>((resolve) => {
       server.listen(0, '127.0.0.1', resolve);
