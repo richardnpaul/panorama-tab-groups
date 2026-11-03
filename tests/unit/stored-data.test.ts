@@ -35,13 +35,17 @@ function keysInSpec(): string[] {
 /** The keys the adapters read and write, as `where:key` */
 function keysInCode(): string[] {
   const code = adapterSources();
+  // The key is the first quoted text after the call or the name, on the same line: Stryker's
+  // sandbox wraps each literal in an expression of its own (in double quotes), which this skips
   const sessionValues = [
     ...code.matchAll(
-      /(?:get|set|remove)(Window|Tab)Value\(\s*\w+,\s*'([A-Za-z_]+)'/gu,
+      /(?:get|set|remove)(Window|Tab)Value\(\s*\w+,[^'\n;]*?'([A-Za-z_]+)'/gu,
     ),
   ].map(([, scope = '', key = '']) => `${scope.toLowerCase()}:${key}`);
   const local = [
-    ...code.matchAll(/(?:const KEY|const STORAGE_KEY) = '([A-Za-z_]+)'/gu),
+    ...code.matchAll(
+      /(?:const KEY|const STORAGE_KEY) = [^'\n;]*?'([A-Za-z_]+)'/gu,
+    ),
   ].map(([, key = '']) => `local:${key}`);
   // The options are the keys of the defaults; the one older versions kept is still read
   const sync = [
