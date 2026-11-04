@@ -5,6 +5,7 @@ function setUp() {
   const deps = {
     handleMenuChange: vi.fn().mockResolvedValue(undefined),
     deleteGroup: vi.fn().mockResolvedValue({ success: true }),
+    tabMoves: { placeTab: vi.fn().mockResolvedValue(undefined) },
     nativeGroupsSync: {
       migrate: vi.fn().mockResolvedValue(true),
       cleanup: vi.fn().mockResolvedValue(undefined),
@@ -35,6 +36,52 @@ describe('app/message-handler.ts', () => {
       expect(deps.handleMenuChange).toHaveBeenCalledWith(message);
     },
   );
+
+  describe('placeTab', () => {
+    it('places the tab as the view asks, and says it did', async () => {
+      const { handle, deps } = setUp();
+
+      await expect(
+        handle({
+          action: 'placeTab',
+          tabId: 11,
+          groupId: 2,
+          windowId: 1,
+          beside: { tabId: 12, before: true },
+        }),
+      ).resolves.toEqual({ success: true });
+
+      expect(deps.tabMoves.placeTab).toHaveBeenCalledWith(11, 2, 1, {
+        tabId: 12,
+        before: true,
+      });
+    });
+
+    it('refuses a message that does not say where', async () => {
+      const { handle, deps } = setUp();
+
+      await expect(
+        handle({ action: 'placeTab', tabId: 11, windowId: 1 }),
+      ).resolves.toEqual({ success: false, error: 'Invalid placeTab message' });
+
+      expect(deps.tabMoves.placeTab).not.toHaveBeenCalled();
+    });
+
+    it('says so when the tab cannot be placed', async () => {
+      const { handle, deps } = setUp();
+      const failure = new Error('No tab with id: 11');
+      deps.tabMoves.placeTab.mockRejectedValue(failure);
+
+      await expect(
+        handle({ action: 'placeTab', tabId: 11, groupId: 2, windowId: 1 }),
+      ).resolves.toEqual({ success: false, error: 'No tab with id: 11' });
+
+      expect(deps.logger.error).toHaveBeenCalledWith(
+        '[Message] Tab 11 could not be placed:',
+        failure,
+      );
+    });
+  });
 
   describe('deleteGroup', () => {
     const message = {

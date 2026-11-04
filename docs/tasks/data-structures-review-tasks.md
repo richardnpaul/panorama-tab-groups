@@ -15,8 +15,8 @@
 | **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`                                                                                      | None                                                                | `[x] Done`  |
 | **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                                         | None                                                                | `[x] Done`  |
 | **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                  | None                                                                | `[x] Done`  |
-| **Chunk 7** | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                         | None                                                                | `[ ] To Do` |
-| **Chunk 8** | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                   | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[ ] To Do` |
+| **Chunk 7** | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                         | None                                                                | `[x] Done`  |
+| **Chunk 8** | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                   | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[x] Done`  |
 | **Chunk 9** | Test Model (`world.ts`), Property Generator & Test Timeouts    | `tests/support/world/world.ts`, `tests/unit/journeys/random-actions.property.test.ts`, `tests/unit/*/start.test.ts` | None (best run after Chunks 2–8)                                    | `[ ] To Do` |
 
 ---
@@ -168,21 +168,58 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
 
 ### Chunk 8: View Drag Native Sync & Context Menu Pinned Active Move
 
-- **Status:** `[ ] To Do`
+- **Status:** `[x] Done`
 - **Touched Files:**
   - `src/js/app/tab-moves.ts`
   - `src/js/view/drag.ts`
-  - `src/js/app/message-handler.ts` (if view drag notifies or delegates to background `ownMoves` / `moveTab`)
-  - `tests/unit/app/tab-moves.test.ts`
-  - `tests/unit/view/drag.test.ts`
+  - `src/js/view/start.ts`
+  - `src/js/app/message-handler.ts`
+  - `src/js/core/messages.ts`
+  - `src/js/background/compose.ts`
+  - `src/js/ports/tabs.ts`, `src/js/adapters/browser/tabs.ts`, `src/js/adapters/memory/tabs.ts`
+  - `src/js/ports/view-tabs.ts`, `src/js/adapters/browser/view-tabs.ts`, `src/js/adapters/memory/view-tabs.ts`
+  - `tests/support/world/browser-model.ts`, `tests/support/world/model-ports.ts`
+  - `tests/unit/app/tab-moves.test.ts`, `tests/unit/view/drag.test.ts`, `tests/unit/view/start.test.ts`,
+    `tests/unit/app/message-handler.test.ts`, `tests/unit/core/messages.test.ts`,
+    `tests/unit/adapters/browser/small-ports.test.ts`, `tests/unit/adapters/memory/steps15-ports.test.ts`,
+    `tests/unit/adapters/view-ports.test.ts`, `tests/unit/world/browser-model.test.ts`
+  - `tests/e2e/user-journeys.spec.ts`
 - **Findings Addressed:**
-  - **8.1 (HIGH — Dragging a tab between groups in `view.html` triggers `followNativeGroupOf` in the background and overwrites the tab's group to `-2`, and leaves native groups out of sync):** In `src/js/view/drag.ts:54, 72-121, 224-238`, `putTabInGroup` and `dropOnTab` run in the `view.html` page process with a page-local `ownMoves` counter, call `groupState.setTabGroup(tabId, groupId)`, and call `tabs.moveTo(tabId, -1)`. In Chromium, moving a grouped tab past its native group fires `tabs.onUpdated({ groupId: -1 })` in the background (where `ownMoves.includes(tabId)` is `false`), which overwrites the tab's group to `-2` (`UNGROUPED_GROUP_ID`). Furthermore, `view/drag.ts` never puts the moved tab into the target group's native group.
-    - _Fix:_ Coordinate tab group moves from `view/drag.ts` with the background (or sync native group membership and background `ownMoves`) so dragging a tab in `view.html` updates the target group's native group and is not clobbered to `-2` by `followNativeGroupOf`.
-  - **8.2 (MEDIUM — `moveActiveTab` in `tab-moves.ts` fails when the active tab being moved via context menu is pinned):** In `src/js/app/tab-moves.ts:192-212, 249-251`, when the active tab is pinned (`own === undefined`), `moveActiveTab` looks for neighbours with `getTabGroup(id) === undefined` (only pinned tabs) instead of unpinned tabs in the window's shown group (`activeGroup`), leaving the moved tab active while trying to hide/collapse it in the target group.
-    - _Fix:_ When `own === undefined` (pinned tab), look for a neighbour in the window's `activeGroup` (or among visible unpinned tabs) so focus shifts before moving the tab to an inactive group.
+  - **8.1 (HIGH — Dragging a tab between groups in `view.html` leaves native groups out of sync, and can be clobbered to
+    `-2`):**
+    - _Reproduced (in part):_ the Chromium E2E journey "Move tab between existing groups" was extended to check, after
+      the drop, that the view still shows the tab in group B once reopened, and that every tab of group B is in one native
+      group. On the code before this chunk it failed in real Chromium: group B's tabs were in two native groups
+      (`[1110981857, 781558561]`), as `view/drag.ts` never put the moved tab in the target group's native group. The
+      overwrite to `-2` did not happen in that run (the tab was still in group B after the reload); it depends on how
+      Chromium reports the move, and the fix removes its cause either way.
+    - _Fixed:_ the view no longer stores the group or moves the tab itself. `view/drag.ts` asks the background
+      (`{ action: 'placeTab', tabId, groupId, windowId, beside }`, parsed by `parseTabPlacement` in
+      `src/js/core/messages.ts` and handled in `src/js/app/message-handler.ts`), and shows the tab again where it is
+      (`groupNodes.insertTab`) when the background did not place it. The new `TabMoves.placeTab` in
+      `src/js/app/tab-moves.ts` sends the tab to its group with `moveTab` (stored group, end of the window, the group's
+      native group, made if there is none, shown or hidden as the menu does) and then puts it next to the tab it was
+      dropped by (`Tabs.moveBeside`, a new port method), inside the background's `ownMoves`, putting it back in its
+      group's native group if the move took it out at the edge of the group. The page-local move counter in
+      `view/drag.ts` and `ViewTabs.moveTo`, now unused, were removed. TDD tests in `tests/unit/app/tab-moves.test.ts`
+      (`placeTab, for a tab the view dropped`), `tests/unit/view/drag.test.ts`, `tests/unit/view/start.test.ts`,
+      `tests/unit/app/message-handler.test.ts`, `tests/unit/core/messages.test.ts` and the adapters' tests.
+    - _E2E:_ the extended journey passes in Chromium (real extension). Its reload and native-group checks run only
+      there: the Firefox page tests run against a stand-in `browser` with no background (it answers every message
+      with `{ success: true }`), so they cannot show a move the background makes.
+  - **8.2 (MEDIUM — `moveActiveTab` picks the wrong neighbour when the active tab is pinned):**
+    - _Fixed:_ for a pinned tab, `moveActiveTab` (`src/js/app/tab-moves.ts`) hands over to the tabs of the group the
+      window shows (`getActiveGroup`), and keeps the pinned tab itself in the list so `neighbourOf` finds its place;
+      where the window shows no group it falls back to the other pinned tabs, as before. Unpinned tabs with no stored
+      group keep the old matching. TDD tests in `tests/unit/app/tab-moves.test.ts` (`for the active tab`).
 - **Verification:**
-  - [ ] `npx vitest run tests/unit/app/tab-moves.test.ts tests/unit/view/drag.test.ts`
-  - [ ] `MUTATE="src/js/app/tab-moves.ts,src/js/view/drag.ts" npm run test:mutation`
+  - [x] `npx vitest run --coverage --maxWorkers=2` (4633 tests; 100% statements, branches, functions, lines)
+  - [x] `MUTATE="src/js/app/tab-moves.ts,src/js/view/drag.ts,src/js/app/message-handler.ts,src/js/core/messages.ts,src/js/adapters/browser/tabs.ts,src/js/adapters/memory/tabs.ts,src/js/adapters/browser/view-tabs.ts,src/js/adapters/memory/view-tabs.ts,src/js/view/start.ts,src/js/background/compose.ts" npm run test:mutation`
+        (100% after sharpening three `drag.test.ts` assertions; the last run was `MUTATE="src/js/view/drag.ts"`)
+  - [x] `npm run lint` (0 errors, 0 warnings)
+  - [x] `npm run test:e2e -- -g "Move tab between existing groups|Drag tab outside"` (4 passed: Chromium and the
+        Firefox page tests)
+  - [x] `npm run test:e2e` (full suite: 333 passed, 0 failed, 259 skipped)
 
 ---
 

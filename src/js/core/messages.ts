@@ -35,6 +35,35 @@ export function parseGroupDeletion(
   return { groupId, windowId, nativeGroupId, tabIds };
 }
 
+/** Where the view put a tab it dropped: in a group, and next to a tab, if it was dropped by one */
+export interface TabPlacement {
+  tabId: number;
+  groupId: number;
+  windowId: number;
+  beside: { tabId: number; before: boolean } | undefined;
+}
+
+/** The placement that was asked for, or nothing if the message does not ask for one */
+export function parseTabPlacement(
+  message: Record<string, unknown>,
+): TabPlacement | undefined {
+  const { tabId, groupId, windowId, beside } = message;
+  if (!isId(tabId) || !isId(groupId) || !isId(windowId)) {
+    return undefined;
+  }
+  if (beside === undefined) {
+    return { tabId, groupId, windowId, beside };
+  }
+  return isRecord(beside) && isId(beside.tabId) && isBoolean(beside.before)
+    ? {
+        tabId,
+        groupId,
+        windowId,
+        beside: { tabId: beside.tabId, before: beside.before },
+      }
+    : undefined;
+}
+
 /**
  * Whether a backup is being opened, as the options page says: the only thing
  * of the background it may change.
@@ -46,6 +75,10 @@ export function parseOpeningBackup(
     ? message.value
     : undefined;
 }
+
+/** Whether the background's answer says it did what it was asked */
+export const isSuccess = (answer: unknown): boolean =>
+  isRecord(answer) && answer.success === true;
 
 /** A message to the background, which names what it asks for */
 export interface Envelope {

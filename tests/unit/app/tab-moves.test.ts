@@ -555,6 +555,116 @@ describe('app/tab-moves.ts', () => {
     });
   });
 
+  describe('placeTab, for a tab the view dropped', () => {
+    it('sends a tab dropped on another group there, as moveTab does', async () => {
+      const env = await setUp({ tabGroups: { 10: 1, 11: 1 } });
+
+      await env.moves.placeTab(11, 2, WINDOW);
+
+      expect(await env.groupState.getTabGroup(11)).toBe(2);
+      expect(env.tabs.calls).toEqual(['move 11']);
+      expect(env.nativeGroups.calls).toEqual(['add 11 to 60']);
+      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
+    });
+
+    it('then puts it next to the tab it was dropped by', async () => {
+      const env = await setUp({
+        tabGroups: { 11: 1, 12: 2 },
+        tabs: [tab(10), tab(11), tab(12, { browserGroupId: 60 })],
+      });
+
+      await env.moves.placeTab(11, 2, WINDOW, { tabId: 12, before: true });
+
+      expect(env.tabs.calls).toEqual(['move 11', 'move 11 before 12']);
+    });
+
+    it('only puts it next to that tab when it is in the group already', async () => {
+      const env = await setUp({
+        tabGroups: { 11: 2, 12: 2 },
+        tabs: [
+          tab(11, { browserGroupId: 60 }),
+          tab(12, { browserGroupId: 60 }),
+        ],
+      });
+
+      await env.moves.placeTab(11, 2, WINDOW, { tabId: 12, before: false });
+
+      expect(env.tabs.calls).toEqual(['move 11 after 12']);
+      expect(env.nativeGroups.calls).toEqual([]);
+      expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
+    });
+
+    it('puts it back in the native group of its group when the move took it out, as Chromium does at the edge of a group', async () => {
+      const env = await setUp({
+        tabGroups: { 11: 2, 12: 2 },
+        tabs: [tab(11), tab(12, { browserGroupId: 60 })],
+      });
+
+      await env.moves.placeTab(11, 2, WINDOW, { tabId: 12, before: false });
+
+      expect(env.nativeGroups.calls).toEqual(['add 11 to 60']);
+    });
+
+    it('leaves native groups alone when they are switched off', async () => {
+      const env = await setUp({
+        useNative: false,
+        tabGroups: { 11: 2, 12: 2 },
+        tabs: [tab(11), tab(12)],
+      });
+
+      await env.moves.placeTab(11, 2, WINDOW, { tabId: 12, before: false });
+
+      expect(env.nativeGroups.calls).toEqual([]);
+    });
+
+    it('puts it in no native group when its group has none', async () => {
+      const env = await setUp({
+        tabGroups: { 11: 3, 12: 3 },
+        tabs: [tab(11), tab(12)],
+      });
+
+      await env.moves.placeTab(11, 3, WINDOW, { tabId: 12, before: false });
+
+      expect(env.nativeGroups.calls).toEqual([]);
+    });
+
+    it('counts the tab as one the add-on is moving while it is put there', async () => {
+      const env = await setUp({
+        tabGroups: { 11: 2, 12: 2 },
+        tabs: [tab(11), tab(12, { browserGroupId: 60 })],
+      });
+      const seen: boolean[] = [];
+      const moveBeside = env.tabs.moveBeside.bind(env.tabs);
+      vi.spyOn(env.tabs, 'moveBeside').mockImplementation(async (...args) => {
+        seen.push(env.ownMoves.includes(11));
+        await moveBeside(...args);
+      });
+
+      await env.moves.placeTab(11, 2, WINDOW, { tabId: 12, before: false });
+
+      expect(seen).toEqual([true]);
+      expect(env.ownMoves.includes(11)).toBe(false);
+    });
+
+    it('says so, and goes on, when the tab cannot be put back in its native group', async () => {
+      const env = await setUp({
+        tabGroups: { 11: 2, 12: 2 },
+        tabs: [tab(11), tab(12, { browserGroupId: 60 })],
+      });
+      const failure = new Error('No tab with id: 11');
+      vi.spyOn(env.nativeGroups, 'addTabs').mockRejectedValue(failure);
+
+      await expect(
+        env.moves.placeTab(11, 2, WINDOW, { tabId: 12, before: false }),
+      ).resolves.toBeUndefined();
+
+      expect(env.logger.warn).toHaveBeenCalledWith(
+        'Could not assign tab to native group:',
+        failure,
+      );
+    });
+  });
+
   describe('menuClicked', () => {
     it('makes the menu again when asked to refresh the groups', async () => {
       const env = await setUp();
@@ -686,6 +796,36 @@ describe('app/tab-moves.ts', () => {
         await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
 
         expect(env.tabs.calls).toEqual(['activate 11', 'move 11']);
+      });
+
+      it('hands a pinned tab over to a tab of the group the window shows, as a pinned tab is in none', async () => {
+        const env = await setUp({
+          useNative: false,
+          tabs: [tab(9, { active: true, pinned: true }), tab(10), tab(11)],
+          tabGroups: { 10: 1, 11: 1 },
+        });
+
+        await env.moves.menuClicked({ menuItemId: '2' }, tab(9));
+
+        expect(env.tabs.calls).toEqual(['activate 10', 'unpin 9', 'move 9']);
+        expect(await env.groupState.getTabGroup(9)).toBe(2);
+      });
+
+      it('hands a pinned tab over to another pinned tab where the window shows no group', async () => {
+        const env = await setUp({
+          useNative: false,
+          activeGroup: undefined,
+          tabs: [
+            tab(8, { pinned: true }),
+            tab(9, { active: true, pinned: true }),
+            tab(10),
+          ],
+          tabGroups: { 10: 1 },
+        });
+
+        await env.moves.menuClicked({ menuItemId: '2' }, tab(9));
+
+        expect(env.tabs.calls[0]).toBe('activate 8');
       });
 
       it('skips the tabs that are hidden', async () => {

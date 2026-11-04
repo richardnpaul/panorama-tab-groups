@@ -404,6 +404,7 @@ export function composeBackgroundFrom({
       handleMessage: createMessageHandler({
         handleMenuChange,
         deleteGroup,
+        tabMoves,
         nativeGroupsSync,
         migrationFlag,
         viewRefresh,

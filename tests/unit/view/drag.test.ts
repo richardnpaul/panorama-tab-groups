@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMemoryGroupState } from '../../../src/js/adapters/memory/group-state.js';
-import { createMemoryViewTabs } from '../../../src/js/adapters/memory/view-tabs.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
-import type { ViewTab } from '../../../src/js/ports/view-tabs.js';
 import { createDrag } from '../../../src/js/view/drag.js';
 
 const makeGroup = (id: number): Group => ({
@@ -11,18 +9,6 @@ const makeGroup = (id: number): Group => ({
   name: `G${String(id)}`,
   containerId: 'firefox-default',
   rect: { x: 0, y: 0, w: 1, h: 1 },
-});
-
-const viewTab = (id: number, index: number): ViewTab => ({
-  id,
-  windowId: 1,
-  index,
-  title: `T${String(id)}`,
-  url: undefined,
-  favIconUrl: undefined,
-  pinned: false,
-  discarded: false,
-  lastAccessed: 0,
 });
 
 const settle = () =>
@@ -114,17 +100,20 @@ function setUp() {
     insertTab: vi.fn().mockResolvedValue(undefined),
   };
   const groupState = createMemoryGroupState();
-  const tabs = createMemoryViewTabs([
-    viewTab(10, 0),
-    viewTab(11, 1),
-    viewTab(12, 2),
-  ]);
+  // The background places the tab, and says it did
+  const placeTab = vi.fn<
+    (
+      tabId: number,
+      groupId: number,
+      beside?: { tabId: number; before: boolean },
+    ) => Promise<boolean>
+  >(() => Promise.resolve(true));
   const logger = { error: vi.fn() };
   const drag = createDrag({
     groups,
     groupNodes: () => groupNodes,
     groupState,
-    tabs,
+    placeTab,
     windowId: () => 1,
     logger,
   });
@@ -164,7 +153,7 @@ function setUp() {
     groups,
     groupNodes,
     groupState,
-    tabs,
+    placeTab,
     logger,
     content,
     newtab,
@@ -462,45 +451,33 @@ describe('view/drag.ts', () => {
       expect(order(env)).toEqual(['11', '12', '10', 'newtab']);
     });
 
-    it('puts the tab before the one it is dropped on, in its group, at its place in the window', async () => {
-      const env = setUp();
-      await env.groupState.setTabGroup(11, 1);
-      await env.groupState.setTabGroup(10, 5);
-
-      await dragAndDrop(env, env.c, 210);
-
-      expect(order(env)).toEqual(['11', '10', '12', 'newtab']);
-      expect(await env.groupState.getTabGroup(10)).toBe(5);
-    });
-
-    it('gives the tab the group of the one it is dropped on', async () => {
+    it('asks the background to put the tab in the group of the tab it is dropped on, before it', async () => {
       const env = setUp();
       await env.groupState.setTabGroup(12, 3);
 
       await dragAndDrop(env, env.c, 210);
 
-      expect(await env.groupState.getTabGroup(10)).toBe(3);
+      expect(order(env)).toEqual(['11', '10', '12', 'newtab']);
+      expect(env.placeTab.mock.calls).toEqual([
+        [10, 3, { tabId: 12, before: true }],
+      ]);
     });
 
-    it('moves the tab in the window to just before the tab, going forward', async () => {
+    it('asks for it after the tab, where the pointer is in its second half', async () => {
       const env = setUp();
-
-      await dragAndDrop(env, env.c, 210);
-
-      expect(env.tabs.calls).toEqual(['move 10 to 1']);
-    });
-
-    it('moves the tab in the window to just after the tab, going forward', async () => {
-      const env = setUp();
+      await env.groupState.setTabGroup(12, 3);
 
       await dragAndDrop(env, env.c, 290);
 
-      expect(env.tabs.calls).toEqual(['move 10 to 2']);
       expect(order(env)).toEqual(['11', '12', '10', 'newtab']);
+      expect(env.placeTab.mock.calls).toEqual([
+        [10, 3, { tabId: 12, before: false }],
+      ]);
     });
 
-    it('moves the tab in the window to the tab before, going back', async () => {
+    it('asks for it before a tab it is dragged back to', async () => {
       const env = setUp();
+      await env.groupState.setTabGroup(10, 1);
       env.c.dispatchEvent(dragEvent('dragstart'));
       env.a.dispatchEvent(dragEvent('dragenter'));
       env.a.dispatchEvent(dragEvent('dragover', { clientX: 10 }));
@@ -508,8 +485,32 @@ describe('view/drag.ts', () => {
       env.a.dispatchEvent(dragEvent('drop'));
       await settle();
 
-      expect(env.tabs.calls).toEqual(['move 12 to 0']);
       expect(order(env)).toEqual(['12', '10', '11', 'newtab']);
+      expect(env.placeTab.mock.calls).toEqual([
+        [12, 1, { tabId: 10, before: true }],
+      ]);
+    });
+
+    it('shows the tab where it is when the background did not place it', async () => {
+      const env = setUp();
+      await env.groupState.setTabGroup(12, 3);
+      env.placeTab.mockResolvedValue(false);
+
+      await dragAndDrop(env, env.c, 210);
+
+      expect(env.groupNodes.insertTab).toHaveBeenCalledWith(10);
+      // Once where it was dropped, and once where it is shown again, for both groups
+      expect(env.groupNodes.updateFit).toHaveBeenCalledTimes(4);
+    });
+
+    it('stores and moves nothing itself, as the background does', async () => {
+      const env = setUp();
+      await env.groupState.setTabGroup(12, 3);
+      const setTabGroup = vi.spyOn(env.groupState, 'setTabGroup');
+
+      await dragAndDrop(env, env.c, 210);
+
+      expect(setTabGroup).not.toHaveBeenCalled();
     });
 
     it('does not let the drop reach the page', async () => {
@@ -524,6 +525,7 @@ describe('view/drag.ts', () => {
 
     it('fits the tabs of every group again', async () => {
       const env = setUp();
+      await env.groupState.setTabGroup(12, 3);
 
       await dragAndDrop(env, env.c, 210);
 
@@ -540,7 +542,9 @@ describe('view/drag.ts', () => {
       env.a.dispatchEvent(dragEvent('drop'));
       await settle();
 
-      expect(env.tabs.calls).toEqual([]);
+      expect(env.placeTab).not.toHaveBeenCalled();
+      expect(env.groupNodes.insertTab).not.toHaveBeenCalled();
+      expect(env.groupNodes.updateFit).not.toHaveBeenCalled();
       expect(order(env)).toEqual(['10', '11', '12', 'newtab']);
     });
 
@@ -552,22 +556,42 @@ describe('view/drag.ts', () => {
       env.b.dispatchEvent(dragEvent('drop'));
       await settle();
 
-      expect(env.tabs.calls).toEqual([]);
+      expect(env.placeTab).not.toHaveBeenCalled();
     });
 
-    it('keeps the group when the one it was dropped on has none', async () => {
+    it('keeps the group when the one it was dropped on has none, and shows the tab where it is', async () => {
       const env = setUp();
       await env.groupState.setTabGroup(10, 5);
 
       await dragAndDrop(env, env.c, 210);
 
       expect(await env.groupState.getTabGroup(10)).toBe(5);
+      expect(env.placeTab).not.toHaveBeenCalled();
+      expect(env.groupNodes.insertTab).toHaveBeenCalledWith(10);
+      expect(env.groupNodes.updateFit).toHaveBeenCalledTimes(4);
+    });
+
+    it('says so when the background cannot be asked, and shows the tab where it is', async () => {
+      const env = setUp();
+      await env.groupState.setTabGroup(12, 3);
+      const failure = new Error('no receiver');
+      env.placeTab.mockRejectedValue(failure);
+
+      await dragAndDrop(env, env.c, 210);
+
+      expect(env.logger.error).toHaveBeenCalledWith(
+        '[View] Tab 10 could not be placed:',
+        failure,
+      );
+      expect(env.groupNodes.insertTab).toHaveBeenCalledWith(10);
     });
 
     it('says so when it fails', async () => {
       const env = setUp();
+      await env.groupState.setTabGroup(12, 3);
       const failure = new Error('gone');
-      env.tabs.moveTo = () => Promise.reject(failure);
+      env.groupNodes.insertTab.mockRejectedValue(failure);
+      env.placeTab.mockResolvedValue(false);
 
       await dragAndDrop(env, env.c, 210);
 
@@ -598,7 +622,7 @@ describe('view/drag.ts', () => {
       ).toBe(false);
     });
 
-    it('puts the tab last in the group, gives it the group, and moves it to the end of the window', async () => {
+    it('puts the tab last in the group, and asks the background to put it in the group', async () => {
       const env = setUp();
       env.a.dispatchEvent(dragEvent('dragstart'));
       const drop = dragEvent('drop');
@@ -607,9 +631,9 @@ describe('view/drag.ts', () => {
       await settle();
 
       expect(order(env)).toEqual(['11', '12', '10', 'newtab']);
-      expect(await env.groupState.getTabGroup(10)).toBe(1);
-      expect(env.tabs.calls).toEqual(['move 10 to -1']);
+      expect(env.placeTab.mock.calls).toEqual([[10, 1, undefined]]);
       expect(env.groupNodes.updateFit).toHaveBeenCalledTimes(2);
+      expect(env.groupNodes.insertTab).not.toHaveBeenCalled();
     });
 
     it('does not let the drop reach the page', async () => {
@@ -630,7 +654,7 @@ describe('view/drag.ts', () => {
       env.content.dispatchEvent(dragEvent('drop'));
       await settle();
 
-      expect(env.tabs.calls).toEqual([]);
+      expect(env.placeTab).not.toHaveBeenCalled();
     });
 
     it('does nothing for a group that has no button for a new tab', async () => {
@@ -641,7 +665,7 @@ describe('view/drag.ts', () => {
       env.content.dispatchEvent(dragEvent('drop'));
       await settle();
 
-      expect(env.tabs.calls).toEqual([]);
+      expect(env.placeTab).not.toHaveBeenCalled();
     });
 
     it('does nothing when the drop is not on an element', async () => {
@@ -651,7 +675,7 @@ describe('view/drag.ts', () => {
       env.drag.group.drop(dragEvent('drop'));
       await settle();
 
-      expect(env.tabs.calls).toEqual([]);
+      expect(env.placeTab).not.toHaveBeenCalled();
     });
   });
 
@@ -674,8 +698,7 @@ describe('view/drag.ts', () => {
       expect(env.created[0]?.rect.h).toBeCloseTo(150 / window.innerHeight, 10);
       expect(target.querySelector('.group')).not.toBeNull();
       expect(env.groupNodes.resize).toHaveBeenCalledTimes(1);
-      expect(await env.groupState.getTabGroup(10)).toBe(7);
-      expect(env.tabs.calls).toEqual(['move 10 to -1']);
+      expect(env.placeTab.mock.calls).toEqual([[10, 7, undefined]]);
       expect(scrollIntoView).toHaveBeenCalledWith({
         behavior: 'smooth',
       });
@@ -748,38 +771,6 @@ describe('view/drag.ts', () => {
       await env.drag.tabMoved(10, { windowId: 2 });
 
       expect(env.groupNodes.insertTab).not.toHaveBeenCalled();
-    });
-
-    it('ignores the moves it makes itself, and takes notice of later ones', async () => {
-      const env = setUp();
-      let finish: () => void = () => undefined;
-      env.tabs.moveTo = () =>
-        new Promise<void>((resolve) => {
-          finish = resolve;
-        });
-      env.a.dispatchEvent(dragEvent('dragstart'));
-      env.content.dispatchEvent(dragEvent('drop'));
-      await settle();
-
-      await env.drag.tabMoved(10, { windowId: 1 });
-      expect(env.groupNodes.insertTab).not.toHaveBeenCalled();
-      finish();
-      await settle();
-      await env.drag.tabMoved(10, { windowId: 1 });
-
-      expect(env.groupNodes.insertTab).toHaveBeenCalledTimes(1);
-    });
-
-    it('takes notice of moves again after one of its own failed', async () => {
-      const env = setUp();
-      env.tabs.moveTo = () => Promise.reject(new Error('no'));
-      env.a.dispatchEvent(dragEvent('dragstart'));
-      env.content.dispatchEvent(dragEvent('drop'));
-      await settle();
-
-      await env.drag.tabMoved(10, { windowId: 1 });
-
-      expect(env.groupNodes.insertTab).toHaveBeenCalledTimes(1);
     });
   });
 });

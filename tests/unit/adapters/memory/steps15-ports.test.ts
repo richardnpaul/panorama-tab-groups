@@ -329,6 +329,19 @@ describe('adapters/memory/tabs.ts (actions)', () => {
     expect(tabs.calls).toEqual(['move 1']);
   });
 
+  it.each([
+    [true, [2, 1, 3]],
+    [false, [2, 3, 1]],
+  ])('puts a tab next to another, before it is %s', async (before, ids) => {
+    const tabs = createMemoryTabs();
+    tabs.setDetails([tab(1, 7), tab(2, 7), tab(3, 7)]);
+
+    await tabs.moveBeside(1, 3, before);
+
+    expect((await tabs.listInWindow(7)).map(({ id }) => id)).toEqual(ids);
+    expect(tabs.calls).toEqual([`move 1 ${before ? 'before' : 'after'} 3`]);
+  });
+
   it('closes a tab, and fails for one that is not there', async () => {
     const tabs = createMemoryTabs();
     tabs.setDetails([tab(1, 7), tab(2, 7)]);

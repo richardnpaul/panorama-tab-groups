@@ -30,7 +30,6 @@ const api = (tabs: Partial<Record<keyof ViewTabsApi['tabs'], Mock>> = {}) => ({
     getCurrent: vi.fn().mockResolvedValue({ id: 7 }),
     update: vi.fn().mockResolvedValue(undefined),
     remove: vi.fn().mockResolvedValue(undefined),
-    move: vi.fn().mockResolvedValue(undefined),
     create: vi.fn().mockResolvedValue({ id: 11 }),
     ...tabs,
   },
@@ -136,19 +135,17 @@ describe('adapters/browser/view-tabs.ts', () => {
     await expect(tabs.get(0)).resolves.toMatchObject({ id: 0, windowId: 0 });
   });
 
-  it('activates, closes and moves tabs, and opens a new one', async () => {
+  it('activates and closes tabs, and opens a new one', async () => {
     const browser = api();
     const tabs = createBrowserViewTabs(() => browser);
 
     await tabs.activate(3);
     await tabs.close(4);
-    await tabs.moveTo(5, 0);
     const opened = await tabs.openNew();
 
     expect(opened).toBe(11);
     expect(browser.tabs.update).toHaveBeenCalledWith(3, { active: true });
     expect(browser.tabs.remove).toHaveBeenCalledWith(4);
-    expect(browser.tabs.move).toHaveBeenCalledWith(5, { index: 0 });
     expect(browser.tabs.create).toHaveBeenCalledWith({ active: true });
   });
 
@@ -164,12 +161,11 @@ describe('adapters/browser/view-tabs.ts', () => {
     const failure = new Error('no');
     const reject = vi.fn().mockRejectedValue(failure);
     const tabs = createBrowserViewTabs(() =>
-      api({ update: reject, remove: reject, move: reject, create: reject }),
+      api({ update: reject, remove: reject, create: reject }),
     );
 
     await expect(tabs.activate(1)).rejects.toBe(failure);
     await expect(tabs.close(1)).rejects.toBe(failure);
-    await expect(tabs.moveTo(1, 0)).rejects.toBe(failure);
     await expect(tabs.openNew()).rejects.toBe(failure);
   });
 
@@ -282,7 +278,6 @@ describe('adapters/memory/view-tabs.ts', () => {
     const tabs = createMemoryViewTabs([viewTab(1), viewTab(2)]);
 
     await tabs.activate(1);
-    await tabs.moveTo(2, 0);
     const first = await tabs.openNew();
     const second = await tabs.openNew();
     await tabs.close(2);
@@ -291,7 +286,6 @@ describe('adapters/memory/view-tabs.ts', () => {
 
     expect(tabs.calls).toEqual([
       'activate 1',
-      'move 2 to 0',
       'open new',
       'open new',
       'close 2',

@@ -128,6 +128,20 @@ export function createMemoryTabs(
       details = [...details.filter(({ id }) => id !== tabId), ...moved];
       return Promise.resolve();
     },
+    moveBeside(tabId, besideTabId, before) {
+      calls.push(
+        `move ${String(tabId)} ${before ? 'before' : 'after'} ${String(besideTabId)}`,
+      );
+      const moved = details.filter(({ id }) => id === tabId);
+      const others = details.filter(({ id }) => id !== tabId);
+      const at = others.findIndex(({ id }) => id === besideTabId);
+      details = [
+        ...others.slice(0, before ? at : at + 1),
+        ...moved,
+        ...others.slice(before ? at : at + 1),
+      ];
+      return Promise.resolve();
+    },
     close(tabId) {
       calls.push(`close ${String(tabId)}`);
       if (!details.some(({ id }) => id === tabId)) {

@@ -749,16 +749,19 @@ test.describe('User Journeys', () => {
     });
 
     // The move is stored, and stays once the browser has said what it did with the tab: the view
-    // shows it in group B when it is opened again
-    await new Promise((r) => {
-      setTimeout(r, 1000);
-    });
-    await viewPage.reload();
-    await expect(viewPage.locator('body.view-ready')).toBeVisible();
-    await expect(groupBLatest.locator('.tab')).toHaveCount(3, {
-      timeout: 10000,
-    });
-    await expect(groupALatest.locator('.tab')).toHaveCount(0);
+    // shows it in group B when it is opened again. The background makes the move, so only the real
+    // extension can show it (the Firefox page tests have a stand-in with no background).
+    if (browserName === 'chromium') {
+      await new Promise((r) => {
+        setTimeout(r, 1000);
+      });
+      await viewPage.reload();
+      await expect(viewPage.locator('body.view-ready')).toBeVisible();
+      await expect(groupBLatest.locator('.tab')).toHaveCount(3, {
+        timeout: 10000,
+      });
+      await expect(groupALatest.locator('.tab')).toHaveCount(0);
+    }
 
     // And in the browser, the tab is in group B's native group, with the others of group B
     if (browserName === 'chromium') {

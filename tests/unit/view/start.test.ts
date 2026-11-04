@@ -457,6 +457,35 @@ describe('view/start.ts', () => {
       );
     });
 
+    it('asks the background to put a tab dropped in a group there', async () => {
+      const env = await load();
+      await env.startView();
+      env.browser.runtime.sendMessage.mockResolvedValue({ success: true });
+      const transfer = {
+        dropEffect: '',
+        effectAllowed: '',
+        setData: vi.fn(),
+        setDragImage: vi.fn(),
+      };
+      const start = new Event('dragstart', { bubbles: true });
+      Object.defineProperty(start, 'dataTransfer', { value: transfer });
+      element('.tab[tabId="1"]').dispatchEvent(start);
+
+      const drop = new Event('drop', { bubbles: true, cancelable: true });
+      Object.defineProperty(drop, 'dataTransfer', { value: transfer });
+      const [, second] = document.querySelectorAll('#groups > .group .content');
+      second?.dispatchEvent(drop);
+      await settle();
+
+      expect(env.browser.runtime.sendMessage).toHaveBeenCalledWith({
+        action: 'placeTab',
+        tabId: 1,
+        groupId: 1,
+        windowId: WINDOW,
+        beside: undefined,
+      });
+    });
+
     it('lets a group be moved by pressing in it, while the layout is the free one', async () => {
       const env = await load();
       await env.startView();

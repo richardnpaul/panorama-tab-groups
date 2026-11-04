@@ -366,6 +366,59 @@ describe('adapters/browser/tabs.ts', () => {
     });
   });
 
+  describe('moveBeside', () => {
+    // Tab 1 is at 1, tab 2 at 4
+    const places = vi.fn((tabId: number) =>
+      Promise.resolve({ id: tabId, windowId: 1, index: tabId === 1 ? 1 : 4 }),
+    );
+
+    it.each([
+      [true, 3],
+      [false, 4],
+    ])(
+      'moves the tab forward next to the other, before it is %s, to %i',
+      async (before, index) => {
+        const move = vi.fn().mockResolvedValue(undefined);
+        const tabs = createBrowserTabs(() => api({ get: places, move }));
+
+        await tabs.moveBeside(1, 2, before);
+
+        expect(move).toHaveBeenCalledWith(1, { index });
+      },
+    );
+
+    it('moves the tab back next to the other', async () => {
+      const move = vi.fn().mockResolvedValue(undefined);
+      const tabs = createBrowserTabs(() => api({ get: places, move }));
+
+      await tabs.moveBeside(2, 1, true);
+
+      expect(move).toHaveBeenCalledWith(2, { index: 1 });
+    });
+
+    it.each([
+      ['the tab', 1],
+      ['the other', 2],
+    ])(
+      'leaves the tab where it is when the browser gives %s no place',
+      async (_name, placeless) => {
+        const move = vi.fn().mockResolvedValue(undefined);
+        const get = vi.fn((tabId: number) =>
+          Promise.resolve(
+            tabId === placeless
+              ? { id: tabId, windowId: 1 }
+              : { id: tabId, windowId: 1, index: 3 },
+          ),
+        );
+        const tabs = createBrowserTabs(() => api({ get, move }));
+
+        await tabs.moveBeside(1, 2, true);
+
+        expect(move).not.toHaveBeenCalled();
+      },
+    );
+  });
+
   describe('close', () => {
     it('closes the tab', async () => {
       const remove = vi.fn().mockResolvedValue(undefined);

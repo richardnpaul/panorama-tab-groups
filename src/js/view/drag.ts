@@ -1,8 +1,7 @@
-import { dropMarkFor, moveTargetIndex, newGroupRect } from '../core/layout.js';
+import { dropMarkFor, newGroupRect } from '../core/layout.js';
 import type { GroupsStore } from '../app/groups-store.js';
 import type { GroupState } from '../ports/group-state.js';
 import type { Logger } from '../ports/logger.js';
-import type { ViewTabs } from '../ports/view-tabs.js';
 import { newElement } from '../share/utils.js';
 import type { GroupDragHandlers, GroupNodes } from './group-nodes.js';
 import type { TabDragHandlers } from './tab-nodes.js';
@@ -16,8 +15,17 @@ export interface DragDeps {
     GroupNodes,
     'make' | 'newTabOf' | 'resize' | 'updateFit' | 'insertTab'
   >;
-  groupState: Pick<GroupState, 'getTabGroup' | 'setTabGroup'>;
-  tabs: Pick<ViewTabs, 'get' | 'moveTo'>;
+  groupState: Pick<GroupState, 'getTabGroup'>;
+  /**
+   * Ask the background to put the tab in the group, next to a tab if it was dropped by one: it
+   * moves it, as what the browser says of the move is taken for the person's doing elsewhere.
+   * Gives whether it did.
+   */
+  placeTab: (
+    tabId: number,
+    groupId: number,
+    beside?: { tabId: number; before: boolean },
+  ) => Promise<boolean>;
   // The window the view is in
   windowId: () => number;
   logger: Pick<Logger, 'error'>;
@@ -38,7 +46,7 @@ export function createDrag({
   groups,
   groupNodes,
   groupState,
-  tabs,
+  placeTab,
   windowId,
   logger,
 }: DragDeps): Drag {
@@ -50,8 +58,6 @@ export function createDrag({
   let over: HTMLElement | null = null;
   let entered = 0;
   let dropBefore = false;
-  // The browser says of a move that was made here, which is already shown
-  let ownMoves = 0;
 
   const report = (action: Promise<unknown>): void => {
     action.catch((error: unknown) => {
@@ -69,12 +75,22 @@ export function createDrag({
     });
   };
 
-  async function moveOwn(tabId: number, index: number): Promise<void> {
-    ownMoves += 1;
-    try {
-      await tabs.moveTo(tabId, index);
-    } finally {
-      ownMoves -= 1;
+  // The tab is shown where it was dropped at once; where the background did not move it, it is
+  // shown again where it is
+  async function place(
+    tabId: number,
+    groupId: number,
+    beside?: { tabId: number; before: boolean },
+  ): Promise<void> {
+    const placed = await placeTab(tabId, groupId, beside).catch(
+      (error: unknown) => {
+        logger.error(`[View] Tab ${String(tabId)} could not be placed:`, error);
+        return false;
+      },
+    );
+    if (!placed) {
+      await groupNodes().insertTab(tabId);
+      updateAllFits();
     }
   }
 
@@ -97,13 +113,12 @@ export function createDrag({
     const toTabId = idOfNode(target);
     const tabId = idOfNode(moved);
     const groupId = await groupState.getTabGroup(toTabId);
-    if (groupId !== undefined) {
-      await groupState.setTabGroup(tabId, groupId);
+    if (groupId === undefined) {
+      await groupNodes().insertTab(tabId);
+      updateAllFits();
+      return;
     }
-
-    const tab = await tabs.get(tabId);
-    const toTab = await tabs.get(toTabId);
-    await moveOwn(tabId, moveTargetIndex(tab.index, toTab.index, dropBefore));
+    await place(tabId, groupId, { tabId: toTabId, before: dropBefore });
   }
 
   async function putTabInGroup(groupId: number): Promise<void> {
@@ -114,10 +129,7 @@ export function createDrag({
     newTab.insertAdjacentElement('beforebegin', dragged);
     updateAllFits();
 
-    const tabId = idOfNode(dragged);
-    await groupState.setTabGroup(tabId, groupId);
-    // The end of the window
-    await moveOwn(tabId, -1);
+    await place(idOfNode(dragged), groupId);
   }
 
   const tab: TabDragHandlers = {
@@ -247,7 +259,7 @@ export function createDrag({
     },
 
     async tabMoved(tabId, moveInfo) {
-      if (ownMoves > 0 || windowId() !== moveInfo.windowId) {
+      if (windowId() !== moveInfo.windowId) {
         return;
       }
       await groupNodes().insertTab(tabId);

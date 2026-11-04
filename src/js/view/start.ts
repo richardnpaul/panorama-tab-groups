@@ -22,6 +22,7 @@ import { initDragScroll } from './dragscroll.js';
 import { createGroupNodes, type GroupNodes } from './group-nodes.js';
 import { createLate } from './late.js';
 import { applyLanguage } from '../share/direction.js';
+import { isSuccess } from '../core/messages.js';
 import { createLeaveView } from './leave-view.js';
 import { createPage } from './page.js';
 import { createTabNodes } from './tab-nodes.js';
@@ -99,7 +100,16 @@ async function initView(): Promise<void> {
     groups,
     groupNodes: groupNodesLate.get,
     groupState,
-    tabs: viewTabs,
+    placeTab: async (tabId, groupId, beside) =>
+      isSuccess(
+        await messaging.send({
+          action: 'placeTab',
+          tabId,
+          groupId,
+          windowId,
+          beside,
+        }),
+      ),
     windowId: () => windowId,
     logger,
   });

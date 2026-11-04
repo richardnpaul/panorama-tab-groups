@@ -53,10 +53,6 @@ export function createMemoryViewTabs(
       tabs = tabs.filter(({ id }) => id !== tabId);
       return Promise.resolve();
     },
-    moveTo(tabId, index) {
-      calls.push(`move ${String(tabId)} to ${String(index)}`);
-      return Promise.resolve();
-    },
     openNew() {
       calls.push('open new');
       const id = self.nextTabId;

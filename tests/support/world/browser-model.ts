@@ -103,6 +103,8 @@ export interface BrowserModel {
   restoreWindow(): { windowId: number; tabIds: number[] } | undefined;
   moveTab(tabId: number, windowId: number): void;
   moveToEnd(tabId: number): void;
+  /** Put a tab next to another of its window */
+  moveBeside(tabId: number, besideTabId: number, before: boolean): void;
   /** Pin or unpin a tab; a tab that is pinned leaves its group, and is not put back when unpinned */
   setPinned(tabId: number, pinned: boolean): void;
   focusWindow(windowId: number): void;
@@ -437,6 +439,13 @@ export function createBrowserModel(
       const tab = tabOf(tabId);
       const window = windowOf(tab.windowId);
       window.tabIds = [...window.tabIds.filter((id) => id !== tabId), tabId];
+    },
+
+    moveBeside(tabId, besideTabId, before) {
+      const window = windowOf(tabOf(tabId).windowId);
+      const others = window.tabIds.filter((id) => id !== tabId);
+      const at = others.indexOf(tabOf(besideTabId).id) + (before ? 0 : 1);
+      window.tabIds = [...others.slice(0, at), tabId, ...others.slice(at)];
     },
 
     setPinned(tabId, pinned) {

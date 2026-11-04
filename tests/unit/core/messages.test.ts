@@ -3,6 +3,8 @@ import {
   openEnvelope,
   parseGroupDeletion,
   parseOpeningBackup,
+  parseTabPlacement,
+  isSuccess,
 } from '../../../src/js/core/messages.js';
 
 const valid = {
@@ -76,6 +78,60 @@ describe('core/messages.ts', () => {
       ['tabIds', [1, 1.5]],
     ])('refuses %s being %j', (key, value) => {
       expect(parseGroupDeletion({ ...valid, [key]: value })).toBeUndefined();
+    });
+  });
+
+  describe('parseTabPlacement', () => {
+    const asked = { tabId: 11, groupId: 0, windowId: 1 };
+
+    it('reads a tab dropped in a group', () => {
+      expect(parseTabPlacement(asked)).toEqual({ ...asked, beside: undefined });
+    });
+
+    it('reads a tab dropped next to another, before or after it', () => {
+      expect(
+        parseTabPlacement({ ...asked, beside: { tabId: 12, before: false } }),
+      ).toEqual({ ...asked, beside: { tabId: 12, before: false } });
+    });
+
+    it('keeps nothing else of what it is given next to', () => {
+      expect(
+        parseTabPlacement({
+          ...asked,
+          beside: { tabId: 12, before: true, extra: 1 },
+        })?.beside,
+      ).toEqual({ tabId: 12, before: true });
+    });
+
+    it.each([
+      [{ groupId: 0, windowId: 1 }],
+      [{ tabId: 11, windowId: 1 }],
+      [{ tabId: 11, groupId: 0 }],
+      [{ ...asked, tabId: 1.5 }],
+      [{ ...asked, groupId: '0' }],
+      [{ ...asked, windowId: null }],
+      [{ ...asked, beside: 12 }],
+      [{ ...asked, beside: { tabId: '12', before: true } }],
+      [{ ...asked, beside: { tabId: 12 } }],
+      [{ ...asked, beside: null }],
+    ])('refuses %j', (message) => {
+      expect(parseTabPlacement(message)).toBeUndefined();
+    });
+  });
+
+  describe('isSuccess', () => {
+    it('is true for an answer that says it succeeded', () => {
+      expect(isSuccess({ success: true })).toBe(true);
+    });
+
+    it.each([
+      [{ success: false }],
+      [{ success: 'true' }],
+      [{}],
+      [undefined],
+      ['ok'],
+    ])('is false for %j', (answer) => {
+      expect(isSuccess(answer)).toBe(false);
     });
   });
 

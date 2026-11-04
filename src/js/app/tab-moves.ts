@@ -16,6 +16,7 @@ export interface TabMovesDeps {
   tabs: Pick<
     Tabs,
     | 'moveToEnd'
+    | 'moveBeside'
     | 'unpin'
     | 'get'
     | 'activate'
@@ -58,6 +59,18 @@ export interface ClickedTab {
 export interface TabMoves {
   /** Send a tab to a group; `windowId` is the window of the tab, where it is not the window the code is running in */
   moveTab: (tabId: number, groupId: number, windowId?: number) => Promise<void>;
+  /**
+   * A tab the view dropped: it is sent to the group, as `moveTab` sends it, and then put next to
+   * the tab it was dropped by, if it was, where it stays in the native group of its group. The
+   * view asks the background to do it, as what the browser says of the moves is not the person's
+   * doing only where they are made.
+   */
+  placeTab: (
+    tabId: number,
+    groupId: number,
+    windowId: number,
+    beside?: { tabId: number; before: boolean },
+  ) => Promise<void>;
   menuClicked: (
     info: { menuItemId: string | number },
     tab: ClickedTab | undefined,
@@ -175,6 +188,47 @@ export function createTabMoves({
     await toggleVisibleTabs(activeGroup, windowId);
   }
 
+  // Chromium takes a tab out of its native group when it is moved past the edge of the group
+  async function keepInNativeGroup(
+    tabId: number,
+    groupId: number,
+    windowId: number,
+  ): Promise<void> {
+    const nativeGroupId = nativeGroupIdOf(
+      (await groupState.getGroups(windowId))?.find(({ id }) => id === groupId),
+    );
+    if (
+      nativeGroupId !== undefined &&
+      (await tabs.get(tabId)).browserGroupId !== nativeGroupId
+    ) {
+      await nativeGroups.addTabs([tabId], nativeGroupId);
+    }
+  }
+
+  async function placeTab(
+    tabId: number,
+    groupId: number,
+    windowId: number,
+    beside?: { tabId: number; before: boolean },
+  ): Promise<void> {
+    if ((await groupState.getTabGroup(tabId)) !== groupId) {
+      await moveTab(tabId, groupId, windowId);
+    }
+    if (beside === undefined) {
+      return;
+    }
+    await ownMoves.during([tabId], async () => {
+      await tabs.moveBeside(tabId, beside.tabId, beside.before);
+      if (await useNativeGroups()) {
+        try {
+          await keepInNativeGroup(tabId, groupId, windowId);
+        } catch (error) {
+          logger.warn('Could not assign tab to native group:', error);
+        }
+      }
+    });
+  }
+
   // One after the other, so the tabs end up in the order they were in
   const moveAll = (
     tabIds: readonly number[],
@@ -194,12 +248,15 @@ export function createTabMoves({
     windowId: number,
     groupId: number,
   ): Promise<void> {
-    const own = await groupState.getTabGroup(tabId);
+    // A pinned tab is in no group: the tabs of the group the window shows take over from it
+    const own = (await tabs.get(tabId)).pinned
+      ? await groupState.getActiveGroup(windowId)
+      : await groupState.getTabGroup(tabId);
     const visible = await tabs.visibleIdsInWindow(windowId);
     const beside = await Promise.all(
       visible.map(async (id) => ({
         id,
-        sameGroup: (await groupState.getTabGroup(id)) === own,
+        sameGroup: id === tabId || (await groupState.getTabGroup(id)) === own,
       })),
     );
     await tabs.activate(
@@ -254,5 +311,5 @@ export function createTabMoves({
     }
   }
 
-  return { moveTab, menuClicked };
+  return { moveTab, placeTab, menuClicked };
 }

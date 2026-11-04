@@ -25,8 +25,6 @@ export interface ViewTabs {
   activate(tabId: number): Promise<void>;
   /** Rejects if the tab is already closed */
   close(tabId: number): Promise<void>;
-  /** Put the tab at a place in its window */
-  moveTo(tabId: number, index: number): Promise<void>;
   /** Open a new tab, make it the active one, and give its id */
   openNew(): Promise<number>;
   /** The id of the tab the view is shown in */

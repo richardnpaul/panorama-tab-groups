@@ -109,6 +109,10 @@ export function tabsOfModel(model: BrowserModel): Tabs {
       rejected(() => {
         model.moveToEnd(id);
       }),
+    moveBeside: (id, besideId, before) =>
+      rejected(() => {
+        model.moveBeside(id, besideId, before);
+      }),
     close: (id) =>
       rejected(() => {
         model.closeTab(id);

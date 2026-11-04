@@ -140,6 +140,19 @@ describe('the model of a browser (tests/support/world)', () => {
       ]);
     });
 
+    it.each([
+      [true, [1, 0, 2]],
+      [false, [1, 2, 0]],
+    ])('puts a tab next to another, before it is %s', (before, order) => {
+      const { windowId, tabIds } = model.seedWindow(['a', 'b', 'c']);
+
+      model.moveBeside(tabIds[0] ?? 0, tabIds[2] ?? 0, before);
+
+      expect(model.tabsOf(windowId).map(({ id }) => id)).toEqual(
+        order.map((at) => tabIds[at]),
+      );
+    });
+
     it('shows a hidden tab that is brought to the front', () => {
       const { windowId, tabIds } = model.seedWindow(['a', 'b']);
       model.hide([tabIds[1] ?? 0]);

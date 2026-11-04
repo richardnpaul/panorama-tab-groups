@@ -2,12 +2,14 @@ import {
   openEnvelope,
   parseGroupDeletion,
   parseOpeningBackup,
+  parseTabPlacement,
   type GroupDeletionRequest,
 } from '../core/messages.js';
 import type { Logger } from '../ports/logger.js';
 import type { MigrationFlag } from '../ports/migration-flag.js';
 import type { DeletionResult } from './delete-group.js';
 import type { NativeGroupsSync } from './native-groups-sync.js';
+import type { TabMoves } from './tab-moves.js';
 import { messageOf } from '../share/guards.js';
 import type { ViewRefresh } from './view-refresh.js';
 import type { AutoBackup } from './auto-backup.js';
@@ -16,6 +18,9 @@ export interface MessageHandlerDeps {
   // Create, rename or remove the menu item of a group
   handleMenuChange: (message: unknown) => Promise<void>;
   deleteGroup: (deletion: GroupDeletionRequest) => Promise<DeletionResult>;
+  // A tab the view dropped is moved here, where what the browser says of the move is known to be
+  // the add-on's own doing
+  tabMoves: Pick<TabMoves, 'placeTab'>;
   nativeGroupsSync: Pick<NativeGroupsSync, 'migrate' | 'cleanup'>;
   migrationFlag: Pick<MigrationFlag, 'setComplete'>;
   viewRefresh: Pick<ViewRefresh, 'refreshView' | 'isOrdered' | 'clear'>;
@@ -33,6 +38,7 @@ type Handler = (message: Record<string, unknown>) => Promise<unknown>;
 export function createMessageHandler({
   handleMenuChange,
   deleteGroup,
+  tabMoves,
   nativeGroupsSync,
   migrationFlag,
   viewRefresh,
@@ -57,6 +63,27 @@ export function createMessageHandler({
               error: 'Invalid deleteGroup message',
             })
           : deleteGroup(deletion);
+      },
+    ],
+
+    [
+      'placeTab',
+      async (message) => {
+        const placement = parseTabPlacement(message);
+        if (placement === undefined) {
+          return { success: false, error: 'Invalid placeTab message' };
+        }
+        const { tabId, groupId, windowId, beside } = placement;
+        try {
+          await tabMoves.placeTab(tabId, groupId, windowId, beside);
+          return { success: true };
+        } catch (error) {
+          logger.error(
+            `[Message] Tab ${String(tabId)} could not be placed:`,
+            error,
+          );
+          return { success: false, error: messageOf(error) };
+        }
       },
     ],
 

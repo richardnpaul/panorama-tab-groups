@@ -1,3 +1,4 @@
+import { moveTargetIndex } from '../../core/layout.js';
 import type {
   TabDetails,
   Tabs,
@@ -155,6 +156,20 @@ export function createBrowserTabs(getApi: () => TabsApi): Tabs {
 
     async moveToEnd(tabId) {
       await getApi().tabs.move(tabId, { index: -1 });
+    },
+
+    async moveBeside(tabId, besideTabId, before) {
+      const api = getApi();
+      const [{ index }, { index: besideIndex }] = await Promise.all([
+        api.tabs.get(tabId),
+        api.tabs.get(besideTabId),
+      ]);
+      // A tab the browser gives no place for is left where it is
+      if (index !== undefined && besideIndex !== undefined) {
+        await api.tabs.move(tabId, {
+          index: moveTargetIndex(index, besideIndex, before),
+        });
+      }
     },
 
     async close(tabId) {

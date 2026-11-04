@@ -53,6 +53,12 @@ export interface Tabs {
   unpin(tabId: number): Promise<void>;
   /** Put the tab after all the others of its window */
   moveToEnd(tabId: number): Promise<void>;
+  /** Put the tab next to another of its window, before or after it, as one dropped there */
+  moveBeside(
+    tabId: number,
+    besideTabId: number,
+    before: boolean,
+  ): Promise<void>;
   /** Rejects if the tab is already closed */
   close(tabId: number): Promise<void>;
   /** The tabs of a window as a backup keeps them, in the order of the window */
