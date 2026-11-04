@@ -240,12 +240,13 @@ describe('app/migrations.ts', () => {
       ]);
     });
 
-    it('writes the version, and the windows', async () => {
-      const env = setUp({ windowIds: [1, 2] });
+    it('writes the version, and the windows, including stored windows that are not open', async () => {
+      const env = setUp({ windowIds: [2] });
       await env.groupState.setGroups(1, [oldGroup(1)]);
 
       await env.migrations.atStart();
 
+      expect(env.autoBackup.writeIfDue).toHaveBeenCalledTimes(1);
       expect(await env.dataVersion.read()).toBe(DATA_VERSION);
       expect(await env.groupState.getGroups(1)).toEqual([group(1)]);
       expect(await env.groupState.getSchemaVersion(1)).toBe(DATA_VERSION);

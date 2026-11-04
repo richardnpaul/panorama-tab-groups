@@ -13,7 +13,7 @@
 | **Chunk 2** | View & Popup Store / UI Edge Cases                             | `src/js/app/stored-groups-wait.ts`                                                                                  | None                                                                | `[x] Done`  |
 | **Chunk 3** | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                           | None                                                                | `[x] Done`  |
 | **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`                                                                                      | None                                                                | `[x] Done`  |
-| **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/startup.ts`, `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                | None                                                                | `[ ] To Do` |
+| **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                                         | None                                                                | `[x] Done`  |
 | **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                  | None                                                                | `[ ] To Do` |
 | **Chunk 7** | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                         | None                                                                | `[ ] To Do` |
 | **Chunk 8** | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                   | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[ ] To Do` |
@@ -106,29 +106,22 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
 
 ### Chunk 5: Startup, Migrations & Emulation Zombie Prevention
 
-- **Status:** `[ ] To Do`
+- **Status:** `[x] Done`
 - **Touched Files:**
-  - `src/js/app/startup.ts`
   - `src/js/app/migrations.ts`
   - `src/js/adapters/browser/sessions-emulation.ts`
-  - `tests/unit/app/startup.test.ts`
   - `tests/unit/app/migrations.test.ts`
   - `tests/unit/adapters/browser/sessions-emulation.test.ts`
 - **Findings Addressed:**
-  - **5.1 (HIGH — Chromium restart runs `migrations.atStart()` before `windowRebuild.rebuildAll()` and leaves `archive` unmigrated):** In `src/js/app/startup.ts:55-59` and `src/js/app/migrations.ts:160-182`:
-    1. On a Chromium restart, restored windows have new window IDs while stored groups are under old window IDs in `__mock_sessions` (`groupState.listStoredWindowIds()`).
-    2. `migrations.atStart()` only queries `windows.listIds()`, sees `undefined` groups on all new window IDs, skips `autoBackup.writeIfDue(...)`, and stamps `schemaVersion = 5` on the empty new window IDs.
-    3. `windowRebuild.rebuildAll()` then copies unmigrated `closed.groups` (still carrying `containerId`) from `archive` into the already-"migrated" new window IDs, bypassing `dropContainers` (v1→v2). The same bypass occurs when reopening a pre-v2 closed window via `rebuildWindow(windowId)`.
-    - _Fix:_ Ensure `windowRebuild.rebuildAll()` runs before (or in coordination with) `migrations.atStart()`, and ensure stored windows in `__mock_sessions` (`listStoredWindowIds()`) are migrated (stripping `containerId`) so neither startup rebuild nor runtime `rebuildWindow` copies unmigrated v1 groups.
-  - **5.2 (MEDIUM — `migrate(windowId)` writes zombie `{ schemaVersion: 5 }` into `privateSessions` for closed/empty windows):** In `src/js/app/migrations.ts:118-133`, `migrate(windowId)` unconditionally calls `setSchemaVersion(windowId, DATA_VERSION)` even when the window has no stored groups (`getGroups(windowId) === undefined`) and is already closed. In Chromium, `sessions-emulation.ts:179-184` catches `windows.get(windowId)` rejecting and writes a zombie entry into `privateSessions`.
-    - _Fix:_ Only write `setSchemaVersion` when the window actually has stored groups or is currently open (or avoid migrating unstored closed windows).
-  - **5.3 (LOW — `sessions-emulation.ts` `ids()` coerces empty/whitespace keys to `0`):** In `src/js/adapters/browser/sessions-emulation.ts:221-226`, `Object.keys(...).map(Number).filter((id) => Number.isInteger(id))` turns `""` into `0`.
-    - _Fix:_ Filter keys with `/^-?\d+$/u` before `Number(...)` (matching `group-state.ts:87`).
-  - **5.4 (LOW — Early startup rejection leaves `waitForInitialization()` blocked for 11s):** In `src/js/app/startup.ts:52-63`, if `firstRun.decideNativeGroups()`, `migrations.atStart()`, or `windowRebuild.rebuildAll()` rejects before `recovery.initializeTabGroupAssignments()`, `initialization.finish()` is never called.
-    - _Fix:_ Ensure `recovery.initializeTabGroupAssignments()` (or `initialization.finish()`) is still reached or guarded so event handlers are not stranded until timeout.
+  - **5.1 (HIGH — Chromium restart runs `migrations.atStart()` without migrating stored windows in `__mock_sessions`):** In `src/js/app/migrations.ts:165-181`, `migrations.atStart()` only queried `windows.listIds()`, ignoring `groupState.listStoredWindowIds()`. On a Chromium restart (where restored windows have new IDs and old windows are in `listStoredWindowIds()`) or when a closed window from v1 was kept in `__mock_sessions`, `migrations.atStart()` missed those stored windows, skipped `autoBackup.writeIfDue(...)` when open windows had no stored groups yet, and left `archive` unmigrated so `windowRebuild` copied v1 groups with `containerId`.
+    - _Fix:_ Combined `await windows.listIds()` and `await groupState.listStoredWindowIds()` (`new Set(...)`) in `migrations.atStart()` so all stored windows are backed up and migrated at startup before `windowRebuild.rebuildAll()` or `rebuildWindow()` reads `archive`; added TDD unit test in `tests/unit/app/migrations.test.ts`.
+  - **5.2 (Closed as False Positive with Evidence — `migrate(windowId)` setting `schemaVersion` on windows without stored groups):** `tests/unit/app/migrations.test.ts:124-131` (`it('notes the version of a window that has nothing stored yet')`) and `tests/unit/adapters/browser/sessions-emulation.test.ts:528-540` (`it('keeps apart what cannot be asked about, as a window that has closed')`) explicitly specify and test this behaviour, and `closedWindows.prune()` (`src/js/app/closed-windows.ts:160-162`) removes all non-open `privateWindowIds`.
+  - **5.3 (LOW — `sessions-emulation.ts` `ids()` coerces empty/whitespace keys to `0`):** In `src/js/adapters/browser/sessions-emulation.ts:221-226`, `Object.keys(...).map(Number).filter((id) => Number.isInteger(id))` turned `""` and whitespace strings into integer keys (`0`, `5`).
+    - _Fix:_ Filtered keys with `WHOLE_NUMBER_TEXT` (`/^-?\d+$/`) before `.map(Number)` in `src/js/adapters/browser/sessions-emulation.ts`, and added TDD unit test cases in `tests/unit/adapters/browser/sessions-emulation.test.ts`.
+  - **5.4 (Closed as False Positive with Evidence — `startup.ts` error propagation):** `tests/unit/app/startup.test.ts:80-106` (`it.each(steps)('stops where %s fails, and says so by failing')`) explicitly specifies that `startup.ts` stops and rejects when any step rejects, while `migrations.atStart()` (`src/js/app/migrations.ts:145,187`) and `windowRebuild.rebuildAll()` (`src/js/app/window-rebuild.ts:336-340`) already catch and log their own internal errors.
 - **Verification:**
-  - [ ] `npx vitest run tests/unit/app/startup.test.ts tests/unit/app/migrations.test.ts tests/unit/adapters/browser/sessions-emulation.test.ts`
-  - [ ] `MUTATE="src/js/app/startup.ts,src/js/app/migrations.ts,src/js/adapters/browser/sessions-emulation.ts" npm run test:mutation`
+  - [x] `npx vitest run tests/unit/app/migrations.test.ts tests/unit/adapters/browser/sessions-emulation.test.ts --coverage` (100% coverage)
+  - [x] `MUTATE="src/js/app/migrations.ts,src/js/adapters/browser/sessions-emulation.ts" npm run test:mutation` (100% mutation score)
 
 ---
 

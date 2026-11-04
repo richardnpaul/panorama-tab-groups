@@ -53,6 +53,7 @@ export type IsPrivate = (scope: ScopeName, id: number) => Promise<boolean>;
 const STORAGE_KEY = '__mock_sessions';
 // Where the values of private windows and tabs are kept apart from the others
 const PRIVATE_KEY = 'privateSessions';
+const WHOLE_NUMBER_TEXT = /^-?\d+$/;
 
 type Values = Record<string, unknown>;
 type Scope = Record<string, Values>;
@@ -221,8 +222,8 @@ export function createSessionsEmulation(
   const ids = (part: Part, scope: ScopeName): Promise<number[]> =>
     exclusively(async () =>
       Object.keys((await load())[part][scope])
-        .map(Number)
-        .filter((id) => Number.isInteger(id)),
+        .filter((id) => WHOLE_NUMBER_TEXT.test(id))
+        .map(Number),
     );
 
   // What a private window or tab has kept apart already is newer than what it has with the others

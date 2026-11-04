@@ -82,12 +82,21 @@ describe('adapters/browser/sessions-emulation.ts', () => {
     it('leaves out an id that is not a whole number', async () => {
       const { sessions } = setUp({
         [KEY]: {
-          tabs: { '5': { a: 1 }, x: { a: 1 }, '1.5': { a: 1 } },
+          tabs: {
+            '5': { a: 1 },
+            '-1': { a: 1 },
+            '': { a: 1 },
+            ' 5': { a: 1 },
+            '5 ': { a: 1 },
+            '5x': { a: 1 },
+            x5: { a: 1 },
+            '1.5': { a: 1 },
+          },
           windows: {},
         },
       });
 
-      expect(await sessions.tabIds()).toEqual([5]);
+      expect(await sessions.tabIds()).toEqual([5, -1]);
     });
 
     it('forgets a window, and a tab, with everything in it, and no other', async () => {

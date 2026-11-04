@@ -162,7 +162,12 @@ export function createMigrations({
       if (stored >= DATA_VERSION) {
         return;
       }
-      const windowIds = await windows.listIds();
+      const windowIds = [
+        ...new Set([
+          ...(await windows.listIds()),
+          ...(await groupState.listStoredWindowIds()),
+        ]),
+      ];
       const kept = await Promise.all(
         windowIds.map((windowId) => groupState.getGroups(windowId)),
       );
