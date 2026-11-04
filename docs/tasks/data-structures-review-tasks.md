@@ -14,7 +14,7 @@
 | **Chunk 3** | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                           | None                                                                | `[x] Done`  |
 | **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`                                                                                      | None                                                                | `[x] Done`  |
 | **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                                         | None                                                                | `[x] Done`  |
-| **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                  | None                                                                | `[ ] To Do` |
+| **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                  | None                                                                | `[x] Done`  |
 | **Chunk 7** | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                         | None                                                                | `[ ] To Do` |
 | **Chunk 8** | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                   | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[ ] To Do` |
 | **Chunk 9** | Test Model (`world.ts`), Property Generator & Test Timeouts    | `tests/support/world/world.ts`, `tests/unit/journeys/random-actions.property.test.ts`, `tests/unit/*/start.test.ts` | None (best run after Chunks 2–8)                                    | `[ ] To Do` |
@@ -127,23 +127,18 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
 
 ### Chunk 6: Native Group Sync (`relinkWindow` & Firefox `cleanup`)
 
-- **Status:** `[ ] To Do`
+- **Status:** `[x] Done`
 - **Touched Files:**
   - `src/js/app/native-groups-sync.ts`
-  - `src/js/background/compose.ts` (if `toggleVisibleTabs` needs to be passed to `createNativeGroupsSync`)
   - `tests/unit/app/native-groups-sync.test.ts`
 - **Findings Addressed:**
-  - **6.1 (MEDIUM — `relinkWindow` links a group even when some of its tabs are ungrouped or when another group spans 2+ native groups):** In `src/js/app/native-groups-sync.ts:218-240`:
-    1. `nativeIdsOf` filters out tabs where `browserGroupId === -1` (`undefined`), so a group with 1 tab in native group `50` and 1 ungrouped tab (`-1`) gets `ids = [50]` (`ids.length === 1`), links to `50`, and is skipped by `migrate()`, leaving its second tab permanently outside the native group.
-    2. `shared` is computed only after collapsing multi-group `ids` (`ids.length !== 1`) to `undefined` and filtering out `-2`, so a native group shared between Group 0 (`[500]`) and Group 1 (`[500, 600]`) or `-2` (`[500]`) is not detected as shared.
-    - _Fix:_ Include `-1` (ungrouped) in a group's distinct tab states when deciding whether _all_ of its tabs are in a single native group, and compute `shared` from all native group IDs present across all groups (including `-2` and groups spanning multiple native groups).
-  - **6.2 (MEDIUM — Switching Native Groups OFF in Firefox (`cleanup`) does not hide inactive groups' tabs, and `cleaning` flag is not re-entrant):** In `src/js/app/native-groups-sync.ts:90, 306-351`:
-    1. When native groups are turned off in Firefox, `cleanup()` removes all tabs from their native groups (expanding inactive groups into the tab strip), but never calls `toggleVisibleTabs` (or hides tabs of inactive groups) for Legacy Mode.
-    2. `let cleaning = false` is reset in `finally` by whichever concurrent `cleanup()` call finishes first.
-    - _Fix:_ Serialize/deduplicate concurrent `cleanup()` calls via an in-flight promise (or `inTurn`) and apply visibility (`toggleVisibleTabs(shown, windowId)`) per window after ungrouping.
+  - **6.1 (MEDIUM — `relinkWindow` misses shared native groups when one of the sharing groups spans 2+ native groups):** In `src/js/app/native-groups-sync.ts:230-240`, `shared` was computed only after collapsing multi-group `ids` (`ids.length !== 1`) to `undefined`, so a native group shared between Group 3 (`[88]`) and Group 4 (`[88, 99]`) was not detected as shared and Group 3 was linked to `88`. (Note: linking a group whose grouped tabs are in one native group while some of its tabs are ungrouped is explicitly required by `tests/unit/app/native-groups-sync.test.ts:139-153`, `it('links a group to the native group of the tabs it has in one, though some are in none')`, and closed as a false positive with that evidence.)
+    - _Fix:_ Computed `shared` from `found.flatMap(({ ids }) => ids)` before collapsing `ids` to `link` in `src/js/app/native-groups-sync.ts`, and added a TDD unit test in `tests/unit/app/native-groups-sync.test.ts`.
+  - **6.2 (MEDIUM — Concurrent `cleanup()` calls race and reset `cleaning` early):** When `useNativeGroups` is switched off in Options, `storage.onChanged` (`browser-events.ts:239`) and `{ action: 'cleanupNativeGroups' }` (`message-handler.ts:67`) both invoke `nativeGroupsSync.cleanup()` concurrently (`tests/support/world/world.ts:441-454`). With `let cleaning = false`, both ran `cleanWindow` in parallel and the first to finish reset `cleaning = false` in `finally` while the second was still running. (Note: `cleanup()` intentionally does not call `toggleVisibleTabs` because the Options tab or another tab may be active when the setting is toggled, as specified in `J6 switching native groups off` and `docs/plans/data-structures-review.md:806`.)
+    - _Fix:_ Replaced `let cleaning = false` with an in-flight `let cleaning: Promise<void> | undefined` in `src/js/app/native-groups-sync.ts` so concurrent `cleanup()` calls share the single running cleanup promise; added a TDD unit test in `tests/unit/app/native-groups-sync.test.ts`.
 - **Verification:**
-  - [ ] `npx vitest run tests/unit/app/native-groups-sync.test.ts`
-  - [ ] `MUTATE="src/js/app/native-groups-sync.ts" npm run test:mutation`
+  - [x] `npx vitest run tests/unit/app/native-groups-sync.test.ts --coverage` (100% coverage)
+  - [x] `MUTATE="src/js/app/native-groups-sync.ts" npm run test:mutation` (100% mutation score)
 
 ---
 

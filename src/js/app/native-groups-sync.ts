@@ -87,7 +87,7 @@ export function createNativeGroupsSync({
 }: NativeGroupsSyncDeps): NativeGroupsSync {
   // While the groups are being taken apart on purpose, the browser's reports
   // that they are gone are not to be acted on
-  let cleaning = false;
+  let cleaning: Promise<void> | undefined;
   // What the browser reports is followed one report after the other: a rename
   // writes the groups of a window whole, and two at once would each write back
   // what the other changed. Each report's failure is logged, so this never rejects.
@@ -229,17 +229,15 @@ export function createNativeGroupsSync({
 
     const found = groups
       .filter(({ id }) => !isReservedGroupId(id))
-      .map((group) => {
-        const ids = nativeIdsOf(group.id);
-        return { group, link: ids.length === 1 ? ids[0] : undefined };
-      });
-    const shared = new Set(
+      .map((group) => ({ group, ids: nativeIdsOf(group.id) }));
+    const shared = new Set<number | undefined>(
       found
-        .map(({ link }) => link)
-        .filter((link, at, all) => all.indexOf(link) !== at),
+        .flatMap(({ ids }) => ids)
+        .filter((id, at, all) => all.indexOf(id) !== at),
     );
     await Promise.all(
-      found.map(async ({ group, link }) => {
+      found.map(async ({ group, ids }) => {
+        const link = ids.length === 1 ? ids[0] : undefined;
         const next = shared.has(link) ? undefined : link;
         if (next !== nativeGroupIdOf(group)) {
           await groupState.setNativeGroupLink(windowId, group.id, next);
@@ -334,20 +332,26 @@ export function createNativeGroupsSync({
     await giveUngroupedTabsAGroup(windowId, groups);
   }
 
-  async function cleanup(): Promise<void> {
-    cleaning = true;
-    try {
-      const windowIds = await windows.listIds();
-      await Promise.all(windowIds.map(cleanWindow));
-
-      // So that switching native groups on again migrates afresh
-      await migrationFlag.setComplete(false);
-    } catch (error) {
-      logger.error('Native groups cleanup failed:', error);
-      throw error;
-    } finally {
-      cleaning = false;
+  function cleanup(): Promise<void> {
+    if (cleaning !== undefined) {
+      return cleaning;
     }
+    const run = (async () => {
+      try {
+        const windowIds = await windows.listIds();
+        await Promise.all(windowIds.map(cleanWindow));
+
+        // So that switching native groups on again migrates afresh
+        await migrationFlag.setComplete(false);
+      } catch (error) {
+        logger.error('Native groups cleanup failed:', error);
+        throw error;
+      } finally {
+        cleaning = undefined;
+      }
+    })();
+    cleaning = run;
+    return run;
   }
 
   // The groups of a window linked to a native group. The browser reports a group
@@ -409,7 +413,7 @@ export function createNativeGroupsSync({
     cleanup,
 
     async onRemoved(group) {
-      if (cleaning) {
+      if (cleaning !== undefined) {
         logger.debug(
           `Native tab group removed (ignored during cleanup): ${String(group.id)}`,
         );

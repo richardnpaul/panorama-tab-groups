@@ -226,19 +226,28 @@ describe('app/native-groups-sync.ts', () => {
       expect(await nativeIds(env)).toEqual([77, null]);
     });
 
-    it('links neither of two groups whose tabs are in one native group', async () => {
+    it('links neither of two groups whose tabs are in one native group, even when one also has tabs in another', async () => {
       const env = await afterRestart(
-        [group(1), group(2), group(3)],
+        [group(1), group(2), group(3), group(4), group(5)],
         [
           { id: 10, group: 1, native: 77 },
           { id: 11, group: 2, native: 77 },
           { id: 12, group: 3, native: 88 },
+          { id: 13, group: 4, native: 88 },
+          { id: 14, group: 4, native: 99 },
+          { id: 15, group: 5, native: 66 },
         ],
       );
 
       await env.sync.relink();
 
-      expect(await nativeIds(env)).toEqual([undefined, undefined, 88]);
+      expect(await nativeIds(env)).toEqual([
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        66,
+      ]);
     });
 
     it('links no group for ungrouped tabs, whatever its tabs are in', async () => {
@@ -832,6 +841,18 @@ describe('app/native-groups-sync.ts', () => {
       await env.sync.onRemoved({ id: 50, windowId: 1 });
 
       expect(await nativeIds(env)).toEqual([undefined]);
+    });
+
+    it('runs once when asked twice at once, as when the option change and the message arrive together', async () => {
+      const env = setUp();
+      await storeGroups(env.groupState, 1, [group(1, 50)]);
+      env.tabs.setDetails([tab(10, 1, 50)]);
+      const listIds = vi.spyOn(env.windows, 'listIds');
+
+      await Promise.all([env.sync.cleanup(), env.sync.cleanup()]);
+
+      expect(listIds).toHaveBeenCalledTimes(1);
+      expect(env.nativeGroups.calls).toEqual(['remove 10']);
     });
   });
 
