@@ -63,21 +63,25 @@ describe('app/stored-groups-wait.ts', () => {
     expect(env.scheduler.pending()).toBe(0);
   });
 
-  it('takes an empty list of groups for none', async () => {
+  it('takes an empty list of groups, or only system groups, for none', async () => {
     const env = setUp();
+    const ungrouped: Group = { ...group, id: -2, name: 'Ungrouped Tabs' };
+    const viewer: Group = { ...group, id: -1, name: 'View' };
     await env.groupState.setGroups(1, []);
     const getGroups = vi.spyOn(env.groupState, 'getGroups');
     const waiting = env.start();
     await env.wait(0);
 
+    await env.groupState.setGroups(1, [ungrouped, viewer]);
     await env.wait(GROUPS_WAIT_EVERY_MS);
 
     expect(getGroups).toHaveBeenCalledTimes(2);
     expect(env.settled()).toBe(false);
-    // The groups come, and the wait is over
-    await env.groupState.setGroups(1, [group]);
+    // A user group comes alongside the system group, and the wait is over
+    await env.groupState.setGroups(1, [ungrouped, group]);
     await env.wait(GROUPS_WAIT_EVERY_MS);
     await waiting;
+    expect(env.settled()).toBe(true);
   });
 
   it('gives up after a few seconds, so the page is shown all the same', async () => {

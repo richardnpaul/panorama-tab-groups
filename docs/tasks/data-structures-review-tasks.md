@@ -7,17 +7,17 @@
 
 ## Chunk Overview & Independence Matrix
 
-| Chunk       | Scope                                                          | Primary Production Files Touched                                                                                                 | Overlaps With Other Chunks?                                         | Status      |
-| :---------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ | :---------- |
-| **Chunk 1** | Governance & External Agent Hygiene                            | `.agents/agents/code-reviewer.md`                                                                                                | None                                                                | `[x] Done`  |
-| **Chunk 2** | View & Popup Store / UI Edge Cases                             | `src/js/app/stored-groups-wait.ts`, `src/popup-view/groups-frame.ts`, `src/js/app/groups-store.ts`, `src/js/view/group-nodes.ts` | None                                                                | `[ ] To Do` |
-| **Chunk 3** | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                                        | None                                                                | `[ ] To Do` |
-| **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`, `src/js/app/window-groups.ts`                                                                    | None                                                                | `[ ] To Do` |
-| **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/startup.ts`, `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                             | None                                                                | `[ ] To Do` |
-| **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                               | None                                                                | `[ ] To Do` |
-| **Chunk 7** | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                                      | None                                                                | `[ ] To Do` |
-| **Chunk 8** | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                                | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[ ] To Do` |
-| **Chunk 9** | Test Model (`world.ts`), Property Generator & Test Timeouts    | `tests/support/world/world.ts`, `tests/unit/journeys/random-actions.property.test.ts`, `tests/unit/*/start.test.ts`              | None (best run after Chunks 2–8)                                    | `[ ] To Do` |
+| Chunk       | Scope                                                          | Primary Production Files Touched                                                                                    | Overlaps With Other Chunks?                                         | Status      |
+| :---------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------ | :---------- |
+| **Chunk 1** | Governance & External Agent Hygiene                            | `.agents/agents/code-reviewer.md`                                                                                   | None                                                                | `[x] Done`  |
+| **Chunk 2** | View & Popup Store / UI Edge Cases                             | `src/js/app/stored-groups-wait.ts`                                                                                  | None                                                                | `[x] Done`  |
+| **Chunk 3** | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                           | None                                                                | `[ ] To Do` |
+| **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`, `src/js/app/window-groups.ts`                                                       | None                                                                | `[ ] To Do` |
+| **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/startup.ts`, `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                | None                                                                | `[ ] To Do` |
+| **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                  | None                                                                | `[ ] To Do` |
+| **Chunk 7** | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                         | None                                                                | `[ ] To Do` |
+| **Chunk 8** | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                   | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[ ] To Do` |
+| **Chunk 9** | Test Model (`world.ts`), Property Generator & Test Timeouts    | `tests/support/world/world.ts`, `tests/unit/journeys/random-actions.property.test.ts`, `tests/unit/*/start.test.ts` | None (best run after Chunks 2–8)                                    | `[ ] To Do` |
 
 ---
 
@@ -53,26 +53,18 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
 
 ### Chunk 2: View & Popup Store / UI Edge Cases
 
-- **Status:** `[ ] To Do`
+- **Status:** `[x] Done`
 - **Touched Files:**
   - `src/js/app/stored-groups-wait.ts`
-  - `src/popup-view/groups-frame.ts`
-  - `src/js/app/groups-store.ts`
-  - `src/js/view/group-nodes.ts`
   - `tests/unit/app/stored-groups-wait.test.ts`
-  - `tests/unit/popup/groups-frame.test.ts`
-  - `tests/unit/app/groups-store.test.ts`
-  - `tests/unit/view/group-nodes.test.ts`
 - **Findings Addressed:**
-  - **2.1 (MEDIUM — `waitForStoredGroups` system group false positive):** In `src/js/app/stored-groups-wait.ts:22-25`, `groups !== undefined && groups.length > 0` returns immediately when `stateManager` (`withUngroupedGroup`) returns `[{ id: -2, ... }]` before any user group (`id >= 0`) exists, causing `groupsStore.load()` to render an empty group list.
-    - _Fix:_ Check `groups?.some(({ id }) => !isReservedGroupId(id)) === true`.
-  - **2.2 (LOW — Popup active-group highlight & `takeInNew` refresh on delete):** In `src/popup-view/groups-frame.ts:200-205`, deleting a group only calls `showAgain()` when `list.querySelector('.list__item') === null`. If the active group is deleted while another user group remains (or `takeInNew` pulls in a background-created group), the background switches `activeGroup`, but the popup does not update `.list__item--highlight` or render the newly pulled-in group.
-    - _Fix:_ Call `await showAgain()` after `groups.remove(group.id)` succeeds (or when the active group or group count changed).
-  - **2.3 (LOW — `GroupsStore.transform` / `moveTo` rollback & `groupNodes.raise` persistence):** In `src/js/app/groups-store.ts:244-265`, if `save()` (`groupState.setGroups`) rejects inside `inTurn`, `transform` and `moveTo` leave the failed `rect`/`lastMoved`/order mutated in memory (unlike `create` and `rename`, which roll back). In `src/js/view/group-nodes.ts:516-525`, `raise(groupId)` mutates `group.lastMoved` directly without persisting via `groups.transform`.
-    - _Fix:_ Roll back in-memory `rect`/`lastMoved`/order when `save()` fails in `transform`/`moveTo`, and persist `lastMoved` in `raise()`.
+  - **2.1 (MEDIUM — `waitForStoredGroups` system group false positive):** In `src/js/app/stored-groups-wait.ts:22-25`, `groups !== undefined && groups.length > 0` returned immediately when `stateManager` (`withUngroupedGroup`) returned `[{ id: -2, ... }]` before any user group (`id >= 0`) existed, causing `groupsStore.load()` to render an empty group list.
+    - _Fix:_ Updated `waitForStoredGroups` to check `groups !== undefined && groups.some(({ id }) => !isReservedGroupId(id))` and added TDD unit test in `tests/unit/app/stored-groups-wait.test.ts`.
+  - **2.2 (Closed as False Positive with Evidence — Popup refresh on delete):** `tests/unit/popup/groups-frame.test.ts:565-573` (`it('does not show the groups again while some are left')`) and `docs/plans/data-structures-review.md:783-785` (Round 11) explicitly specify that `showAgain()` is only invoked when the last group in the list is deleted (`list.querySelector('.list__item') === null`) so the new first group created by the background is shown.
+  - **2.3 (Closed as False Positive with Evidence — `GroupsStore.transform` / `moveTo` & `groupNodes.raise`):** `docs/plans/data-structures-review.md:773-780` (Rounds 9–10) and `tests/unit/app/groups-store.test.ts:523-543` explicitly specify that `transform` and `moveTo` update the view's in-memory groups immediately to stay in sync with the already-moved DOM node while only `save` waits its turn. `groupNodes.raise` is unchanged from `main` and intentionally updates only the session z-index without triggering storage writes or automatic backup notifications on every click.
 - **Verification:**
-  - [ ] `npx vitest run tests/unit/app/stored-groups-wait.test.ts tests/unit/popup/groups-frame.test.ts tests/unit/app/groups-store.test.ts tests/unit/view/group-nodes.test.ts`
-  - [ ] `MUTATE="src/js/app/stored-groups-wait.ts,src/popup-view/groups-frame.ts,src/js/app/groups-store.ts,src/js/view/group-nodes.ts" npm run test:mutation`
+  - [x] `npx vitest run tests/unit/app/stored-groups-wait.test.ts --coverage` (100% coverage)
+  - [x] `MUTATE="src/js/app/stored-groups-wait.ts" npm run test:mutation` (100% mutation score)
 
 ---
 
