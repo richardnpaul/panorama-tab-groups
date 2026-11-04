@@ -43,7 +43,6 @@ describe('background/StateManager.ts', () => {
       {
         id: -2,
         name: 'Ungrouped Tabs',
-        containerId: 'browser-default',
         nativeGroupId: null,
         rect: { x: 0, y: 0, w: 0, h: 0 },
         lastMoved: 1_700_000_000_000,

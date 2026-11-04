@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMemoryClock } from '../../../src/js/adapters/memory/clock.js';
 import { createMemoryGroupState } from '../../../src/js/adapters/memory/group-state.js';
+import { createMemoryNativeGroups } from '../../../src/js/adapters/memory/native-groups.js';
 import { createMemoryMessaging } from '../../../src/js/adapters/memory/messaging.js';
 import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createGroupsStore } from '../../../src/js/app/groups-store.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
+import { storeGroups } from '../../support/stored-groups.js';
 
 const WINDOW = 7;
 
@@ -19,18 +21,28 @@ const stored = (id: number, extra: Partial<Group> = {}): Group => ({
 async function setUp(groups: readonly Group[] | null = [stored(1), stored(2)]) {
   const groupState = createMemoryGroupState();
   if (groups !== null) {
-    await groupState.setGroups(WINDOW, groups);
+    await storeGroups(groupState, WINDOW, groups);
   }
   const messaging = createMemoryMessaging();
   const tabs = createMemoryTabs();
   const clock = createMemoryClock(5000);
   const logger = { error: vi.fn() };
   const i18n = { getMessage: vi.fn().mockReturnValue('Group ') };
+  const nativeGroups = createMemoryNativeGroups([50], WINDOW);
   const store = await createGroupsStore(
-    { groupState, messaging, tabs, clock, i18n, logger },
+    { groupState, messaging, nativeGroups, tabs, clock, i18n, logger },
     WINDOW,
   );
-  return { store, groupState, messaging, tabs, clock, logger, i18n };
+  return {
+    store,
+    groupState,
+    messaging,
+    nativeGroups,
+    tabs,
+    clock,
+    logger,
+    i18n,
+  };
 }
 
 const flush = async () => {
@@ -81,6 +93,7 @@ describe('app/groups-store.ts', () => {
         {
           groupState,
           messaging: createMemoryMessaging(),
+          nativeGroups: createMemoryNativeGroups(),
           tabs: createMemoryTabs(),
           clock: createMemoryClock(),
           i18n: { getMessage: () => '' },
@@ -160,7 +173,6 @@ describe('app/groups-store.ts', () => {
         id: 3,
         name: 'Gruppe 3',
         windowId: WINDOW,
-        containerId: 'firefox-default',
         rect: { x: 0, y: 0, w: 0.2, h: 0.2 },
         lastMoved: 5000,
       });
@@ -192,6 +204,17 @@ describe('app/groups-store.ts', () => {
       expect(store.get(group.id)).toBe(group);
       const saved = await groupState.getGroups(WINDOW);
       expect(saved?.map(({ id }) => id)).toEqual([1, 2, group.id]);
+    });
+
+    it('makes nothing when the group cannot be stored, and says so to the caller', async () => {
+      const { store, groupState, messaging } = await setUp();
+      const failure = new Error('storage is full');
+      vi.spyOn(groupState, 'setGroups').mockRejectedValue(failure);
+
+      await expect(store.create()).rejects.toBe(failure);
+
+      expect(store.getIds()).toEqual([1, 2]);
+      expect(messaging.sent).toEqual([]);
     });
 
     it('tells the background to add a menu item for the group', async () => {
@@ -244,6 +267,156 @@ describe('app/groups-store.ts', () => {
       ]);
     });
 
+    it('gives the native group of the group the new name as its title, before the name is stored', async () => {
+      const env = await setUp([stored(1, { nativeGroupId: 50 }), stored(2)]);
+      await env.groupState.setNativeGroupLink(WINDOW, 1, 50);
+      const titleWhenStored: (string | undefined)[] = [];
+      const setGroups = env.groupState.setGroups.bind(env.groupState);
+      vi.spyOn(env.groupState, 'setGroups').mockImplementation(
+        async (windowId, groups) => {
+          titleWhenStored.push(env.nativeGroups.groups.get(50)?.title);
+          await setGroups(windowId, groups);
+        },
+      );
+
+      await env.store.rename(1, 'Renamed');
+
+      expect(env.nativeGroups.calls).toEqual(['title 50 Renamed']);
+      expect(titleWhenStored).toEqual(['Renamed']);
+    });
+
+    it('gives the title to the native group the group was linked to after the view loaded', async () => {
+      const env = await setUp();
+      // The background links the group once the view has its copy, as a native group made then
+      await env.groupState.setNativeGroupLink(WINDOW, 1, 50);
+
+      await env.store.rename(1, 'Renamed');
+
+      expect(env.nativeGroups.calls).toEqual(['title 50 Renamed']);
+    });
+
+    it('gives no native group a title for a group the background has deleted since the view loaded', async () => {
+      const env = await setUp([stored(1, { nativeGroupId: 50 }), stored(2)]);
+      await env.groupState.setGroups(WINDOW, [stored(2)]);
+
+      await env.store.rename(1, 'Renamed');
+
+      expect(env.nativeGroups.calls).toEqual([]);
+    });
+
+    it('changes nothing when the groups cannot be read for the link, and says so to the caller', async () => {
+      const env = await setUp();
+      const failure = new Error('storage is gone');
+      vi.spyOn(env.groupState, 'getGroups').mockRejectedValue(failure);
+
+      await expect(env.store.rename(1, 'Renamed')).rejects.toBe(failure);
+
+      expect(env.store.getName(1)).toBe('Stored 1');
+      expect(env.messaging.sent).toEqual([]);
+    });
+
+    it('changes nothing when the name cannot be stored: the native group gets its title back', async () => {
+      const env = await setUp([stored(1, { name: 'Work', nativeGroupId: 50 })]);
+      await env.groupState.setNativeGroupLink(WINDOW, 1, 50);
+      await env.nativeGroups.setTitle(50, 'Work');
+      const failure = new Error('storage is full');
+      vi.spyOn(env.groupState, 'setGroups').mockRejectedValue(failure);
+
+      await expect(env.store.rename(1, 'Play')).rejects.toBe(failure);
+
+      expect(env.store.getName(1)).toBe('Work');
+      expect(env.nativeGroups.groups.get(50)?.title).toBe('Work');
+      expect(env.messaging.sent).toEqual([]);
+    });
+
+    it('gives no native group a title back when it gave none the new one', async () => {
+      const env = await setUp([stored(1, { name: 'Work' })]);
+      const failure = new Error('storage is full');
+      vi.spyOn(env.groupState, 'setGroups').mockRejectedValue(failure);
+
+      await expect(env.store.rename(1, 'Play')).rejects.toBe(failure);
+
+      expect(env.nativeGroups.calls).toEqual([]);
+      expect(env.store.getName(1)).toBe('Work');
+    });
+
+    it('gives no title back to a native group that would not take the new one', async () => {
+      const env = await setUp([stored(1, { name: 'Work', nativeGroupId: 70 })]);
+      await env.groupState.setNativeGroupLink(WINDOW, 1, 70);
+      vi.spyOn(env.groupState, 'setGroups').mockRejectedValue(
+        new Error('storage is full'),
+      );
+      const setTitle = vi.spyOn(env.nativeGroups, 'setTitle');
+
+      await expect(env.store.rename(1, 'Play')).rejects.toThrow();
+
+      expect(setTitle).toHaveBeenCalledTimes(1);
+    });
+
+    it('says so when the native group cannot be given its title back', async () => {
+      const env = await setUp([stored(1, { name: 'Work', nativeGroupId: 50 })]);
+      await env.groupState.setNativeGroupLink(WINDOW, 1, 50);
+      const failure = new Error('storage is full');
+      vi.spyOn(env.groupState, 'setGroups').mockRejectedValue(failure);
+      const titleFailure = new Error('dragging a tab');
+      vi.spyOn(env.nativeGroups, 'setTitle')
+        .mockResolvedValueOnce(undefined)
+        .mockRejectedValueOnce(titleFailure);
+
+      await expect(env.store.rename(1, 'Play')).rejects.toBe(failure);
+
+      expect(env.logger.error).toHaveBeenCalledWith(
+        'Could not give native group 50 back the name of group 1:',
+        titleFailure,
+      );
+    });
+
+    it('stores a copy with the new name, and only then changes its own', async () => {
+      const env = await setUp([
+        stored(1, { name: 'Work' }),
+        stored(2, { name: 'Home' }),
+      ]);
+      const nameWhenStored: (string | undefined)[] = [];
+      const setGroups = env.groupState.setGroups.bind(env.groupState);
+      vi.spyOn(env.groupState, 'setGroups').mockImplementation(
+        async (windowId, groups) => {
+          nameWhenStored.push(env.store.getName(1));
+          await setGroups(windowId, groups);
+        },
+      );
+
+      await env.store.rename(1, 'Play');
+
+      expect(nameWhenStored).toEqual(['Work']);
+      expect(env.store.getName(1)).toBe('Play');
+      expect(
+        (await env.groupState.getGroups(WINDOW))?.map(({ name }) => name),
+      ).toEqual(['Play', 'Home']);
+    });
+
+    it('gives no native group a title for a group that has none', async () => {
+      const env = await setUp();
+
+      await env.store.rename(2, 'Renamed');
+
+      expect(env.nativeGroups.calls).toEqual([]);
+    });
+
+    it('says so, and still renames, when the native group cannot be given the title', async () => {
+      const env = await setUp([stored(1, { nativeGroupId: 70 }), stored(2)]);
+      await env.groupState.setNativeGroupLink(WINDOW, 1, 70);
+
+      await env.store.rename(1, 'Renamed');
+
+      expect(env.logger.error).toHaveBeenCalledWith(
+        'Could not give native group 70 the new name of group 1:',
+        new Error('No group with id: 70'),
+      );
+      expect((await env.groupState.getGroups(WINDOW))?.[0]?.name).toBe(
+        'Renamed',
+      );
+    });
+
     it('does nothing for an unknown group', async () => {
       const { store, groupState, messaging } = await setUp();
 
@@ -268,6 +441,119 @@ describe('app/groups-store.ts', () => {
         'Failed to update the menu:',
         failure,
       );
+    });
+  });
+
+  describe('changes made while another is being stored', () => {
+    // Each store of the groups holds until it is let go, once it has written
+    function slowStores(env: Awaited<ReturnType<typeof setUp>>) {
+      const setGroups = env.groupState.setGroups.bind(env.groupState);
+      const written: (() => void)[] = [];
+      vi.spyOn(env.groupState, 'setGroups').mockImplementation(
+        async (windowId, groups) => {
+          await setGroups(windowId, groups);
+          await new Promise<void>((resolve) => {
+            written.push(resolve);
+          });
+        },
+      );
+      return {
+        letGo: async () => {
+          await flush();
+          written.splice(0).forEach((resolve) => {
+            resolve();
+          });
+        },
+      };
+    }
+
+    it('keeps the new name when the groups are stored again while it is stored', async () => {
+      const env = await setUp();
+      const stores = slowStores(env);
+
+      const renaming = env.store.rename(1, 'New');
+      await flush();
+      const moving = env.store.transform(2, { x: 0.5, y: 0.5, w: 0.1, h: 0.1 });
+      await stores.letGo();
+      await stores.letGo();
+      await stores.letGo();
+      await Promise.all([renaming, moving]);
+
+      expect(
+        (await env.groupState.getGroups(WINDOW))?.map(({ name }) => name),
+      ).toEqual(['New', 'Stored 2']);
+      expect(env.store.get(2)?.rect).toEqual({
+        x: 0.5,
+        y: 0.5,
+        w: 0.1,
+        h: 0.1,
+      });
+    });
+
+    it('does not store a group being deleted again when another change is stored meanwhile', async () => {
+      const env = await setUp();
+      let reply: (answer: unknown) => void = () => undefined;
+      const asked = new Promise<void>((askedToDelete) => {
+        vi.spyOn(env.messaging, 'send').mockImplementation(
+          (message) =>
+            new Promise((resolve) => {
+              if ('action' in message && message.action === 'deleteGroup') {
+                reply = resolve;
+                askedToDelete();
+              } else {
+                resolve(undefined);
+              }
+            }),
+        );
+      });
+
+      const removing = env.store.remove(1);
+      await asked;
+      // The background deletes it, and stores the groups without it
+      await env.groupState.setGroups(WINDOW, [stored(2)]);
+      const moving = env.store.transform(2, { x: 0.5, y: 0.5, w: 0.1, h: 0.1 });
+      reply({ success: true });
+      await Promise.all([removing, moving]);
+
+      expect(
+        (await env.groupState.getGroups(WINDOW))?.map(({ id }) => id),
+      ).toEqual([2]);
+    });
+
+    it('moves and orders its own groups at once, while an earlier change is still being stored', async () => {
+      const env = await setUp([stored(1), stored(2), stored(3)]);
+      // The background never answers the delete, which holds the changes after it
+      vi.spyOn(env.messaging, 'send').mockReturnValue(
+        new Promise(() => {
+          // never settles
+        }),
+      );
+      const rect = { x: 0.5, y: 0.5, w: 0.1, h: 0.1 };
+
+      const changes = [
+        env.store.remove(3),
+        env.store.transform(2, rect),
+        env.store.moveTo(2, 0),
+      ];
+
+      expect(env.store.get(2)?.rect).toBe(rect);
+      expect(env.store.get(2)?.lastMoved).toBe(5000);
+      expect(env.store.getIds()).toEqual([2, 1, 3]);
+      expect(changes).toHaveLength(3);
+    });
+
+    it('goes on with the next change when one fails', async () => {
+      const env = await setUp();
+      vi.spyOn(env.groupState, 'setGroups')
+        .mockRejectedValueOnce(new Error('storage is full'))
+        .mockResolvedValue(undefined);
+
+      const renaming = env.store.rename(1, 'New');
+      const moving = env.store.moveTo(2, 0);
+
+      await expect(renaming).rejects.toThrow('storage is full');
+      await expect(moving).resolves.toBeUndefined();
+      expect(env.store.getIds()).toEqual([2, 1]);
     });
   });
 
@@ -383,6 +669,16 @@ describe('app/groups-store.ts', () => {
       ]);
     });
 
+    it('sends the native group the group was linked to after the view loaded', async () => {
+      const { store, messaging, groupState } = await setUp();
+      await groupState.setNativeGroupLink(WINDOW, 1, 50);
+      messaging.reply({ success: true });
+
+      await store.remove(1);
+
+      expect(messaging.sent[0]).toHaveProperty('nativeGroupId', 50);
+    });
+
     it('sends no native group id for a group without one', async () => {
       const { store, messaging } = await setUp();
       messaging.reply({ success: true });
@@ -413,6 +709,60 @@ describe('app/groups-store.ts', () => {
       expect(store.get(1)).toBeNull();
     });
 
+    it('takes in the first group the background made when this was the last', async () => {
+      const { store, messaging, groupState } = await setUp([stored(1)]);
+      vi.spyOn(messaging, 'send').mockImplementation(async (message) => {
+        if ('action' in message && message.action === 'deleteGroup') {
+          // As the background does: the groups without it, and a new first one
+          await groupState.setGroups(WINDOW, [
+            stored(-2, { name: 'Ungrouped' }),
+            stored(0, { name: 'Fresh' }),
+          ]);
+          return { success: true };
+        }
+        return undefined;
+      });
+
+      await expect(store.remove(1)).resolves.toBe(true);
+
+      expect(store.getIds()).toEqual([0]);
+      expect(store.get(0)?.name).toBe('Fresh');
+      expect(store.get(0)?.tabCount).toBe(0);
+    });
+
+    it('takes in nothing when the window has no groups stored after the delete', async () => {
+      const { store, messaging, groupState } = await setUp();
+      vi.spyOn(messaging, 'send').mockImplementation(async (message) => {
+        if ('action' in message && message.action === 'deleteGroup') {
+          await groupState.forgetWindow(WINDOW);
+          return { success: true };
+        }
+        return undefined;
+      });
+
+      await expect(store.remove(1)).resolves.toBe(true);
+
+      expect(store.getIds()).toEqual([2]);
+    });
+
+    it('still says the group was deleted when the groups cannot be read after, and says so', async () => {
+      const { store, messaging, groupState, logger } = await setUp();
+      messaging.reply({ success: true });
+      const failure = new Error('storage is gone');
+      const getGroups = groupState.getGroups.bind(groupState);
+      vi.spyOn(groupState, 'getGroups')
+        .mockImplementationOnce(getGroups)
+        .mockRejectedValue(failure);
+
+      await expect(store.remove(1)).resolves.toBe(true);
+
+      expect(store.getIds()).toEqual([2]);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Could not read the groups of window 7 after group 1 was deleted:',
+        failure,
+      );
+    });
+
     it('leaves saving the groups to the background', async () => {
       const { store, messaging, groupState } = await setUp();
       messaging.reply({ success: true });
@@ -427,7 +777,7 @@ describe('app/groups-store.ts', () => {
     it('does nothing for an unknown group', async () => {
       const { store, messaging } = await setUp();
 
-      await store.remove(99);
+      await expect(store.remove(99)).resolves.toBe(false);
 
       expect(messaging.sent).toEqual([]);
       expect(store.getLength()).toBe(2);

@@ -1,6 +1,6 @@
 # Implementation Plan: A Review of the Extension's Data Structures
 
-> **Status: Phases 1, 2 and 4 are done; Phase 3 is to do** (decisions 1 to 5, taken on 2026-11-02 and revised on
+> **Status: Phases 1, 2 and 4 are done; Phase 3 is done for all eight steps on 2026-11-03, with the points listed under "What Phase 3 has done" still to settle** (decisions 1 to 5, taken on 2026-11-02 and revised on
 > 2026-11-03, decision 6, proposed on 2026-11-02 and taken on 2026-11-03, decision 7, taken on 2026-11-03, with how many backups
 > are kept and how often still proposed, and the order of
 > the work are under "Result").
@@ -86,7 +86,32 @@ same store as the groups, with no limit or eviction; the statistics page shows t
 compiler cannot tell them apart; the `nativeGroupId` check `browserGroupId > 0` in the cleanup shows a convention
 (no group is -1) that is not in the type.
 
-**F11. Not yet thought of, to look at:** private windows (does the extension run there at all, and where is its data),
+**F11. Not yet thought of, to look at:** private windows (does the extension run there at all, and where is its data;
+_decided with decision 7:_ the automatic backups leave them out, as a file nobody asked for must not put a private session's
+addresses on disk, and the backup the user saves keeps them; the windows are taken from one look at them, `listNonPrivateIds`.
+Nothing of a private window is kept for a window that comes back, or its groups could be given to one that is not private and
+so reach the backups. Firefox drops a private window's values with it, and the add-on keeps nothing of a closed window there.
+Only Chromium keeps closed windows (its values are emulated in `storage.local`), so there the values of a private window or tab
+are kept apart, under `privateSessions`, and the windows kept are listed from `__mock_sessions` alone, so a private one is never
+among them. Both keys are read in one call and written in one call, and every change is worked out on the
+two together, so an id has values under one of them at most: a call that stopped between two writes could leave one under
+both, and then a value removed from one would come back from the other. Whether a window or tab is private is asked of the browser when its first value is stored, and one it cannot tell
+about (it has closed) is kept apart too. They are in `storage.local`, not `storage.session`, because Chromium also empties
+`storage.session` when the add-on is updated, reloaded or disabled, and an open private window would lose its groups then. An
+add-on cannot run when the browser closes, so they are let go of as each private window and tab closes, and at start-up for
+any that are not open (the browser quit or crashed first): _the cost_ is that a private window's group names and layout are on
+disk until then (the user's choice, over losing them at each update). A private window that comes back with native groups and
+none of the add-on's is given groups from its native groups alone, never those of a window that was kept (`window-rebuild.ts`),
+or it could take a normal window's groups and use them up. _Tried first and dropped:_ noting the private windows in
+`storage.session` while they were open, from two looks at the windows (all, then those not private), and letting go of what was
+kept of one when it closed. The note was lost when the browser quit while the groups stayed in `storage.local`, and a window
+that closed between the two looks was taken for a private one; keeping the values apart makes both impossible rather than
+handled. Then `privateSessions` in `storage.session`, dropped for the loss at each update. _Not covered:_ versions before this
+one kept private windows' values in `__mock_sessions` too, and nothing tells them apart once the window has closed.
+**Follow-up task (remove temporary code):** a private window that is open when this version starts has its values moved apart
+then (`setOpenPrivateApart` in `closed-windows.ts`, `GroupState.setPrivate`, `SessionsEmulation.setPrivate`,
+`Windows.listPrivateIds`). It is only for values stored by the versions before this one, which few if any are using: remove it
+in a later release, with its tests),
 profiles (each has its own `storage` so groups are never shared, and sync carries only the options), pinned tabs
 (assumed never grouped; the code does not hold to that, see decision 6), discarded tabs, a tab dragged to another window while the extension sleeps (MV3 service worker), the
 view tab being closed, two extensions' data (see the migration plan), a very large number of tabs (hundreds), and
@@ -352,7 +377,11 @@ assumed.
          tabs follow their native groups whichever pair is made. Taking nothing loses those for both windows.
        - A restored window with no candidate left uses the native groups alone.
        - Titles stay in step with names: renaming a native group in the browser renames the add-on's group
-         (`native-groups-sync.ts`, `onUpdated` and `followNativeGroup`).
+         (`native-groups-sync.ts`, `onUpdated` and `followNativeGroup`), and renaming a group in the view or the popup
+         gives its native group the new title before the name is stored (`groups-store.ts`, `rename`). Before, the title
+         was left as it was, and the browser's next report of the native group (one the add-on collapses or expands)
+         gave the group its old name back: `user-journeys.spec.ts`, "Test relabelling a tab group", failed 6 runs in 20,
+         and passes 30 in 30 with the title set.
      - **Which group.** Within that window, each native group is matched by title to `oldGroup.name` (or to
        `defaultGroupName` plus the id, for a group with no name; `createNativeGroup` gives that title). A title that two
        old groups share is not matched. A matched group keeps its `id`, `rect` and order; the old window's groups that had
@@ -676,6 +705,112 @@ in the Firefox lab.
 Restoring containers is not a step here: it is a plan of its own (decision 4),
 `docs/plans/firefox-containers-in-backups.md`.
 
+### What Phase 3 has done (2026-11-03; nothing is committed)
+
+| Step | Built                                                                                                                                                                                                                                                                                           | Shown by                                                                                                                                            |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | The property test (`tests/unit/journeys/random-actions.property.test.ts`) has the invariants "no tab is lost", "no tab is hidden in native mode", "a pinned tab is in no group and no native group" and "the add-on has the browser unpin none"                                                 | Unit tests; it found the bugs under "What the property test found"                                                                                  |
+| 2    | `app/auto-backup.ts`, `app/addon-update.ts`, the files (`adapters/browser/backup-files.ts`, as `data:` links, which Chromium's service worker can use), the record (`automaticBackups`), `onUpdateAvailable`                                                                                    | Unit tests, journey J18; Chromium E2E (`chromium-backup-files.spec.ts`, `chromium-reload.spec.ts`) and Firefox lab (`firefox-backup-files.spec.ts`) |
+| 3    | `app/migrations.ts`: a version for the profile (`storage.local`) and for each window, `DATA_VERSION` 5, `containerId` dropped                                                                                                                                                                   | Unit tests, J19; Chromium E2E                                                                                                                       |
+| 4    | Native mode hides no tab, every group that has a tab has a collapsed native group, Chromium's option checked and disabled and `useNativeGroups` true there, the first run decided by hidden tabs, the migration that shows hidden tabs                                                          | Unit tests, J2 to J7, J13, J20; Chromium E2E (`extension.spec.ts`, `group-switching.spec.ts`); Firefox lab (`native-groups-first-run.spec.ts`)      |
+| 5    | Pinned tabs: no group, never passed to `tabs.group` (also filtered in the browser adapter), pinning clears the group, unpinning by mode, a menu move unpins then moves, migration (version 5), a backup restores them with no group                                                             | Unit tests, J21; Chromium E2E and Firefox lab (`chromium-pinned-tabs.spec.ts`, `firefox-pinned-tabs.spec.ts`)                                       |
+| 6    | `nativeGroupId` out of the stored group into `storage.session` (`GroupState.setNativeGroupLink`, the join in `adapters/browser/group-state.ts`, links of groups that are gone forgotten), `relink` rebuilt on it (a native group two groups' tabs share is linked to neither); migration step 4 | Unit tests (the contract of `GroupState` for both adapters); Chromium E2E (`chromium-reload.spec.ts`: the links outlive the stopped background)     |
+
+| 7 | `app/window-rebuild.ts` (Chromium only): a window with native groups and none of the add-on's gets its groups from them and from what was kept of a window that closed; one to one across windows, best fit first; at start-up before events are let through, and when a window opens. `GroupState` gained `listStoredWindowIds`, `listStoredTabIds`, `forgetWindow`, `forgetTab`, `getClosedAt` and `setClosedAt`; `NativeGroups.get` says whether a group is collapsed | Unit tests, the property test (it fails on a plain restart with the rebuild off); Chromium E2E (`chromium-stored-data.spec.ts`: a restored window gets Alpha, Beta, the empty group, their places, links and tabs) |
+| 8 | `app/closed-windows.ts` (a tab's values let go of at close and at start-up; a window dated at close, kept among the five most recent and under a week); a reopened tab joins the group of its native group; `tabs.onUpdated` `groupId` is followed in native mode (`app/browser-events.ts`), reading the group the tab is in now, with the add-on's own moves skipped (`app/own-moves.ts`) | Unit tests, J10; Chromium E2E (`chromium-stored-data.spec.ts`, `chromium-reopen.spec.ts`) |
+
+**What the checks of "not verified" found** (each is a test, so repeatable):
+
+- Chromium's `tabs.group` unpins a pinned tab, for a new group and one that exists; pinning takes a tab out of its group and unpinning does not put it back: **true** (`chromium-pinned-tabs.spec.ts`). Firefox: **true**, and unpin, group, pin again does not keep a tab in its group (`firefox-pinned-tabs.spec.ts`); pinning a hidden tab shows it (the model does the same now).
+- `downloads.download` from the background: Firefox refuses a `data:` link ("Access denied") and takes a `blob:` link; Chromium's service worker has no `URL.createObjectURL`, and takes a `data:` link. The adapter uses a `blob:` link where the runtime can make one and a `data:` link where not. `conflictAction: 'overwrite'` works in both, `saveAs: false` writes into the folder with no question, and `downloads.erase` leaves the file.
+- What an open `view.html` does when the add-on is unloaded (`runtime.reload()`): **it is closed** (Chromium). Playwright's Chromium does not load the add-on again after that, so the start-up after an update is tested by stopping the service worker over the DevTools protocol and waking it with a new tab (a background with no memory of the old one).
+- `storage.session` keeps the links while the Chromium service worker is stopped and started again: **true**. Firefox's behaviour on an unloaded background is still **not verified**, and the Firefox lab does not test it.
+- A Chromium restart's effect on `storage.session` is not tested (Playwright restores a session for tabs but `storage.session` is cleared by the browser, as its reference says).
+- Chromium restores native groups with their titles and puts a reopened tab back in its native group (`chromium-reopen.spec.ts`); the add-on then has the tab in the group of that native group, whether the report of the group comes with `tabs.onCreated` or after it (either path ends in the same group, and the test cannot tell which ran).
+- **Not verified: a window reopened (Ctrl+Shift+T on a window).** `sessions.restore` of a window session answers "No active tab" in Playwright's Chromium, from a page and from the background, so the order of `windows.onCreated`, the restored tabs and the restored native groups is not known. If the window opens before its tabs and native groups are there, `rebuildWindow` finds none and the window gets a first group of its own, and is not rebuilt later. This is manual test M6 below. The model of the browser and the property test do the reopening in the order of "tabs first".
+
+**What a flaky Chromium E2E test found** (`group-switching.spec.ts`, "activating a tab of another group", about 1 run in 7 on
+this branch and none in 15 on `main`; the page's and the background's writes of `storage.local` were logged in the test to find it):
+
+- The page stored the window's groups in the same millisecond as the background's start-up stored them, as it had read them just
+  before: the page's groups were lost. It is not the `__mock_sessions` object being rewritten from a stale copy: the emulation's
+  Web Lock (`tgv-sessions`) is shared by the service worker and the pages (a lock the background held kept the page waiting).
+  It is a read, then a write, of the groups, which no lock spans. Start-up does more work on this branch (migrations, rebuild, pruning), which is the likely reason it
+  shows here and not on `main` (not measured).
+- The test now waits for start-up before its first write, as it already did before each later step (30 runs out of 30 pass).
+- In the add-on, two read-then-write paths were made shorter: renaming a group after its native group (`rename` in
+  `native-groups-sync.ts`) reads the groups again once it has the title, and stores them only when a name changes (most reports
+  are a group collapsed or expanded). It still looks for the link first: the add-on links a native group it makes only once its
+  title is set, and asking for the title first gave a group being made the empty title for a moment, which the toolbar showed
+  (the test "sending the last tab of the shown group" failed every time). Migration step 4 no longer stores every window's groups again, as reading them already
+  leaves out the old links and the next write drops them.
+- `user-journeys.spec.ts`, "Move tab between OS windows" (3 runs in 30 failed on this branch, none in 30 on `main`) found two
+  things in the view, logged from the page and fixed (60 runs out of 60 pass):
+  - A view opened with its window (`windows.create` with the view's address) could load before the background had made the
+    window's first group, and showed no group. It waits for the window's groups now, three seconds at most
+    (`app/stored-groups-wait.ts`, in the view and the popup), and so cannot store an empty list over them either.
+  - A tab moved in from another window is in no group for a moment: the background lets go of its group when it leaves a window
+    and gives it one when it arrives. The view read the group the tab had in the other window, then read none when it placed the
+    tab, and dropped it. `insertTab` says whether it placed the tab, and the view looks again when it did not.
+- The Chromium test of the migration from before version 2 (`chromium-reload.spec.ts`) gave the group a name that was not its
+  native group's title; a report of the native group after the start renamed it, as it should. The test keeps the name it has.
+- The fourth review round asked for three more: a backup file that was written but could not be taken out of the list of
+  downloads counted as failed (it is written; the entry left is logged); a download that never ends left its listener and the
+  backup's text behind after the time ran out (the write is told to stop, and the download is cancelled); and a native title
+  that Chromium refuses while a tab is dragged, which is when a group's name field loses focus, is asked for again
+  (`setTitle`, every 200 ms for 5 s). **Not verified:** the wording of Chromium's refusal ("Tabs cannot be edited right now
+  (user may be dragging a tab).") is matched on "dragging a tab"; Playwright cannot drag a tab in the tab strip to test it.
+- The sixth and seventh review rounds found a rename that the view showed while its native group kept the old title: the view
+  read the link from the groups it loaded, so a group whose native group was made after had none (a Chromium E2E test, which
+  fails without the fix, makes one that way). The link is now read as it is stored, for a rename and a delete. A rename is
+  stored as a copy before the view's own group, the menu or anything else takes the new name; if it cannot be stored, the
+  native group gets its old title back and the view shows the name the group has, so a rename that fails changes nothing.
+- The eighth round found that storing the copy first let another change of the view (a move, a new group) store the old name
+  over it while it was being stored, and that a delete could be undone the same way. The view's changes now take turns, each
+  storing the groups as the one before left them. It also found that `setGroups` stored the groups and then let go of the
+  links of those taken away, so a failure in that second step reported a store that had been made; the links go first now,
+  and a failure there stores no groups (one in storing them leaves the groups taken away without their links, which the next
+  start finds again). A rename takes no group away, so it lets go of none. The ninth round found that a move, queued behind a
+  delete waiting for the background, was not the view's own until its turn, so a second drag started from where the group
+  had been: a move and a new order are the view's own at once, and only storing them waits. It also found that the view took
+  a group away when the background had not deleted it; `remove` now says whether it did. The tenth round found that the background answered
+  that a delete had failed when only what came after it had (showing the next group, or making a new first one), so a page
+  kept the group and stored it again; once the groups are stored without it, it is deleted, and what fails after is logged. A
+  new group is stored before the view, the popup or the menu has it, as a rename is. A move made while an earlier change is
+  being stored is stored once that change is done, so it is lost if the page closes before then (it goes back to where it was).
+- The eleventh round found that the view and the popup each gave the window a group to show after a delete, the view without
+  showing its tabs and both by their own rule, where the background already does it by the spec's (the lowest left, only when
+  the deleted group was shown): the background alone does it now. It also found that a page never learned of the first group
+  the background makes when the last is deleted, and stored over it with its next new group: the page takes in the groups the
+  background stored that it does not have, the view draws them and the popup shows its list again. And it found that a window
+  left with no group of the user's, or showing a group that was deleted, was never put right (when what follows a delete
+  fails): a window with only the group for ungrouped tabs gets a first group at the next start, and a new tab in a window whose
+  shown group is gone goes to the lowest group left.
+- **Not done:** a page that stores groups during the last moments of start-up (the view opened as the browser starts) can still
+  lose them. The view stores groups only when the person changes something, so this needs a change in that instant. Making it
+  impossible needs a lock around each read-then-write of a window's groups, shared by the pages and the background.
+
+**What the property test found** (all fixed, each with a unit test; the journeys J17, J21 and J22 show several; items 9 to 12 came with steps 7 and 8):
+
+1. A hidden tab moved to another window stayed hidden (`tabAttached` showed nothing).
+2. A native group removed together with another (a window closed) left a link to the second one: the reports of the browser are followed one after the other now.
+3. A native group's `onUpdated` with an empty title, which Chromium sends just after it makes a group, renamed the add-on's group to "": the name is the title the native group has _now_.
+4. Deleting the last group of the user's never made a new first group, as the group for ungrouped tabs (`-2`) was always left in the list. (Not caused by this work; the pinned tab that keeps a window open showed it.)
+5. Deleting the group a window showed, when it had no tabs, left the window's active group pointing at the deleted group; the background points the window at the lowest group left and shows its tabs.
+6. Activating a tab in the group for ungrouped tabs (which native mode makes of an unpinned tab) set the window's active group to `-2` and logged an error: it changes nothing now.
+7. A tab that comes back hidden (a window closed in legacy mode, restored after native groups were switched on) is shown.
+8. Sending a pinned tab that is the window's only one to a group from the menu aborted the switch: a pinned tab that was all the window showed makes the window follow it.
+9. A report of a tab leaving its native group for a tab that was closed on the way (a group deleted with its tabs) was logged as an error: a tab that is gone is left alone.
+10. `toggleVisibleTabs` aborted, logging an error, whenever the shown group had no tab, even in native mode, where no tab is hidden: it only does where tabs are hidden.
+11. A tab that comes back in the group for ungrouped tabs asked for that group to be shown: it shows no group.
+12. Switching native groups off left tabs that sat in the group for ungrouped tabs there, where tabs hidden hide them for good: they join the group the window shows.
+
+The model of the browser (`tests/support/world/browser-model.ts`) was extended to match: pinning and unpinning, `tabs.group` unpinning, `storage.session` cleared on restart.
+
+**A decision of the plan this work follows that changes an earlier journey:** a tab that leaves its native group goes to the group for ungrouped tabs (decision 2). The user "Ungroup" of a native group therefore leaves the add-on's group, its link forgotten, with its tabs ungrouped; journey J10 said the tabs stayed in the group, and was rewritten.
+
+**Not yet done of the loop of `.agents/rules/verification-validation-rules.md`:** the code and security reviewers (the rule's agents), and `pre-commit run`, which is not installed here. `npm audit` is not part of this record.
+
 ### The checks of what is not verified
 
 Each point the decisions mark **not verified** (or "likely", or known from the source only) is settled by an automated test
@@ -730,3 +865,4 @@ release), with the add-on built from the finished work, and the result written h
   the system and start it again. Each time, expected: the same groups, names, rectangles and empty groups in each window,
   every tab in its group, the native groups linked (no duplicate native group made), and the pinned tab pinned and in no
   group.
+- **M6. Chromium: a window reopened.** With a window of several named native groups (and groups of the add-on's with places of their own) and another window open, close the first and reopen it (Ctrl+Shift+T, or "Reopen closed window"). Expected: its groups, names, places and empty groups come back, the tabs are in their groups and linked to their native groups. If it gets one new group instead, the window opened before its tabs and native groups were there (see "What the checks of not verified found"), and the rebuild needs to run again when they are.

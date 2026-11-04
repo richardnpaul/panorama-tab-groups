@@ -27,11 +27,12 @@ export interface TabsApi {
       currentWindow?: boolean;
       windowId?: number;
       highlighted?: boolean;
+      hidden?: boolean;
     }): Promise<QueriedTab[]>;
     get(tabId: number): Promise<QueriedTab>;
     update(
       tabId: number,
-      updateProperties: { active: boolean },
+      updateProperties: { active?: boolean; pinned?: boolean },
     ): Promise<unknown>;
     move(tabId: number, moveProperties: { index: number }): Promise<unknown>;
     remove(tabId: number): Promise<unknown>;
@@ -129,8 +130,27 @@ export function createBrowserTabs(getApi: () => TabsApi): Tabs {
       return idsOf(found.filter(({ hidden }) => hidden !== true));
     },
 
+    async hiddenIdsInWindow(windowId) {
+      return idsOf(await getApi().tabs.query({ windowId, hidden: true }));
+    },
+
+    async idsOfAddressesUnder(prefix) {
+      const found = await getApi().tabs.query({});
+      return idsOf(
+        found.filter(
+          ({ url, pendingUrl }) =>
+            url?.startsWith(prefix) === true ||
+            pendingUrl?.startsWith(prefix) === true,
+        ),
+      );
+    },
+
     async activate(tabId) {
       await getApi().tabs.update(tabId, { active: true });
+    },
+
+    async unpin(tabId) {
+      await getApi().tabs.update(tabId, { pinned: false });
     },
 
     async moveToEnd(tabId) {

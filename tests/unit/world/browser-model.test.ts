@@ -83,7 +83,7 @@ describe('the model of a browser (tests/support/world)', () => {
 
       model.closeTab(tabIds[0] ?? 0);
 
-      expect(kinds()).toEqual(['tabRemoved']);
+      expect(kinds()).toEqual(['tabRemoved', 'windowRemoved']);
       expect(model.windows.has(windowId)).toBe(false);
     });
 
@@ -161,7 +161,7 @@ describe('the model of a browser (tests/support/world)', () => {
 
       model.moveTab(tabId, second.windowId);
 
-      expect(kinds()).toEqual(['tabDetached', 'tabAttached']);
+      expect(kinds()).toEqual(['tabDetached', 'tabAttached', 'windowRemoved']);
       expect(model.tabs.get(tabId)?.windowId).toBe(second.windowId);
       expect(model.windows.has(first.windowId)).toBe(false);
     });
@@ -404,6 +404,9 @@ describe('the model of a browser (tests/support/world)', () => {
       expect(model.groups.size).toBe(0);
       expect(kinds().filter((kind) => kind === 'tabRemoved')).toHaveLength(2);
       expect(kinds()).toContain('groupRemoved');
+      // Its tabs are gone first, as the browser says
+      expect(kinds().at(-1)).toBe('windowRemoved');
+      expect(events.at(-1)).toMatchObject({ type: 'windowRemoved', windowId });
     });
 
     it('restores the window last closed, with new ids for it and its tabs, and the focus (a fact of Firefox)', () => {

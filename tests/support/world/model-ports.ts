@@ -2,6 +2,7 @@ import type { SessionsApi } from '../../../src/js/adapters/browser/group-state.j
 import type { NativeGroups } from '../../../src/js/ports/native-groups.js';
 import type { TabDetails, Tabs } from '../../../src/js/ports/tabs.js';
 import type { Windows } from '../../../src/js/ports/windows.js';
+import { createFakeSessionArea } from '../fake-session-area.js';
 import type { BrowserModel, ModelTab } from './browser-model.js';
 
 /** What the extension is told of a tab */
@@ -84,9 +85,25 @@ export function tabsOfModel(model: BrowserModel): Tabs {
           .filter(({ hidden }) => !hidden)
           .map(({ id }) => id),
       ),
+    hiddenIdsInWindow: (windowId) =>
+      rejected(() =>
+        inWindow(windowId)
+          .filter(({ hidden }) => hidden)
+          .map(({ id }) => id),
+      ),
+    idsOfAddressesUnder: (prefix) =>
+      Promise.resolve(
+        [...model.tabs.values()]
+          .filter(({ url }) => url.startsWith(prefix))
+          .map(({ id }) => id),
+      ),
     activate: (id) =>
       rejected(() => {
         model.activateTab(id);
+      }),
+    unpin: (id) =>
+      rejected(() => {
+        model.setPinned(id, false);
       }),
     moveToEnd: (id) =>
       rejected(() => {
@@ -130,6 +147,8 @@ export function windowsOfModel(model: BrowserModel): Windows {
     create: () => Promise.resolve(model.openWindow([]).windowId),
     place: () => Promise.resolve(),
     listIds: () => Promise.resolve([...model.windows.keys()]),
+    listNonPrivateIds: () => Promise.resolve([...model.windows.keys()]),
+    listPrivateIds: () => Promise.resolve([]),
     exists: (windowId) => Promise.resolve(model.windows.has(windowId)),
   };
 }
@@ -171,6 +190,11 @@ export function nativeGroupsOfModel(model: BrowserModel): NativeGroups {
       rejected(() => {
         model.ungroup(tabIds);
       }),
+    setTitle: (id, title) =>
+      rejected(() => {
+        group(id);
+        model.updateGroup(id, { title });
+      }),
     setAppearance: (id, { title, color }) =>
       rejected(() => {
         group(id);
@@ -181,8 +205,8 @@ export function nativeGroupsOfModel(model: BrowserModel): NativeGroups {
       }),
     get: (id) =>
       rejected(() => {
-        const { windowId, title } = group(id);
-        return { windowId, title };
+        const { windowId, title, collapsed } = group(id);
+        return { windowId, title, collapsed };
       }),
   };
 }
@@ -204,6 +228,7 @@ export function sessionsOfModel(model: BrowserModel): SessionsApi {
     return found;
   };
   return {
+    storage: { session: createFakeSessionArea(model.sessionStorage).area },
     sessions: {
       getWindowValue: (windowId, key) =>
         rejected(() => structuredClone(window(windowId).values[key])),

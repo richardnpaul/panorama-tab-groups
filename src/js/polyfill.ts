@@ -6,6 +6,8 @@ import {
 import { createExclusively, type Locks } from './adapters/browser/exclusive.js';
 import {
   createSessionsEmulation,
+  type IsPrivate,
+  type SessionsEmulation,
   type StorageArea,
 } from './adapters/browser/sessions-emulation.js';
 
@@ -27,9 +29,27 @@ interface PolyfillSessions {
   removeWindowValue?: (windowId: number, key: string) => Promise<void>;
 }
 
+/** What only the emulation can do: list and forget what it keeps, which a browser's own values do by themselves */
+export type SessionsManagement = Pick<
+  SessionsEmulation,
+  | 'windowIds'
+  | 'tabIds'
+  | 'privateWindowIds'
+  | 'privateTabIds'
+  | 'setPrivate'
+  | 'removeWindow'
+  | 'removeTab'
+>;
+
 export interface PolyfillTarget {
   sessions?: PolyfillSessions | undefined;
+  // Set where the values are emulated
+  sessionsManagement?: SessionsManagement | undefined;
   storage: { local: StorageArea };
+  tabs?:
+    { get: (tabId: number) => Promise<{ incognito: boolean }> } | undefined;
+  windows?:
+    { get: (windowId: number) => Promise<{ incognito: boolean }> } | undefined;
   action?:
     | {
         setTitle: (details: TitleDetails) => Promise<void>;
@@ -43,6 +63,18 @@ export interface PolyfillScope {
   chrome?: PolyfillTarget | undefined;
   // Shared by all the contexts of the extension, where the browser has it
   navigator?: { locks?: Locks | undefined } | undefined;
+}
+
+/**
+ * How the emulation knows a private window or tab, whose values it keeps apart from the others.
+ * Every context of the add-on has `tabs` and `windows`; without them, nothing is kept apart.
+ */
+function isPrivateIn({ tabs, windows }: PolyfillTarget): IsPrivate | undefined {
+  if (tabs === undefined || windows === undefined) {
+    return undefined;
+  }
+  return async (scope, id) =>
+    (await (scope === 'tabs' ? tabs.get(id) : windows.get(id))).incognito;
 }
 
 /**
@@ -60,9 +92,22 @@ export function installPolyfills(scope: PolyfillScope): void {
   const emulation = createSessionsEmulation(
     () => target.storage.local,
     createExclusively(scope.navigator?.locks),
+    isPrivateIn(target),
   );
   target.sessions ??= {};
   const { sessions } = target;
+  // Only where the browser has no values of its own: there the emulation is the store
+  if (sessions.getTabValue === undefined) {
+    target.sessionsManagement = {
+      windowIds: emulation.windowIds,
+      tabIds: emulation.tabIds,
+      privateWindowIds: emulation.privateWindowIds,
+      privateTabIds: emulation.privateTabIds,
+      setPrivate: emulation.setPrivate,
+      removeWindow: emulation.removeWindow,
+      removeTab: emulation.removeTab,
+    };
+  }
   sessions.getTabValue ??= emulation.getTabValue;
   sessions.setTabValue ??= emulation.setTabValue;
   sessions.removeTabValue ??= emulation.removeTabValue;

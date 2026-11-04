@@ -17,6 +17,13 @@ export interface Windows {
   place(windowId: number, placement: WindowPlacement): Promise<void>;
   /** The ids of all the windows that are open */
   listIds(): Promise<number[]>;
+  /**
+   * The ids of the windows that are open and not private (incognito), from one look at the
+   * windows: a private window that opens meanwhile cannot slip in
+   */
+  listNonPrivateIds(): Promise<number[]>;
+  /** The ids of the windows that are open and private, from one look at the windows */
+  listPrivateIds(): Promise<number[]>;
   /** Whether the window is still open */
   exists(windowId: number): Promise<boolean>;
 }

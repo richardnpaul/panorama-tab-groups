@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Usa i gruppi di schede nativi del browser per l'organizzazione visiva e la compressione."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "I gruppi di schede nativi non sono supportati in questa versione del browser (richiede l'API per nascondere le schede)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Questo browser usa sempre i gruppi di schede nativi, quindi questa impostazione non può essere modificata."
   },
   "optionsNativeGroupsLegacy": {
     "message": "I gruppi di schede nativi non sono supportati in questa versione del browser. Aggiorna a Firefox 139+ o usa Chrome 89+."

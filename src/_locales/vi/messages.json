@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Dùng nhóm thẻ gốc của trình duyệt để sắp xếp trực quan và thu gọn."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Phiên bản trình duyệt này không hỗ trợ nhóm thẻ gốc (cần API ẩn thẻ)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Trình duyệt này luôn dùng nhóm thẻ gốc, vì vậy không thể thay đổi cài đặt này."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Phiên bản trình duyệt này không hỗ trợ nhóm thẻ gốc. Vui lòng cập nhật lên Firefox 139+ hoặc dùng Chrome 89+."

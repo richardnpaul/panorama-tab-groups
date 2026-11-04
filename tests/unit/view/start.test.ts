@@ -60,6 +60,8 @@ async function load(
     tabGroups?: Record<number, number>;
     groups?: ReturnType<typeof group>[];
     stored?: Record<string, unknown>;
+    // The links of the groups to native groups, as `storage.session` keeps them
+    links?: Record<string, number>;
     path?: string;
     // The markup of the page, where the test is about what the page itself says
     page?: string;
@@ -75,6 +77,7 @@ async function load(
     tabGroups = { 1: 0, 2: 1, [VIEW_TAB]: -1 },
     groups = [group(0, 'First'), group(1, 'Second')],
     stored = {},
+    links,
     page = PAGE,
   } = options;
   document.body.className = '';
@@ -115,7 +118,17 @@ async function load(
         set: vi.fn().mockResolvedValue(undefined),
       },
       onChanged: events.storageChanged,
+      ...(links === undefined
+        ? {}
+        : {
+            session: {
+              get: vi.fn(() => Promise.resolve({ ...links })),
+              set: vi.fn().mockResolvedValue(undefined),
+              remove: vi.fn().mockResolvedValue(undefined),
+            },
+          }),
     },
+    tabGroups: { update: vi.fn().mockResolvedValue(undefined) },
     sessions: sessions.api.sessions,
     windows: { getCurrent: vi.fn().mockResolvedValue({ id: WINDOW }) },
     tabs: {
@@ -385,6 +398,29 @@ describe('view/start.ts', () => {
       }
     });
 
+    it('gives the native group of a group that is renamed the new name as its title', async () => {
+      const env = await load({
+        links: { [`nativeGroup:${String(WINDOW)}:0`]: 50 },
+      });
+      await env.startView();
+      const header = element('#groups > .group .header');
+      header.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      const input = header.querySelector('input');
+      if (input === null) {
+        throw new Error('No input to rename the group in');
+      }
+      input.value = 'Renamed';
+      input.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+      );
+      await settle();
+
+      expect(env.browser.tabGroups.update).toHaveBeenCalledWith(50, {
+        title: 'Renamed',
+      });
+      expect(groupNames()).toEqual(['Renamed', 'Second']);
+    });
+
     it('asks before closing a group that has tabs', async () => {
       const env = await load();
       await env.startView();
@@ -403,6 +439,8 @@ describe('view/start.ts', () => {
       const env = await load();
       await env.startView();
       vi.spyOn(window, 'confirm').mockReturnValue(true);
+      // The background deletes it
+      env.browser.runtime.sendMessage.mockResolvedValue({ success: true });
 
       element('#groups > .group .header .close').dispatchEvent(
         new MouseEvent('click', { bubbles: true, cancelable: true }),

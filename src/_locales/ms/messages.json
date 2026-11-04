@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Gunakan kumpulan tab asal pelayar untuk penyusunan visual dan pelipatan."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Kumpulan tab asal tidak disokong dalam versi pelayar ini (memerlukan API penyembunyian tab)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Pelayar ini sentiasa menggunakan kumpulan tab asal, jadi tetapan ini tidak boleh diubah."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Kumpulan tab asal tidak disokong dalam versi pelayar ini. Sila kemas kini kepada Firefox 139+ atau gunakan Chrome 89+."

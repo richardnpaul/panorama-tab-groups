@@ -116,6 +116,33 @@ describe('polyfill.ts', () => {
       });
     });
 
+    it('gives the way to list and forget what it keeps, where it keeps the values', async () => {
+      const browser = target();
+
+      installPolyfills({ browser });
+      await browser.sessions?.setWindowValue?.(3, 'a', { n: 1 });
+      await browser.sessions?.setTabValue?.(20, 'a', { n: 1 });
+      const management = browser.sessionsManagement;
+
+      expect(await management?.windowIds()).toEqual([3]);
+      expect(await management?.tabIds()).toEqual([20]);
+      await management?.removeWindow(3);
+      await management?.removeTab(20);
+      expect(await management?.windowIds()).toEqual([]);
+      expect(await management?.tabIds()).toEqual([]);
+    });
+
+    it('gives none where the browser keeps the values itself: they go with their window and tab', () => {
+      const own = Object.fromEntries(
+        SESSION_METHODS.map((method) => [method, vi.fn()]),
+      );
+      const browser = target({ sessions: { ...own } });
+
+      installPolyfills({ browser });
+
+      expect(browser.sessionsManagement).toBeUndefined();
+    });
+
     it('leaves a browser that has all of them alone', () => {
       const own = Object.fromEntries(
         SESSION_METHODS.map((method) => [method, vi.fn()]),
@@ -178,6 +205,94 @@ describe('polyfill.ts', () => {
       expect(first.data.size).toBe(0);
       expect(second.data.size).toBe(1);
     });
+  });
+
+  describe('sessions of private windows and tabs', () => {
+    // Window 1 and tab 10 are private; the browser knows no others
+    const browserWithPrivate = () => {
+      const local = createFakeStorage();
+      const known = (privateId: number) => (id: number) =>
+        id === privateId || id === privateId * 2
+          ? Promise.resolve({ incognito: id === privateId })
+          : Promise.reject(new Error(`No ${String(id)}`));
+      const browser = target({
+        storage: { local: local.area },
+        tabs: { get: known(10) },
+        windows: { get: known(1) },
+      });
+      installPolyfills({ browser });
+      return { browser, local };
+    };
+
+    it('keeps them apart from the others, as the browser tells them', async () => {
+      const { browser, local } = browserWithPrivate();
+
+      await browser.sessions?.setWindowValue?.(1, 'groups', 'private');
+      await browser.sessions?.setTabValue?.(10, 'groupId', 'private');
+      await browser.sessions?.setWindowValue?.(2, 'groups', 'normal');
+      await browser.sessions?.setTabValue?.(20, 'groupId', 'normal');
+
+      expect(local.data.get('privateSessions')).toEqual({
+        windows: { 1: { groups: 'private' } },
+        tabs: { 10: { groupId: 'private' } },
+      });
+      expect(local.data.get('__mock_sessions')).toEqual({
+        windows: { 2: { groups: 'normal' } },
+        tabs: { 20: { groupId: 'normal' } },
+      });
+    });
+
+    it('keeps apart a window or tab the browser does not know', async () => {
+      const { browser, local } = browserWithPrivate();
+
+      await browser.sessions?.setWindowValue?.(7, 'closedAt', 'x');
+
+      expect(local.data.get('privateSessions')).toEqual({
+        windows: { 7: { closedAt: 'x' } },
+        tabs: {},
+      });
+      expect(local.data.has('__mock_sessions')).toBe(false);
+    });
+
+    it('gives the way to list them, forget them and move them apart', async () => {
+      const { browser } = browserWithPrivate();
+      await browser.sessions?.setWindowValue?.(1, 'a', 'x');
+      await browser.sessions?.setTabValue?.(10, 'a', 'x');
+      await browser.sessions?.setTabValue?.(20, 'a', 'x');
+
+      await browser.sessionsManagement?.setPrivate([], [20]);
+
+      expect(await browser.sessionsManagement?.privateWindowIds()).toEqual([1]);
+      expect(await browser.sessionsManagement?.privateTabIds()).toEqual([
+        10, 20,
+      ]);
+    });
+
+    it.each([
+      [
+        'tabs',
+        { windows: { get: () => Promise.resolve({ incognito: true }) } },
+      ],
+      [
+        'windows',
+        { tabs: { get: () => Promise.resolve({ incognito: true }) } },
+      ],
+    ])(
+      'keeps nothing apart where the browser has no %s to ask',
+      async (_name, apis) => {
+        const local = createFakeStorage();
+        const browser = target({ storage: { local: local.area }, ...apis });
+        installPolyfills({ browser });
+
+        await browser.sessions?.setWindowValue?.(2, 'a', 'x');
+
+        expect(local.data.has('privateSessions')).toBe(false);
+        expect(local.data.get('__mock_sessions')).toEqual({
+          windows: { 2: { a: 'x' } },
+          tabs: {},
+        });
+      },
+    );
   });
 
   describe('the toolbar button', () => {

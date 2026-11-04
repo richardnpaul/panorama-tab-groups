@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Utilitza els grups de pestanyes natius del navegador per a l'organització visual i el plegat."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Els grups de pestanyes natius no són compatibles amb aquesta versió del navegador (cal l'API per amagar pestanyes)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Aquest navegador sempre utilitza els grups de pestanyes natius, per tant aquest paràmetre no es pot canviar."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Els grups de pestanyes natius no són compatibles amb aquesta versió del navegador. Actualitzeu a Firefox 139+ o feu servir Chrome 89+."

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Izmantot pārlūka pašu cilņu grupas vizuālai organizēšanai un sakļaušanai."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Pārlūka pašu cilņu grupas šajā pārlūka versijā netiek atbalstītas (nepieciešama cilņu slēpšanas API)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Šis pārlūks vienmēr izmanto pašu cilņu grupas, tāpēc šo iestatījumu nevar mainīt."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Pārlūka pašu cilņu grupas šajā pārlūka versijā netiek atbalstītas. Lūdzu, atjauniniet uz Firefox 139+ vai izmantojiet Chrome 89+."

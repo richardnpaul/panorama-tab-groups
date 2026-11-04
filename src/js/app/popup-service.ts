@@ -41,7 +41,7 @@ export interface PopupService {
   addNewTab(groupId: number): Promise<void>;
   /** Make a group in the next place of the grid, and say its id */
   createGroup(): Promise<number>;
-  /** Whether the group is gone; if so, the first of those left is shown */
+  /** Whether the group was deleted (not one it does not have) */
   removeGroup(groupId: number): Promise<boolean>;
   renameGroup(groupId: number, name: string): Promise<void>;
   moveGroup(groupId: number, gap: number): Promise<void>;
@@ -114,17 +114,8 @@ export function createPopupService({
       return id;
     },
 
-    async removeGroup(groupId) {
-      await groups.remove(groupId);
-      if (groups.get(groupId) !== null) {
-        return false;
-      }
-      const [first] = groups.getIds();
-      if (first !== undefined) {
-        await showGroup(first);
-      }
-      return true;
-    },
+    // The background gives the window the group it shows next, when it was this one
+    removeGroup: (groupId) => groups.remove(groupId),
 
     renameGroup: (groupId, name) => groups.rename(groupId, name),
     moveGroup: (groupId, gap) => groups.moveTo(groupId, gap),

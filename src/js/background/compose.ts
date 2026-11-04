@@ -1,3 +1,10 @@
+import {
+  createBrowserBackupFiles,
+  textLinksOf,
+} from '../adapters/browser/backup-files.js';
+import { createBrowserBackupLog } from '../adapters/browser/backup-log.js';
+import { createBrowserDataVersion } from '../adapters/browser/data-version.js';
+import { createBrowserPendingUpdate } from '../adapters/browser/pending-update.js';
 import { createBrowserExtension } from '../adapters/browser/extension.js';
 import { createBrowserI18n } from '../adapters/browser/i18n.js';
 import { createBrowserMenus } from '../adapters/browser/menus.js';
@@ -13,7 +20,11 @@ import { createBrowserWindows } from '../adapters/browser/windows.js';
 import type { BackgroundHandlers } from '../adapters/browser/events.js';
 import { systemClock } from '../adapters/system/clock.js';
 import { createSystemScheduler } from '../adapters/system/scheduler.js';
+import { createAddonUpdate } from '../app/addon-update.js';
+import { createAutoBackup, withBackupOnChange } from '../app/auto-backup.js';
+import { createBackupSnapshot } from '../app/backup-service.js';
 import { createBrowserEvents } from '../app/browser-events.js';
+import { createClosedWindows } from '../app/closed-windows.js';
 import { createCommands } from '../app/commands.js';
 import { createGroupDeletion } from '../app/delete-group.js';
 import { createExternalMessageHandler } from '../app/external-messages.js';
@@ -24,6 +35,7 @@ import { createInitializationUi } from '../app/initialization-ui.js';
 import { createMessageHandler } from '../app/message-handler.js';
 import { createNativeGroupAssignment } from '../app/native-group-assignment.js';
 import { createNativeGroupsSync } from '../app/native-groups-sync.js';
+import { createOwnMoves } from '../app/own-moves.js';
 import { createStartup } from '../app/startup.js';
 import { createTabLifecycle } from '../app/tab-lifecycle.js';
 import { createTabMoves } from '../app/tab-moves.js';
@@ -34,9 +46,14 @@ import { createViewRefresh } from '../app/view-refresh.js';
 import { createViewToggle } from '../app/view-toggle.js';
 import { createVisibilityService } from '../app/visibility-service.js';
 import { createWindowGroups } from '../app/window-groups.js';
+import { createWindowRebuild } from '../app/window-rebuild.js';
 import { browserModeOf, detectCapabilities } from '../share/capabilities.js';
 import { createMenuManager } from '../app/menu-manager.js';
+import { createMigrations, withMigratedWindows } from '../app/migrations.js';
+import type { BackupFiles } from '../ports/backup-files.js';
+import type { BackupLog } from '../ports/backup-log.js';
 import type { Clock } from '../ports/clock.js';
+import type { DataVersion } from '../ports/data-version.js';
 import type { Extension } from '../ports/extension.js';
 import type { GroupState } from '../ports/group-state.js';
 import type { I18n } from '../ports/i18n.js';
@@ -45,6 +62,7 @@ import type { Menus } from '../ports/menus.js';
 import type { Messaging } from '../ports/messaging.js';
 import type { MigrationFlag } from '../ports/migration-flag.js';
 import type { NativeGroups } from '../ports/native-groups.js';
+import type { PendingUpdate } from '../ports/pending-update.js';
 import type { Notifications } from '../ports/notifications.js';
 import type { OptionsStore } from '../ports/options.js';
 import type { Scheduler } from '../ports/scheduler.js';
@@ -78,6 +96,10 @@ export interface BackgroundPorts {
   messaging: Messaging;
   sessionHistory: SessionHistory;
   groupState: GroupState;
+  backupFiles: BackupFiles;
+  backupLog: BackupLog;
+  dataVersion: DataVersion;
+  pendingUpdate: PendingUpdate;
   clock: Clock;
   scheduler: Scheduler;
   logger: Logger;
@@ -100,6 +122,14 @@ function browserPorts(): BackgroundPorts {
     messaging: createBrowserMessaging(() => browser),
     sessionHistory: createBrowserSessionHistory(() => browser),
     groupState: stateManager,
+    backupFiles: createBrowserBackupFiles(
+      () => browser,
+      textLinksOf(URL),
+      console,
+    ),
+    backupLog: createBrowserBackupLog(() => browser),
+    dataVersion: createBrowserDataVersion(() => browser),
+    pendingUpdate: createBrowserPendingUpdate(() => browser),
     clock: systemClock,
     scheduler: createSystemScheduler(),
     logger: console,
@@ -121,7 +151,11 @@ export function composeBackgroundFrom({
   notifications,
   messaging,
   sessionHistory,
-  groupState,
+  groupState: storedGroupState,
+  backupFiles,
+  backupLog,
+  dataVersion,
+  pendingUpdate,
   clock,
   scheduler,
   logger,
@@ -130,6 +164,54 @@ export function composeBackgroundFrom({
     tabHide: capabilities.hasTabHide,
     tabGroups: capabilities.hasTabGroups,
     mode: browserModeOf(capabilities),
+  });
+
+  const useNativeGroups = createUseNativeGroups({
+    hasTabGroups: capabilities.hasTabGroups,
+    hasTabHide: capabilities.hasTabHide,
+    options,
+  });
+
+  // Set by the options page while it opens a backup, whose tabs bring their own groups
+  let openingBackup = false;
+  const isOpeningBackup = () => openingBackup;
+
+  // Every change of the groups is noted for the automatic backups, which read them as they are stored
+  const autoBackup = createAutoBackup({
+    snapshot: createBackupSnapshot({
+      windows,
+      tabs,
+      groupState: storedGroupState,
+    }),
+    files: backupFiles,
+    log: backupLog,
+    clock,
+    scheduler,
+    isOpeningBackup,
+    logger,
+  });
+  // Each window is brought to the current version of the stored data before it is used
+  const migrations = createMigrations({
+    groupState: storedGroupState,
+    windows,
+    tabs,
+    dataVersion,
+    migrationFlag,
+    autoBackup,
+    canHideTabs: capabilities.hasTabHide,
+    useNativeGroups,
+    logger,
+  });
+  const groupState = withBackupOnChange(
+    withMigratedWindows(storedGroupState, migrations),
+    autoBackup,
+  );
+  const addonUpdate = createAddonUpdate({
+    autoBackup,
+    tabs,
+    extension,
+    pendingUpdate,
+    logger,
   });
 
   const menuManager = createMenuManager({
@@ -141,14 +223,6 @@ export function composeBackgroundFrom({
   });
   const { createMenuList, handleMenuChange } = menuManager;
   const viewUrl = extension.urlOf('view.html');
-  const useNativeGroups = createUseNativeGroups({
-    hasTabGroups: capabilities.hasTabGroups,
-    options,
-  });
-
-  // Set by the options page while it opens a backup, whose tabs bring their own groups
-  let openingBackup = false;
-  const isOpeningBackup = () => openingBackup;
 
   const initialization = createInitialization({ clock, scheduler, logger });
   const ui = createInitializationUi({
@@ -182,6 +256,27 @@ export function composeBackgroundFrom({
     logger,
   });
 
+  const closedWindows = createClosedWindows({
+    groupState: storedGroupState,
+    windows,
+    tabs,
+    clock,
+    logger,
+  });
+  // What the browser says of tabs the add-on moves between native groups is not the person's doing
+  const ownMoves = createOwnMoves();
+  const windowRebuild = createWindowRebuild({
+    enabled: !capabilities.hasTabHide,
+    groupState,
+    // A window that closed is read as it was stored, not brought up to date for nothing
+    archive: storedGroupState,
+    windows,
+    tabs,
+    nativeGroups,
+    i18n,
+    viewUrl,
+    logger,
+  });
   const windowGroups = createWindowGroups({
     groupState,
     windows,
@@ -190,6 +285,7 @@ export function composeBackgroundFrom({
     toolbar: toolbarService,
     waitForInitialization: initialization.waitForInitialization,
     isOpeningBackup,
+    rebuildWindow: windowRebuild.rebuildWindow,
     logger,
   });
   const recovery = createGroupRecovery({
@@ -209,6 +305,7 @@ export function composeBackgroundFrom({
     nativeGroups,
     assignment,
     migrationFlag,
+    canHideTabs: capabilities.hasTabHide,
     logger,
   });
 
@@ -239,6 +336,7 @@ export function composeBackgroundFrom({
     toggleVisibleTabs: (activeGroup, windowId) =>
       visibility.toggleVisibleTabs(activeGroup, undefined, windowId),
     useNativeGroups,
+    ownMoves,
     logger,
   });
   const triggerCommand = createCommands({
@@ -251,10 +349,13 @@ export function composeBackgroundFrom({
   });
   const events = createBrowserEvents({
     groupState,
+    tabs,
     nativeGroups,
     nativeGroupsSync,
     viewOpening,
     useNativeGroups,
+    waitForInitialization: initialization.waitForInitialization,
+    ownMoves,
     viewUrl,
     logger,
   });
@@ -265,6 +366,8 @@ export function composeBackgroundFrom({
     windowGroups,
     menus,
     hasTabGroups: capabilities.hasTabGroups,
+    toggleVisibleTabs: (activeGroup, windowId) =>
+      visibility.toggleVisibleTabs(activeGroup, undefined, windowId),
     logger,
   });
 
@@ -272,7 +375,6 @@ export function composeBackgroundFrom({
     options,
     windows,
     tabs,
-    groupState,
     capabilities,
     notifications,
     extension,
@@ -285,12 +387,17 @@ export function composeBackgroundFrom({
       toggleView: createViewToggle({ tabs, windows, extension, viewOpening }),
       triggerCommand,
       createGroupInWindowIfMissing: windowGroups.createGroupInWindowIfMissing,
+      windowRemoved: closedWindows.windowClosed,
       tabCreated: lifecycle.tabCreated,
       tabAttached: lifecycle.tabAttached,
       tabDetached: lifecycle.tabDetached,
       tabActivated: lifecycle.tabActivated,
       tabUpdated: events.onTabUpdated,
-      tabRemoved: events.onTabRemoved,
+      tabRemoved: async (tabId) => {
+        events.onTabRemoved(tabId);
+        await closedWindows.tabClosed(tabId);
+        await addonUpdate.tabRemoved(tabId);
+      },
       menuClicked: tabMoves.menuClicked,
       handleMessage: createMessageHandler({
         handleMenuChange,
@@ -301,24 +408,30 @@ export function composeBackgroundFrom({
         setOpeningBackup: (opening) => {
           openingBackup = opening;
         },
+        autoBackup,
         logger,
       }),
       handleExternalMessage: createExternalMessageHandler({
         triggerCommand,
         logger,
       }),
+      updateAvailable: addonUpdate.updateAvailable,
       storageChanged: events.onStorageChanged,
       nativeGroupRemoved: nativeGroupsSync.onRemoved,
       nativeGroupUpdated: nativeGroupsSync.onUpdated,
       notificationClicked: firstRun.noticeClicked,
     },
     init: createStartup({
+      migrations,
       firstRun,
+      windowRebuild,
+      closedWindows,
       recovery,
       windowGroups,
       nativeGroupsSync,
       menuManager: { createMenuList },
       viewRefresh,
+      autoBackup,
       useNativeGroups,
       logger,
     }),

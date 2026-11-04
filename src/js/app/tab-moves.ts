@@ -1,3 +1,4 @@
+import { isReservedGroupId } from '../core/constants.js';
 import { nativeGroupIdOf } from '../core/groups.js';
 import { groupIdOfMenuItem, neighbourOf } from '../core/menu-items.js';
 import type { GroupState } from '../ports/group-state.js';
@@ -7,6 +8,7 @@ import type { NativeGroups } from '../ports/native-groups.js';
 import type { Tabs } from '../ports/tabs.js';
 import type { Windows } from '../ports/windows.js';
 import type { NativeGroupAssignment } from './native-group-assignment.js';
+import type { OwnMoves } from './own-moves.js';
 
 const REFRESH_GROUPS = 'refresh-groups';
 
@@ -14,6 +16,8 @@ export interface TabMovesDeps {
   tabs: Pick<
     Tabs,
     | 'moveToEnd'
+    | 'unpin'
+    | 'get'
     | 'activate'
     | 'highlightedIdsInWindow'
     | 'visibleIdsInWindow'
@@ -40,6 +44,8 @@ export interface TabMovesDeps {
   ) => Promise<void>;
   // Whether native tab groups are available and switched on
   useNativeGroups: () => Promise<boolean>;
+  // What the browser says of a tab that the add-on moves is not the person's doing
+  ownMoves: Pick<OwnMoves, 'during'>;
   logger: Pick<Logger, 'debug' | 'warn'>;
 }
 
@@ -68,35 +74,36 @@ export function createTabMoves({
   createMenuList,
   toggleVisibleTabs,
   useNativeGroups,
+  ownMoves,
   logger,
 }: TabMovesDeps): TabMoves {
-  // Only the active group has its tabs in a native group: the others have
-  // theirs hidden, which would clash. A group that has none takes its tab out
-  // of the one it was in, or the tab would be in a group of another; except
-  // when the window has just switched to it, and then it is given one.
+  // Every group that has a tab has its native group, collapsed when it is not
+  // the one shown: the tab joins it, and it is made if there is none yet. The
+  // group for ungrouped tabs has none, and where none could be made the tab
+  // leaves the one it was in, or it would be in a group of another.
   async function moveToNativeGroup(
     tabId: number,
     groupId: number,
     windowId: number,
     activeGroup: number | undefined,
-    switched: boolean,
   ): Promise<void> {
     const groups = (await groupState.getGroups(windowId)) ?? [];
-    const group = groups.find(({ id }) => id === groupId);
+    const group = isReservedGroupId(groupId)
+      ? undefined
+      : groups.find(({ id }) => id === groupId);
     const nativeGroupId = nativeGroupIdOf(group);
-    if (nativeGroupId !== undefined && groupId === activeGroup) {
+    if (nativeGroupId !== undefined) {
       await nativeGroups.addTabs([tabId], nativeGroupId);
       return;
     }
     if (
-      switched &&
       group !== undefined &&
       (
         await assignment.createNativeGroup({
           windowId,
           group,
-          groups,
           label: 'TabMoved',
+          collapsed: groupId !== activeGroup,
         })
       ).kind === 'created'
     ) {
@@ -106,15 +113,19 @@ export function createTabMoves({
   }
 
   // The tab was the last the window showed, so with it gone from the group
-  // there would be nothing to show: the window follows the tab to its group
+  // there would be nothing to show: the window follows the tab to its group. A pinned tab
+  // showed nothing of a group, and is the last when no other tab does.
   async function wasLastShown(
     tabId: number,
     windowId: number,
     activeGroup: number | undefined,
   ): Promise<boolean> {
+    if (activeGroup === undefined) {
+      return false;
+    }
     if (
-      activeGroup === undefined ||
-      (await groupState.getTabGroup(tabId)) !== activeGroup
+      (await groupState.getTabGroup(tabId)) !== activeGroup &&
+      !(await tabs.get(tabId)).pinned
     ) {
       return false;
     }
@@ -137,28 +148,29 @@ export function createTabMoves({
     const switched =
       groupId !== shown && (await wasLastShown(tabId, windowId, shown));
     await groupState.setTabGroup(tabId, groupId);
+    // As the browser's own menu does, a pinned tab is unpinned and then moved. Its group is
+    // stored first, so that the unpinning is not taken for a tab left without a group.
+    if ((await tabs.get(tabId)).pinned) {
+      await tabs.unpin(tabId);
+    }
     if (switched) {
       await groupState.setActiveGroup(windowId, groupId);
     }
     const activeGroup = switched ? groupId : shown;
 
-    // Before it is put in a native group: Chromium takes a tab out of its group when it is moved past the group
-    await tabs.moveToEnd(tabId);
+    await ownMoves.during([tabId], async () => {
+      // Before it is put in a native group: Chromium takes a tab out of its group when it is moved past the group
+      await tabs.moveToEnd(tabId);
 
-    if (await useNativeGroups()) {
-      try {
-        await moveToNativeGroup(
-          tabId,
-          groupId,
-          windowId,
-          activeGroup,
-          switched,
-        );
-      } catch (error) {
-        // The tab may be gone, or the browser may have no native groups
-        logger.warn('Could not assign tab to native group:', error);
+      if (await useNativeGroups()) {
+        try {
+          await moveToNativeGroup(tabId, groupId, windowId, activeGroup);
+        } catch (error) {
+          // The tab may be gone, or the browser may have no native groups
+          logger.warn('Could not assign tab to native group:', error);
+        }
       }
-    }
+    });
 
     await toggleVisibleTabs(activeGroup, windowId);
   }

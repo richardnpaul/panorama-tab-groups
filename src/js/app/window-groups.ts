@@ -1,3 +1,4 @@
+import { isReservedGroupId } from '../core/constants.js';
 import type { Clock } from '../ports/clock.js';
 import type { Group, GroupState } from '../ports/group-state.js';
 import type { I18n } from '../ports/i18n.js';
@@ -22,6 +23,8 @@ export interface WindowGroupsDeps {
   waitForInitialization: () => Promise<void>;
   // Whether a backup is being opened, which brings its own groups
   isOpeningBackup: () => boolean;
+  // Gives a window that has native groups its groups from them; whether it did
+  rebuildWindow: (windowId: number) => Promise<boolean>;
   logger: Pick<Logger, 'debug'>;
 }
 
@@ -50,6 +53,7 @@ export function createWindowGroups({
   toolbar,
   waitForInitialization,
   isOpeningBackup,
+  rebuildWindow,
   logger,
 }: WindowGroupsDeps): WindowGroups {
   // The number the next group of the window gets
@@ -70,7 +74,6 @@ export function createWindowGroups({
     const group: Group = {
       id: groupId,
       name: `${i18n.getMessage('defaultGroupName')}${String(groupId)}`,
-      containerId: 'browser-default',
       nativeGroupId: null,
       rect: { x: 0, y: 0, w: 0.5, h: 0.5 },
       lastMoved: clock.now(),
@@ -84,10 +87,18 @@ export function createWindowGroups({
   async function createGroupInWindowIfMissing(windowId: number): Promise<void> {
     await waitForInitialization();
 
+    // The group for ungrouped tabs is not one of the user's: a window that has only it has none,
+    // as one whose last group was deleted and whose first could not be made then
     const groups = await groupState.getGroups(windowId);
-    if (groups === undefined || groups.length === 0) {
+    if (
+      groups === undefined ||
+      groups.every(({ id }) => isReservedGroupId(id))
+    ) {
       logger.debug(`No groups found for window ${String(windowId)}!`);
-      await createGroupInWindow(windowId);
+      // A window that comes back with native groups gets its groups from them
+      if (isOpeningBackup() || !(await rebuildWindow(windowId))) {
+        await createGroupInWindow(windowId);
+      }
     }
     await toolbar.showNoActiveGroup(windowId);
   }

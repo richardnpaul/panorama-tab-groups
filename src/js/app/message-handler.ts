@@ -10,6 +10,7 @@ import type { DeletionResult } from './delete-group.js';
 import type { NativeGroupsSync } from './native-groups-sync.js';
 import { messageOf } from '../share/guards.js';
 import type { ViewRefresh } from './view-refresh.js';
+import type { AutoBackup } from './auto-backup.js';
 
 export interface MessageHandlerDeps {
   // Create, rename or remove the menu item of a group
@@ -19,6 +20,7 @@ export interface MessageHandlerDeps {
   migrationFlag: Pick<MigrationFlag, 'setComplete'>;
   viewRefresh: Pick<ViewRefresh, 'refreshView' | 'isOrdered' | 'clear'>;
   setOpeningBackup: (opening: boolean) => void;
+  autoBackup: Pick<AutoBackup, 'changed'>;
   logger: Pick<Logger, 'error'>;
 }
 
@@ -35,6 +37,7 @@ export function createMessageHandler({
   migrationFlag,
   viewRefresh,
   setOpeningBackup,
+  autoBackup,
   logger,
 }: MessageHandlerDeps): (message: unknown) => Promise<unknown> {
   const changeMenu: Handler = (message) => handleMenuChange(message);
@@ -100,6 +103,16 @@ export function createMessageHandler({
           });
         }
         setOpeningBackup(opening);
+        return Promise.resolve(undefined);
+      },
+    ],
+
+    // A page stored groups itself; the message carries nothing to check, and a backup is only ever
+    // written once the changes stop and the last one is old enough
+    [
+      'groupsChanged',
+      () => {
+        autoBackup.changed();
         return Promise.resolve(undefined);
       },
     ],

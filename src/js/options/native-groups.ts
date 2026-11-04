@@ -42,12 +42,12 @@ const MODE_DISPLAY: Record<BrowserMode, ModeDisplay> = {
     className: 'info-text',
     dimmed: false,
   },
-  // Chrome/Edge - has tabGroups but no tabHide
+  // Chrome/Edge - has tabGroups but no tabHide: native groups are the only kind
   'collapse-only': {
-    disabled: false,
+    disabled: true,
     checked: true,
-    message: 'optionsNativeGroupsCollapseOnly',
-    className: 'warning-text',
+    message: 'optionsNativeGroupsAlwaysOn',
+    className: 'info-text',
     dimmed: true,
   },
   // Old Firefox - has tabHide but no tabGroups
@@ -118,9 +118,9 @@ export default async function initNativeGroupsOption(
 ): Promise<void> {
   const options = await ports.options.load();
   const checkbox = document.getElementById('useNativeGroups');
-  const container = document.getElementById('nativeGroupsContainer');
+  const label = document.getElementById('nativeGroupsLabel');
 
-  if (!(checkbox instanceof HTMLInputElement) || container === null) {
+  if (!(checkbox instanceof HTMLInputElement) || label === null) {
     return;
   }
 
@@ -131,8 +131,10 @@ export default async function initNativeGroupsOption(
   checkbox.disabled = display.disabled;
   warningText.textContent = ports.i18n.getMessage(display.message);
   warningText.className = display.className;
+  // The control is dimmed, and its explanation is not: it is the one way to learn why the control
+  // is as it is, and has to stay legible
   if (display.dimmed) {
-    container.style.opacity = '0.5';
+    label.style.opacity = '0.5';
   }
 
   checkbox.addEventListener('change', () => {

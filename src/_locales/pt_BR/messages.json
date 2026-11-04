@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Usar os grupos de abas nativos do navegador para organização visual e recolhimento."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Os grupos de abas nativos não são compatíveis com esta versão do navegador (requer a API para ocultar abas)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Este navegador sempre usa os grupos de abas nativos, então esta configuração não pode ser alterada."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Os grupos de abas nativos não são compatíveis com esta versão do navegador. Atualize para o Firefox 139+ ou use o Chrome 89+."

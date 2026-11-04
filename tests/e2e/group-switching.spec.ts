@@ -46,41 +46,30 @@ test.describe('Switching groups by activating tabs', () => {
         if (id === undefined) throw new Error('The browser gave no id');
         return id;
       };
-      // The groups as stored, each as found, whatever it holds
-      const storedGroups = async (windowId: number): Promise<unknown[]> => {
-        const stored = await browser.sessions.getWindowValue(
-          windowId,
-          'groups',
-        );
-        const groups: unknown[] = Array.isArray(stored) ? stored : [];
-        return groups;
-      };
+      // The link of a group to its native group, which is kept in `storage.session`
       const nativeIdOf = async (
         windowId: number,
         id: number,
       ): Promise<number | undefined> => {
-        const found = (await storedGroups(windowId)).find(
-          (g) =>
-            typeof g === 'object' && g !== null && 'id' in g && g.id === id,
-        );
-        return typeof found === 'object' &&
-          found !== null &&
-          'nativeGroupId' in found &&
-          typeof found.nativeGroupId === 'number'
-          ? found.nativeGroupId
-          : undefined;
+        const key = `nativeGroup:${String(windowId)}:${String(id)}`;
+        const stored: Record<string, unknown> =
+          await browser.storage.session.get(key);
+        const link = stored[key];
+        return typeof link === 'number' ? link : undefined;
       };
+      // The background reads the groups, works, and writes them back, so a
+      // write from here in between would be overwritten: each step waits for
+      // the background to be done, the first for its start-up, which ends by
+      // storing this window's groups
+      const settle = () => sleep(1500);
+
       const windowId = idOf(await browser.windows.getCurrent());
+      await settle();
       await browser.sessions.setWindowValue(windowId, 'groups', [
         group(0, 'First'),
         group(1, 'Second'),
       ]);
       await browser.sessions.setWindowValue(windowId, 'activeGroup', 0);
-
-      // The background reads the groups, works, and writes them back, so a
-      // write from here in between would be overwritten: each step waits for
-      // the background to be done
-      const settle = () => sleep(1500);
 
       // The background puts new tabs in the active group, and gives that group
       // a native group; the second tab is then moved to the second group
@@ -170,29 +159,16 @@ test.describe('Switching groups by activating tabs', () => {
         if (id === undefined) throw new Error('The browser gave no id');
         return id;
       };
-      // The groups as stored, each as found, whatever it holds
-      const storedGroups = async (windowId: number): Promise<unknown[]> => {
-        const stored = await browser.sessions.getWindowValue(
-          windowId,
-          'groups',
-        );
-        const groups: unknown[] = Array.isArray(stored) ? stored : [];
-        return groups;
-      };
+      // The link of a group to its native group, which is kept in `storage.session`
       const nativeIdOf = async (
         windowId: number,
         id: number,
       ): Promise<number | undefined> => {
-        const found = (await storedGroups(windowId)).find(
-          (g) =>
-            typeof g === 'object' && g !== null && 'id' in g && g.id === id,
-        );
-        return typeof found === 'object' &&
-          found !== null &&
-          'nativeGroupId' in found &&
-          typeof found.nativeGroupId === 'number'
-          ? found.nativeGroupId
-          : undefined;
+        const key = `nativeGroup:${String(windowId)}:${String(id)}`;
+        const stored: Record<string, unknown> =
+          await browser.storage.session.get(key);
+        const link = stored[key];
+        return typeof link === 'number' ? link : undefined;
       };
 
       // A window of its own, with one tab: it is given a native group like
@@ -387,7 +363,7 @@ test.describe('Switching groups by activating tabs', () => {
     expect(result.nativeOfSent).toBeGreaterThan(0);
     expect(result.nativeOfOther).toBe(result.nativeOfSent);
   });
-  test('a tab that arrives in a native group while native groups are off is taken out of it, and keeps its group', async ({
+  test('a tab that arrives in a native group stays in one, and keeps its group, though the stored option says native groups are off', async ({
     page,
     context,
   }) => {
@@ -464,19 +440,9 @@ test.describe('Switching groups by activating tabs', () => {
         new Promise((resolve) => {
           setTimeout(resolve, ms);
         });
-      const isTruthy = (value: unknown): boolean => Boolean(value);
-      const until = async <T>(
-        read: () => Promise<T>,
-        attempts = 50,
-      ): Promise<T> => {
-        const value = await read();
-        if (isTruthy(value) || attempts <= 1) return value;
-        await sleep(100);
-        return until(read, attempts - 1);
-      };
-      const left = await until(
-        async () => (await browser.tabs.get(ids.tabId)).groupId === -1,
-      );
+      // Native groups are the only kind in Chromium, whatever is stored: the tab is not taken out
+      await sleep(2000);
+      const left = (await browser.tabs.get(ids.tabId)).groupId === -1;
       const group: unknown = await browser.sessions.getTabValue(
         ids.tabId,
         'groupId',
@@ -484,6 +450,6 @@ test.describe('Switching groups by activating tabs', () => {
       return { left, group };
     }, arranged);
 
-    expect(result).toEqual({ left: true, group: 0 });
+    expect(result).toEqual({ left: false, group: 0 });
   });
 });

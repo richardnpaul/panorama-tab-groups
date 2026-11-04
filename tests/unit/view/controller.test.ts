@@ -78,7 +78,7 @@ async function setUp({
     updateFit: vi.fn(),
     raise: vi.fn(),
     close: vi.fn().mockResolvedValue(undefined),
-    insertTab: vi.fn().mockResolvedValue(undefined),
+    insertTab: vi.fn().mockResolvedValue(true),
     fill: vi.fn().mockResolvedValue(undefined),
     tabIdsOf: vi.fn((id: number) => content(id)),
   };
@@ -494,6 +494,32 @@ describe('view/controller.ts', () => {
       expect(env.logger.debug).toHaveBeenCalledWith(
         '[View] tabCreated: Adding tab 20 to group 1 in view',
       );
+    });
+
+    it('looks again when the tab could not be placed, as it is in no group for a moment on its way from another window', async () => {
+      const env = await setUp({ tabGroups: { 20: 1 } });
+      env.groupNodes.insertTab.mockResolvedValueOnce(false);
+      const created = env.controller.tabCreated(tab(20));
+      await settle();
+
+      expect(env.groupNodes.insertTab).toHaveBeenCalledTimes(1);
+      expect(env.groupNodes.updateFit).not.toHaveBeenCalled();
+      env.scheduler.advance(100);
+      await created;
+
+      expect(env.groupNodes.insertTab).toHaveBeenCalledTimes(2);
+      expect(env.groupNodes.updateFit).toHaveBeenCalledWith(group(1));
+    });
+
+    it('places a pinned tab at once, as it has no group to wait for', async () => {
+      const env = await setUp();
+
+      await env.controller.tabCreated(tab(20, { pinned: true }));
+
+      expect(env.groupNodes.insertTab).toHaveBeenCalledTimes(1);
+      expect(env.groupNodes.insertTab).toHaveBeenCalledWith(20);
+      expect(env.groupNodes.updateFit).not.toHaveBeenCalled();
+      expect(env.logger.debug).not.toHaveBeenCalled();
     });
 
     it('ignores a tab of another window', async () => {

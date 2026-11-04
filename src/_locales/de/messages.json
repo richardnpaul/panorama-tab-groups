@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Native Tab-Gruppen des Browsers für die visuelle Organisation und das Einklappen verwenden."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Native Tab-Gruppen werden in dieser Browserversion nicht unterstützt (die Schnittstelle zum Ausblenden von Tabs ist erforderlich)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Dieser Browser verwendet immer native Tab-Gruppen, daher kann diese Einstellung nicht geändert werden."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Native Tab-Gruppen werden in dieser Browserversion nicht unterstützt. Bitte auf Firefox 139+ aktualisieren oder Chrome 89+ verwenden."

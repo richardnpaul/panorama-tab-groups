@@ -4,6 +4,8 @@ export interface MemoryWindows extends Windows {
   setCurrent(windowId: number): void;
   setLastFocused(windowId: number): void;
   open(windowId: number): void;
+  /** Make an open window a private one */
+  makePrivate(windowId: number): void;
   close(windowId: number): void;
   /** Where each window was last placed */
   readonly placements: Map<number, WindowPlacement>;
@@ -20,6 +22,7 @@ export function createMemoryWindows(
   let lastFocused = lastFocusedId;
   const open = new Set([windowId, lastFocusedId]);
   const placements = new Map<number, WindowPlacement>();
+  const privateIds = new Set<number>();
 
   const self: MemoryWindows = {
     placements,
@@ -37,9 +40,17 @@ export function createMemoryWindows(
       return Promise.resolve();
     },
     listIds: () => Promise.resolve([...open]),
+    listNonPrivateIds: () =>
+      Promise.resolve([...open].filter((id) => !privateIds.has(id))),
+    listPrivateIds: () =>
+      Promise.resolve([...open].filter((id) => privateIds.has(id))),
     exists: (id) => Promise.resolve(open.has(id)),
     open(id) {
       open.add(id);
+    },
+    makePrivate(id) {
+      open.add(id);
+      privateIds.add(id);
     },
     close(id) {
       open.delete(id);

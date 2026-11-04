@@ -16,7 +16,7 @@ import type { Tabs } from '../ports/tabs.js';
 import type { Windows } from '../ports/windows.js';
 
 export interface BackupDeps {
-  windows: Pick<Windows, 'listIds' | 'create' | 'place'>;
+  windows: Pick<Windows, 'listIds' | 'listNonPrivateIds' | 'create' | 'place'>;
   tabs: Pick<Tabs, 'snapshotsInWindow' | 'listInWindow' | 'create' | 'close'>;
   groupState: Pick<
     GroupState,
@@ -48,17 +48,27 @@ export interface BackupService {
 
 const VIEW_GROUP_ID = -1;
 
-export function createBackupService({
+/** What a backup reads of the groups and tabs */
+export interface SnapshotDeps {
+  windows: Pick<Windows, 'listIds' | 'listNonPrivateIds'>;
+  tabs: Pick<Tabs, 'snapshotsInWindow'>;
+  groupState: Pick<
+    GroupState,
+    'getGroups' | 'getActiveGroup' | 'getGroupIndex' | 'getTabGroup'
+  >;
+}
+
+/**
+ * The groups and tabs of every window, as a backup holds them. A private window is left out
+ * unless `includePrivate` says to keep it (it does not, if not said): the person who exports a backup chose to, and a backup
+ * the add-on writes by itself must not leave the addresses of a private session on disk.
+ */
+export function createBackupSnapshot({
   windows,
   tabs,
   groupState,
-  messaging,
-  i18n,
-  options,
-  downloads,
-  clock,
-  logger,
-}: BackupDeps): BackupService {
+  includePrivate = false,
+}: SnapshotDeps & { includePrivate?: boolean }): () => Promise<Backup> {
   async function snapshotOf(windowId: number): Promise<BackupWindow> {
     const groups = (await groupState.getGroups(windowId)) ?? [];
     const snapshots = await tabs.snapshotsInWindow(windowId);
@@ -90,6 +100,35 @@ export function createBackupService({
     };
   }
 
+  return async () => {
+    const ids = await (includePrivate
+      ? windows.listIds()
+      : windows.listNonPrivateIds());
+    return {
+      file: { type: 'tgvView', version: 1 },
+      windows: await Promise.all(ids.map(snapshotOf)),
+    };
+  };
+}
+
+export function createBackupService({
+  windows,
+  tabs,
+  groupState,
+  messaging,
+  i18n,
+  options,
+  downloads,
+  clock,
+  logger,
+}: BackupDeps): BackupService {
+  const snapshot = createBackupSnapshot({
+    windows,
+    tabs,
+    groupState,
+    includePrivate: true,
+  });
+
   async function openTab(windowId: number, tab: BackupTab): Promise<void> {
     try {
       const tabId = await tabs.create({
@@ -100,7 +139,8 @@ export function createBackupService({
         discarded: !tab.pinned,
         pinned: tab.pinned,
       });
-      if (tab.groupId !== undefined) {
+      // A pinned tab has no group, whatever the backup says (older ones gave it one)
+      if (tab.groupId !== undefined && !tab.pinned) {
         await groupState.setTabGroup(tabId, tab.groupId);
       }
     } catch (error) {
@@ -140,7 +180,6 @@ export function createBackupService({
     ).map((group) => ({
       id: group.id,
       name: group.name,
-      containerId: 'firefox-default',
       rect: group.rect,
       tabCount: 0,
     }));
@@ -164,14 +203,8 @@ export function createBackupService({
 
   return {
     async save() {
-      const windowIds = await windows.listIds();
-      const backup: Backup = {
-        file: { type: 'tgvView', version: 1 },
-        windows: await Promise.all(windowIds.map(snapshotOf)),
-      };
-
       await downloads.saveFile(
-        JSON.stringify(backup, null, '\t'),
+        JSON.stringify(await snapshot(), null, '\t'),
         backupFileName(new Date(clock.now())),
       );
     },

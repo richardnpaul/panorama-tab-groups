@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Vizual təşkil və yığcamlaşdırma üçün brauzerin doğma vərəq qruplarından istifadə et."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Doğma vərəq qrupları bu brauzer versiyasında dəstəklənmir (vərəqləri gizlətmə API-si tələb olunur)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Bu brauzer həmişə doğma vərəq qruplarından istifadə edir, buna görə də bu ayar dəyişdirilə bilməz."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Doğma vərəq qrupları bu brauzer versiyasında dəstəklənmir. Zəhmət olmasa Firefox 139+ versiyasına yeniləyin və ya Chrome 89+ istifadə edin."

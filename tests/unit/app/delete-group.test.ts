@@ -57,8 +57,10 @@ async function setUp({ hasTabGroups = true }: { hasTabGroups?: boolean } = {}) {
     }),
     waitForInitialization: () => Promise.resolve(),
     isOpeningBackup: () => false,
+    rebuildWindow: () => Promise.resolve(false),
     logger,
   });
+  const toggleVisibleTabs = vi.fn().mockResolvedValue(undefined);
   return {
     deleteGroup: createGroupDeletion({
       tabs,
@@ -67,8 +69,10 @@ async function setUp({ hasTabGroups = true }: { hasTabGroups?: boolean } = {}) {
       windowGroups,
       menus,
       hasTabGroups,
+      toggleVisibleTabs,
       logger,
     }),
+    toggleVisibleTabs,
     groupState,
     tabs,
     nativeGroups,
@@ -226,6 +230,127 @@ describe('app/delete-group.ts', () => {
     ]);
     expect(env.logger.debug).toHaveBeenCalledWith(
       'Last group deleted, creating new initial group...',
+    );
+  });
+
+  it('makes a new first group when the last group of the user’s was deleted, though the group for ungrouped tabs is left', async () => {
+    // Found by the property test: a window kept open by a pinned tab has no tab in a group
+    const env = await setUp();
+    const raw = createMemoryGroupState();
+    await raw.setGroups(WINDOW, [
+      group(1),
+      { ...group(-2), name: 'Ungrouped Tabs', isSystemGroup: true },
+    ]);
+    env.groupState.getGroups = (windowId) => raw.getGroups(windowId);
+    env.groupState.setGroups = (windowId, groups) =>
+      raw.setGroups(windowId, groups);
+
+    await env.deleteGroup(request({ tabIds: [] }));
+
+    expect((await raw.getGroups(WINDOW))?.map((g) => g.name)).toEqual([
+      'Group 0',
+    ]);
+  });
+
+  describe('the group the window shows', () => {
+    it('goes to the first group that is left, when the group deleted was the one shown', async () => {
+      const env = await setUp();
+      await env.groupState.setGroups(WINDOW, [group(4), group(2), group(3)]);
+      await env.groupState.setActiveGroup(WINDOW, 4);
+
+      await env.deleteGroup(request({ groupId: 4, tabIds: [] }));
+
+      // The lowest, as a window with none shown gets
+      expect(await env.groupState.getActiveGroup(WINDOW)).toBe(2);
+    });
+
+    it('shows the tabs of the group it goes to, which may have been hidden', async () => {
+      const env = await setUp();
+      await env.groupState.setActiveGroup(WINDOW, 1);
+
+      await env.deleteGroup(request({ groupId: 1 }));
+
+      expect(env.toggleVisibleTabs).toHaveBeenCalledTimes(1);
+      expect(env.toggleVisibleTabs).toHaveBeenCalledWith(2, WINDOW);
+    });
+
+    it('is not a failed deletion when the tabs of that group cannot be shown', async () => {
+      const env = await setUp();
+      await env.groupState.setActiveGroup(WINDOW, 1);
+      const failure = new Error('cannot show');
+      env.toggleVisibleTabs.mockRejectedValue(failure);
+
+      await expect(env.deleteGroup(request({ groupId: 1 }))).resolves.toEqual({
+        success: true,
+      });
+
+      expect(env.logger.warn).toHaveBeenCalledWith(
+        'Could not show group 2:',
+        failure,
+      );
+    });
+
+    it('is not a failed deletion when the window cannot be given the next group to show, as the group is gone', async () => {
+      const env = await setUp();
+      await env.groupState.setActiveGroup(WINDOW, 1);
+      const failure = new Error('storage is full');
+      vi.spyOn(env.groupState, 'setActiveGroup').mockRejectedValue(failure);
+
+      await expect(env.deleteGroup(request({ groupId: 1 }))).resolves.toEqual({
+        success: true,
+      });
+
+      expect(
+        (await env.groupState.getGroups(WINDOW))?.map(({ id }) => id),
+      ).toEqual([2]);
+      expect(env.menus.items.some(({ id }) => id === '1')).toBe(false);
+      expect(env.logger.warn).toHaveBeenCalledWith(
+        `Group 1 is deleted, but window ${String(WINDOW)} could not be put right after it:`,
+        failure,
+      );
+    });
+
+    it('shows nothing when the group deleted was not the one shown', async () => {
+      const env = await setUp();
+      await env.groupState.setActiveGroup(WINDOW, 2);
+
+      await env.deleteGroup(request({ groupId: 1 }));
+
+      expect(env.toggleVisibleTabs).not.toHaveBeenCalled();
+    });
+
+    it('stays as it is when the group deleted was not the one shown', async () => {
+      const env = await setUp();
+      await env.groupState.setActiveGroup(WINDOW, 2);
+
+      await env.deleteGroup(request({ groupId: 1 }));
+
+      expect(await env.groupState.getActiveGroup(WINDOW)).toBe(2);
+    });
+
+    it('stays unset when the window showed none', async () => {
+      const env = await setUp();
+
+      await env.deleteGroup(request({ groupId: 1 }));
+
+      expect(await env.groupState.getActiveGroup(WINDOW)).toBeUndefined();
+    });
+  });
+
+  it('is not a failed deletion when the new first group cannot be made, as the group is gone', async () => {
+    const env = await setUp();
+    await env.groupState.setGroups(WINDOW, [group(1)]);
+    const failure = new Error('storage is full');
+    vi.spyOn(env.groupState, 'setActiveGroup').mockRejectedValue(failure);
+
+    await expect(env.deleteGroup(request({ groupId: 1 }))).resolves.toEqual({
+      success: true,
+    });
+
+    expect(env.menus.items.some(({ id }) => id === '1')).toBe(false);
+    expect(env.logger.warn).toHaveBeenCalledWith(
+      `Group 1 is deleted, but window ${String(WINDOW)} could not be put right after it:`,
+      failure,
     );
   });
 

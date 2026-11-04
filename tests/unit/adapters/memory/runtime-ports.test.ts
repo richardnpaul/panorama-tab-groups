@@ -44,6 +44,15 @@ describe('adapters/memory/extension.ts', () => {
 
     expect(extension.optionsOpened).toBe(2);
   });
+
+  it('counts how often it was started again', () => {
+    const extension = createMemoryExtension();
+
+    extension.reload();
+
+    expect(extension.reloads).toBe(1);
+    expect(extension.optionsOpened).toBe(0);
+  });
 });
 
 describe('adapters/memory/session-history.ts', () => {

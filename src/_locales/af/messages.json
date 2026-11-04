@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Gebruik die blaaier se eie oortjiegroepe vir visuele organisering en invou."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Die blaaier se eie oortjiegroepe word nie in hierdie blaaierweergawe ondersteun nie (vereis die oortjie-versteek-API)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Hierdie blaaier gebruik altyd sy eie oortjiegroepe, so hierdie instelling kan nie verander word nie."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Die blaaier se eie oortjiegroepe word nie in hierdie blaaierweergawe ondersteun nie. Gradeer asseblief op na Firefox 139+ of gebruik Chrome 89+."

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Brug browserens egne fanegrupper til visuel organisering og sammenfoldning."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Browserens egne fanegrupper understøttes ikke i denne browserversion (kræver API'et til skjulning af faner)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Denne browser bruger altid sine egne fanegrupper, så denne indstilling kan ikke ændres."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Browserens egne fanegrupper understøttes ikke i denne browserversion. Opdater til Firefox 139+ eller brug Chrome 89+."

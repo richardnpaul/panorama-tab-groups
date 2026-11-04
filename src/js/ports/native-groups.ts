@@ -28,6 +28,8 @@ export interface NativeGroups {
   addTabs(tabIds: readonly number[], nativeGroupId: number): Promise<void>;
   /** Take the tabs out of whatever native group they are in */
   removeTabs(tabIds: readonly number[]): Promise<void>;
+  /** Give a group a new title, and leave its colour as it is */
+  setTitle(nativeGroupId: number, title: string): Promise<void>;
   setAppearance(
     nativeGroupId: number,
     appearance: { title: string; color: NativeGroupColor | undefined },
@@ -36,5 +38,6 @@ export interface NativeGroups {
   get(nativeGroupId: number): Promise<{
     windowId: number;
     title: string | undefined;
+    collapsed: boolean;
   }>;
 }

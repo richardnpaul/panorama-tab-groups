@@ -174,8 +174,12 @@
     <section id="optionsNativeGroups">
       <h2>Native Browser Groups</h2>
       <div id="nativeGroupsContainer">
-        <label class="browser-style">
-          <input type="checkbox" id="useNativeGroups" />
+        <label class="browser-style" id="nativeGroupsLabel">
+          <input
+            type="checkbox"
+            id="useNativeGroups"
+            aria-describedby="nativeGroupsWarning"
+          />
           <span>Use native browser tab groups</span>
         </label>
         <p id="nativeGroupsWarning" class="info-text"></p>

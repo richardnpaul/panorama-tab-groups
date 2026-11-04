@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Använd webbläsarens egna flikgrupper för visuell organisering och hopfällning."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Webbläsarens egna flikgrupper stöds inte i den här webbläsarversionen (kräver API:et för att dölja flikar)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Den här webbläsaren använder alltid sina egna flikgrupper, så den här inställningen kan inte ändras."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Webbläsarens egna flikgrupper stöds inte i den här webbläsarversionen. Uppdatera till Firefox 139+ eller använd Chrome 89+."

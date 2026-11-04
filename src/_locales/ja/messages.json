@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "視覚的な整理と折りたたみにブラウザー標準のタブグループを使います。"
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "このバージョンのブラウザーでは標準のタブグループはサポートされていません（タブ非表示 API が必要です）。"
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "このブラウザーは常に標準のタブグループを使うため、この設定は変更できません。"
   },
   "optionsNativeGroupsLegacy": {
     "message": "このバージョンのブラウザーでは標準のタブグループはサポートされていません。Firefox 139 以降に更新するか、Chrome 89 以降をお使いください。"

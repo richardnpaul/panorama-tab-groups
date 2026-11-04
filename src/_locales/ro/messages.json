@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Folosește grupurile de file native ale browserului pentru organizare vizuală și restrângere."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Grupurile de file native nu sunt acceptate în această versiune de browser (necesită API-ul de ascundere a filelor)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Acest browser folosește întotdeauna grupurile de file native, așa că această setare nu poate fi schimbată."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Grupurile de file native nu sunt acceptate în această versiune de browser. Actualizează la Firefox 139+ sau folosește Chrome 89+."

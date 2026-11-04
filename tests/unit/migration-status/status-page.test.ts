@@ -12,6 +12,7 @@ import {
 import type { Group } from '../../../src/js/ports/group-state.js';
 import { englishMessage } from '../../support/messages.js';
 import { flush } from '../../support/popup-page.js';
+import { storeGroups } from '../../support/stored-groups.js';
 
 const WINDOW = 4;
 
@@ -75,7 +76,9 @@ function setUp(options: { complete?: boolean; groups?: Group[] | null } = {}) {
     logger,
   });
   const ready =
-    groups === null ? Promise.resolve() : groupState.setGroups(WINDOW, groups);
+    groups === null
+      ? Promise.resolve()
+      : storeGroups(groupState, WINDOW, groups);
   return {
     ...page,
     nodes,

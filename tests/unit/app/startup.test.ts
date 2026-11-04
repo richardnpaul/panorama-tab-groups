@@ -9,7 +9,10 @@ function setUp(useNativeGroups = true) {
       return Promise.resolve();
     });
   const deps = {
+    migrations: { atStart: step('migrate data') },
     firstRun: { decideNativeGroups: step('firstRun') },
+    windowRebuild: { rebuildAll: step('rebuild') },
+    closedWindows: { prune: step('prune') },
     recovery: {
       initializeTabGroupAssignments: step('recover'),
       salvageGrouplessTabs: step('salvage'),
@@ -24,6 +27,11 @@ function setUp(useNativeGroups = true) {
     },
     menuManager: { createMenuList: step('menu') },
     viewRefresh: { applyPopup: step('popup') },
+    autoBackup: {
+      start: vi.fn(() => {
+        order.push('backups');
+      }),
+    },
     useNativeGroups: vi.fn(() => Promise.resolve(useNativeGroups)),
     logger: {
       debug: vi.fn((message: string) => {
@@ -35,7 +43,7 @@ function setUp(useNativeGroups = true) {
 }
 
 describe('app/startup.ts', () => {
-  it('decides about native groups first, then recovers the groups of the tabs, then builds on them', async () => {
+  it('decides about native groups first, then brings the stored data up, recovers the groups of the tabs, and builds on them', async () => {
     const env = setUp();
 
     await env.init();
@@ -43,13 +51,17 @@ describe('app/startup.ts', () => {
     expect(env.order).toEqual([
       'Initializing Tab Groups Viewer',
       'firstRun',
+      'migrate data',
+      'rebuild',
       'recover',
       'setupWindows',
       'salvage',
+      'prune',
       'relink',
       'migrate',
       'menu',
       'popup',
+      'backups',
       'Finished setup',
     ]);
   });
@@ -66,10 +78,13 @@ describe('app/startup.ts', () => {
 
   type Deps = ReturnType<typeof setUp>['deps'];
   const steps: [string, (deps: Deps) => ReturnType<typeof vi.fn>][] = [
+    ['migrate data', (deps) => deps.migrations.atStart],
+    ['rebuild', (deps) => deps.windowRebuild.rebuildAll],
     ['firstRun', (deps) => deps.firstRun.decideNativeGroups],
     ['recover', (deps) => deps.recovery.initializeTabGroupAssignments],
     ['setupWindows', (deps) => deps.windowGroups.setupWindows],
     ['salvage', (deps) => deps.recovery.salvageGrouplessTabs],
+    ['prune', (deps) => deps.closedWindows.prune],
     ['relink', (deps) => deps.nativeGroupsSync.relink],
     ['menu', (deps) => deps.menuManager.createMenuList],
     ['popup', (deps) => deps.viewRefresh.applyPopup],
@@ -85,6 +100,8 @@ describe('app/startup.ts', () => {
       await expect(env.init()).rejects.toBe(failure);
 
       expect(env.order).not.toContain('Finished setup');
+      // Nothing is backed up from what start-up could not finish putting together
+      expect(env.deps.autoBackup.start).not.toHaveBeenCalled();
     },
   );
 });

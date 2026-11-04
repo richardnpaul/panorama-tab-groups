@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "દૃશ્ય ગોઠવણી અને સમેટવા માટે બ્રાઉઝરના મૂળ ટેબ જૂથોનો ઉપયોગ કરો."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "આ બ્રાઉઝર સંસ્કરણમાં મૂળ ટેબ જૂથો સપોર્ટેડ નથી (ટેબ છુપાવવાનું API જરૂરી છે)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "આ બ્રાઉઝર હંમેશા મૂળ ટેબ જૂથોનો ઉપયોગ કરે છે, તેથી આ સેટિંગ બદલી શકાતું નથી."
   },
   "optionsNativeGroupsLegacy": {
     "message": "આ બ્રાઉઝર સંસ્કરણમાં મૂળ ટેબ જૂથો સપોર્ટેડ નથી. કૃપા કરીને Firefox 139+ પર અપડેટ કરો અથવા Chrome 89+ વાપરો."

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Koʻrinishni tartiblash va yigʻish uchun brauzerning oʻz varaq guruhlaridan foydalanish."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Brauzerning bu versiyasida oʻz varaq guruhlari qoʻllab-quvvatlanmaydi (varaqlarni yashirish API si kerak)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Bu brauzer har doim oʻz varaq guruhlaridan foydalanadi, shuning uchun bu sozlamani oʻzgartirib boʻlmaydi."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Brauzerning bu versiyasida oʻz varaq guruhlari qoʻllab-quvvatlanmaydi. Iltimos, Firefox 139+ ga yangilang yoki Chrome 89+ dan foydalaning."

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "दृश्य मांडणी आणि आकुंचन करण्यासाठी ब्राउझरचे मूळ टॅब गट वापरा."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "या ब्राउझर आवृत्तीमध्ये मूळ टॅब गट समर्थित नाहीत (टॅब लपवणारा API आवश्यक आहे)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "हा ब्राउझर नेहमी मूळ टॅब गट वापरतो, त्यामुळे ही सेटिंग बदलता येत नाही."
   },
   "optionsNativeGroupsLegacy": {
     "message": "या ब्राउझर आवृत्तीमध्ये मूळ टॅब गट समर्थित नाहीत. कृपया Firefox 139+ वर अद्यतनित करा किंवा Chrome 89+ वापरा."

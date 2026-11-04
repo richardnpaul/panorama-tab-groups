@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Huutinir feddeeji tab bilaadi lowre ngam nuunɗal e murtugo."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Feddeeji tab bilaadi ngalaa wallitaaɗe nder ndee versiyoŋ lowre (ana yiɗi API suuɗugo tabs)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Lowre ndee huutinirta feddeeji tab mum sahaa kala, ndeen teelte ndee waawaa waylteede."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Feddeeji tab bilaadi ngalaa wallitaaɗe nder ndee versiyoŋ lowre. Tiiɗnu e Firefox 139+ malla huutinir Chrome 89+."

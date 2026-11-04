@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Používať natívne skupiny kariet prehliadača na vizuálne usporiadanie a zbaľovanie."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Natívne skupiny kariet nie sú v tejto verzii prehliadača podporované (vyžadujú rozhranie API na skrývanie kariet)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Tento prehliadač vždy používa natívne skupiny kariet, preto toto nastavenie nemožno zmeniť."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Natívne skupiny kariet nie sú v tejto verzii prehliadača podporované. Aktualizujte na Firefox 139+ alebo použite Chrome 89+."

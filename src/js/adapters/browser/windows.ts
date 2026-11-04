@@ -2,6 +2,7 @@ import type { Windows, WindowPlacement } from '../../ports/windows.js';
 
 interface QueriedWindow {
   id?: number | undefined;
+  incognito?: boolean | undefined;
 }
 
 /** The part of `browser.windows` the extension uses */
@@ -35,6 +36,18 @@ export function createBrowserWindows(getApi: () => WindowsApi): Windows {
     listIds: async () => {
       const windows = await getApi().windows.getAll({});
       return windows.flatMap(({ id }) => (id === undefined ? [] : [id]));
+    },
+    listNonPrivateIds: async () => {
+      const windows = await getApi().windows.getAll({});
+      return windows.flatMap(({ id, incognito }) =>
+        id === undefined || incognito === true ? [] : [id],
+      );
+    },
+    listPrivateIds: async () => {
+      const windows = await getApi().windows.getAll({});
+      return windows.flatMap(({ id, incognito }) =>
+        id === undefined || incognito !== true ? [] : [id],
+      );
     },
     exists: async (windowId) => {
       try {

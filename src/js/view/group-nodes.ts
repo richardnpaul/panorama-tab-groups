@@ -14,7 +14,7 @@ import type { Group, GroupState } from '../ports/group-state.js';
 import type { I18n } from '../ports/i18n.js';
 import type { Logger } from '../ports/logger.js';
 import type { LayoutMode } from '../ports/view-state.js';
-import type { ViewTabs } from '../ports/view-tabs.js';
+import type { ViewTab, ViewTabs } from '../ports/view-tabs.js';
 import { getPluralForm, newElement } from '../share/utils.js';
 import type { TabNodes } from './tab-nodes.js';
 
@@ -75,8 +75,11 @@ export interface GroupNodes {
   init: (groupsNode: HTMLElement, pinnedNode: HTMLElement) => Promise<void>;
   /** Put every tab of the window where it belongs */
   fill: () => Promise<void>;
-  /** Put a tab that was added or moved in its place in its group */
-  insertTab: (tabId: number) => Promise<void>;
+  /**
+   * Put a tab that was added or moved in its place in its group. Whether it was: a tab that is in
+   * no group, or in one that is not shown, is not placed
+   */
+  insertTab: (tabId: number) => Promise<boolean>;
 }
 
 const px = (value: number): string => `${String(value)}px`;
@@ -256,7 +259,11 @@ export function createGroupNodes({
     nodes.delete(groupId);
   }
 
-  async function close(group: Group): Promise<void> {
+  // `draw` makes the node of a group, for one the background made (`make`, which calls this)
+  async function close(
+    group: Group,
+    draw: (made: Group) => HTMLElement,
+  ): Promise<void> {
     const node = nodes.get(group.id);
     // The last child is the button for a new tab
     const tabCount = (node?.content.children.length ?? 1) - 1;
@@ -272,14 +279,20 @@ export function createGroupNodes({
       }
     }
 
-    await groups.remove(group.id);
-    removeNode(group.id);
-
-    // The tabs went with the group, so the window goes to another
-    const [first] = groups.getIds();
-    if (tabCount > 0 && first !== undefined) {
-      await groups.setActive(first);
+    // A group the background did not delete stays, with its tabs. The background also gives the
+    // window the group it shows next, when it was this one, and makes a new first group when it
+    // was the last: that one is drawn.
+    const container = node?.group.parentElement;
+    if (!(await groups.remove(group.id))) {
+      return;
     }
+    removeNode(group.id);
+    groups.forEach((each) => {
+      if (each.id >= 0 && !nodes.has(each.id)) {
+        container?.appendChild(draw(each));
+      }
+    });
+    resize();
   }
 
   function make(group: Group): HTMLElement {
@@ -338,7 +351,7 @@ export function createGroupNodes({
 
     closeButton.addEventListener('click', (event) => {
       event.stopPropagation();
-      report(close(group));
+      report(close(group, make));
     });
 
     newtab.addEventListener('click', (event) => {
@@ -386,7 +399,14 @@ export function createGroupNodes({
       header.classList.remove('edit');
       input.setSelectionRange(0, 0);
       name.replaceChildren(document.createTextNode(input.value));
-      report(groups.rename(group.id, input.value));
+      // A rename that fails changes nothing, so the name the group has is shown again
+      report(
+        groups.rename(group.id, input.value).catch((error: unknown) => {
+          name.replaceChildren(document.createTextNode(group.name));
+          input.value = group.name;
+          throw error;
+        }),
+      );
       editing = false;
     });
 
@@ -448,24 +468,37 @@ export function createGroupNodes({
     pinnedContent?.appendChild(pinned);
   }
 
-  async function placeTab(tabId: number): Promise<void> {
-    const tab = await tabs.get(tabId);
+  // Where a tab is shown: with the pinned tabs, or in its group before the group's new tab button
+  async function placeOf(
+    tab: ViewTab,
+  ): Promise<{ content: HTMLElement; end: Node | null } | undefined> {
+    // A pinned tab is in no group, as `fillAll` has it
+    if (tab.pinned) {
+      return pinnedContent && { content: pinnedContent, end: null };
+    }
     const groupId = await groupState.getTabGroup(tab.id);
-    // A tab that is in no group, or in one that is not shown, is not placed
     const node = groupId === undefined ? undefined : nodes.get(groupId);
+    return node && { content: node.content, end: node.newtab };
+  }
+
+  async function placeTab(tabId: number): Promise<boolean> {
+    const tab = await tabs.get(tabId);
+    const place = await placeOf(tab);
     const element = tabNodes.elementOf(tab.id);
-    if (node === undefined || element === undefined) {
-      return;
+    // A tab that is in no group, or in one that is not shown, is not placed
+    if (place === undefined || element === undefined) {
+      return false;
     }
 
-    // The tabs of the group that are shown, with their places in the window
+    // The tabs shown with it, with their places in the window
     const shown = (await tabs.list()).filter(({ id }) =>
-      node.content.contains(tabNodes.elementOf(id) ?? null),
+      place.content.contains(tabNodes.elementOf(id) ?? null),
     );
     const before = tabToPutBefore(tab.index, shown);
     const neighbour =
       before === undefined ? undefined : tabNodes.elementOf(before);
-    node.content.insertBefore(element, neighbour ?? node.newtab);
+    place.content.insertBefore(element, neighbour ?? place.end);
+    return true;
   }
 
   return {
@@ -490,7 +523,7 @@ export function createGroupNodes({
       group.lastMoved = lastMoved;
       node.group.style.zIndex = stackingOf({ id: groupId, lastMoved });
     },
-    close,
+    close: (group) => close(group, make),
 
     async init(groupsNode, pinnedNode) {
       groups.forEach((group) => {

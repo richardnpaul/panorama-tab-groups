@@ -1,4 +1,5 @@
 import type { SessionsApi } from '../../src/js/adapters/browser/group-state.js';
+import { createFakeSessionArea } from './fake-session-area.js';
 
 /**
  * A stand-in for `browser.sessions` that keeps values the way the browser
@@ -8,8 +9,10 @@ export function createFakeSessions() {
   const windowValues = new Map<string, unknown>();
   const tabValues = new Map<string, unknown>();
   const slot = (id: number, key: string) => `${String(id)}:${key}`;
+  const session = createFakeSessionArea();
 
   const api: SessionsApi = {
+    storage: { session: session.area },
     sessions: {
       getWindowValue: (windowId, key) =>
         Promise.resolve(structuredClone(windowValues.get(slot(windowId, key)))),
@@ -30,5 +33,5 @@ export function createFakeSessions() {
     },
   };
 
-  return { api, windowValues, tabValues, slot };
+  return { api, windowValues, tabValues, slot, sessionValues: session.values };
 }

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Defnyddio grwpiau tabiau brodorol y porwr ar gyfer trefnu gweledol a chwympo."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Nid yw grwpiau tabiau brodorol yn cael eu cynnal yn y fersiwn hon o'r porwr (mae angen yr API cuddio tabiau)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Mae'r porwr hwn bob amser yn defnyddio grwpiau tabiau brodorol, felly nid oes modd newid y gosodiad hwn."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Nid yw grwpiau tabiau brodorol yn cael eu cynnal yn y fersiwn hon o'r porwr. Diweddarwch i Firefox 139+ neu defnyddiwch Chrome 89+."

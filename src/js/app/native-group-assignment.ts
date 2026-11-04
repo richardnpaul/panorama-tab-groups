@@ -9,10 +9,10 @@ import type { Windows } from '../ports/windows.js';
 export interface NativeGroupAssignmentDeps {
   tabs: Pick<Tabs, 'listInWindow'>;
   windows: Pick<Windows, 'exists'>;
-  groupState: Pick<GroupState, 'getTabGroup' | 'getGroups' | 'setGroups'>;
+  groupState: Pick<GroupState, 'getTabGroup' | 'setNativeGroupLink'>;
   nativeGroups: Pick<
     NativeGroups,
-    'createFromTabs' | 'setAppearance' | 'get' | 'removeTabs'
+    'createFromTabs' | 'setAppearance' | 'get' | 'removeTabs' | 'setCollapsed'
   >;
   // For the title of a group that has no name
   i18n: Pick<I18n, 'getMessage'>;
@@ -29,16 +29,15 @@ export type NativeGroupCreation =
 export interface NativeGroupAssignment {
   /**
    * Put the tabs of a group that are in a window into a new native tab group,
-   * style it like the group, and record it as the group's native group.
-   * `groups` are the groups of the window as the caller saw them, which are
-   * what is recorded in if none are stored by then.
-   * `label` starts the log messages: the event that led to this.
+   * style it like the group, and link it to the group. `label` starts the log
+   * messages: the event that led to this. A group that is not the one shown is
+   * made `collapsed`, as the others are.
    */
   createNativeGroup: (options: {
     windowId: number;
     group: Group;
-    groups: readonly Group[];
     label: string;
+    collapsed?: boolean;
   }) => Promise<NativeGroupCreation>;
 }
 
@@ -77,8 +76,11 @@ export function createNativeGroupAssignment({
   }
 
   return {
-    async createNativeGroup({ windowId, group, groups, label }) {
-      const windowTabs = await tabs.listInWindow(windowId);
+    async createNativeGroup({ windowId, group, label, collapsed = false }) {
+      // A pinned tab is not grouped: grouping would unpin it
+      const windowTabs = (await tabs.listInWindow(windowId)).filter(
+        ({ pinned }) => !pinned,
+      );
       const memberships = await Promise.all(
         windowTabs.map(async ({ id }) => ({
           id,
@@ -117,16 +119,12 @@ export function createNativeGroupAssignment({
         return { kind: 'aborted' };
       }
 
-      // The groups are read again: making the group may have emptied another,
-      // which the browser then removed, and the groups as they were seen before
-      // would bring back the reference to it
-      const current = (await groupState.getGroups(windowId)) ?? groups;
-      await groupState.setGroups(
-        windowId,
-        current.map((each) =>
-          each.id === group.id ? { ...each, nativeGroupId } : each,
-        ),
-      );
+      // The link alone is written: making the group may have emptied another,
+      // which the browser then removed and is forgetting the link of meanwhile
+      await groupState.setNativeGroupLink(windowId, group.id, nativeGroupId);
+      if (collapsed) {
+        await nativeGroups.setCollapsed(nativeGroupId, true);
+      }
       logger.debug(
         `[${label}] Created native group ${String(nativeGroupId)} for group ${String(group.id)} with ${String(tabIds.length)} tabs in window ${String(windowId)}`,
       );

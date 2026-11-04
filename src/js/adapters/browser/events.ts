@@ -13,8 +13,18 @@ interface RawTab {
   id?: number | undefined;
   windowId?: number | undefined;
   active?: boolean | undefined;
+  pinned?: boolean | undefined;
+  // Only browsers that can hide tabs say
+  hidden?: boolean | undefined;
   url?: string | undefined;
   pendingUrl?: string | undefined;
+  groupId?: number | undefined;
+}
+
+/** What changed about a tab, as the browser says it */
+interface RawTabChange {
+  url?: string | undefined;
+  pinned?: boolean | undefined;
   groupId?: number | undefined;
 }
 
@@ -28,13 +38,16 @@ interface RawNativeGroup {
 export interface EventsApi {
   action: { onClicked: Emitter<[unknown]> };
   commands: { onCommand: Emitter<[string]> };
-  windows: { onCreated: Emitter<[{ id?: number | undefined }]> };
+  windows: {
+    onCreated: Emitter<[{ id?: number | undefined }]>;
+    onRemoved: Emitter<[number]>;
+  };
   tabs: {
     onCreated: Emitter<[RawTab]>;
     onAttached: Emitter<[number, { newWindowId: number }]>;
     onDetached: Emitter<[number]>;
     onActivated: Emitter<[{ tabId: number }]>;
-    onUpdated: Emitter<[number, { url?: string | undefined }, RawTab]>;
+    onUpdated: Emitter<[number, RawTabChange, RawTab]>;
     onRemoved: Emitter<[number, unknown]>;
   };
   // Browsers without native tab groups have none of these
@@ -53,6 +66,7 @@ export interface EventsApi {
       boolean
     >;
     onMessageExternal: Emitter<[unknown]>;
+    onUpdateAvailable: Emitter<[unknown]>;
   };
   contextMenus: {
     onClicked: Emitter<
@@ -67,6 +81,8 @@ export interface BackgroundHandlers {
   toggleView: () => Promise<void>;
   triggerCommand: (command: string) => Promise<void>;
   createGroupInWindowIfMissing: (windowId: number) => Promise<void>;
+  /** A window was closed */
+  windowRemoved: (windowId: number) => Promise<void>;
   tabCreated: (tab: CreatedTab) => Promise<void>;
   tabAttached: (
     tabId: number,
@@ -75,13 +91,15 @@ export interface BackgroundHandlers {
   tabDetached: (tabId: number) => Promise<void>;
   tabActivated: (activeInfo: { tabId: number }) => Promise<void>;
   tabUpdated: BrowserEvents['onTabUpdated'];
-  tabRemoved: BrowserEvents['onTabRemoved'];
+  tabRemoved: (tabId: number) => Promise<void>;
   menuClicked: (
     info: { menuItemId: string | number },
     tab: ClickedTab | undefined,
   ) => Promise<void>;
   handleMessage: (message: unknown) => Promise<unknown>;
   handleExternalMessage: (message: unknown) => Promise<void>;
+  /** A new version of the add-on is waiting to be applied */
+  updateAvailable: () => Promise<void>;
   storageChanged: BrowserEvents['onStorageChanged'];
   nativeGroupRemoved: (group: NativeGroupEvent) => Promise<void>;
   nativeGroupUpdated: (group: NativeGroupEvent) => Promise<void>;
@@ -97,6 +115,8 @@ function createdTabOf(tab: RawTab): CreatedTab | undefined {
         id,
         windowId,
         active: tab.active,
+        pinned: tab.pinned,
+        hidden: tab.hidden,
         url: tab.url,
         pendingUrl: tab.pendingUrl,
         browserGroupId: tab.groupId,
@@ -132,6 +152,10 @@ export function registerListeners(
     }
   });
 
+  api.windows.onRemoved.addListener((windowId) => {
+    run('windows.onRemoved', handlers.windowRemoved(windowId));
+  });
+
   api.tabs.onCreated.addListener((raw) => {
     const tab = createdTabOf(raw);
     if (tab !== undefined) {
@@ -151,7 +175,7 @@ export function registerListeners(
     run('tabs.onUpdated', handlers.tabUpdated(tabId, changeInfo, tab));
   });
   api.tabs.onRemoved.addListener((tabId) => {
-    handlers.tabRemoved(tabId);
+    run('tabs.onRemoved', handlers.tabRemoved(tabId));
   });
 
   api.tabGroups?.onRemoved.addListener((group) => {
@@ -178,6 +202,10 @@ export function registerListeners(
   });
   api.runtime.onMessageExternal.addListener((message) => {
     run('runtime.onMessageExternal', handlers.handleExternalMessage(message));
+  });
+  // A listener holds the update back until the add-on starts again (MDN), which it does itself
+  api.runtime.onUpdateAvailable.addListener(() => {
+    run('runtime.onUpdateAvailable', handlers.updateAvailable());
   });
 
   api.contextMenus.onClicked.addListener((info, tab) => {

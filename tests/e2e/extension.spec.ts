@@ -157,7 +157,7 @@ test('chromium service worker initializes without errors', async ({
   expect(isAlive).toBe(true);
 });
 
-test('native browser groups option disabled in chromium', async ({
+test('native browser groups option is on and cannot be changed in chromium', async ({
   browserName,
   page,
   extensionId,
@@ -171,13 +171,18 @@ test('native browser groups option disabled in chromium', async ({
   await waitForOptionsPageReady(page);
 
   const nativeGroupsCheckbox = page.locator('#useNativeGroups');
-  await expect(nativeGroupsCheckbox).toBeEnabled();
+  // Native groups are the only kind there: shown checked, and not a choice
+  await expect(nativeGroupsCheckbox).toBeDisabled();
   await expect(nativeGroupsCheckbox).toBeChecked();
 
-  // Verify the error text is visible
+  // The text says why the control is as it is, and the control points to it
   const warningText = page.locator('#nativeGroupsWarning');
-  await expect(warningText).toHaveClass(/warning-text/);
-  await expect(warningText).toContainText('not supported');
+  await expect(warningText).toHaveClass(/info-text/);
+  await expect(warningText).toContainText('always uses native tab groups');
+  await expect(nativeGroupsCheckbox).toHaveAttribute(
+    'aria-describedby',
+    'nativeGroupsWarning',
+  );
 });
 
 test.describe('Regression Tests', () => {

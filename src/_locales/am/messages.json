@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "ለእይታ አደረጃጀት እና ለማጠፍ የአሳሹን ቤተኛ የትር ቡድኖች ተጠቀም።"
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "ቤተኛ የትር ቡድኖች በዚህ የአሳሽ ስሪት አይደገፉም (የትር መደበቂያ API ያስፈልጋል)።"
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "ይህ አሳሽ ሁልጊዜ ቤተኛ የትር ቡድኖችን ይጠቀማል፣ ስለዚህ ይህ ቅንብር ሊቀየር አይችልም።"
   },
   "optionsNativeGroupsLegacy": {
     "message": "ቤተኛ የትር ቡድኖች በዚህ የአሳሽ ስሪት አይደገፉም። እባክዎ ወደ Firefox 139+ ያዘምኑ ወይም Chrome 89+ ይጠቀሙ።"

@@ -15,6 +15,7 @@ type Action =
   | { kind: 'restoreWindow' }
   | { kind: 'moveTab'; tab: number; window: number }
   | { kind: 'activateTab'; tab: number }
+  | { kind: 'setPinned'; tab: number; pinned: boolean }
   | { kind: 'sendTabToGroup'; tab: number; group: number }
   | { kind: 'ungroupNative'; group: number }
   | { kind: 'setNative'; on: boolean }
@@ -44,6 +45,11 @@ const action: fc.Arbitrary<Action> = fc.oneof(
   }),
   fc.record({ kind: fc.constant<'activateTab'>('activateTab'), tab: index }),
   fc.record({
+    kind: fc.constant<'setPinned'>('setPinned'),
+    tab: index,
+    pinned: fc.boolean(),
+  }),
+  fc.record({
     kind: fc.constant<'sendTabToGroup'>('sendTabToGroup'),
     tab: index,
     group: index,
@@ -67,6 +73,7 @@ const pick = <T>(list: readonly T[], at: number): T | undefined =>
   list.length === 0 ? undefined : list[at % list.length];
 
 const RESERVED = new Set([-1, -2]);
+const VIEW = -1;
 
 /** What a person has in front of them: windows and their tabs, as the browser has them */
 const windowsOf = (world: World) => [...world.model.windows.values()];
@@ -128,8 +135,15 @@ async function perform(
       }
       await world.activateTab(tab.id);
       return `activateTab ${String(tab.id)} (w${String(tab.windowId)}, focus in w${String(world.model.focused())})`;
-    case 'sendTabToGroup': {
+    case 'setPinned':
       if (tab === undefined) {
+        return undefined;
+      }
+      await world.setPinned(tab.id, step.pinned);
+      return `setPinned ${String(tab.id)} ${String(step.pinned)}`;
+    case 'sendTabToGroup': {
+      // The menu is of a tab the person sees: a hidden tab has none to click
+      if (tab === undefined || tab.hidden) {
         return undefined;
       }
       const groups = (await world.groupsOf(tab.windowId)).filter(
@@ -151,6 +165,10 @@ async function perform(
       return `ungroupNative ${String(native)}`;
     }
     case 'setNative':
+      // Native groups are the only kind where tabs cannot be hidden: the person has no switch
+      if (!world.hasTabHide) {
+        return undefined;
+      }
       await world.setNativeGroups(step.on);
       return `setNative ${String(step.on)}`;
     case 'deleteGroup': {
@@ -235,7 +253,31 @@ async function violation(world: World): Promise<string | undefined> {
       await Promise.all(
         world.model.tabsOf(window.id).map(async (tab) => {
           const group = await world.groupState.getTabGroup(tab.id);
-          if (group === undefined) {
+          // A tab in a native group is in the group of the add-on's that goes with it, so that what
+          // the person sees in the tab strip is what the add-on has (after a restart as before)
+          if (!tab.pinned && tab.groupId > 0 && group !== VIEW) {
+            const linked = groups.find(
+              ({ nativeGroupId }) => nativeGroupId === tab.groupId,
+            );
+            if (linked === undefined || linked.id !== group) {
+              problems.push(
+                `tab ${String(tab.id)} of window ${String(window.id)} is in the native group ${String(tab.groupId)}, which goes with group ${String(linked?.id)}, and the tab is in group ${String(group)}`,
+              );
+            }
+          }
+          // A pinned tab is in no group, and no native group; only an unpinned tab has to have one
+          if (tab.pinned) {
+            if (group !== undefined && group !== VIEW) {
+              problems.push(
+                `tab ${String(tab.id)} of window ${String(window.id)} is pinned, and in group ${String(group)}`,
+              );
+            }
+            if (tab.groupId !== -1) {
+              problems.push(
+                `tab ${String(tab.id)} of window ${String(window.id)} is pinned, and in the native group ${String(tab.groupId)}`,
+              );
+            }
+          } else if (group === undefined) {
             problems.push(
               `tab ${String(tab.id)} of window ${String(window.id)} is in no group`,
             );
@@ -244,14 +286,45 @@ async function violation(world: World): Promise<string | undefined> {
               `tab ${String(tab.id)} of window ${String(window.id)} is in group ${String(group)}, which the window does not have (${ids.join()})`,
             );
           }
+          // No tab is lost: one that is hidden is in a group the window does not show, where the
+          // view finds it, and not in the group on show, where nothing would bring it back
+          // (A window that shows only its pinned tabs is left: the person closed or deleted what
+          // it showed, and the view, which the model has none of, is how they go on from there)
+          const showsOnlyPinned = world.model
+            .tabsOf(window.id)
+            .every((each) => each.pinned || each.hidden);
+          if (
+            tab.hidden &&
+            !showsOnlyPinned &&
+            active !== undefined &&
+            group === active
+          ) {
+            problems.push(
+              `tab ${String(tab.id)} of window ${String(window.id)} is hidden in the group on show (${String(active)})`,
+            );
+          }
         }),
       );
     }),
   );
 
-  if (!(await world.options.load()).useNativeGroups && nativeGroups.size > 0) {
+  const native =
+    !world.hasTabHide || (await world.options.load()).useNativeGroups;
+  if (!native && nativeGroups.size > 0) {
     problems.push(
       `native groups are off, and the browser has ${String(nativeGroups.size)}`,
+    );
+  }
+  if (world.model.unpinnedByGrouping.length > 0) {
+    problems.push(
+      `the add-on had the browser unpin tabs ${world.model.unpinnedByGrouping.join()} by grouping them`,
+    );
+  }
+  // Native mode collapses the groups not shown, and hides no tab
+  const hidden = tabsOf(world).filter((tab) => tab.hidden);
+  if (native && hidden.length > 0) {
+    problems.push(
+      `native groups are on, and tabs ${hidden.map(({ id }) => id).join()} are hidden`,
     );
   }
   if (world.logs.error.length > 0) {
@@ -267,8 +340,12 @@ describe('any run of what a person does', () => {
         fc.boolean(),
         fc.integer({ min: 1, max: 2 }),
         fc.array(action, { maxLength: 18 }),
-        async (native, windowCount, actions) => {
-          const world = createWorld({ stored: { useNativeGroups: native } });
+        fc.boolean(),
+        async (native, windowCount, actions, chromium) => {
+          const world = createWorld({
+            stored: { useNativeGroups: native },
+            hasTabHide: !chromium,
+          });
           Array.from({ length: windowCount }, (_, at) => at).forEach((at) => {
             world.seedWindow(
               Array.from(

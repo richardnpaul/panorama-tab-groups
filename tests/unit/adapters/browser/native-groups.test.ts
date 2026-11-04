@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createBrowserNativeGroups } from '../../../../src/js/adapters/browser/native-groups.js';
 import { createBrowserToolbar } from '../../../../src/js/adapters/browser/toolbar.js';
+import {
+  NATIVE_GROUP_EDIT_RETRY_MS,
+  NATIVE_GROUP_EDIT_TRIES,
+} from '../../../../src/js/core/constants.js';
 
 function fakeApi() {
   return {
@@ -13,6 +17,8 @@ function fakeApi() {
     },
     tabs: {
       query: vi.fn().mockResolvedValue([{ id: 1 }, {}, { id: 2 }]),
+      // A tab is not pinned unless it is told to be
+      get: vi.fn((id: number) => Promise.resolve({ pinned: id >= 100 })),
       group: vi.fn().mockResolvedValue(77),
       ungroup: vi.fn().mockResolvedValue(undefined),
     },
@@ -92,6 +98,57 @@ describe('adapters/browser/native-groups.ts', () => {
     expect(api.tabs.group).toHaveBeenCalledWith({ tabIds: [3], groupId: 5 });
   });
 
+  describe('pinned tabs, which grouping would unpin', () => {
+    it('leaves them out of a new group', async () => {
+      const api = fakeApi();
+      const groups = createBrowserNativeGroups(() => api);
+
+      await groups.createFromTabs([3, 100, 4, 101], 9);
+
+      expect(api.tabs.group).toHaveBeenCalledWith({
+        tabIds: [3, 4],
+        createProperties: { windowId: 9 },
+      });
+    });
+
+    it('leaves them out of a group that exists', async () => {
+      const api = fakeApi();
+      const groups = createBrowserNativeGroups(() => api);
+
+      await groups.addTabs([3, 100], 5);
+
+      expect(api.tabs.group).toHaveBeenCalledWith({ tabIds: [3], groupId: 5 });
+    });
+
+    it('makes no group of tabs that are all pinned, and says so', async () => {
+      const api = fakeApi();
+      const groups = createBrowserNativeGroups(() => api);
+
+      await expect(groups.createFromTabs([100, 101], 9)).rejects.toThrow(
+        'Every tab is pinned, so there is nothing to group',
+      );
+      expect(api.tabs.group).not.toHaveBeenCalled();
+    });
+
+    it('adds nothing to a group of tabs that are all pinned', async () => {
+      const api = fakeApi();
+      const groups = createBrowserNativeGroups(() => api);
+
+      await expect(groups.addTabs([100], 5)).resolves.toBeUndefined();
+      expect(api.tabs.group).not.toHaveBeenCalled();
+    });
+
+    it('fails for a tab that is gone, as grouping it would', async () => {
+      const api = fakeApi();
+      const failure = new Error('Invalid tab ID: 3');
+      api.tabs.get.mockRejectedValue(failure);
+      const groups = createBrowserNativeGroups(() => api);
+
+      await expect(groups.addTabs([3], 5)).rejects.toBe(failure);
+      await expect(groups.createFromTabs([3], 9)).rejects.toBe(failure);
+    });
+  });
+
   it('takes tabs out of their native group', async () => {
     const api = fakeApi();
     const groups = createBrowserNativeGroups(() => api);
@@ -115,6 +172,91 @@ describe('adapters/browser/native-groups.ts', () => {
     });
   });
 
+  it('gives a group a new title, and nothing else', async () => {
+    const api = fakeApi();
+    const groups = createBrowserNativeGroups(() => api);
+
+    await groups.setTitle(5, 'Renamed');
+
+    expect(api.tabGroups.update).toHaveBeenCalledTimes(1);
+    expect(api.tabGroups.update.mock.calls[0]).toStrictEqual([
+      5,
+      { title: 'Renamed' },
+    ]);
+  });
+
+  it('asks for the title again while the browser refuses it as a tab is dragged, then sets it', async () => {
+    const api = fakeApi();
+    const dragging = new Error(
+      'Tabs cannot be edited right now (user may be dragging a tab).',
+    );
+    api.tabGroups.update
+      .mockRejectedValueOnce(dragging)
+      .mockRejectedValueOnce(dragging)
+      .mockResolvedValue(undefined);
+    const wait = vi.fn().mockResolvedValue(undefined);
+    const groups = createBrowserNativeGroups(() => api, wait);
+
+    await groups.setTitle(5, 'Renamed');
+
+    expect(api.tabGroups.update).toHaveBeenCalledTimes(3);
+    expect(wait).toHaveBeenCalledTimes(2);
+    expect(wait).toHaveBeenCalledWith(NATIVE_GROUP_EDIT_RETRY_MS);
+  });
+
+  it('passes on a refusal for anything else at once', async () => {
+    const api = fakeApi();
+    const failure = new Error('No group with id: 5.');
+    api.tabGroups.update.mockRejectedValue(failure);
+    const wait = vi.fn().mockResolvedValue(undefined);
+    const groups = createBrowserNativeGroups(() => api, wait);
+
+    await expect(groups.setTitle(5, 'Renamed')).rejects.toBe(failure);
+
+    expect(api.tabGroups.update).toHaveBeenCalledTimes(1);
+    expect(wait).not.toHaveBeenCalled();
+  });
+
+  it('gives up, and passes the refusal on, when the drag lasts', async () => {
+    const api = fakeApi();
+    const dragging = new Error(
+      'Tabs cannot be edited right now (user may be dragging a tab).',
+    );
+    api.tabGroups.update.mockRejectedValue(dragging);
+    const wait = vi.fn().mockResolvedValue(undefined);
+    const groups = createBrowserNativeGroups(() => api, wait);
+
+    await expect(groups.setTitle(5, 'Renamed')).rejects.toBe(dragging);
+
+    expect(api.tabGroups.update).toHaveBeenCalledTimes(NATIVE_GROUP_EDIT_TRIES);
+    expect(wait).toHaveBeenCalledTimes(NATIVE_GROUP_EDIT_TRIES - 1);
+  });
+
+  it('waits a real while between tries where it is not told how', async () => {
+    vi.useFakeTimers();
+    try {
+      const api = fakeApi();
+      api.tabGroups.update
+        .mockRejectedValueOnce(
+          new Error(
+            'Tabs cannot be edited right now (user may be dragging a tab).',
+          ),
+        )
+        .mockResolvedValue(undefined);
+      const groups = createBrowserNativeGroups(() => api);
+
+      const titled = groups.setTitle(5, 'Renamed');
+      await vi.advanceTimersByTimeAsync(NATIVE_GROUP_EDIT_RETRY_MS - 1);
+      expect(api.tabGroups.update).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      await titled;
+
+      expect(api.tabGroups.update).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('sets only the title when there is no colour', async () => {
     const api = fakeApi();
     const groups = createBrowserNativeGroups(() => api);
@@ -126,12 +268,28 @@ describe('adapters/browser/native-groups.ts', () => {
     });
   });
 
-  it('gives the window and title of a group, and nothing else about it', async () => {
+  it('gives the window, title and whether it is collapsed of a group, and nothing else about it', async () => {
     const api = fakeApi();
+    api.tabGroups.get.mockResolvedValue({
+      windowId: 9,
+      title: 'Work',
+      color: 'blue',
+      collapsed: true,
+    });
     const groups = createBrowserNativeGroups(() => api);
 
-    expect(await groups.get(5)).toStrictEqual({ windowId: 9, title: 'Work' });
+    expect(await groups.get(5)).toStrictEqual({
+      windowId: 9,
+      title: 'Work',
+      collapsed: true,
+    });
     expect(api.tabGroups.get).toHaveBeenCalledWith(5);
+  });
+
+  it('says a group is not collapsed when the browser does not say', async () => {
+    const groups = createBrowserNativeGroups(() => fakeApi());
+
+    expect(await groups.get(5)).toMatchObject({ collapsed: false });
   });
 
   it('passes on a failure to find a group', async () => {

@@ -4,6 +4,7 @@ import { createMemoryGroupState } from '../../../src/js/adapters/memory/group-st
 import { createMemoryMessaging } from '../../../src/js/adapters/memory/messaging.js';
 import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createMemoryViewTabs } from '../../../src/js/adapters/memory/view-tabs.js';
+import { createMemoryNativeGroups } from '../../../src/js/adapters/memory/native-groups.js';
 import { createGroupsStore } from '../../../src/js/app/groups-store.js';
 import { createPopupService } from '../../../src/js/app/popup-service.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
@@ -50,6 +51,7 @@ async function setUp(
     {
       groupState,
       messaging,
+      nativeGroups: createMemoryNativeGroups(),
       tabs: createMemoryTabs(),
       clock: createMemoryClock(100),
       i18n: { getMessage: () => 'Group ' },
@@ -230,7 +232,7 @@ describe('app/popup-service.ts', () => {
   });
 
   describe('removeGroup', () => {
-    it('removes the group and shows the first of those left', async () => {
+    it('removes the group, and leaves the group the window shows to the background', async () => {
       const { service, store, groupState, viewTabs, messaging } = await setUp(
         undefined,
         [tab(10), tab(11)],
@@ -243,8 +245,8 @@ describe('app/popup-service.ts', () => {
       expect(messaging.sent).toEqual([
         expect.objectContaining({ action: 'deleteGroup', groupId: 2 }),
       ]);
-      await expect(groupState.getActiveGroup(WINDOW)).resolves.toBe(1);
-      expect(viewTabs.calls).toEqual(['activate 10']);
+      await expect(groupState.getActiveGroup(WINDOW)).resolves.toBeUndefined();
+      expect(viewTabs.calls).toEqual([]);
     });
 
     it('shows nothing when no group is left', async () => {

@@ -5,7 +5,10 @@ import { createMemoryGroupState } from '../../../src/js/adapters/memory/group-st
 import { createMemoryMessaging } from '../../../src/js/adapters/memory/messaging.js';
 import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createMemoryWindows } from '../../../src/js/adapters/memory/windows.js';
-import { createBackupService } from '../../../src/js/app/backup-service.js';
+import {
+  createBackupService,
+  createBackupSnapshot,
+} from '../../../src/js/app/backup-service.js';
 import {
   parseBackup,
   type Backup,
@@ -96,6 +99,56 @@ const detail = (id: number, windowId: number, overrides = {}) => ({
 });
 
 describe('app/backup-service.ts', () => {
+  describe('the snapshot, with a private window', () => {
+    function withPrivateWindow() {
+      const env = setUp();
+      env.windows.makePrivate(2);
+      env.tabs.setDetails([
+        { ...detail(10, 1), url: 'https://open/' },
+        { ...detail(20, 2), url: 'https://private/' },
+      ]);
+      return env;
+    }
+    const urlsOf = (backup: Backup) =>
+      backup.windows.flatMap((window) => window.tabs.map(({ url }) => url));
+
+    it('keeps the private window when the person saves a backup themselves', async () => {
+      const env = withPrivateWindow();
+
+      await env.service.save();
+
+      const saved = parseBackup(env.downloads.saved[0]?.content ?? '');
+      expect(saved && urlsOf(saved)).toEqual([
+        'https://open/',
+        'https://private/',
+      ]);
+    });
+
+    it('leaves the private window out of a backup the add-on writes by itself', async () => {
+      const env = withPrivateWindow();
+      const snapshot = createBackupSnapshot({
+        windows: env.windows,
+        tabs: env.tabs,
+        groupState: env.groupState,
+      });
+
+      expect(urlsOf(await snapshot())).toEqual(['https://open/']);
+    });
+
+    it('keeps every window when none is private', async () => {
+      const env = setUp();
+      env.windows.open(2);
+      env.tabs.setDetails([detail(10, 1), detail(20, 2)]);
+      const snapshot = createBackupSnapshot({
+        windows: env.windows,
+        tabs: env.tabs,
+        groupState: env.groupState,
+      });
+
+      expect((await snapshot()).windows).toHaveLength(2);
+    });
+  });
+
   describe('save', () => {
     it('offers the groups and tabs of every window as a file named for the time', async () => {
       const env = setUp();
@@ -264,7 +317,6 @@ describe('app/backup-service.ts', () => {
         {
           id: 1,
           name: 'Work',
-          containerId: 'firefox-default',
           rect,
           tabCount: 0,
         },
@@ -316,7 +368,7 @@ describe('app/backup-service.ts', () => {
       );
     });
 
-    it('opens the tabs in the window, in the group they were in, discarded unless pinned', async () => {
+    it('opens the tabs in the window, in the group they were in, discarded unless pinned; a pinned tab is in no group, as older backups gave it one', async () => {
       const env = setUp();
 
       await env.service.open(
@@ -342,7 +394,7 @@ describe('app/backup-service.ts', () => {
           listed.find((each) => each.url === url)?.id ?? -99,
         );
       expect(await groupOf('https://a/')).toBe(1);
-      expect(await groupOf('https://p/')).toBe(0);
+      expect(await groupOf('https://p/')).toBeUndefined();
     });
 
     it('opens a tab that was in no group without giving it one', async () => {

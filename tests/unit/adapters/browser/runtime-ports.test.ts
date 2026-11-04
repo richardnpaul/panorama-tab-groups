@@ -75,7 +75,18 @@ describe('adapters/browser/extension.ts', () => {
     runtime: {
       getURL: vi.fn((path: string) => `moz-extension://id/${path}`),
       openOptionsPage: vi.fn().mockResolvedValue(undefined),
+      reload: vi.fn(),
     },
+  });
+
+  it('starts the extension again', () => {
+    const browser = api();
+    const extension = createBrowserExtension(() => browser);
+
+    extension.reload();
+
+    expect(browser.runtime.reload).toHaveBeenCalledTimes(1);
+    expect(browser.runtime.reload).toHaveBeenCalledWith();
   });
 
   it('gives the address of a file of the extension', () => {

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Eporu kundaha tendayke atyha ijehegui ñemohenda hechapyrã ha mbopyrũrã."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Tendayke atyha ijehegui nomoneĩri ko kundaha rysýi-pe (oikotevẽ tendayke ñemokañy API)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Ko kundaha oiporu tapiaite tendayke atyha ijehegui, upévare ndaikatúi oñemoambue ko ñemboheko."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Tendayke atyha ijehegui nomoneĩri ko kundaha rysýi-pe. Emopyahu Firefox 139+ térã eporu Chrome 89+."

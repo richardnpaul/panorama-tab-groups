@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import type { BackgroundHandlers } from '../../../src/js/adapters/browser/events.js';
 import { createFakeSessions } from '../../support/fake-sessions.js';
 
@@ -119,6 +127,12 @@ function fakeBrowser(tabs: FakeTab[], { withTabGroups = true } = {}) {
       create: vi.fn().mockResolvedValue('id'),
       clear: vi.fn().mockResolvedValue(true),
     },
+    downloads: {
+      download: vi.fn().mockResolvedValue(3),
+      search: vi.fn().mockResolvedValue([{ state: 'complete' }]),
+      erase: vi.fn().mockResolvedValue([3]),
+      onChanged: { addListener: vi.fn(), removeListener: vi.fn() },
+    },
     ...(withTabGroups
       ? {
           tabGroups: {
@@ -147,6 +161,13 @@ async function compose(
 }
 
 describe('background/compose.ts', () => {
+  // The first import reads every module of the background, which can take longer than a test is
+  // given while the whole suite runs with coverage; it is done once, here, and each test then
+  // imports its own copy from the modules already read
+  beforeAll(async () => {
+    await import('../../../src/js/background/compose.js');
+  }, 30_000);
+
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -176,6 +197,7 @@ describe('background/compose.ts', () => {
       'storageChanged',
       'nativeGroupRemoved',
       'nativeGroupUpdated',
+      'updateAvailable',
     ];
     names.forEach((name) => {
       expect(typeof handlers[name]).toBe('function');
@@ -369,11 +391,28 @@ describe('background/compose.ts', () => {
     expect(sessions.tabValues.get(sessions.slot(5, 'groupId'))).toBe(-1);
   });
 
-  it('shows the group of the tab that was activated and hides the others', async () => {
+  it('shows the group of the tab that was activated, and hides no tab, as native groups are on', async () => {
     const { handlers, init, browser, sessions } = await compose([
       tab(5, { active: true }),
       tab(6),
     ]);
+    await init();
+    await sessions.api.sessions.setTabValue(5, 'groupId', 0);
+    await sessions.api.sessions.setTabValue(6, 'groupId', 7);
+    browser.tabs.hide.mockClear();
+
+    await handlers.tabActivated({ tabId: 5 });
+
+    expect(browser.tabs.hide).not.toHaveBeenCalled();
+    expect(browser.action.setTitle).toHaveBeenCalled();
+  });
+
+  it('hides the tabs of the other groups with native groups off', async () => {
+    const { handlers, init, browser, sessions, sync } = await compose([
+      tab(5, { active: true }),
+      tab(6),
+    ]);
+    sync.useNativeGroups = false;
     await init();
     await sessions.api.sessions.setTabValue(5, 'groupId', 0);
     await sessions.api.sessions.setTabValue(6, 'groupId', 7);
@@ -382,6 +421,41 @@ describe('background/compose.ts', () => {
 
     expect(browser.tabs.hide).toHaveBeenCalledWith([6]);
     expect(browser.tabs.show).toHaveBeenCalledWith([5]);
+  });
+
+  it('stops waiting for a view tab that was closed before it showed up', async () => {
+    const { handlers, init, sessions } = await compose();
+    await init();
+    // The view asked for is tab 99, which is closed at once
+    await handlers.toggleView();
+
+    await handlers.tabRemoved(99);
+    await handlers.tabCreated({ id: 7, windowId: 1, url: 'https://site7/' });
+
+    // A tab opened in the window just after is not taken for the view
+    expect(await sessions.api.sessions.getTabValue(7, 'groupId')).toBe(0);
+  });
+
+  it('backs the groups up to a file by itself, a few seconds after they change', async () => {
+    const { handlers, init, browser } = await compose();
+    await init();
+
+    await handlers.tabDetached(1);
+    await vi.advanceTimersByTimeAsync(5000);
+
+    expect(browser.downloads.download).toHaveBeenCalledTimes(1);
+    expect(browser.downloads.download).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filename: 'panorama-tab-groups-backups/backup-1.json',
+        conflictAction: 'overwrite',
+        saveAs: false,
+      }),
+    );
+    expect(browser.downloads.erase).toHaveBeenCalledWith({ id: 3 });
+    // The clock is the timers' fake one, which has moved on to when it was written
+    expect(browser.storage.local.set).toHaveBeenCalledWith({
+      automaticBackups: { next: 2, last: Date.now() },
+    });
   });
 
   it('works in a browser without native tab groups', async () => {

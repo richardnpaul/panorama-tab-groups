@@ -16,6 +16,7 @@ function setUp() {
       clear: vi.fn(),
     },
     setOpeningBackup: vi.fn(),
+    autoBackup: { changed: vi.fn() },
     logger: { error: vi.fn() },
   };
   return { handle: createMessageHandler(deps), deps };
@@ -198,6 +199,18 @@ describe('app/message-handler.ts', () => {
       ).resolves.toEqual({ error: 'Invalid setBackgroundState message' });
 
       expect(deps.setOpeningBackup).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('groupsChanged', () => {
+    it('tells the automatic backups of a change a page stored, and answers nothing', async () => {
+      const { handle, deps } = setUp();
+
+      await expect(
+        handle({ action: 'groupsChanged' }),
+      ).resolves.toBeUndefined();
+
+      expect(deps.autoBackup.changed).toHaveBeenCalledTimes(1);
     });
   });
 

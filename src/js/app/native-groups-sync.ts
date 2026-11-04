@@ -1,3 +1,5 @@
+import { isReservedGroupId, UNGROUPED_GROUP_ID } from '../core/constants.js';
+import { fallbackActiveGroup } from '../core/tab-assignment.js';
 import { nativeGroupIdOf } from '../core/groups.js';
 import type { Group, GroupState } from '../ports/group-state.js';
 import type { Logger } from '../ports/logger.js';
@@ -10,13 +12,20 @@ import type { NativeGroupAssignment } from './native-group-assignment.js';
 export interface NativeGroupsSyncDeps {
   groupState: Pick<
     GroupState,
-    'getGroups' | 'setGroups' | 'getActiveGroup' | 'getTabGroup'
+    | 'getGroups'
+    | 'setGroups'
+    | 'setNativeGroupLink'
+    | 'getActiveGroup'
+    | 'getTabGroup'
+    | 'setTabGroup'
   >;
-  tabs: Pick<Tabs, 'listInWindow'>;
+  tabs: Pick<Tabs, 'listInWindow' | 'show'>;
   windows: Pick<Windows, 'listIds'>;
   nativeGroups: Pick<NativeGroups, 'get' | 'removeTabs'>;
   assignment: NativeGroupAssignment;
   migrationFlag: MigrationFlag;
+  // Whether the browser can hide tabs, which native mode never does
+  canHideTabs: boolean;
   logger: Pick<Logger, 'debug' | 'warn' | 'error'>;
 }
 
@@ -73,14 +82,31 @@ export function createNativeGroupsSync({
   nativeGroups,
   assignment,
   migrationFlag,
+  canHideTabs,
   logger,
 }: NativeGroupsSyncDeps): NativeGroupsSync {
   // While the groups are being taken apart on purpose, the browser's reports
   // that they are gone are not to be acted on
   let cleaning = false;
+  // What the browser reports is followed one report after the other: a rename
+  // writes the groups of a window whole, and two at once would each write back
+  // what the other changed. Each report's failure is logged, so this never rejects.
+  let following: Promise<void> = Promise.resolve();
 
-  // A reference to a native group that has gone since is dropped
-  async function withoutStaleReference(group: Group): Promise<Group> {
+  function inTurn(work: () => Promise<void>, failure: string): Promise<void> {
+    following = following.then(() =>
+      work().catch((error: unknown) => {
+        logger.warn(failure, error);
+      }),
+    );
+    return following;
+  }
+
+  // A link to a native group that has gone since is forgotten
+  async function withoutStaleReference(
+    windowId: number,
+    group: Group,
+  ): Promise<Group> {
     const reference = group.nativeGroupId;
     if (typeof reference !== 'number') {
       return group;
@@ -93,7 +119,42 @@ export function createNativeGroupsSync({
         `Group ${String(group.id)} has stale nativeGroupId ${String(reference)}, will recreate`,
         error,
       );
+      await groupState.setNativeGroupLink(windowId, group.id, undefined);
       return withoutNativeGroup(group);
+    }
+  }
+
+  // A tab that is shown already is left as it is
+  async function showAll(windowId: number): Promise<void> {
+    const tabIds = (await tabs.listInWindow(windowId)).map(({ id }) => id);
+    if (tabIds.length > 0) {
+      await tabs.show(tabIds);
+    }
+  }
+
+  // A group with no tabs in the window has nothing to be made of
+  async function nativeGroupFor(
+    windowId: number,
+    group: Group,
+    collapsed: boolean,
+  ): Promise<WindowMigration> {
+    try {
+      const creation = await assignment.createNativeGroup({
+        windowId,
+        group,
+        label: 'Migration',
+        collapsed,
+      });
+      if (creation.kind === 'created') {
+        return 'created';
+      }
+      return creation.kind === 'aborted' ? 'failed' : 'nothing-to-do';
+    } catch (error) {
+      logger.warn(
+        `Failed to create native group for group ${String(group.id)}:`,
+        error,
+      );
+      return 'failed';
     }
   }
 
@@ -104,46 +165,42 @@ export function createNativeGroupsSync({
       return 'nothing-to-do';
     }
 
-    const valid = await Promise.all(groups.map(withoutStaleReference));
-    // Saved before the native group is made, which records its reference in
-    // what is stored
-    if (valid.some((group, index) => group !== groups[index])) {
-      await groupState.setGroups(windowId, valid);
-    }
-
-    // Only the active group gets a native group now: the others get theirs
-    // when they become active
-    const activeGroup = await groupState.getActiveGroup(windowId);
-    const target = valid.find(
-      (group) =>
-        group.id === activeGroup && nativeGroupIdOf(group) === undefined,
+    const valid = await Promise.all(
+      groups.map((group) => withoutStaleReference(windowId, group)),
     );
-    let outcome: WindowMigration = 'nothing-to-do';
-    if (target !== undefined) {
-      try {
-        const creation = await assignment.createNativeGroup({
-          windowId,
-          group: target,
-          groups: valid,
-          label: 'Migration',
-        });
-        if (creation.kind === 'created') {
-          return 'created';
-        }
-        // A group with no tabs in the window has nothing to be made of
-        outcome = creation.kind === 'aborted' ? 'failed' : 'nothing-to-do';
-      } catch (error) {
-        logger.warn(
-          `Failed to create native group for group ${String(target.id)}:`,
-          error,
-        );
-        outcome = 'failed';
-      }
+
+    // Every group that has a tab gets a native group, one after the other: a group made
+    // can empty another, which the browser then removes
+    const activeGroup = await groupState.getActiveGroup(windowId);
+    const outcomes = await valid
+      .filter(
+        (group) =>
+          !isReservedGroupId(group.id) && nativeGroupIdOf(group) === undefined,
+      )
+      .reduce<Promise<WindowMigration[]>>(
+        async (done, group) => [
+          ...(await done),
+          await nativeGroupFor(windowId, group, group.id !== activeGroup),
+        ],
+        Promise.resolve([]),
+      );
+
+    // No tab is hidden in native mode: those the groups not shown had hidden are shown, after
+    // they are in their collapsed native groups (Firefox groups a hidden tab, and keeps it
+    // hidden: tests/e2e/firefox-facts.spec.ts), so they do not show outside them first
+    if (canHideTabs) {
+      await showAll(windowId);
     }
 
-    return outcome;
+    if (outcomes.includes('created')) {
+      return 'created';
+    }
+    return outcomes.includes('failed') ? 'failed' : 'nothing-to-do';
   }
 
+  // A group is linked to the native group its tabs are in, where they are all in
+  // one that the tabs of no other group are in; otherwise to none, and one is made
+  // when it is needed
   async function relinkWindow(windowId: number): Promise<void> {
     const groups = await groupState.getGroups(windowId);
     if (groups === undefined) {
@@ -170,23 +227,25 @@ export function createNativeGroupsSync({
       ),
     ];
 
-    const linked = groups.map((group) => {
-      const reference = group.nativeGroupId;
-      if (typeof reference !== 'number') {
-        return group;
-      }
-      const ids = nativeIdsOf(group.id);
-      if (ids.includes(reference)) {
-        return group;
-      }
-      const [only] = ids;
-      return ids.length === 1 && only !== undefined
-        ? { ...group, nativeGroupId: only }
-        : withoutNativeGroup(group);
-    });
-    if (linked.some((group, index) => group !== groups[index])) {
-      await groupState.setGroups(windowId, linked);
-    }
+    const found = groups
+      .filter(({ id }) => !isReservedGroupId(id))
+      .map((group) => {
+        const ids = nativeIdsOf(group.id);
+        return { group, link: ids.length === 1 ? ids[0] : undefined };
+      });
+    const shared = new Set(
+      found
+        .map(({ link }) => link)
+        .filter((link, at, all) => all.indexOf(link) !== at),
+    );
+    await Promise.all(
+      found.map(async ({ group, link }) => {
+        const next = shared.has(link) ? undefined : link;
+        if (next !== nativeGroupIdOf(group)) {
+          await groupState.setNativeGroupLink(windowId, group.id, next);
+        }
+      }),
+    );
   }
 
   async function relink(): Promise<void> {
@@ -221,6 +280,29 @@ export function createNativeGroupsSync({
     }
   }
 
+  // With native groups off, tabs are hidden: one in the group for ungrouped tabs, which is none to
+  // show, would be hidden for good. Such a tab joins the group the window shows.
+  async function giveUngroupedTabsAGroup(
+    windowId: number,
+    groups: readonly Group[],
+  ): Promise<void> {
+    const active = await groupState.getActiveGroup(windowId);
+    const shown =
+      active !== undefined && groups.some(({ id }) => id === active)
+        ? active
+        : fallbackActiveGroup(groups);
+    await Promise.all(
+      (await tabs.listInWindow(windowId)).map(async ({ id, pinned }) => {
+        if (
+          !pinned &&
+          (await groupState.getTabGroup(id)) === UNGROUPED_GROUP_ID
+        ) {
+          await groupState.setTabGroup(id, shown);
+        }
+      }),
+    );
+  }
+
   async function cleanWindow(windowId: number): Promise<void> {
     const groups = await groupState.getGroups(windowId);
     if (groups === undefined) {
@@ -242,12 +324,14 @@ export function createNativeGroupsSync({
       );
     }
 
-    await groupState.setGroups(
-      windowId,
-      groups.map((group) =>
-        hasReference(group) ? withoutNativeGroup(group) : group,
-      ),
+    await Promise.all(
+      groups
+        .filter(hasReference)
+        .map(({ id }) =>
+          groupState.setNativeGroupLink(windowId, id, undefined),
+        ),
     );
+    await giveUngroupedTabsAGroup(windowId, groups);
   }
 
   async function cleanup(): Promise<void> {
@@ -266,28 +350,57 @@ export function createNativeGroupsSync({
     }
   }
 
-  // Change the groups of a window that refer to the native group. Nothing is
-  // written when none does: the browser reports a group right after it is made,
-  // before the group that made it has been given its reference, and writing the
-  // groups back as they were then would lose that reference.
-  async function followNativeGroup(
-    { id, windowId }: NativeGroupEvent,
-    change: (group: Group) => Group,
-    failure: string,
-  ): Promise<void> {
-    try {
-      const groups = await groupState.getGroups(windowId);
-      if (groups?.some((group) => group.nativeGroupId === id) === true) {
-        await groupState.setGroups(
-          windowId,
-          groups.map((group) =>
-            group.nativeGroupId === id ? change(group) : group,
-          ),
-        );
-      }
-    } catch (error) {
-      logger.warn(failure, error);
+  // The groups of a window linked to a native group. The browser reports a group
+  // right after it is made, before the group that made it has its link: none is
+  // linked to it then, and nothing is done.
+  async function linkedTo({
+    id,
+    windowId,
+  }: NativeGroupEvent): Promise<Group[]> {
+    const groups = (await groupState.getGroups(windowId)) ?? [];
+    return groups.filter((group) => group.nativeGroupId === id);
+  }
+
+  async function forget(event: NativeGroupEvent): Promise<void> {
+    await Promise.all(
+      (await linkedTo(event)).map(({ id }) =>
+        groupState.setNativeGroupLink(event.windowId, id, undefined),
+      ),
+    );
+  }
+
+  // The name is the native group's title as it is now, not as the event said: the browser
+  // reports a group made with no title (Chromium does, a moment before the title is set), and
+  // that report can arrive after the group was linked. A group the add-on is making is linked
+  // only once its title is set, so a report of a group no group is linked to is left alone. The
+  // groups are read again once the title is known, and stored only when a name changes: a page
+  // may store them while the title is asked for, and most reports (a group collapsed or
+  // expanded) change no name.
+  async function rename(event: NativeGroupEvent): Promise<void> {
+    const isLinked = (groups: Group[] | undefined): boolean =>
+      groups?.some((group) => group.nativeGroupId === event.id) === true;
+    if (!isLinked(await groupState.getGroups(event.windowId))) {
+      return;
     }
+    // A group that is gone has been reported gone, which forgets its link
+    const { title } = await nativeGroups.get(event.id);
+    if (title === undefined) {
+      return;
+    }
+    const groups = (await groupState.getGroups(event.windowId)) ?? [];
+    if (
+      !groups.some(
+        (group) => group.nativeGroupId === event.id && group.name !== title,
+      )
+    ) {
+      return;
+    }
+    await groupState.setGroups(
+      event.windowId,
+      groups.map((group) =>
+        group.nativeGroupId === event.id ? { ...group, name: title } : group,
+      ),
+    );
   }
 
   return {
@@ -302,18 +415,10 @@ export function createNativeGroupsSync({
         );
         return;
       }
-      await followNativeGroup(
-        group,
-        withoutNativeGroup,
-        'Error syncing removed native group:',
-      );
+      await inTurn(() => forget(group), 'Error syncing removed native group:');
     },
 
     onUpdated: (group) =>
-      followNativeGroup(
-        group,
-        (ours) => ({ ...ours, name: group.title ?? ours.name }),
-        'Error syncing updated native group:',
-      ),
+      inTurn(() => rename(group), 'Error syncing updated native group:'),
   };
 }

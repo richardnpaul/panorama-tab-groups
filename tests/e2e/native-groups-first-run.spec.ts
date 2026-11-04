@@ -36,12 +36,43 @@ test.describe('First run over tabs that are already open', () => {
     return { world, first, second, third, before };
   }
 
-  test('leaves native groups off, over windows that have tabs, and keeps every tab in the window it was in', async () => {
+  test('turns native groups on, over windows that have tabs and none hidden, and keeps every tab in the window it was in', async () => {
     test.setTimeout(90000);
     const { world, first, second, third, before } = await threeWindows();
 
     await lab.installLogged(path.join(process.cwd(), 'dist-firefox'));
-    // The extension sets itself up: it says so when it is done
+    await expect
+      .poll(async () => (await world.groups()).length, { timeout: 30000 })
+      .toBe(3);
+
+    const tabs = await world.tabs();
+    expect(
+      tabs
+        .filter(({ id, windowId }) => before.get(id) !== windowId)
+        .map(({ id }) => `tab ${String(id)} left its window`),
+    ).toEqual([]);
+    expect(await world.windowIds()).toEqual(
+      expect.arrayContaining([first, second.windowId, third.windowId]),
+    );
+    expect(lab.logs().join('\n')).toContain(
+      '[FirstRun] No tab is hidden: native tab groups are on',
+    );
+    expect(tabs.some(({ hidden }) => hidden)).toBe(false);
+  });
+
+  test('leaves native groups off, over a window that has a hidden tab, which they would show, and keeps every tab where it was', async () => {
+    test.setTimeout(90000);
+    const { world, first, second, third, before } = await threeWindows();
+    // The tab in front of a window is not hidden by the browser: the last of a new window is not it
+    const hidden = (await world.tabs())
+      .filter(({ windowId }) => windowId === second.windowId)
+      .sort((one, other) => other.index - one.index)[0];
+    await lab.probe('a').call('tabs.hide', [hidden?.id]);
+    expect(
+      (await world.tabs()).find(({ id }) => id === hidden?.id)?.hidden,
+    ).toBe(true);
+
+    await lab.installLogged(path.join(process.cwd(), 'dist-firefox'));
     await expect
       .poll(() => lab.logs().join('\n'), { timeout: 30000 })
       .toContain('Finished setup');
@@ -53,6 +84,7 @@ test.describe('First run over tabs that are already open', () => {
         .filter(({ id, windowId }) => before.get(id) !== windowId)
         .map(({ id }) => `tab ${String(id)} left its window`),
     ).toEqual([]);
+    expect(tabs.find(({ id }) => id === hidden?.id)?.hidden).toBe(true);
     expect(await world.windowIds()).toEqual(
       expect.arrayContaining([first, second.windowId, third.windowId]),
     );

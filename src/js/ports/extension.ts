@@ -3,4 +3,6 @@ export interface Extension {
   /** The address of a file of the extension */
   urlOf(path: string): string;
   openOptionsPage(): Promise<void>;
+  /** Start the extension again, which applies an update that is waiting and ends its pages */
+  reload(): void;
 }

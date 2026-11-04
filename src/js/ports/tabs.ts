@@ -44,7 +44,13 @@ export interface Tabs {
   highlightedIdsInWindow(windowId: number): Promise<number[]>;
   /** The ids of the tabs of a window that are not hidden, in the browser's order */
   visibleIdsInWindow(windowId: number): Promise<number[]>;
+  /** The ids of the tabs of a window that are hidden; only browsers that can hide tabs support this */
+  hiddenIdsInWindow(windowId: number): Promise<number[]>;
+  /** The ids of the tabs, in every window, whose address (or the one they are loading) starts with this */
+  idsOfAddressesUnder(prefix: string): Promise<number[]>;
   activate(tabId: number): Promise<void>;
+  /** Unpin a tab; rejects if it no longer exists */
+  unpin(tabId: number): Promise<void>;
   /** Put the tab after all the others of its window */
   moveToEnd(tabId: number): Promise<void>;
   /** Rejects if the tab is already closed */

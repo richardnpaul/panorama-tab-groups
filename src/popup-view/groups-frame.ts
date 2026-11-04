@@ -98,6 +98,8 @@ export function createGroupsFrame({
   function makeGroupList(
     groups: readonly PopupGroup[],
     lastUsedGroupId: number | undefined,
+    // Shows the groups again, once a group has been deleted
+    showAgain: () => Promise<void>,
   ): HTMLElement {
     const list = newElement('ul', { class: 'list' });
     let dragged: { id: number; item: HTMLElement } | undefined;
@@ -192,9 +194,14 @@ export function createGroupsFrame({
             if (tabCount > 0 && !confirm(warning)) {
               return;
             }
-            if (await service.removeGroup(group.id)) {
-              item.remove();
-              placeDropZones();
+            if (!(await service.removeGroup(group.id))) {
+              return;
+            }
+            item.remove();
+            placeDropZones();
+            // The background makes a new first group when the last is deleted: it is shown
+            if (list.querySelector('.list__item') === null) {
+              await showAgain();
             }
           })(),
         );
@@ -228,110 +235,110 @@ export function createGroupsFrame({
     return list;
   }
 
-  return {
-    async render() {
-      frame.startLoading();
-      const { groups, lastUsed } = await service.snapshot();
-      const lastUsedTabId = lastUsed?.tabId;
+  async function render(): Promise<void> {
+    frame.startLoading();
+    const { groups, lastUsed } = await service.snapshot();
+    const lastUsedTabId = lastUsed?.tabId;
 
-      const makeGroupsView = (): HTMLElement =>
-        makeGroupList(groups, lastUsed?.groupId);
-      let results: ViewTab | undefined;
-      let showingResults = false;
+    const makeGroupsView = (): HTMLElement =>
+      makeGroupList(groups, lastUsed?.groupId, render);
+    let results: ViewTab | undefined;
+    let showingResults = false;
 
-      const showResults = (query: string): void => {
-        const matches = searchGroups<ViewTab, PopupGroup>(groups, query);
-        const [first] = matches.flatMap(({ tabs }) => tabs);
-        results = first;
-        showingResults = true;
-        if (first === undefined) {
-          frame.setContent(
-            newElement('h2', {
-              class: 'list-title',
-              content: i18n.getMessage('searchForTab_noResults'),
-            }),
-          );
-          return;
-        }
+    const showResults = (query: string): void => {
+      const matches = searchGroups<ViewTab, PopupGroup>(groups, query);
+      const [first] = matches.flatMap(({ tabs }) => tabs);
+      results = first;
+      showingResults = true;
+      if (first === undefined) {
         frame.setContent(
-          newElement(
-            'div',
-            {},
-            matches.flatMap(({ group, tabs }) => [
-              newElement('h2', { class: 'list-title', content: group.name }),
-              tabList(tabs, {
-                hideCloseButton: true,
-                lastUsedTabId,
-                selectedTabId: first.id,
-              }),
-            ]),
-          ),
+          newElement('h2', {
+            class: 'list-title',
+            content: i18n.getMessage('searchForTab_noResults'),
+          }),
         );
-      };
-
-      const searchInput = document.createElement('input');
-      searchInput.className = 'form-field__input';
-      searchInput.type = 'search';
-      searchInput.name = 'query';
-      searchInput.placeholder = i18n.getMessage('searchForTab_placeholder');
-      searchInput.addEventListener('input', () => {
-        const mode = searchMode(searchInput.value);
-        if (mode === 'results') {
-          showResults(searchInput.value);
-        } else if (mode === 'groups' && showingResults) {
-          showingResults = false;
-          results = undefined;
-          frame.setContent(makeGroupsView());
-        }
-      });
-      // Enter goes to the first of the tabs found
-      searchInput.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && results !== undefined) {
-          report(openTab(results));
-        }
-      });
-
-      const settingsButton = newElement('button', {
-        class: 'button-ghost button-ghost--settings',
-        title: i18n.getMessage('settingsButton'),
-      });
-      settingsButton.addEventListener('click', () => {
-        report(extension.openOptionsPage().then(closePopup));
-      });
-
-      const newGroupButton = newElement('button', {
-        class: 'button-ghost button-ghost--new',
-        content: i18n.getMessage('newGroupButton'),
-      });
-      newGroupButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        report(
-          (async () => {
-            const id = await service.createGroup();
-            await service.addNewTab(id);
-            showDetail(id, true);
-          })(),
-        );
-      });
-
-      frame.setHeader([
-        newElement('div', { class: 'form-field form-field--search' }, [
-          searchInput,
-        ]),
-        settingsButton,
-      ]);
-      frame.setContent(makeGroupsView());
-      frame.setFooter(newGroupButton);
-      frame.show();
-
-      // Back from the tabs of a group, the focus is where it was left
-      const cameBackTo = frame.node.querySelectorAll<HTMLElement>(
-        `#group-${String(lastViewedGroup)} .list__link--extend`,
+        return;
+      }
+      frame.setContent(
+        newElement(
+          'div',
+          {},
+          matches.flatMap(({ group, tabs }) => [
+            newElement('h2', { class: 'list-title', content: group.name }),
+            tabList(tabs, {
+              hideCloseButton: true,
+              lastUsedTabId,
+              selectedTabId: first.id,
+            }),
+          ]),
+        ),
       );
-      lastViewedGroup = undefined;
-      [...cameBackTo, searchInput].slice(0, 1).forEach((first) => {
-        first.focus();
-      });
-    },
-  };
+    };
+
+    const searchInput = document.createElement('input');
+    searchInput.className = 'form-field__input';
+    searchInput.type = 'search';
+    searchInput.name = 'query';
+    searchInput.placeholder = i18n.getMessage('searchForTab_placeholder');
+    searchInput.addEventListener('input', () => {
+      const mode = searchMode(searchInput.value);
+      if (mode === 'results') {
+        showResults(searchInput.value);
+      } else if (mode === 'groups' && showingResults) {
+        showingResults = false;
+        results = undefined;
+        frame.setContent(makeGroupsView());
+      }
+    });
+    // Enter goes to the first of the tabs found
+    searchInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && results !== undefined) {
+        report(openTab(results));
+      }
+    });
+
+    const settingsButton = newElement('button', {
+      class: 'button-ghost button-ghost--settings',
+      title: i18n.getMessage('settingsButton'),
+    });
+    settingsButton.addEventListener('click', () => {
+      report(extension.openOptionsPage().then(closePopup));
+    });
+
+    const newGroupButton = newElement('button', {
+      class: 'button-ghost button-ghost--new',
+      content: i18n.getMessage('newGroupButton'),
+    });
+    newGroupButton.addEventListener('click', (event) => {
+      event.preventDefault();
+      report(
+        (async () => {
+          const id = await service.createGroup();
+          await service.addNewTab(id);
+          showDetail(id, true);
+        })(),
+      );
+    });
+
+    frame.setHeader([
+      newElement('div', { class: 'form-field form-field--search' }, [
+        searchInput,
+      ]),
+      settingsButton,
+    ]);
+    frame.setContent(makeGroupsView());
+    frame.setFooter(newGroupButton);
+    frame.show();
+
+    // Back from the tabs of a group, the focus is where it was left
+    const cameBackTo = frame.node.querySelectorAll<HTMLElement>(
+      `#group-${String(lastViewedGroup)} .list__link--extend`,
+    );
+    lastViewedGroup = undefined;
+    [...cameBackTo, searchInput].slice(0, 1).forEach((first) => {
+      first.focus();
+    });
+  }
+
+  return { render };
 }

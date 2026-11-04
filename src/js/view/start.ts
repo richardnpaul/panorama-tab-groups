@@ -3,6 +3,7 @@ import { createExclusively } from '../adapters/browser/exclusive.js';
 import { createBrowserExtension } from '../adapters/browser/extension.js';
 import { createBrowserI18n } from '../adapters/browser/i18n.js';
 import { createBrowserMessaging } from '../adapters/browser/messaging.js';
+import { createBrowserNativeGroups } from '../adapters/browser/native-groups.js';
 import { createBrowserTabs } from '../adapters/browser/tabs.js';
 import { registerViewListeners } from '../adapters/browser/view-events.js';
 import { createBrowserViewState } from '../adapters/browser/view-state.js';
@@ -12,6 +13,8 @@ import { systemClock } from '../adapters/system/clock.js';
 import { createSystemScheduler } from '../adapters/system/scheduler.js';
 import { createGroupsStore } from '../app/groups-store.js';
 import { stateManager } from '../background/StateManager.js';
+import { withBackupNotice } from '../app/page-backup-notice.js';
+import { waitForStoredGroups } from '../app/stored-groups-wait.js';
 import { requireElementById } from '../share/dom.js';
 import { createViewController } from './controller.js';
 import { createDrag } from './drag.js';
@@ -48,6 +51,8 @@ async function initView(): Promise<void> {
   const viewTabs = createBrowserViewTabs(() => browser);
   const viewState = createBrowserViewState(() => browser);
   const messaging = createBrowserMessaging(() => browser);
+  // The groups are stored from this page, so the background is told for the automatic backups
+  const groupState = withBackupNotice(stateManager, messaging, console);
 
   BUTTON_TITLES.forEach(([id, message]) => {
     requireElementById(HTMLElement, id).title = i18n.getMessage(message);
@@ -62,11 +67,18 @@ async function initView(): Promise<void> {
   const pinnedNode = requireElementById(HTMLElement, 'pinnedTabs');
   const searchInput = requireElementById(HTMLInputElement, 'tab-search');
 
-  // The groups are known before any node is made for them
+  // The groups are known before any node is made for them, once the background has made them
+  await waitForStoredGroups(
+    groupState,
+    createSystemScheduler(),
+    logger,
+    windowId,
+  );
   const groups = await createGroupsStore(
     {
-      groupState: stateManager,
+      groupState,
       messaging,
+      nativeGroups: createBrowserNativeGroups(() => browser),
       tabs: createBrowserTabs(() => browser),
       clock: systemClock,
       i18n,
@@ -86,7 +98,7 @@ async function initView(): Promise<void> {
   const drag = createDrag({
     groups,
     groupNodes: groupNodesLate.get,
-    groupState: stateManager,
+    groupState,
     tabs: viewTabs,
     windowId: () => windowId,
     logger,
@@ -103,7 +115,7 @@ async function initView(): Promise<void> {
   const groupNodes = createGroupNodes({
     groups,
     tabs: viewTabs,
-    groupState: stateManager,
+    groupState,
     tabNodes,
     drag: drag.group,
     i18n,
@@ -120,7 +132,7 @@ async function initView(): Promise<void> {
     tabs: viewTabs,
     viewState,
     messaging,
-    groupState: stateManager,
+    groupState,
     groups,
     groupNodes,
     tabNodes,

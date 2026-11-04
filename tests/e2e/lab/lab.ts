@@ -36,6 +36,8 @@ export interface Lab {
   ) => Promise<void>;
   /** What the extensions that were loaded with `installLogged` have written, `level: text` */
   logs: () => string[];
+  /** The folder Firefox saves downloads in: one of the lab's own, not the user's */
+  downloads: string;
   close: () => Promise<void>;
 }
 
@@ -50,7 +52,14 @@ interface Answer {
   error?: string;
 }
 
-const PERMISSIONS = ['tabs', 'tabHide', 'tabGroups', 'sessions', 'storage'];
+const PERMISSIONS = [
+  'tabs',
+  'tabHide',
+  'tabGroups',
+  'sessions',
+  'storage',
+  'downloads',
+];
 
 /** The probe, compiled, as the folder of an extension of its own */
 function writeProbe(directory: string, name: string, port: number): string {
@@ -231,6 +240,8 @@ export async function startLab({ probes }: { probes: string[] }): Promise<Lab> {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'lab-'));
   const profile = path.join(directory, 'profile');
   fs.mkdirSync(profile);
+  const downloads = path.join(directory, 'downloads');
+  fs.mkdirSync(downloads);
 
   const { connectWithMaxRetries, findFreeTcpPort } =
     await import('playwright-webextext/dist/firefox_remote.js');
@@ -254,6 +265,9 @@ export async function startLab({ probes }: { probes: string[] }): Promise<Lab> {
         'devtools.debugger.prompt-connection': false,
         'extensions.manifestV3.enabled': true,
         'xpinstall.signatures.required': false,
+        // A folder of the lab's, so nothing is written to the user's Downloads
+        'browser.download.folderList': 2,
+        'browser.download.dir': downloads,
       },
     });
   };
@@ -323,6 +337,7 @@ export async function startLab({ probes }: { probes: string[] }): Promise<Lab> {
     install,
     installLogged,
     logs: () => [...logs],
+    downloads,
     async close() {
       await context.close();
       server.close();

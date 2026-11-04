@@ -146,6 +146,22 @@ describe('adapters/memory/native-groups.ts (membership)', () => {
     expect(groups.calls).toEqual(['appearance 1 Work']);
   });
 
+  it('gives a group a new title and keeps its colour, and fails for one that does not exist', async () => {
+    const groups = createMemoryNativeGroups([1]);
+    await groups.setAppearance(1, { title: 'Work', color: 'blue' });
+
+    await groups.setTitle(1, 'Play');
+
+    expect(groups.groups.get(1)).toMatchObject({
+      title: 'Play',
+      color: 'blue',
+    });
+    expect(groups.calls).toEqual(['appearance 1 Work', 'title 1 Play']);
+    await expect(groups.setTitle(5, 'x')).rejects.toThrow(
+      new Error('No group with id: 5'),
+    );
+  });
+
   it('fails to style a group that does not exist', async () => {
     const groups = createMemoryNativeGroups();
 
@@ -158,7 +174,13 @@ describe('adapters/memory/native-groups.ts (membership)', () => {
     const groups = createMemoryNativeGroups([1], 7);
     await groups.setAppearance(1, { title: 'Work', color: undefined });
 
-    expect(await groups.get(1)).toEqual({ windowId: 7, title: 'Work' });
+    expect(await groups.get(1)).toEqual({
+      windowId: 7,
+      title: 'Work',
+      collapsed: false,
+    });
+    await groups.setCollapsed(1, true);
+    expect(await groups.get(1)).toMatchObject({ collapsed: true });
     await expect(groups.get(2)).rejects.toThrow(
       new Error('No group with id: 2'),
     );
@@ -255,6 +277,46 @@ describe('adapters/memory/tabs.ts (actions)', () => {
     expect(await tabs.visibleIdsInWindow(7)).toEqual([1, 4]);
     await tabs.show([2]);
     expect(await tabs.visibleIdsInWindow(7)).toEqual([1, 2, 4]);
+  });
+
+  it('unpins a tab, and fails for one that is not there', async () => {
+    const tabs = createMemoryTabs();
+    tabs.setDetails([
+      { ...tab(1, 7), pinned: true },
+      { ...tab(2, 7), pinned: true },
+    ]);
+
+    await tabs.unpin(1);
+
+    expect((await tabs.listInWindow(7)).map(({ pinned }) => pinned)).toEqual([
+      false,
+      true,
+    ]);
+    expect(tabs.calls).toEqual(['unpin 1']);
+    await expect(tabs.unpin(9)).rejects.toThrow('Invalid tab ID: 9');
+  });
+
+  it('lists the hidden tabs of a window, and of no other', async () => {
+    const tabs = createMemoryTabs();
+    tabs.setDetails([tab(1, 7), tab(2, 7), tab(3, 8)]);
+    await tabs.hide([2, 3]);
+
+    expect(await tabs.hiddenIdsInWindow(7)).toEqual([2]);
+    expect(await tabs.hiddenIdsInWindow(8)).toEqual([3]);
+  });
+
+  it('gives the tabs at an address, or loading one, under a prefix', async () => {
+    const tabs = createMemoryTabs();
+    tabs.setDetails([
+      { ...tab(1, 7), url: 'moz-extension://id/view.html' },
+      { ...tab(2, 8), pendingUrl: 'moz-extension://id/options.html' },
+      { ...tab(3, 7), url: 'https://example.test/' },
+      tab(4, 7),
+    ]);
+
+    expect(await tabs.idsOfAddressesUnder('moz-extension://id/')).toEqual([
+      1, 2,
+    ]);
   });
 
   it('moves a tab after all the others', async () => {

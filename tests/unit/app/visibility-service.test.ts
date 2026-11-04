@@ -9,6 +9,7 @@ import {
 } from '../../../src/js/app/visibility-service.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
 import type { TabSummary } from '../../../src/js/ports/tabs.js';
+import { storeGroups } from '../../support/stored-groups.js';
 
 const WINDOW = 3;
 const FOCUSED = 8;
@@ -46,7 +47,7 @@ async function setUp({
   useNativeGroups = true,
 }: Options = {}) {
   const groupState = createMemoryGroupState();
-  await groupState.setGroups(WINDOW, groups);
+  await storeGroups(groupState, WINDOW, groups);
   await Promise.all(
     Object.entries(tabGroups).map(([id, groupId]) =>
       groupState.setTabGroup(Number(id), groupId),
@@ -155,6 +156,7 @@ describe('app/visibility-service.ts', () => {
   describe('switching to a group', () => {
     it('hides the tabs of the other groups and shows the tabs of the group', async () => {
       const ctx = await setUp({
+        useNativeGroups: false,
         tabs: [tab(1), tab(2), tab(3), tab(4, { pinned: true })],
         tabGroups: { 1: 1, 2: 2, 3: 1, 4: 2 },
       });
@@ -176,7 +178,7 @@ describe('app/visibility-service.ts', () => {
       expect(ctx.nativeGroups.collapsed.get(101)).toBe(false);
     });
 
-    it('collapses before it hides, and shows before it expands', async () => {
+    it('collapses the other groups, then expands the group, and hides no tab, in a browser that can', async () => {
       const ctx = await setUp({
         tabs: [tab(1), tab(2)],
         tabGroups: { 1: 1, 2: 2 },
@@ -186,12 +188,20 @@ describe('app/visibility-service.ts', () => {
 
       await ctx.service.toggleVisibleTabs(1);
 
-      expect(ctx.order).toEqual([
-        'collapsed 102,true',
-        'hide 2',
-        'show 1',
-        'collapsed 101,false',
-      ]);
+      expect(ctx.order).toEqual(['collapsed 102,true', 'collapsed 101,false']);
+      expect(ctx.tabs.calls).toEqual([]);
+    });
+
+    it('hides before it shows, with native groups off', async () => {
+      const ctx = await setUp({
+        useNativeGroups: false,
+        tabs: [tab(1), tab(2)],
+        tabGroups: { 1: 1, 2: 2 },
+      });
+
+      await ctx.service.toggleVisibleTabs(1);
+
+      expect(ctx.order).toEqual(['hide 2', 'show 1']);
     });
 
     it('looks at the tabs and groups of the current window', async () => {
@@ -215,6 +225,7 @@ describe('app/visibility-service.ts', () => {
 
     it('treats the view tab as part of the view group', async () => {
       const ctx = await setUp({
+        useNativeGroups: false,
         tabs: [tab(1), tab(2)],
         tabGroups: { 1: -1, 2: 1 },
       });
@@ -225,6 +236,7 @@ describe('app/visibility-service.ts', () => {
 
     it('hides the view tab when a group is active', async () => {
       const ctx = await setUp({
+        useNativeGroups: false,
         tabs: [tab(1), tab(2)],
         tabGroups: { 1: -1, 2: 1 },
       });
@@ -235,7 +247,11 @@ describe('app/visibility-service.ts', () => {
     });
 
     it('hides a tab that has no group', async () => {
-      const ctx = await setUp({ tabs: [tab(1), tab(2)], tabGroups: { 2: 1 } });
+      const ctx = await setUp({
+        useNativeGroups: false,
+        tabs: [tab(1), tab(2)],
+        tabGroups: { 2: 1 },
+      });
 
       await ctx.service.toggleVisibleTabs(1);
 
@@ -244,6 +260,7 @@ describe('app/visibility-service.ts', () => {
 
     it('skips a tab whose group cannot be read, as it has probably been closed', async () => {
       const ctx = await setUp({
+        useNativeGroups: false,
         tabs: [tab(1), tab(2), tab(3)],
         tabGroups: { 1: 1, 2: 2, 3: 1 },
       });
@@ -261,8 +278,24 @@ describe('app/visibility-service.ts', () => {
   });
 
   describe('when no tab would be left', () => {
+    it('switches to a group with no tab in native mode, which hides none: the others are collapsed', async () => {
+      const ctx = await setUp({
+        tabs: [tab(1), tab(2)],
+        tabGroups: { 1: 1, 2: 1 },
+      });
+
+      await ctx.service.toggleVisibleTabs(2, true);
+
+      expect(ctx.logger.error).not.toHaveBeenCalled();
+      expect(ctx.tabs.calls).toEqual([]);
+      expect(ctx.nativeGroups.collapsed.get(101)).toBe(true);
+      expect(ctx.nativeGroups.collapsed.get(102)).toBe(false);
+      expect(ctx.updateActionTitle).toHaveBeenCalledWith(FOCUSED, 2);
+    });
+
     it('changes nothing, and says so, instead of hiding every tab', async () => {
       const ctx = await setUp({
+        useNativeGroups: false,
         tabs: [tab(1), tab(2)],
         tabGroups: { 1: 1, 2: 1 },
       });
@@ -281,6 +314,7 @@ describe('app/visibility-service.ts', () => {
   describe('no tab selected', () => {
     it('activates the shown tab used most recently, before anything else', async () => {
       const ctx = await setUp({
+        useNativeGroups: false,
         tabs: [
           tab(1, { lastAccessed: 100 }),
           tab(2, { lastAccessed: 200 }),
@@ -367,7 +401,7 @@ describe('app/visibility-service.ts', () => {
       await ctx.service.toggleVisibleTabs(1);
 
       expect(ctx.nativeGroups.calls).toEqual([]);
-      expect(ctx.tabs.calls).toEqual(['hide 2', 'show 1']);
+      expect(ctx.tabs.calls).toEqual([]);
     });
 
     it('asks once whether they are in use', async () => {
@@ -392,7 +426,8 @@ describe('app/visibility-service.ts', () => {
 
       await expect(ctx.service.toggleVisibleTabs(1)).resolves.toBeUndefined();
 
-      expect(ctx.tabs.calls).toEqual(['hide 2', 'show 1']);
+      // The group is still expanded after the other failed to collapse
+      expect(ctx.nativeGroups.collapsed.get(101)).toBe(false);
     });
 
     it('carries on when the group to expand no longer exists', async () => {
@@ -424,6 +459,7 @@ describe('app/visibility-service.ts', () => {
   describe('failures that are not ignored', () => {
     it('passes on a failure to hide the tabs', async () => {
       const ctx = await setUp({
+        useNativeGroups: false,
         tabs: [tab(1), tab(2)],
         tabGroups: { 1: 1, 2: 2 },
       });
@@ -437,7 +473,11 @@ describe('app/visibility-service.ts', () => {
     });
 
     it('passes on a failure to show the tabs', async () => {
-      const ctx = await setUp({ tabs: [tab(1)], tabGroups: { 1: 1 } });
+      const ctx = await setUp({
+        useNativeGroups: false,
+        tabs: [tab(1)],
+        tabGroups: { 1: 1 },
+      });
       const failure = new Error('cannot show');
       const service = createVisibilityService({
         ...ctx.deps,
@@ -466,6 +506,7 @@ describe('app/visibility-service.ts', () => {
     // The browser's events say which window they are about; the window the user is in may be another
     it('works on the tabs of that window, not of the one the user is in', async () => {
       const ctx = await setUp({
+        useNativeGroups: false,
         tabs: [tab(1), tab(2)],
         tabGroups: { 1: 1, 2: 2 },
       });
@@ -514,7 +555,7 @@ describe('app/visibility-service.ts', () => {
 
       expect(ctx.updateActionTitle).toHaveBeenCalledTimes(1);
       expect(ctx.updateActionTitle).toHaveBeenCalledWith(FOCUSED, 2);
-      expect(ctx.order).toEqual(['show 1', 'collapsed 102,false']);
+      expect(ctx.order).toEqual(['collapsed 102,false']);
     });
 
     it('shows group 0', async () => {

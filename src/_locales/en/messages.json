@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Use native browser tab groups for visual organization and collapsing."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Native tab groups are not supported in this browser version (requires Tab Hiding API)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "This browser always uses native tab groups, so this setting cannot be changed."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Native tab groups are not supported in this browser version. Please update to Firefox 139+ or use Chrome 89+."

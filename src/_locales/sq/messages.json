@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Përdor grupet e brendshme të skedave të shfletuesit për organizim pamor dhe palosje."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Grupet e brendshme të skedave nuk mbulohen në këtë version shfletuesi (lypset API-ja e fshehjes së skedave)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Ky shfletues përdor gjithmonë grupet e brendshme të skedave, ndaj ky rregullim nuk mund të ndryshohet."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Grupet e brendshme të skedave nuk mbulohen në këtë version shfletuesi. Përditësojeni te Firefox 139+ ose përdorni Chrome 89+."

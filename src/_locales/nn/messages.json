@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Bruk nettlesaren sine eigne fanegrupper til visuell organisering og samanfelling."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Nettlesaren sine eigne fanegrupper er ikkje støtta i denne nettlesarversjonen (krev API-et for skjuling av faner)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Denne nettlesaren brukar alltid sine eigne fanegrupper, så denne innstillinga kan ikkje endrast."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Nettlesaren sine eigne fanegrupper er ikkje støtta i denne nettlesarversjonen. Oppdater til Firefox 139+ eller bruk Chrome 89+."

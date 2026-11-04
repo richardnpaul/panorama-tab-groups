@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Kasuta brauseri enda vahelehtede rühmi visuaalseks korraldamiseks ja ahendamiseks."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Brauseri enda vahelehtede rühmi selles brauseri versioonis ei toetata (nõuab vahelehtede peitmise API-t)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "See brauser kasutab alati enda vahelehtede rühmi, seega seda sätet ei saa muuta."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Brauseri enda vahelehtede rühmi selles brauseri versioonis ei toetata. Uuenda Firefox 139+ peale või kasuta Chrome 89+."

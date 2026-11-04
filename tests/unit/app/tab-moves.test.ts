@@ -5,10 +5,12 @@ import { createMemoryNativeGroups } from '../../../src/js/adapters/memory/native
 import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createMemoryWindows } from '../../../src/js/adapters/memory/windows.js';
 import { createNativeGroupAssignment } from '../../../src/js/app/native-group-assignment.js';
+import { createOwnMoves } from '../../../src/js/app/own-moves.js';
 import { createTabMoves } from '../../../src/js/app/tab-moves.js';
 import type { Group } from '../../../src/js/ports/group-state.js';
 import type { TabDetails } from '../../../src/js/ports/tabs.js';
 import { englishMessage } from '../../support/messages.js';
+import { storeGroups } from '../../support/stored-groups.js';
 
 const WINDOW = 1;
 
@@ -59,7 +61,7 @@ async function setUp(options: Options = {}) {
   tabs.setDetails(tabList);
   tabs.setHighlighted(highlighted);
   const groupState = createMemoryGroupState();
-  await groupState.setGroups(WINDOW, groups);
+  await storeGroups(groupState, WINDOW, groups);
   if (activeGroup !== undefined) {
     await groupState.setActiveGroup(WINDOW, activeGroup);
   }
@@ -80,6 +82,7 @@ async function setUp(options: Options = {}) {
     return Promise.resolve();
   });
   const logger = { debug: vi.fn(), warn: vi.fn(), error: vi.fn() };
+  const ownMoves = createOwnMoves();
   const windows = createMemoryWindows(currentWindow);
   const moves = createTabMoves({
     tabs,
@@ -98,9 +101,11 @@ async function setUp(options: Options = {}) {
     createMenuList,
     toggleVisibleTabs,
     useNativeGroups: () => Promise.resolve(useNative),
+    ownMoves,
     logger,
   });
   return {
+    ownMoves,
     moves,
     tabs,
     groupState,
@@ -185,6 +190,97 @@ describe('app/tab-moves.ts', () => {
       expect(env.toggleVisibleTabs).toHaveBeenCalledWith(7, 4);
     });
 
+    it('counts the tab as one the add-on is moving while it is moved, and not after', async () => {
+      const env = await setUp({ activeGroup: 2 });
+      const seen: boolean[] = [];
+      const addTabs = env.nativeGroups.addTabs.bind(env.nativeGroups);
+      env.nativeGroups.addTabs = (tabIds, nativeGroupId) => {
+        seen.push(env.ownMoves.includes(11));
+        return addTabs(tabIds, nativeGroupId);
+      };
+
+      await env.moves.moveTab(11, 2);
+
+      expect(seen).toEqual([true]);
+      expect(env.ownMoves.includes(11)).toBe(false);
+    });
+
+    describe('a pinned tab', () => {
+      const pinnedTab = [tab(10, { active: true }), tab(11, { pinned: true })];
+
+      it('is given its group first, then unpinned, then moved, so that unpinning is not taken for a tab without a group', async () => {
+        const env = await setUp({
+          tabs: pinnedTab,
+          tabGroups: { 10: 1 },
+          useNative: false,
+        });
+        const order: string[] = [];
+        const setTabGroup = env.groupState.setTabGroup.bind(env.groupState);
+        env.groupState.setTabGroup = (id, groupOfTab) => {
+          order.push(`group ${String(id)} ${String(groupOfTab)}`);
+          return setTabGroup(id, groupOfTab);
+        };
+
+        await env.moves.moveTab(11, 2);
+
+        expect(order).toEqual(['group 11 2']);
+        expect(env.tabs.calls).toEqual(['unpin 11', 'move 11']);
+        expect(await env.groupState.getTabGroup(11)).toBe(2);
+      });
+
+      it('is put in the native group of the group, as any tab', async () => {
+        const env = await setUp({ tabs: pinnedTab, tabGroups: { 10: 1 } });
+
+        await env.moves.moveTab(11, 2);
+
+        expect(env.nativeGroups.calls).toEqual(['add 11 to 60']);
+      });
+
+      it('does not unpin a tab that is not pinned', async () => {
+        const env = await setUp({ tabs: pinnedTab, tabGroups: { 10: 1 } });
+
+        await env.moves.moveTab(10, 2);
+
+        expect(env.tabs.calls).not.toContain('unpin 10');
+      });
+
+      it('switches the window to the group it goes to when it was all the window showed', async () => {
+        // The only tab of the window, with no group: nothing is left to show of the group on show
+        const env = await setUp({
+          tabs: [tab(11, { pinned: true })],
+          useNative: false,
+        });
+
+        await env.moves.moveTab(11, 2);
+
+        expect(await env.groupState.getActiveGroup(WINDOW)).toBe(2);
+      });
+
+      it('does not write the group on show when the tab goes to the group already shown', async () => {
+        const env = await setUp({
+          tabs: [tab(11, { pinned: true })],
+          useNative: false,
+        });
+        const setActive = vi.spyOn(env.groupState, 'setActiveGroup');
+
+        await env.moves.moveTab(11, 1);
+
+        expect(setActive).not.toHaveBeenCalled();
+      });
+
+      it('does not switch the window when other tabs of the group on show are left', async () => {
+        const env = await setUp({
+          tabs: pinnedTab,
+          tabGroups: { 10: 1 },
+          useNative: false,
+        });
+
+        await env.moves.moveTab(11, 2);
+
+        expect(await env.groupState.getActiveGroup(WINDOW)).toBe(1);
+      });
+    });
+
     it('puts the tab in the native group of the group when that is the active one', async () => {
       const env = await setUp({ activeGroup: 2 });
 
@@ -194,22 +290,54 @@ describe('app/tab-moves.ts', () => {
       expect(await env.nativeGroups.tabIdsIn(60)).toEqual([11]);
     });
 
-    it('takes the tab out of native groups when the group is not the active one', async () => {
+    it('puts the tab in the native group of the group when that is not the active one too', async () => {
       const env = await setUp({ activeGroup: 1 });
-      env.nativeGroups.seed(60, WINDOW, [11]);
 
       await env.moves.moveTab(11, 2);
 
-      expect(env.nativeGroups.calls).toEqual(['remove 11']);
-      expect(await env.nativeGroups.tabIdsIn(60)).toEqual([]);
+      expect(env.nativeGroups.calls).toEqual(['add 11 to 60']);
+      expect(await env.nativeGroups.tabIdsIn(60)).toEqual([11]);
     });
 
-    it('takes the tab out of the native group it was in when the group it goes to has none, so it is not in a group of another', async () => {
-      const env = await setUp({ activeGroup: 3 });
+    it('makes a native group for a group that has none, of the tabs in it', async () => {
+      const env = await setUp({ activeGroup: 3, tabGroups: { 12: 3 } });
 
       await env.moves.moveTab(11, 3);
 
+      // The tab is at the end of the window by then
+      expect(env.nativeGroups.calls).toEqual([
+        'create 12,11',
+        'appearance 1000 G3',
+      ]);
+      expect(
+        (await env.groupState.getGroups(WINDOW))?.find(({ id }) => id === 3)
+          ?.nativeGroupId,
+      ).toBe(1000);
+    });
+
+    it('makes it collapsed when the group is not the one shown', async () => {
+      const env = await setUp({ activeGroup: 1 });
+
+      await env.moves.moveTab(11, 3);
+
+      expect(env.nativeGroups.calls).toEqual([
+        'create 11',
+        'appearance 1000 G3',
+        'collapse 1000',
+      ]);
+    });
+
+    it('takes the tab out of its native group when it is sent to the group for ungrouped tabs, which has none', async () => {
+      const env = await setUp({
+        groups: [group(1, 50), { ...group(-2), nativeGroupId: null }],
+        activeGroup: 1,
+      });
+      env.nativeGroups.seed(50, WINDOW, [11]);
+
+      await env.moves.moveTab(11, -2);
+
       expect(env.nativeGroups.calls).toEqual(['remove 11']);
+      expect(await env.groupState.getTabGroup(11)).toBe(-2);
     });
 
     it('takes the tab out of its native group for a group that is not known, which has no native group', async () => {
@@ -220,12 +348,12 @@ describe('app/tab-moves.ts', () => {
       expect(env.nativeGroups.calls).toEqual(['remove 11']);
     });
 
-    it('treats a native group with the id 0 as none', async () => {
+    it('treats a native group with the id 0 as none, and makes one', async () => {
       const env = await setUp({ groups: [group(1, 0)], activeGroup: 1 });
 
       await env.moves.moveTab(11, 1);
 
-      expect(env.nativeGroups.calls).toEqual(['remove 11']);
+      expect(env.nativeGroups.calls[0]).toBe('create 11');
     });
 
     it('takes the tab out of its native group when the window has no groups stored', async () => {
@@ -392,7 +520,7 @@ describe('app/tab-moves.ts', () => {
         expect(await env.groupState.getActiveGroup(WINDOW)).toBeUndefined();
       });
 
-      it('does not treat a tab that stays in the shown group as one that switched it, and so makes no native group', async () => {
+      it('does not treat a tab that stays in the shown group as one that switched it', async () => {
         const env = await setUp({
           ...onlyShown,
           groups: [group(1), group(2, 60)],
@@ -400,8 +528,8 @@ describe('app/tab-moves.ts', () => {
 
         await env.moves.moveTab(10, 1);
 
-        expect(env.nativeGroups.calls).toEqual(['remove 10']);
-        expect(env.logger.debug).not.toHaveBeenCalled();
+        expect(await env.groupState.getActiveGroup(WINDOW)).toBe(1);
+        expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
       });
 
       it('does not switch when the window has no shown group, whatever the tabs are in', async () => {

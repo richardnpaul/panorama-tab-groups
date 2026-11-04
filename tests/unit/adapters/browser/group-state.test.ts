@@ -7,6 +7,7 @@ import type {
   Group,
   GroupState,
 } from '../../../../src/js/ports/group-state.js';
+import { createFakeSessionArea } from '../../../support/fake-session-area.js';
 import { createFakeSessions } from '../../../support/fake-sessions.js';
 import { describeGroupStateContract } from '../../../support/group-state-contract.js';
 
@@ -29,6 +30,84 @@ function setUp() {
 }
 
 describe('adapters/browser/group-state.ts', () => {
+  describe('links to native groups', () => {
+    const four: Group = {
+      id: 4,
+      name: 'Four',
+      rect: { x: 0, y: 0, w: 0.5, h: 0.5 },
+    };
+
+    function withLinks() {
+      const fake = createFakeSessions();
+      const session = createFakeSessionArea();
+      const state = createBrowserGroupState(() => ({
+        sessions: fake.api.sessions,
+        storage: { session: session.area },
+      }));
+      return { ...fake, session, state };
+    }
+
+    it('keeps each in `storage.session`, under the window and the group', async () => {
+      const { state, session, windowValues, slot } = withLinks();
+      await state.setGroups(3, [four]);
+
+      await state.setNativeGroupLink(3, 4, 500);
+
+      expect(Object.fromEntries(session.values)).toEqual({
+        'nativeGroup:3:4': 500,
+      });
+      expect(windowValues.get(slot(3, 'groups'))).toEqual([four]);
+    });
+
+    it('asks nothing of `storage.session` for a window with no groups', async () => {
+      const { state, session } = withLinks();
+      await state.setGroups(3, []);
+      const get = vi.spyOn(session.area, 'get');
+
+      await expect(state.getGroups(3)).resolves.toEqual([]);
+
+      expect(get).not.toHaveBeenCalled();
+    });
+
+    it('removes nothing when no link is gone', async () => {
+      const { state, session } = withLinks();
+      await state.setGroups(3, [four]);
+      await state.setNativeGroupLink(3, 4, 500);
+      const remove = vi.spyOn(session.area, 'remove');
+
+      await state.setGroups(3, [four]);
+
+      expect(remove).not.toHaveBeenCalled();
+    });
+
+    it('stores no groups when the links of the others cannot be let go of, so that a failure stores nothing', async () => {
+      const { state, session } = withLinks();
+      await state.setGroups(3, [four]);
+      const failure = new Error('the extension is reloading');
+      vi.spyOn(session.area, 'get').mockRejectedValue(failure);
+
+      await expect(
+        state.setGroups(3, [{ ...four, name: 'Renamed' }]),
+      ).rejects.toBe(failure);
+
+      vi.restoreAllMocks();
+      expect((await state.getGroups(3))?.[0]?.name).toBe('Four');
+    });
+
+    it('keeps none in a browser without `storage.session` (Firefox before 115), and works on', async () => {
+      const { api } = createFakeSessions();
+      const state = createBrowserGroupState(() => ({
+        sessions: api.sessions,
+      }));
+      await state.setGroups(3, [four]);
+
+      await state.setNativeGroupLink(3, 4, 500);
+      await state.setGroups(3, [four]);
+
+      await expect(state.getGroups(3)).resolves.toEqual([four]);
+    });
+  });
+
   describe('where it keeps things', () => {
     it('keeps a window’s groups, active group and index under their own keys', async () => {
       const { state, windowValues, slot } = setUp();
@@ -178,6 +257,15 @@ describe('adapters/browser/group-state.ts', () => {
       await expect(putGroups([stored])).resolves.toEqual([stored]);
     });
 
+    it('keeps a group that has no container, as version 2 of the stored data writes it', async () => {
+      const { containerId, ...withoutContainer } = valid();
+
+      await expect(putGroups([withoutContainer])).resolves.toEqual([
+        withoutContainer,
+      ]);
+      expect(containerId).toBe('firefox-default');
+    });
+
     it('drops entries that are not groups and keeps the rest in order', async () => {
       const result = await putGroups([
         valid(),
@@ -196,7 +284,6 @@ describe('adapters/browser/group-state.ts', () => {
       ['name', 4],
       ['name', undefined],
       ['containerId', 4],
-      ['containerId', undefined],
       ['rect', undefined],
       ['rect', 'big'],
       ['rect', null],
@@ -217,9 +304,14 @@ describe('adapters/browser/group-state.ts', () => {
       ).resolves.toEqual([]);
     });
 
+    it('keeps a group whose nativeGroupId is a number, which earlier versions stored, without it: it is no link', async () => {
+      const stored = { ...valid(), nativeGroupId: 12 };
+
+      await expect(putGroups([stored])).resolves.toEqual([valid()]);
+    });
+
     it.each([
       ['windowId', 7],
-      ['nativeGroupId', 12],
       ['nativeGroupId', null],
       ['lastMoved', 1_700_000_000_000],
       ['isSystemGroup', true],
@@ -288,5 +380,72 @@ describe('adapters/browser/group-state.ts', () => {
         },
       );
     });
+  });
+});
+
+describe('adapters/browser/group-state.ts, where the browser keeps values with their window and tab', () => {
+  it('lists none and forgets none, as there is nothing of the add-on’s to prune', async () => {
+    const { state, windowValues } = setUp();
+    await state.setSchemaVersion(3, 5);
+
+    await expect(state.listStoredWindowIds()).resolves.toEqual([]);
+    await expect(state.listStoredTabIds()).resolves.toEqual([]);
+    await expect(state.listPrivateWindowIds()).resolves.toEqual([]);
+    await expect(state.listPrivateTabIds()).resolves.toEqual([]);
+    await state.setPrivate([3], [3]);
+    await state.forgetWindow(3);
+    await state.forgetTab(3);
+
+    // What was stored is still there: the window and the tab go with their values
+    await expect(state.getSchemaVersion(3)).resolves.toBe(5);
+    expect(windowValues.size).toBe(1);
+  });
+
+  it('does not write when a window closed: the window is gone, and its values with it', async () => {
+    const { state, windowValues } = setUp();
+
+    await state.setClosedAt(3, 1234);
+
+    expect(windowValues.size).toBe(0);
+    await expect(state.getClosedAt(3)).resolves.toBeUndefined();
+  });
+
+  it('reads and writes the closing time where the values are emulated', async () => {
+    const fake = createFakeSessions();
+    const removed: string[] = [];
+    const state = createBrowserGroupState(() => ({
+      sessions: fake.api.sessions,
+      sessionsManagement: {
+        windowIds: () => Promise.resolve([3]),
+        tabIds: () => Promise.resolve([20]),
+        privateWindowIds: () => Promise.resolve([4]),
+        privateTabIds: () => Promise.resolve([40]),
+        setPrivate: (windowIds, tabIds) => {
+          removed.push(`private ${windowIds.join()} ${tabIds.join()}`);
+          return Promise.resolve();
+        },
+        removeWindow: (id) => {
+          removed.push(`window ${String(id)}`);
+          return Promise.resolve();
+        },
+        removeTab: (id) => {
+          removed.push(`tab ${String(id)}`);
+          return Promise.resolve();
+        },
+      },
+    }));
+
+    await state.setClosedAt(3, 1234);
+    await state.setPrivate([4, 5], [40]);
+    await state.forgetWindow(3);
+    await state.forgetTab(20);
+
+    await expect(state.getClosedAt(3)).resolves.toBe(1234);
+    await expect(state.listStoredWindowIds()).resolves.toEqual([3]);
+    await expect(state.listStoredTabIds()).resolves.toEqual([20]);
+    await expect(state.listPrivateWindowIds()).resolves.toEqual([4]);
+    await expect(state.listPrivateTabIds()).resolves.toEqual([40]);
+    expect(removed).toEqual(['private 4,5 40', 'window 3', 'tab 20']);
+    expect(fake.windowValues.get(fake.slot(3, 'closedAt'))).toBe(1234);
   });
 });

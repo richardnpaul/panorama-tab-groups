@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Gamitin ang mga native na grupo ng tab ng browser para sa biswal na pag-aayos at pag-collapse."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Hindi sinusuportahan ang mga native na grupo ng tab sa bersyong ito ng browser (kailangan ang API sa pagtatago ng tab)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Palaging ginagamit ng browser na ito ang mga native na grupo ng tab, kaya hindi mababago ang setting na ito."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Hindi sinusuportahan ang mga native na grupo ng tab sa bersyong ito ng browser. Mag-update sa Firefox 139+ o gumamit ng Chrome 89+."
