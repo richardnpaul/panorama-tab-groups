@@ -7,6 +7,7 @@ import type { Menus } from '../ports/menus.js';
 import type { NativeGroups } from '../ports/native-groups.js';
 import type { Tabs } from '../ports/tabs.js';
 import { messageOf } from '../share/guards.js';
+import type { OwnMoves } from './own-moves.js';
 import type { WindowGroups } from './window-groups.js';
 
 export interface DeleteGroupDeps {
@@ -22,6 +23,8 @@ export interface DeleteGroupDeps {
   hasTabGroups: boolean;
   // Shows the tabs of a group in a window, and hides the rest
   toggleVisibleTabs: (activeGroup: number, windowId: number) => Promise<void>;
+  // What the browser says of a tab the add-on ungroups to close is not the person's doing
+  ownMoves: Pick<OwnMoves, 'during'>;
   logger: Pick<Logger, 'debug' | 'warn' | 'error'>;
 }
 
@@ -40,6 +43,7 @@ export function createGroupDeletion({
   menus,
   hasTabGroups,
   toggleVisibleTabs,
+  ownMoves,
   logger,
 }: DeleteGroupDeps): (deletion: GroupDeletion) => Promise<DeletionResult> {
   // Taken out first, so the browser does not keep a group of closed tabs
@@ -60,7 +64,7 @@ export function createGroupDeletion({
         ),
       );
       if (inGroup.length > 0) {
-        await nativeGroups.removeTabs(inGroup);
+        await ownMoves.during(inGroup, () => nativeGroups.removeTabs(inGroup));
         logger.debug(
           `Ungrouped ${String(inGroup.length)} tabs from native group ${String(nativeGroupId)}`,
         );

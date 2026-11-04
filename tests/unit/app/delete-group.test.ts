@@ -6,6 +6,7 @@ import { createMemoryNativeGroups } from '../../../src/js/adapters/memory/native
 import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createMemoryWindows } from '../../../src/js/adapters/memory/windows.js';
 import { createGroupDeletion } from '../../../src/js/app/delete-group.js';
+import { createOwnMoves } from '../../../src/js/app/own-moves.js';
 import { createToolbarService } from '../../../src/js/app/toolbar-service.js';
 import { createWindowGroups } from '../../../src/js/app/window-groups.js';
 import { createMemoryToolbar } from '../../../src/js/adapters/memory/toolbar.js';
@@ -61,6 +62,7 @@ async function setUp({ hasTabGroups = true }: { hasTabGroups?: boolean } = {}) {
     logger,
   });
   const toggleVisibleTabs = vi.fn().mockResolvedValue(undefined);
+  const ownMoves = createOwnMoves();
   return {
     deleteGroup: createGroupDeletion({
       tabs,
@@ -70,8 +72,10 @@ async function setUp({ hasTabGroups = true }: { hasTabGroups?: boolean } = {}) {
       menus,
       hasTabGroups,
       toggleVisibleTabs,
+      ownMoves,
       logger,
     }),
+    ownMoves,
     toggleVisibleTabs,
     groupState,
     tabs,
@@ -118,6 +122,22 @@ describe('app/delete-group.ts', () => {
     await env.deleteGroup(request({ tabIds: [10, 12, 13, 99] }));
 
     expect(env.nativeGroups.calls).toEqual(['remove 10']);
+  });
+
+  it('counts the tabs it takes out of the native group as tabs the add-on is moving', async () => {
+    const env = await setUp();
+    const seen: boolean[][] = [];
+    const removeTabs = env.nativeGroups.removeTabs.bind(env.nativeGroups);
+    env.nativeGroups.removeTabs = (ids) => {
+      seen.push([10, 11, 12].map((id) => env.ownMoves.includes(id)));
+      return removeTabs(ids);
+    };
+
+    await env.deleteGroup(request({ tabIds: [10, 11, 12] }));
+
+    expect(seen).toEqual([[true, true, false]]);
+    expect(env.ownMoves.includes(10)).toBe(false);
+    expect(env.ownMoves.includes(11)).toBe(false);
   });
 
   it('does not ungroup when no tab is in the native group any more', async () => {

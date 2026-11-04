@@ -15,6 +15,7 @@ import type { Logger } from '../ports/logger.js';
 import type { NativeGroups } from '../ports/native-groups.js';
 import type { Tabs } from '../ports/tabs.js';
 import type { NativeGroupAssignment } from './native-group-assignment.js';
+import type { OwnMoves } from './own-moves.js';
 
 /** What is known about a tab when the browser says it was created */
 export interface CreatedTab {
@@ -60,6 +61,8 @@ export interface TabLifecycleDeps {
   openingView: () => OpeningView | null;
   // The view tab shows up: stop waiting for it
   finishOpeningView: () => void;
+  // What the browser says of a tab the add-on is attaching is not the person's doing
+  ownMoves: Pick<OwnMoves, 'during'>;
   clock: Clock;
   // The address of the view page
   viewUrl: string;
@@ -87,6 +90,7 @@ export function createTabLifecycle({
   isOpeningBackup,
   openingView,
   finishOpeningView,
+  ownMoves,
   clock,
   viewUrl,
   logger,
@@ -331,25 +335,27 @@ export function createTabLifecycle({
     tabId: number,
     { newWindowId }: { newWindowId: number },
   ): Promise<void> {
-    await waitForInitialization();
+    await ownMoves.during([tabId], async () => {
+      await waitForInitialization();
 
-    const tab = await tabs.get(tabId);
-    // The tab joins the group the new window is showing, unless it is pinned
-    const activeGroup = await groupState.getActiveGroup(newWindowId);
-    if (activeGroup !== undefined && !tab.pinned) {
-      await groupState.setTabGroup(tabId, activeGroup);
-    }
+      const tab = await tabs.get(tabId);
+      // The tab joins the group the new window is showing, unless it is pinned
+      const activeGroup = await groupState.getActiveGroup(newWindowId);
+      if (activeGroup !== undefined && !tab.pinned) {
+        await groupState.setTabGroup(tabId, activeGroup);
+      }
 
-    await tabCreated(tab);
+      await tabCreated(tab);
 
-    // The tab may have been hidden in the window it left: in the group shown here, it is shown
-    const shown = await groupState.getActiveGroup(newWindowId);
-    if (
-      shown !== undefined &&
-      (await groupState.getTabGroup(tabId)) === shown
-    ) {
-      await toggleVisibleTabs(shown, newWindowId);
-    }
+      // The tab may have been hidden in the window it left: in the group shown here, it is shown
+      const shown = await groupState.getActiveGroup(newWindowId);
+      if (
+        shown !== undefined &&
+        (await groupState.getTabGroup(tabId)) === shown
+      ) {
+        await toggleVisibleTabs(shown, newWindowId);
+      }
+    });
   }
 
   async function tabDetached(tabId: number): Promise<void> {

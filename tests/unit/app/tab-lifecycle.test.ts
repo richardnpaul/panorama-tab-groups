@@ -5,6 +5,7 @@ import { createMemoryNativeGroups } from '../../../src/js/adapters/memory/native
 import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createMemoryWindows } from '../../../src/js/adapters/memory/windows.js';
 import { createNativeGroupAssignment } from '../../../src/js/app/native-group-assignment.js';
+import { createOwnMoves } from '../../../src/js/app/own-moves.js';
 import {
   createTabLifecycle,
   type CreatedTab,
@@ -95,6 +96,7 @@ async function setUp(options: Options = {}) {
   const finishOpeningView = vi.fn();
   const waitForInitialization = vi.fn(wait);
   const clock = createMemoryClock(nowMs);
+  const ownMoves = createOwnMoves();
   const lifecycle = createTabLifecycle({
     groupState,
     tabs,
@@ -106,6 +108,7 @@ async function setUp(options: Options = {}) {
     isOpeningBackup: () => openingBackup,
     openingView: () => opening,
     finishOpeningView,
+    ownMoves,
     clock,
     viewUrl: VIEW,
     logger,
@@ -115,6 +118,7 @@ async function setUp(options: Options = {}) {
     tabs,
     groupState,
     nativeGroups,
+    ownMoves,
     logger,
     toggleVisibleTabs,
     finishOpeningView,
@@ -942,6 +946,28 @@ describe('app/tab-lifecycle.ts', () => {
       await expect(
         env.lifecycle.tabAttached(5, { newWindowId: WINDOW }),
       ).rejects.toThrow('Invalid tab ID: 5');
+    });
+
+    it('counts the tab as one the add-on is moving while it is attached', async () => {
+      const seen: boolean[] = [];
+      const env = await setUp({
+        activeGroup: 2,
+        useNative: false,
+        tabs: [{ tab: details(5), group: 1 }],
+        wait: () => {
+          seen.push(env.ownMoves.includes(5));
+          return Promise.resolve();
+        },
+      });
+      env.toggleVisibleTabs.mockImplementation(() => {
+        seen.push(env.ownMoves.includes(5));
+        return Promise.resolve();
+      });
+
+      await env.lifecycle.tabAttached(5, { newWindowId: WINDOW });
+
+      expect(seen).toEqual([true, true, true]);
+      expect(env.ownMoves.includes(5)).toBe(false);
     });
   });
 

@@ -109,10 +109,13 @@ export function createBrowserEvents({
       return;
     }
     const active = await groupState.getActiveGroup(windowId);
-    // The view is not a group a tab can join
+    const groups = await groupState.getGroups(windowId);
+    // The view, or a group that was deleted, is not a group a tab can join
     const shown =
-      active === undefined || active === VIEWER_GROUP_ID
-        ? fallbackActiveGroup(await groupState.getGroups(windowId))
+      active === undefined ||
+      active === VIEWER_GROUP_ID ||
+      groups?.some(({ id }) => id === active) === false
+        ? fallbackActiveGroup(groups)
         : active;
     await groupState.setTabGroup(tabId, shown);
     logger.debug(
@@ -176,18 +179,13 @@ export function createBrowserEvents({
       );
       return undefined;
     });
-    if (now !== undefined) {
+    if (now !== undefined && !now.pinned) {
       await follow(tabId, tab.windowId, now.browserGroupId ?? -1);
     }
   }
 
   return {
     async onTabUpdated(tabId, changeInfo, tab) {
-      if (changeInfo.groupId !== undefined) {
-        await waitForInitialization();
-        await followNativeGroupOf(tabId, tab);
-        return;
-      }
       if (changeInfo.pinned !== undefined) {
         await waitForInitialization();
         await (changeInfo.pinned
@@ -195,14 +193,20 @@ export function createBrowserEvents({
           : unpinned(tabId, tab.windowId));
         return;
       }
+      if (changeInfo.groupId !== undefined) {
+        await waitForInitialization();
+        await followNativeGroupOf(tabId, tab);
+        return;
+      }
       const isView =
         changeInfo.url === viewUrl ||
         tab.url === viewUrl ||
         tab.pendingUrl === viewUrl;
-      if (
-        !isView ||
-        (await groupState.getTabGroup(tabId)) === VIEWER_GROUP_ID
-      ) {
+      if (!isView) {
+        return;
+      }
+      await waitForInitialization();
+      if ((await groupState.getTabGroup(tabId)) === VIEWER_GROUP_ID) {
         return;
       }
 

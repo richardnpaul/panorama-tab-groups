@@ -96,6 +96,7 @@ describe('app/browser-events.ts', () => {
     it.each([
       ['has none', undefined],
       ['shows the view', -1],
+      ['shows a group that was deleted', 7],
     ])(
       'puts a tab that is unpinned in the lowest group of a window that %s',
       async (_, active) => {
@@ -113,6 +114,36 @@ describe('app/browser-events.ts', () => {
         expect(await env.groupState.getTabGroup(10)).toBe(1);
       },
     );
+
+    it.each([
+      ['has none', undefined],
+      ['shows the view', -1],
+    ])(
+      'puts a tab that is unpinned in group 0 when the window has no groups stored and %s',
+      async (_, active) => {
+        const env = setUp({ useNative: false });
+        if (active !== undefined) {
+          await env.groupState.setActiveGroup(1, active);
+        }
+
+        await env.events.onTabUpdated(10, { pinned: false }, { windowId: 1 });
+
+        expect(await env.groupState.getTabGroup(10)).toBe(0);
+      },
+    );
+
+    it('takes the group of a tab whose pinning and native group are reported together', async () => {
+      const env = setUp();
+      await env.groupState.setTabGroup(10, 2);
+
+      await env.events.onTabUpdated(
+        10,
+        { pinned: true, groupId: -1 },
+        { windowId: 1, pinned: true },
+      );
+
+      expect(await env.groupState.getTabGroup(10)).toBeUndefined();
+    });
 
     it.each([true, false])(
       'keeps the group a tab was given before it was unpinned, as the menu does (native: %s)',
@@ -271,6 +302,15 @@ describe('app/browser-events.ts', () => {
       expect(await env.groupState.getTabGroup(10)).toBe(1);
     });
 
+    it('leaves a tab alone that is pinned by the time it is looked at', async () => {
+      const env = await arranged(-1);
+      env.tabs.setDetails([details(-1, true)]);
+
+      await env.events.onTabUpdated(10, { groupId: -1 }, tab);
+
+      expect(await env.groupState.getTabGroup(10)).toBe(1);
+    });
+
     it('does nothing when it is not known which window the tab is in', async () => {
       const env = await arranged(60);
 
@@ -344,6 +384,7 @@ describe('app/browser-events.ts', () => {
       await env.events.onTabUpdated(10, change, tab);
 
       expect(await env.groupState.getTabGroup(10)).toBe(-1);
+      expect(env.waitForInitialization).toHaveBeenCalledTimes(1);
       expect(env.logger.debug).toHaveBeenCalledWith(
         'Tab 10 updated to view, assigned groupId -1',
       );
@@ -396,6 +437,7 @@ describe('app/browser-events.ts', () => {
       await env.events.onTabUpdated(10, {}, {});
 
       expect(await env.groupState.getTabGroup(10)).toBe(2);
+      expect(env.waitForInitialization).not.toHaveBeenCalled();
       expect(env.nativeGroups.calls).toEqual([]);
     });
   });

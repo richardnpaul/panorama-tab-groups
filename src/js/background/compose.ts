@@ -321,6 +321,7 @@ export function composeBackgroundFrom({
     isOpeningBackup,
     openingView: viewOpening.current,
     finishOpeningView: viewOpening.finish,
+    ownMoves,
     clock,
     viewUrl,
     logger,
@@ -368,6 +369,7 @@ export function composeBackgroundFrom({
     hasTabGroups: capabilities.hasTabGroups,
     toggleVisibleTabs: (activeGroup, windowId) =>
       visibility.toggleVisibleTabs(activeGroup, undefined, windowId),
+    ownMoves,
     logger,
   });
 

@@ -144,31 +144,25 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
 
 ### Chunk 7: Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races
 
-- **Status:** `[ ] To Do`
+- **Status:** `[x] Done`
 - **Touched Files:**
   - `src/js/app/browser-events.ts`
   - `src/js/app/tab-lifecycle.ts`
   - `src/js/app/delete-group.ts`
-  - `src/js/background/compose.ts` (if `ownMoves` is injected into `createTabLifecycle` / `createGroupDeletion`)
+  - `src/js/background/compose.ts`
   - `tests/unit/app/browser-events.test.ts`
   - `tests/unit/app/tab-lifecycle.test.ts`
   - `tests/unit/app/delete-group.test.ts`
 - **Findings Addressed:**
   - **7.1 (HIGH — `tabAttached` and `deleteGroup` trigger `tabs.onUpdated({ groupId: -1 })` without `ownMoves`):**
-    1. In `src/js/app/tab-lifecycle.ts:330-353`, moving a grouped tab across windows fires `tabs.onUpdated({ groupId: -1 })`. `tabAttached` sets `setTabGroup(tabId, activeGroup)` and awaits `tabCreated(tab)` without `ownMoves.during([tabId], ...)`, allowing `followNativeGroupOf` to overwrite the tab's group in the new window with `-2`.
-    2. In `src/js/app/delete-group.ts:62`, `ungroupTabs` calls `nativeGroups.removeTabs(inGroup)` without `ownMoves.during(inGroup, ...)`, racing with `closeTabs` and `tabClosed` to write `-2` into `privateSessions`.
-    - _Fix:_ Wrap `tabAttached` and `deleteGroup`'s `removeTabs` in `ownMoves.during(...)`.
-  - **7.2 (MEDIUM — `onTabUpdated` in `browser-events.ts` misses `now.pinned` and early-returns after `changeInfo.groupId`):** In `src/js/app/browser-events.ts:158-214`:
-    1. `followNativeGroupOf` checks `if (tab.pinned === true)` before `await tabs.get(tabId)`, but never checks `if (now.pinned) return;` after `tabs.get(tabId)` resolves (and passes `tab.windowId` instead of `now.windowId`).
-    2. `if (changeInfo.groupId !== undefined)` returns early on line 189 before checking `if (changeInfo.pinned !== undefined)` on line 191.
-    3. `unpinned()` (`L114`) does not check `groups.some(({ id }) => id === active)` if `active` points to a deleted group.
-    4. The `isView` branch (`L198`) does not await `waitForInitialization()`.
-    - _Fix:_ Check `if (now.pinned) return;` and use `now.windowId` in `followNativeGroupOf`; allow both `groupId` and `pinned` handlers to run if both are present; validate `active` against `groups` in `unpinned()`; await `waitForInitialization()` in `isView`.
-  - **7.3 (MEDIUM — Reopening a closed tab into a recreated/unlinked native group pulls it into `activeGroup`'s native group):** In `src/js/app/tab-lifecycle.ts:95-193`, if all tabs of Group 1 (`"Alpha"`) were closed (clearing its `nativeGroupId` link) and a tab is reopened via `Ctrl+Shift+T`, Chromium recreates native group `"Alpha"` with a new `nativeGroupId`. `groupOfNativeGroup` sees no link, assigns `activeGroup`, and `assignNewTabToNativeGroup` pulls the tab out of `"Alpha"` into `activeGroup`'s native group.
-    - _Fix:_ When `tab.browserGroupId > 0` has no existing link in `groupState`, check if an unlinked group in `groups` matches the native group's title (via `nativeGroups.get(tab.browserGroupId)`) and link/assign it, or avoid pulling a tab that already has `tab.browserGroupId > 0` into a different group's native group.
+    - _Fixed:_ Wrapped `tabAttached` (`src/js/app/tab-lifecycle.ts:336-358`) and `deleteGroup`'s `nativeGroups.removeTabs(inGroup)` (`src/js/app/delete-group.ts:66`) in `ownMoves.during(...)`, wired `ownMoves` into `createTabLifecycle` and `createGroupDeletion` in `src/js/background/compose.ts`, and added TDD tests in `tests/unit/app/tab-lifecycle.test.ts` and `tests/unit/app/delete-group.test.ts`.
+  - **7.2 (MEDIUM — `onTabUpdated` in `browser-events.ts` misses `now.pinned` and early-returns after `changeInfo.groupId`):**
+    - _Fixed:_ Checked `if (now !== undefined && !now.pinned)` in `followNativeGroupOf`, ordered `if (changeInfo.pinned !== undefined)` before `if (changeInfo.groupId !== undefined)` so coalesced `{ pinned: true, groupId: -1 }` updates clear the pinned tab's group, validated `active` against `groups` (`groups?.some(({ id }) => id === active) === false`) in `unpinned()`, and awaited `waitForInitialization()` in the `isView` branch in `src/js/app/browser-events.ts`. Added TDD tests in `tests/unit/app/browser-events.test.ts`.
+  - **7.3 (MEDIUM — Reopening a closed tab into an unlinked native group):**
+    - _Closed as False Positive with Evidence:_ `docs/plans/data-structures-review.md:403-407` explicitly specifies: _"If Chromium reopens it inside a native group (`tab.browserGroupId !== -1` ...), the tab goes to the group linked to that native group in decision 5's mapping. Otherwise it goes to the active group, as every tab does today (`tab-lifecycle.ts`, `groupOfNewTab`)."_ Furthermore, `tests/unit/app/tab-lifecycle.test.ts:185-196` (`it('is in the group the window shows when no group goes with the native group it is in')`) directly tests and requires that a tab created with an unlinked `browserGroupId` (`77`) is assigned to `activeGroup` (`1`).
 - **Verification:**
-  - [ ] `npx vitest run tests/unit/app/browser-events.test.ts tests/unit/app/tab-lifecycle.test.ts tests/unit/app/delete-group.test.ts`
-  - [ ] `MUTATE="src/js/app/browser-events.ts,src/js/app/tab-lifecycle.ts,src/js/app/delete-group.ts" npm run test:mutation`
+  - [x] `npx vitest run tests/unit/app/browser-events.test.ts tests/unit/app/tab-lifecycle.test.ts tests/unit/app/delete-group.test.ts tests/unit/background/compose.test.ts --coverage` (100% coverage)
+  - [x] `MUTATE="src/js/app/browser-events.ts,src/js/app/tab-lifecycle.ts,src/js/app/delete-group.ts,src/js/background/compose.ts" npm run test:mutation` (100% mutation score)
 
 ---
 
