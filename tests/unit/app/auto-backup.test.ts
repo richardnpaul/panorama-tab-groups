@@ -123,6 +123,21 @@ describe('app/auto-backup.ts', () => {
         failure,
       );
     });
+
+    it('writes only the first when asked twice at once and none was written within the hour', async () => {
+      const env = setUp({ record: { next: 3, last: NOON - HOUR } });
+
+      const results = await Promise.all([
+        env.autoBackup.writeIfDue('first'),
+        env.autoBackup.writeIfDue('second'),
+      ]);
+
+      expect(results).toEqual([true, true]);
+      expect(env.files.written).toEqual([autoBackupPath(3)]);
+      expect(env.logger.debug).toHaveBeenCalledWith(
+        '[AutoBackup] No backup (second): the last is less than an hour old',
+      );
+    });
   });
 
   describe('writeNow', () => {
@@ -438,6 +453,29 @@ describe('app/auto-backup.ts', () => {
         '[AutoBackup] Could not tell when the last backup was:',
         failure,
       );
+    });
+
+    it('does not back up a change when another backup is being written as the quiet time ends', async () => {
+      const env = setUp();
+      env.autoBackup.start();
+      let finishWrite: () => void = () => undefined;
+      vi.spyOn(env.files, 'write').mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finishWrite = resolve;
+          }),
+      );
+
+      env.autoBackup.changed();
+      const urgent = env.autoBackup.writeNow('update');
+      await env.wait(QUIET);
+      finishWrite();
+      await urgent;
+      await env.wait(0);
+
+      expect(env.logger.debug.mock.calls).toEqual([
+        ['[AutoBackup] Wrote backup 1 (update)'],
+      ]);
     });
   });
 

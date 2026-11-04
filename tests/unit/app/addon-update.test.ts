@@ -106,6 +106,16 @@ describe('app/addon-update.ts', () => {
     expect(env.extension.reloads).toBe(1);
   });
 
+  it('starts again only once when several tabs are closed at the same time', async () => {
+    const env = setUp([tab(2, 'moz-extension://id/view.html')]);
+    await env.update.updateAvailable();
+    env.tabs.setDetails([]);
+
+    await Promise.all([env.update.tabRemoved(2), env.update.tabRemoved(5)]);
+
+    expect(env.extension.reloads).toBe(1);
+  });
+
   it('takes no notice of tabs closed while no update is waiting', async () => {
     const env = setUp();
     const query = vi.spyOn(env.tabs, 'idsOfAddressesUnder');

@@ -33,6 +33,12 @@ export function createAddonUpdate({
   // Remembered where the background being unloaded does not lose it, and here for a browser that
   // cannot keep it
   let waiting = false;
+  // One check at a time, so two tabs closed together do not both start the add-on again
+  let turn = Promise.resolve();
+  const inTurn = (work: () => Promise<void>): Promise<void> => {
+    turn = turn.then(work);
+    return turn;
+  };
 
   const isWaiting = async (): Promise<boolean> =>
     waiting || (await pendingUpdate.isPending());
@@ -61,27 +67,30 @@ export function createAddonUpdate({
       // Written or not, the update is the browser's to apply; a failure is logged by the backup.
       // The add-on does not start again before the backup is over, which would cut it short.
       await autoBackup.writeNow('update');
-      waiting = true;
-      try {
-        await pendingUpdate.set(true);
-      } catch (error) {
-        logger.error('[Update] The update could not be remembered:', error);
-      }
-      try {
-        await reloadIfNoPageOpen();
-      } catch (error) {
-        logger.error('[Update] Could not go on with the update:', error);
-      }
+      await inTurn(async () => {
+        waiting = true;
+        try {
+          await pendingUpdate.set(true);
+        } catch (error) {
+          logger.error('[Update] The update could not be remembered:', error);
+        }
+        try {
+          await reloadIfNoPageOpen();
+        } catch (error) {
+          logger.error('[Update] Could not go on with the update:', error);
+        }
+      });
     },
 
-    async tabRemoved(tabId) {
-      try {
-        if (await isWaiting()) {
-          await reloadIfNoPageOpen(tabId);
+    tabRemoved: (tabId) =>
+      inTurn(async () => {
+        try {
+          if (await isWaiting()) {
+            await reloadIfNoPageOpen(tabId);
+          }
+        } catch (error) {
+          logger.error('[Update] Could not go on with the update:', error);
         }
-      } catch (error) {
-        logger.error('[Update] Could not go on with the update:', error);
-      }
-    },
+      }),
   };
 }

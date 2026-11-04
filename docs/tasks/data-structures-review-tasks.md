@@ -11,7 +11,7 @@
 | :---------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------ | :---------- |
 | **Chunk 1** | Governance & External Agent Hygiene                            | `.agents/agents/code-reviewer.md`                                                                                   | None                                                                | `[x] Done`  |
 | **Chunk 2** | View & Popup Store / UI Edge Cases                             | `src/js/app/stored-groups-wait.ts`                                                                                  | None                                                                | `[x] Done`  |
-| **Chunk 3** | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                           | None                                                                | `[ ] To Do` |
+| **Chunk 3** | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                           | None                                                                | `[x] Done`  |
 | **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`, `src/js/app/window-groups.ts`                                                       | None                                                                | `[ ] To Do` |
 | **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/startup.ts`, `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                | None                                                                | `[ ] To Do` |
 | **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                  | None                                                                | `[ ] To Do` |
@@ -70,20 +70,20 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
 
 ### Chunk 3: Automatic Backups & Add-on Update Concurrency
 
-- **Status:** `[ ] To Do`
+- **Status:** `[x] Done`
 - **Touched Files:**
   - `src/js/app/addon-update.ts`
   - `src/js/app/auto-backup.ts`
   - `tests/unit/app/addon-update.test.ts`
   - `tests/unit/app/auto-backup.test.ts`
 - **Findings Addressed:**
-  - **3.1 (MEDIUM — Concurrent `tabRemoved` calls `extension.reload()` multiple times):** In `src/js/app/addon-update.ts:41-57, 77-85`, `waiting = false` is set after `await isWaiting()` and `await tabs.idsOfAddressesUnder(...)`. When multiple tabs close simultaneously (e.g., closing a window), two `tabRemoved` events can both observe `open.length === 0` and call `extension.reload()` twice.
-    - _Fix:_ Guard `reloadIfClear` against concurrent reloads (e.g. serialize or check/clear `waiting` atomically before calling `extension.reload()`).
-  - **3.2 (MEDIUM — `writeIfDue` and `whenQuiet` check `wroteRecently()` outside `queue`):** In `src/js/app/auto-backup.ts:73, 145-181`, `wroteRecently()` reads `log.read()` before chaining onto `queue`. If a backup write is currently in flight on `queue`, `log` still has the previous `last` timestamp, so a second duplicate backup is queued right behind the in-flight write.
-    - _Fix:_ Evaluate `wroteRecently()` inside the serialized `queue` task in `writeIfDue` and `whenQuiet`.
+  - **3.1 (MEDIUM — Concurrent `tabRemoved` calls `extension.reload()` multiple times):** In `src/js/app/addon-update.ts:41-57, 77-85`, `waiting = false` was set after `await isWaiting()` and `await tabs.idsOfAddressesUnder(...)`. When multiple tabs closed simultaneously (e.g., closing a window), two `tabRemoved` events could both observe `open.length === 0` and call `extension.reload()` twice.
+    - _Fix:_ Serialized update check and reload execution via `inTurn` in `src/js/app/addon-update.ts` and added TDD unit test in `tests/unit/app/addon-update.test.ts`.
+  - **3.2 (MEDIUM — `writeIfDue` and `whenQuiet` check `wroteRecently()` outside `queue`):** In `src/js/app/auto-backup.ts:73, 145-181`, `wroteRecently()` read `log.read()` before chaining onto `queue`. If a backup write was in flight on `queue`, `log` still held the previous `last` timestamp, so a second duplicate backup was queued right behind the in-flight write.
+    - _Fix:_ Evaluated `wroteRecently()` inside the serialized `inTurn` queue in `writeIfDue` and `whenQuiet` in `src/js/app/auto-backup.ts`, and added TDD unit tests in `tests/unit/app/auto-backup.test.ts`.
 - **Verification:**
-  - [ ] `npx vitest run tests/unit/app/addon-update.test.ts tests/unit/app/auto-backup.test.ts`
-  - [ ] `MUTATE="src/js/app/addon-update.ts,src/js/app/auto-backup.ts" npm run test:mutation`
+  - [x] `npx vitest run tests/unit/app/addon-update.test.ts tests/unit/app/auto-backup.test.ts --coverage` (100% coverage)
+  - [x] `MUTATE="src/js/app/addon-update.ts,src/js/app/auto-backup.ts" npm run test:mutation` (100% mutation score)
 
 ---
 

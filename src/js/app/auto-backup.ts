@@ -69,8 +69,15 @@ export function createAutoBackup({
   let timer: TimerHandle | undefined;
   // Whether a backup is put off, as one is being opened
   let puttingOff = false;
-  // One backup at a time: two would write the same file and count it once
+  // One backup at a time: two would write the same file and count it once, and a check of when
+  // the last was waits for any backup being written now
   let queue: Promise<unknown> = Promise.resolve();
+  const inTurn = <T>(work: () => Promise<T>): Promise<T> => {
+    // No work handed to the queue rejects, as each failure is reported where it happens
+    const result = queue.then(work);
+    queue = result;
+    return result;
+  };
 
   // A download can stay unfinished for ever; the backup then fails, and says so, and the next goes
   // on. The write is told to stop, so that nothing of it is left waiting.
@@ -118,20 +125,17 @@ export function createAutoBackup({
     logger.debug(`[AutoBackup] Wrote backup ${String(next)} (${reason})`);
   }
 
-  function writeNow(reason: string): Promise<boolean> {
-    // The queue never rejects, as each backup's failure is reported here
-    const result = queue
-      .then(() => write(reason))
-      .then(
-        () => true,
-        (error: unknown) => {
-          logger.error(`[AutoBackup] The backup (${reason}) failed:`, error);
-          return false;
-        },
-      );
-    queue = result;
-    return result;
-  }
+  const runNow = (reason: string): Promise<boolean> =>
+    write(reason).then(
+      () => true,
+      (error: unknown) => {
+        logger.error(`[AutoBackup] The backup (${reason}) failed:`, error);
+        return false;
+      },
+    );
+
+  const writeNow = (reason: string): Promise<boolean> =>
+    inTurn(() => runNow(reason));
 
   async function wroteRecently(): Promise<boolean> {
     const { last } = await log.read();
@@ -141,25 +145,26 @@ export function createAutoBackup({
     return since !== undefined && since >= 0 && since < AUTO_BACKUP_INTERVAL_MS;
   }
 
-  async function writeIfDue(reason: string): Promise<boolean> {
-    try {
-      if (await wroteRecently()) {
-        logger.debug(
-          `[AutoBackup] No backup (${reason}): the last is less than an hour old`,
+  const writeIfDue = (reason: string): Promise<boolean> =>
+    inTurn(async () => {
+      try {
+        if (await wroteRecently()) {
+          logger.debug(
+            `[AutoBackup] No backup (${reason}): the last is less than an hour old`,
+          );
+          return true;
+        }
+      } catch (error) {
+        logger.error(
+          '[AutoBackup] Could not tell when the last backup was:',
+          error,
         );
-        return true;
       }
-    } catch (error) {
-      logger.error(
-        '[AutoBackup] Could not tell when the last backup was:',
-        error,
-      );
-    }
-    return writeNow(reason);
-  }
+      return runNow(reason);
+    });
 
   // `again` waits once more
-  async function whenQuiet(again: () => void): Promise<void> {
+  function whenQuiet(again: () => void): void {
     timer = undefined;
     // The tabs of a backup being opened are still arriving; wait until they have. Said once for
     // each wait, as the options page that opens it may be closed before it says it is done.
@@ -174,10 +179,19 @@ export function createAutoBackup({
       return;
     }
     puttingOff = false;
-    if (await wroteRecently()) {
-      return;
-    }
-    await writeNow('changes');
+    queue = queue
+      .then(async () => {
+        if (await wroteRecently()) {
+          return;
+        }
+        await runNow('changes');
+      })
+      .catch((error: unknown) => {
+        logger.error(
+          '[AutoBackup] Could not tell when the last backup was:',
+          error,
+        );
+      });
   }
 
   function changed(): void {
@@ -189,12 +203,7 @@ export function createAutoBackup({
       scheduler.clearTimeout(timer);
     }
     timer = scheduler.setTimeout(() => {
-      whenQuiet(changed).catch((error: unknown) => {
-        logger.error(
-          '[AutoBackup] Could not tell when the last backup was:',
-          error,
-        );
-      });
+      whenQuiet(changed);
     }, AUTO_BACKUP_QUIET_MS);
   }
 
