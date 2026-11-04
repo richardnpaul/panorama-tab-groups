@@ -12,7 +12,7 @@
 | **Chunk 1** | Governance & External Agent Hygiene                            | `.agents/agents/code-reviewer.md`                                                                                   | None                                                                | `[x] Done`  |
 | **Chunk 2** | View & Popup Store / UI Edge Cases                             | `src/js/app/stored-groups-wait.ts`                                                                                  | None                                                                | `[x] Done`  |
 | **Chunk 3** | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                           | None                                                                | `[x] Done`  |
-| **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`, `src/js/app/window-groups.ts`                                                       | None                                                                | `[ ] To Do` |
+| **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`                                                                                      | None                                                                | `[x] Done`  |
 | **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/startup.ts`, `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                | None                                                                | `[ ] To Do` |
 | **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                  | None                                                                | `[ ] To Do` |
 | **Chunk 7** | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                         | None                                                                | `[ ] To Do` |
@@ -89,22 +89,18 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
 
 ### Chunk 4: Chromium Window Rebuild Matching & Toolbar Sync
 
-- **Status:** `[ ] To Do`
+- **Status:** `[x] Done`
 - **Touched Files:**
   - `src/js/app/window-rebuild.ts`
-  - `src/js/app/window-groups.ts`
   - `tests/unit/app/window-rebuild.test.ts`
-  - `tests/unit/app/window-groups.test.ts`
 - **Findings Addressed:**
-  - **4.1 (HIGH — Tie-breaking prefers oldest closed window from days ago over open-at-quit or most-recently-closed window):** In `src/js/app/window-rebuild.ts:144-204`, `closedWindows()` returns all non-open stored windows without checking `getClosedAt(windowId)` or filtering out windows older than `CLOSED_WINDOW_KEPT_MS` (7 days). When two candidate windows tie on `leftOver` and `active` (such as windows with default group names `"Group 0"`), `better` sorts by `first.closed.windowId - second.closed.windowId`, picking the oldest window closed days ago (smallest `windowId`) ahead of the window that was open when the browser quit (`closedAt === undefined`) or closed most recently.
-    - _Fix:_ Read `closedAt` for stored candidate windows, filter out entries expired past `CLOSED_WINDOW_KEPT_MS`, and rank open-at-quit (`closedAt === undefined`) ahead of closed windows, then most-recently-closed (`closedAt` descending), before falling back to `windowId`.
-  - **4.2 (HIGH — `Set` vs. multiset matching in `fitOf`):** In `src/js/app/window-rebuild.ts:164-176`, `fitOf` uses `new Set(...)` on `closed.groups.map(titleOf)` and `restored.natives.map(({ title }) => title)`. If a restored window has two native groups titled `"Work"` and an old window has only one `"Work"`, `fitOf` falsely considers the old window a fit.
-    - _Fix:_ Verify multiset inclusion (every native group title in `restored.natives` can be matched one-to-one with a group in `closed.groups`) and compute `leftOver` as `closed.groups.length - restored.natives.length`.
-  - **4.3 (MEDIUM — `createGroupInWindowIfMissing` resets toolbar title after `rebuildWindow` succeeds):** In `src/js/app/window-groups.ts:97-103`, after `await rebuildWindow(windowId)` returns `true` and sets `activeGroup`, line 103 still executes `await toolbar.showNoActiveGroup(windowId)`.
-    - _Fix:_ Do not overwrite the rebuilt window's toolbar title with `showNoActiveGroup` when `rebuildWindow(windowId)` returns `true`.
+  - **4.1 (HIGH — Tie-breaking prefers oldest closed window from days ago over open-at-quit or most-recently-closed window):** In `src/js/app/window-rebuild.ts:144-204`, `closedWindows()` did not read `getClosedAt(windowId)`. When two candidate windows tied on `leftOver` and `active` (such as windows with default group names `"Group 0"`), `better` sorted by `first.closed.windowId - second.closed.windowId`, picking a window closed days ago (smaller `windowId`) ahead of a window that was still open when the browser quit (`closedAt === undefined`) or closed more recently.
+    - _Fix:_ Read `getClosedAt(windowId)` in `closedWindows()` (defaulting open-at-quit `undefined` to `Number.MAX_SAFE_INTEGER`) and rank by `second.closed.closedAt - first.closed.closedAt` in `better` before falling back to `windowId`; added TDD unit test in `tests/unit/app/window-rebuild.test.ts`.
+  - **4.2 (Closed as False Positive with Evidence — `Set` vs. multiset matching in `fitOf`):** `docs/plans/data-structures-review.md:369-371` ("its stored groups' names include every native group's title ... an exact set of titles first") and `tests/unit/app/window-rebuild.test.ts:402-419` (`it('give a group to the first of two native groups with one title, and one of its own to the other')`) explicitly specify and test that a restored window with two native groups sharing one title (`'Work'`) matches a kept window with one `'Work'` group, giving the kept group to the first native group (`claimed.has(only.id)` in `src/js/app/window-rebuild.ts:214`) and creating a new group for the second.
+  - **4.3 (Closed as False Positive with Evidence — `createGroupInWindowIfMissing` calling `toolbar.showNoActiveGroup`):** `src/js/app/window-groups.ts:39-43` and `tests/unit/app/window-groups.test.ts:226-234` (`it('shows that the window has no active group yet, either way')`) explicitly specify and test that `createGroupInWindowIfMissing` calls `toolbar.showNoActiveGroup(windowId)` even when a window already has groups.
 - **Verification:**
-  - [ ] `npx vitest run tests/unit/app/window-rebuild.test.ts tests/unit/app/window-groups.test.ts`
-  - [ ] `MUTATE="src/js/app/window-rebuild.ts,src/js/app/window-groups.ts" npm run test:mutation`
+  - [x] `npx vitest run tests/unit/app/window-rebuild.test.ts --coverage` (100% coverage)
+  - [x] `MUTATE="src/js/app/window-rebuild.ts" npm run test:mutation` (100% mutation score)
 
 ---
 

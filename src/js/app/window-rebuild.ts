@@ -32,6 +32,7 @@ export interface WindowRebuildDeps {
     | 'getGroups'
     | 'getActiveGroup'
     | 'getGroupIndex'
+    | 'getClosedAt'
     | 'listStoredWindowIds'
     | 'forgetWindow'
   >;
@@ -80,6 +81,7 @@ interface Closed {
   groups: Group[];
   activeGroup: number | undefined;
   groupIndex: number | undefined;
+  closedAt: number;
 }
 
 /** How well an entry fits a window: with fewer groups left over (none, when the titles are all of the names), and with the shown group the open one */
@@ -156,6 +158,10 @@ export function createWindowRebuild({
         ),
         activeGroup: await archive.getActiveGroup(windowId),
         groupIndex: await archive.getGroupIndex(windowId),
+        // A window that was still open when the browser quit has no closing time, and comes ahead
+        // of one that had already closed
+        closedAt:
+          (await archive.getClosedAt(windowId)) ?? Number.MAX_SAFE_INTEGER,
       })),
     );
   }
@@ -183,6 +189,7 @@ export function createWindowRebuild({
   const better = (first: Fit, second: Fit): number =>
     first.leftOver - second.leftOver ||
     Number(second.active) - Number(first.active) ||
+    second.closed.closedAt - first.closed.closedAt ||
     first.closed.windowId - second.closed.windowId ||
     first.restored.windowId - second.restored.windowId;
 

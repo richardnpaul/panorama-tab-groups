@@ -46,6 +46,7 @@ interface Kept {
   groups: Group[];
   active?: number;
   index?: number;
+  closedAt?: number;
 }
 
 async function setUp({
@@ -96,6 +97,9 @@ async function setUp({
       }
       if (entry.index !== undefined) {
         await groupState.setGroupIndex(entry.windowId, entry.index);
+      }
+      if (entry.closedAt !== undefined) {
+        await groupState.setClosedAt(entry.windowId, entry.closedAt);
       }
     }),
   );
@@ -528,6 +532,50 @@ describe('app/window-rebuild.ts', () => {
       // Window 9 showed the group of the first native group, which is no match with both open: the
       // lower id of the two windows goes with it
       expect(await env.groupState.listStoredWindowIds()).toEqual([9, 101]);
+    });
+
+    it('prefers a window that was still open when the browser quit to one that closed earlier, and a more recently closed window to an older one', async () => {
+      const openAtQuit = await setUp({
+        natives: { 101: [{ id: 900, title: 'Group 0', tabs: [1] }] },
+        closed: [
+          {
+            windowId: 6,
+            groups: [kept(4, 'Group 0')],
+            closedAt: 1000,
+          },
+          {
+            windowId: 9,
+            groups: [kept(5, 'Group 0')],
+          },
+        ],
+      });
+      const moreRecent = await setUp({
+        natives: { 101: [{ id: 900, title: 'Group 0', tabs: [1] }] },
+        closed: [
+          {
+            windowId: 6,
+            groups: [kept(4, 'Group 0')],
+            closedAt: 1000,
+          },
+          {
+            windowId: 9,
+            groups: [kept(5, 'Group 0')],
+            closedAt: 2000,
+          },
+        ],
+      });
+
+      await openAtQuit.rebuild.rebuildAll();
+      await moreRecent.rebuild.rebuildAll();
+
+      // Window 9 was open at quit (no closedAt), or closed more recently (2000 > 1000),
+      // so it is chosen even though window 6 has the lower windowId
+      expect((await userGroups(openAtQuit, 101)).map(({ id }) => id)).toEqual([
+        5,
+      ]);
+      expect((await userGroups(moreRecent, 101)).map(({ id }) => id)).toEqual([
+        5,
+      ]);
     });
 
     it('goes in the order of the ids when the windows fit alike, whatever the number of them', async () => {
