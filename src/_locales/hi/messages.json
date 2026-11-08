@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "दृश्य व्यवस्था और समेटने के लिए ब्राउज़र के मूल टैब समूहों का उपयोग करें।"
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "इस ब्राउज़र संस्करण में मूल टैब समूह समर्थित नहीं हैं (टैब छिपाने वाला API आवश्यक है)।"
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "यह ब्राउज़र हमेशा मूल टैब समूहों का उपयोग करता है, इसलिए यह सेटिंग बदली नहीं जा सकती।"
   },
   "optionsNativeGroupsLegacy": {
     "message": "इस ब्राउज़र संस्करण में मूल टैब समूह समर्थित नहीं हैं। कृपया Firefox 139+ पर अपडेट करें या Chrome 89+ का उपयोग करें।"

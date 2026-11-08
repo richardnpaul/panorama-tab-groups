@@ -289,6 +289,62 @@ describe('adapters/browser/tabs.ts', () => {
     });
   });
 
+  describe('hiddenIdsInWindow', () => {
+    it('asks the browser for the hidden tabs of the window', async () => {
+      const query = vi.fn().mockResolvedValue([{ id: 5 }, {}, { id: 0 }]);
+      const tabs = createBrowserTabs(() => api({ query }));
+
+      await expect(tabs.hiddenIdsInWindow(3)).resolves.toEqual([5, 0]);
+
+      expect(query).toHaveBeenCalledTimes(1);
+      expect(query).toHaveBeenCalledWith({ windowId: 3, hidden: true });
+    });
+  });
+
+  describe('idsOfAddressesUnder', () => {
+    it('gives the tabs of every window at an address, or loading one, under the prefix', async () => {
+      const query = vi
+        .fn()
+        .mockResolvedValue([
+          { id: 1, url: 'moz-extension://id/view.html' },
+          { id: 2, url: 'https://example.test/' },
+          { id: 3, url: 'about:blank', pendingUrl: 'moz-extension://id/a' },
+          { id: 4 },
+          { url: 'moz-extension://id/b' },
+          { id: 5, url: 'https://moz-extension://id/' },
+        ]);
+      const tabs = createBrowserTabs(() => api({ query }));
+
+      await expect(
+        tabs.idsOfAddressesUnder('moz-extension://id/'),
+      ).resolves.toEqual([1, 3]);
+
+      expect(query).toHaveBeenCalledTimes(1);
+      expect(query).toHaveBeenCalledWith({});
+    });
+  });
+
+  describe('unpin', () => {
+    it('unpins the tab', async () => {
+      const update = vi.fn().mockResolvedValue({});
+      const tabs = createBrowserTabs(() => api({ update }));
+
+      await tabs.unpin(8);
+
+      expect(update).toHaveBeenCalledTimes(1);
+      expect(update).toHaveBeenCalledWith(8, { pinned: false });
+    });
+
+    it('passes on a failure', async () => {
+      const failure = new Error('Invalid tab ID: 8');
+      const tabs = createBrowserTabs(() =>
+        api({ update: vi.fn().mockRejectedValue(failure) }),
+      );
+
+      await expect(tabs.unpin(8)).rejects.toBe(failure);
+    });
+  });
+
   describe('moveToEnd', () => {
     it('moves the tab after all the others', async () => {
       const move = vi.fn().mockResolvedValue(undefined);
@@ -308,6 +364,59 @@ describe('adapters/browser/tabs.ts', () => {
 
       await expect(tabs.moveToEnd(8)).rejects.toBe(failure);
     });
+  });
+
+  describe('moveBeside', () => {
+    // Tab 1 is at 1, tab 2 at 4
+    const places = vi.fn((tabId: number) =>
+      Promise.resolve({ id: tabId, windowId: 1, index: tabId === 1 ? 1 : 4 }),
+    );
+
+    it.each([
+      [true, 3],
+      [false, 4],
+    ])(
+      'moves the tab forward next to the other, before it is %s, to %i',
+      async (before, index) => {
+        const move = vi.fn().mockResolvedValue(undefined);
+        const tabs = createBrowserTabs(() => api({ get: places, move }));
+
+        await tabs.moveBeside(1, 2, before);
+
+        expect(move).toHaveBeenCalledWith(1, { index });
+      },
+    );
+
+    it('moves the tab back next to the other', async () => {
+      const move = vi.fn().mockResolvedValue(undefined);
+      const tabs = createBrowserTabs(() => api({ get: places, move }));
+
+      await tabs.moveBeside(2, 1, true);
+
+      expect(move).toHaveBeenCalledWith(2, { index: 1 });
+    });
+
+    it.each([
+      ['the tab', 1],
+      ['the other', 2],
+    ])(
+      'leaves the tab where it is when the browser gives %s no place',
+      async (_name, placeless) => {
+        const move = vi.fn().mockResolvedValue(undefined);
+        const get = vi.fn((tabId: number) =>
+          Promise.resolve(
+            tabId === placeless
+              ? { id: tabId, windowId: 1 }
+              : { id: tabId, windowId: 1, index: 3 },
+          ),
+        );
+        const tabs = createBrowserTabs(() => api({ get, move }));
+
+        await tabs.moveBeside(1, 2, true);
+
+        expect(move).not.toHaveBeenCalled();
+      },
+    );
   });
 
   describe('close', () => {

@@ -5,6 +5,7 @@ export interface ExtensionApi {
   runtime: {
     getURL(path: string): string;
     openOptionsPage(): Promise<void>;
+    reload(): void;
   };
 }
 
@@ -12,5 +13,8 @@ export function createBrowserExtension(getApi: () => ExtensionApi): Extension {
   return {
     urlOf: (path) => getApi().runtime.getURL(path),
     openOptionsPage: () => getApi().runtime.openOptionsPage(),
+    reload: () => {
+      getApi().runtime.reload();
+    },
   };
 }

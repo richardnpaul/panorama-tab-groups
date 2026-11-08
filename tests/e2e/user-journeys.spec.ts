@@ -248,6 +248,7 @@ test.describe('User Journeys', () => {
     page,
     extensionId,
     extensionProtocol,
+    browserName,
   }) => {
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
     await expect(page.locator('body.view-ready')).toBeVisible({
@@ -258,6 +259,16 @@ test.describe('User Journeys', () => {
       await page.click('#newGroup');
       await expect(page.locator('.group')).toHaveCount(1, { timeout: 10000 });
     }
+
+    // A tab in the group, so that it has a native group, whose title goes with its name
+    const firstId = await page
+      .locator('.group')
+      .first()
+      .locator('.content')
+      .getAttribute('groupId');
+    await openTabsInGroup(page, firstId);
+    await page.reload();
+    await expect(page.locator('body.view-ready')).toBeVisible();
 
     const groupElement = page.locator('.group').first();
     const header = groupElement.locator('.header').first();
@@ -275,6 +286,28 @@ test.describe('User Journeys', () => {
 
     // 5. The label for the group in the extension UI is changed to "New Label"
     await expect(nameSpan).toHaveText('New Label');
+
+    // The native group of the group has the new name as its title, or the browser's next report of it
+    // would give the group its old name back (Chromium: the Firefox page tests have no native groups)
+    if (browserName === 'chromium') {
+      const groupId = Number(
+        await groupElement.locator('.content').getAttribute('groupId'),
+      );
+      await expect
+        .poll(() =>
+          page.evaluate(async (id) => {
+            const windowId = (await browser.windows.getCurrent()).id ?? 0;
+            const key = `nativeGroup:${String(windowId)}:${String(id)}`;
+            const stored: Record<string, unknown> =
+              await browser.storage.session.get(key);
+            const link = stored[key];
+            return typeof link === 'number'
+              ? (await browser.tabGroups.get(link)).title
+              : 'no native group';
+          }, groupId),
+        )
+        .toBe('New Label');
+    }
 
     // Wait a bit for storage to update
     await new Promise((r) => {
@@ -296,6 +329,59 @@ test.describe('User Journeys', () => {
     // The label for the group persists and is still "New Label"
     const newPageGroup = newPage.locator('.group').first();
     await expect(newPageGroup.locator('.header .name')).toHaveText('New Label');
+  });
+
+  test('Journey: Relabel a group that got its native group while the view was open', async ({
+    page,
+    extensionId,
+    extensionProtocol,
+    browserName,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'Only Chromium runs the real extension with native groups here',
+    );
+    await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
+    await expect(page.locator('body.view-ready')).toBeVisible({
+      timeout: 10000,
+    });
+    // A new group, which has no tab and so no native group: the window's first group has one
+    // before the view opens
+    const before = await page.locator('.group').count();
+    await page.click('#newGroup');
+    await expect(page.locator('.group')).toHaveCount(before + 1, {
+      timeout: 10000,
+    });
+    const groupElement = page.locator('.group').last();
+    const groupId = Number(
+      await groupElement.locator('.content').getAttribute('groupId'),
+    );
+
+    // The title of the native group the group is linked to now, read as the background stores it
+    const nativeTitle = () =>
+      page.evaluate(async (id) => {
+        const windowId = (await browser.windows.getCurrent()).id ?? 0;
+        const key = `nativeGroup:${String(windowId)}:${String(id)}`;
+        const stored: Record<string, unknown> =
+          await browser.storage.session.get(key);
+        const link = stored[key];
+        return typeof link === 'number'
+          ? (await browser.tabGroups.get(link)).title
+          : 'no native group';
+      }, groupId);
+
+    // A tab in the group, with the view open: the background makes its native group now, after
+    // the view has read the groups
+    await openTabsInGroup(page, String(groupId));
+    await expect.poll(nativeTitle).not.toBe('no native group');
+
+    const header = groupElement.locator('.header').first();
+    await header.dblclick();
+    await header.locator('input').fill('Linked Later');
+    await header.locator('input').press('Enter');
+
+    await expect(header.locator('.name')).toHaveText('Linked Later');
+    await expect.poll(nativeTitle).toBe('Linked Later');
   });
 
   test('Journey: Close (delete) tab group', async ({
@@ -562,6 +648,7 @@ test.describe('User Journeys', () => {
     page,
     extensionId,
     extensionProtocol,
+    browserName,
   }) => {
     await gotoExtensionPage(page, extensionProtocol, extensionId, 'view.html');
     await expect(page.locator('body.view-ready')).toBeVisible({
@@ -660,6 +747,43 @@ test.describe('User Journeys', () => {
     await expect(groupBLatest.locator('.tab')).toHaveCount(3, {
       timeout: 10000,
     });
+
+    // The move is stored, and stays once the browser has said what it did with the tab: the view
+    // shows it in group B when it is opened again. The background makes the move, so only the real
+    // extension can show it (the Firefox page tests have a stand-in with no background).
+    if (browserName === 'chromium') {
+      await new Promise((r) => {
+        setTimeout(r, 1000);
+      });
+      await viewPage.reload();
+      await expect(viewPage.locator('body.view-ready')).toBeVisible();
+      await expect(groupBLatest.locator('.tab')).toHaveCount(3, {
+        timeout: 10000,
+      });
+      await expect(groupALatest.locator('.tab')).toHaveCount(0);
+    }
+
+    // And in the browser, the tab is in group B's native group, with the others of group B
+    if (browserName === 'chromium') {
+      const nativeGroupsOfB = await viewPage.evaluate(async (b) => {
+        const windowId = (await browser.windows.getCurrent()).id ?? 0;
+        const tabs = await browser.tabs.query({ windowId });
+        const inB = await Promise.all(
+          tabs.map(async (each) => {
+            const stored: unknown = await browser.sessions.getTabValue(
+              each.id ?? 0,
+              'groupId',
+            );
+            const nativeGroup: unknown =
+              'groupId' in each ? each.groupId : undefined;
+            return stored === Number(b) ? [nativeGroup] : [];
+          }),
+        );
+        return [...new Set(inB.flat())];
+      }, groupIdB);
+      expect(nativeGroupsOfB).toHaveLength(1);
+      expect(nativeGroupsOfB[0]).toBeGreaterThan(0);
+    }
   });
 
   test('Journey: Drag tab outside to create a new group', async ({

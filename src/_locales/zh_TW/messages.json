@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "使用瀏覽器原生標籤頁組進行視覺化整理和摺疊。"
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "此瀏覽器版本不支援原生標籤頁組（需要標籤頁隱藏 API）。"
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "此瀏覽器一律使用原生標籤頁組，因此無法變更此設定。"
   },
   "optionsNativeGroupsLegacy": {
     "message": "此瀏覽器版本不支援原生標籤頁組。請更新到 Firefox 139+ 或使用 Chrome 89+。"

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Görsel düzenleme ve daraltma için tarayıcının yerel sekme alanlarını kullan."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Yerel sekme alanları bu tarayıcı sürümünde desteklenmiyor (sekme gizleme API'si gerekir)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Bu tarayıcı her zaman yerel sekme alanlarını kullanır, bu nedenle bu ayar değiştirilemez."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Yerel sekme alanları bu tarayıcı sürümünde desteklenmiyor. Lütfen Firefox 139+ sürümüne güncelleyin veya Chrome 89+ kullanın."

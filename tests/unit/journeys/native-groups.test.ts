@@ -7,6 +7,7 @@ import {
   tabsThatMoved,
   windowOfEachTab,
 } from '../../support/world/scenarios.js';
+import { DATA_VERSION } from '../../../src/js/app/migrations.js';
 import { createWorld } from '../../support/world/world.js';
 
 // What a person does with the add-on and the browser's tab groups, one story to a test,
@@ -36,8 +37,8 @@ describe('user journeys with native tab groups', () => {
     });
   });
 
-  describe('J2 first run in Firefox 139 or later, windows with many tabs and no groups known', () => {
-    it('makes one group of the tabs of each window, and leaves native groups off, which the user can turn on', async () => {
+  describe('J2 first run in Firefox 139 or later, windows with many tabs, none hidden', () => {
+    it('makes one group of the tabs of each window, in a native group, and turns native groups on, as no tab is hidden', async () => {
       const world = createWorld();
       const first = world.seedWindow(['a', 'b', 'c']);
       const second = world.seedWindow(['d', 'e']);
@@ -45,7 +46,7 @@ describe('user journeys with native tab groups', () => {
 
       await world.start();
 
-      expect(world.options.stored.useNativeGroups).toBe(false);
+      expect(world.options.stored.useNativeGroups).toBe(true);
       const windows = await world.windows();
       expect(windows.map(({ id }) => id)).toEqual([
         first.windowId,
@@ -53,29 +54,31 @@ describe('user journeys with native tab groups', () => {
       ]);
       windows.forEach((window) => {
         expect(tabsInGroup(window, 0)).toHaveLength(window.tabs.length);
+        expect(nativeGroupsOf(window.tabs)).toHaveLength(1);
       });
-      expect(world.model.groups.size).toBe(0);
+      expect(world.notifications.shown.size).toBe(0);
       expect(await tabsThatMoved(world, before)).toEqual([]);
       expect(world.logs.error).toEqual([]);
     });
 
-    it('does not turn native groups on at the next start, though the tabs are as they were', async () => {
+    it('decides once: native groups stay on at the next start', async () => {
       const world = createWorld();
       world.seedWindow(['a', 'b', 'c']);
       await world.start();
 
       await world.restart();
 
-      expect(world.options.stored.useNativeGroups).toBe(false);
-      expect(world.model.groups.size).toBe(0);
+      expect(world.options.stored.useNativeGroups).toBe(true);
     });
   });
 
   describe('J3 an update from an earlier version of the add-on, with groups stored', () => {
-    it('keeps the groups and leaves native groups off, for there are groups to move', async () => {
+    it('keeps the groups and leaves native groups off, for the group not shown has its tabs hidden', async () => {
       const world = createWorld();
       const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
       await arrangeGroups(world, windowId, tabIds, [1, 1, 2, 2], 1);
+      // As the earlier version left them
+      world.model.hide([tabIds[2] ?? 0, tabIds[3] ?? 0]);
 
       await world.start();
 
@@ -91,8 +94,8 @@ describe('user journeys with native tab groups', () => {
       expect(
         await Promise.all(tabIds.map((id) => world.groupState.getTabGroup(id))),
       ).toEqual([1, 1, 2, 2]);
-      // Native groups were made for the active group before this was seen to
       expect(world.model.groups.size).toBe(0);
+      expect(world.model.tabs.get(tabIds[2] ?? 0)?.hidden).toBe(true);
       expect(world.logs.error).toEqual([]);
     });
 
@@ -104,15 +107,25 @@ describe('user journeys with native tab groups', () => {
       await world.start();
 
       expect(world.options.stored.useNativeGroups).toBe(true);
-      expect(world.model.groups.size).toBe(1);
+      // A native group for each group that has tabs, the one not shown collapsed
+      expect(
+        [...world.model.groups.values()].map(({ title, collapsed }) => [
+          title,
+          collapsed,
+        ]),
+      ).toEqual([
+        ['G1', false],
+        ['G2', true],
+      ]);
     });
   });
 
   describe('J4 first run next to another add-on that has groups the add-on cannot read', () => {
-    // What this add-on sees is windows full of tabs and no groups of its own: as in J2
-    it('is J2: native groups stay off, and nothing is lost', async () => {
+    // What this add-on sees is windows of tabs, some of them hidden by the other add-on
+    it('leaves native groups off, which would show the hidden tabs, and nothing is lost', async () => {
       const world = createWorld();
-      world.seedWindow(['a', 'b', 'c', 'd']);
+      const { tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
+      world.model.hide([tabIds[2] ?? 0, tabIds[3] ?? 0]);
       const before = await windowOfEachTab(world);
 
       await world.start();
@@ -125,7 +138,8 @@ describe('user journeys with native tab groups', () => {
     // is its export file, which the options page imports (core/backup.ts reads that format)
     it("tells the user once that the tabs were left as they are, and the notice leads to the options, where the switch and the import of the other add-on's backup are", async () => {
       const world = createWorld();
-      world.seedWindow(['a', 'b', 'c', 'd']);
+      const { tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
+      world.model.hide([tabIds[3] ?? 0]);
 
       await world.start();
       await world.restart();
@@ -169,29 +183,39 @@ describe('user journeys with native tab groups', () => {
       expect(world.model.groups.size).toBe(0);
     });
 
-    it('makes a native group for the group that is shown, named like it, with its tabs and no other; the tabs stay in their window', async () => {
-      const { world, windowId, tabIds } = await threeGroups();
+    it('makes a native group for every group, named like it, with its tabs, collapsed where it is not shown, and hides no tab; the tabs stay in their window', async () => {
+      const { world, windowId } = await threeGroups();
       const before = await windowOfEachTab(world);
+      // The groups not shown had their tabs hidden
+      await world.activateTab(world.model.tabsOf(windowId)[2]?.id ?? 0);
+      expect(
+        world.model.tabsOf(windowId).filter(({ hidden }) => hidden),
+      ).toHaveLength(4);
 
       await world.setNativeGroups(true);
 
       const [window] = await world.windows();
-      const [native] = [...world.model.groups.values()];
-      expect(world.model.groups.size).toBe(1);
-      expect(native).toMatchObject({ title: 'G2', windowId });
+      const natives = [...world.model.groups.values()];
       expect(
-        nativeGroupsOf(tabsInGroup(window ?? { id: 0, tabs: [] }, 2)),
-      ).toEqual([native?.id]);
-      expect(
-        window?.tabs
-          .filter((tab) => tab.nativeGroupId !== -1)
-          .map(({ id }) => id),
-      ).toEqual([tabIds[2], tabIds[3]]);
-      expect(await referencesOf(world, windowId)).toEqual([
-        undefined,
-        native?.id,
-        undefined,
+        natives.map(({ title, collapsed, windowId: id }) => [
+          title,
+          collapsed,
+          id,
+        ]),
+      ).toEqual([
+        ['G1', true, windowId],
+        ['G2', false, windowId],
+        ['G3', true, windowId],
       ]);
+      [1, 2, 3].forEach((group, at) => {
+        expect(
+          nativeGroupsOf(tabsInGroup(window ?? { id: 0, tabs: [] }, group)),
+        ).toEqual([natives[at]?.id]);
+      });
+      expect(window?.tabs.filter(({ hidden }) => hidden)).toEqual([]);
+      expect(await referencesOf(world, windowId)).toEqual(
+        natives.map(({ id }) => id),
+      );
       expect(await tabsThatMoved(world, before)).toEqual([]);
       expect(world.logs.error).toEqual([]);
     });
@@ -199,20 +223,13 @@ describe('user journeys with native tab groups', () => {
     it('does nothing more when it is asked again', async () => {
       const { world } = await threeGroups();
       await world.setNativeGroups(true);
-      const [first] = [...world.model.groups.keys()];
+      const made = [...world.model.groups.keys()];
+      expect(made).toHaveLength(3);
 
       await world.message({ action: 'migrateToHybridGroups' });
 
-      expect([...world.model.groups.keys()]).toEqual([first]);
+      expect([...world.model.groups.keys()]).toEqual(made);
     });
-
-    // The groups that are not shown have their tabs hidden, and Firefox does let hidden
-    // tabs be in a tab group and the group be collapsed (firefox-facts.spec.ts), so a group
-    // for each is possible. Whether it is wanted is for the owner to say, having looked at
-    // how Firefox shows such a group; today the others get theirs when they are shown.
-    it.todo(
-      'makes a native group for every group at once, collapsed where it is not shown (Decision 3 of the plan)',
-    );
   });
 
   describe('J6 switching native groups off', () => {
@@ -226,7 +243,7 @@ describe('user journeys with native tab groups', () => {
 
     it('takes the tabs out of the native groups and forgets them, and the groups of the add-on are as they were', async () => {
       const { world, windowId, tabIds } = await withNativeGroups();
-      expect(world.model.groups.size).toBe(1);
+      expect(world.model.groups.size).toBe(2);
 
       await world.setNativeGroups(false);
 
@@ -274,6 +291,32 @@ describe('user journeys with native tab groups', () => {
       expect(world.logs.error).toEqual([]);
     });
 
+    it('forgets every native group of a window closed while they were on, when it is restored after', async () => {
+      // Found by the property test: the browser reports both groups gone at once
+      const world = createWorld({ stored: { useNativeGroups: true } });
+      world.seedWindow(['keep']);
+      const closing = world.seedWindow(['a1', 'a2', 'a3', 'a4']);
+      await arrangeGroups(
+        world,
+        closing.windowId,
+        closing.tabIds,
+        [1, 1, 2, 2],
+        1,
+      );
+      await world.start();
+      await world.closeWindow(closing.windowId);
+      await world.setNativeGroups(false);
+
+      const restored = await world.restoreWindow();
+
+      expect(world.model.groups.size).toBe(0);
+      expect(await referencesOf(world, restored?.windowId ?? 0)).toEqual([
+        undefined,
+        undefined,
+      ]);
+      expect(world.logs.error).toEqual([]);
+    });
+
     it('stays off when the browser is started again', async () => {
       const { world } = await withNativeGroups();
       await world.setNativeGroups(false);
@@ -289,12 +332,10 @@ describe('user journeys with native tab groups', () => {
 
       await world.setNativeGroups(true);
 
-      const [native] = [...world.model.groups.values()];
-      expect(world.model.groups.size).toBe(1);
-      expect(await referencesOf(world, windowId)).toEqual([
-        native?.id,
-        undefined,
-      ]);
+      expect(world.model.groups.size).toBe(2);
+      expect(await referencesOf(world, windowId)).toEqual(
+        [...world.model.groups.keys()].sort(),
+      );
     });
   });
 
@@ -310,11 +351,16 @@ describe('user journeys with native tab groups', () => {
       // The window that was opened last has the focus, and the first is not it
       await world.start();
 
-      expect(world.model.groups.size).toBe(2);
+      // A native group for each group of each window, in its window; the windows are done at once
       const groups = [...world.model.groups.values()];
-      expect(groups.map(({ windowId }) => windowId).sort()).toEqual(
-        [first.windowId, second.windowId].sort(),
-      );
+      expect(
+        groups.map(({ windowId, title }) => [windowId, title]).sort(),
+      ).toEqual([
+        [first.windowId, 'G1'],
+        [first.windowId, 'G2'],
+        [second.windowId, 'G1'],
+        [second.windowId, 'G2'],
+      ]);
       expect(await tabsThatMoved(world, before)).toEqual([]);
       expect(world.logs.error).toEqual([]);
     });
@@ -337,11 +383,9 @@ describe('user journeys with native tab groups', () => {
       await world.restart();
 
       const [window] = await world.windows();
-      const [native] = [...world.model.groups.values()];
-      expect(world.model.groups.size).toBe(1);
+      expect(world.model.groups.size).toBe(2);
       expect(await referencesOf(world, window?.id ?? 0)).toEqual([
-        native?.id,
-        undefined,
+        ...world.model.groups.keys(),
       ]);
       expect(world.logs.error).toEqual([]);
     });
@@ -353,11 +397,9 @@ describe('user journeys with native tab groups', () => {
       await world.restart();
 
       const [window] = await world.windows();
-      const [native] = [...world.model.groups.values()];
-      expect(world.model.groups.size).toBe(1);
+      expect(world.model.groups.size).toBe(2);
       expect(await referencesOf(world, window?.id ?? 0)).toEqual([
-        native?.id,
-        undefined,
+        ...world.model.groups.keys(),
       ]);
     });
   });
@@ -407,25 +449,56 @@ describe('user journeys with native tab groups', () => {
     });
   });
 
-  describe('J10 the user takes a native group apart', () => {
-    it('keeps the group of the add-on, forgets the reference, and the tabs stay where they are', async () => {
+  describe('J10 the user takes a native group apart, or drags a tab out of it', () => {
+    async function twoGroupsOfTabs() {
       const world = createWorld({ stored: { useNativeGroups: true } });
       const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c']);
       await arrangeGroups(world, windowId, tabIds, [1, 1, 2], 1);
       await world.start();
-      const [native] = [...world.model.groups.keys()];
+      const [native, other] = [...world.model.groups.keys()];
+      return { world, windowId, tabIds, native, other };
+    }
+
+    it('keeps the group of the add-on, with its link forgotten and its tabs in no group, as they are in no native group', async () => {
+      const { world, windowId, tabIds, native, other } =
+        await twoGroupsOfTabs();
 
       await world.ungroupGroup(native ?? 0);
 
-      expect(world.model.groups.size).toBe(0);
-      expect(await referencesOf(world, windowId)).toEqual([
-        undefined,
-        undefined,
-      ]);
+      // The other group keeps its own
+      expect([...world.model.groups.keys()]).toEqual([other]);
+      expect(await referencesOf(world, windowId)).toEqual([undefined, other]);
+      expect(
+        (await world.groupsOf(windowId))
+          .filter(({ id }) => id >= 0)
+          .map(({ id }) => id),
+      ).toEqual([1, 2]);
       expect(
         await Promise.all(tabIds.map((id) => world.groupState.getTabGroup(id))),
-      ).toEqual([1, 1, 2]);
+      ).toEqual([-2, -2, 2]);
       expect(world.model.tabsOf(windowId)).toHaveLength(3);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('takes a tab that is dragged out of its native group out of its group, and leaves the others', async () => {
+      const { world, tabIds } = await twoGroupsOfTabs();
+
+      world.model.ungroup([tabIds[0] ?? 0]);
+      await world.settle();
+
+      expect(
+        await Promise.all(tabIds.map((id) => world.groupState.getTabGroup(id))),
+      ).toEqual([-2, 1, 2]);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('puts a tab that is dragged into another native group in the group that goes with it', async () => {
+      const { world, tabIds, other } = await twoGroupsOfTabs();
+
+      world.model.group([tabIds[0] ?? 0], { groupId: other ?? 0 });
+      await world.settle();
+
+      expect(await world.groupState.getTabGroup(tabIds[0] ?? 0)).toBe(2);
       expect(world.logs.error).toEqual([]);
     });
   });
@@ -473,15 +546,17 @@ describe('user journeys with native tab groups', () => {
       expect(world.logs.error).toEqual([]);
     });
 
-    it('takes it out of the native group of the group it left, where the group it goes to has none, for it is hidden', async () => {
+    it('puts it in the collapsed native group of a group that is not shown, and hides it not', async () => {
       const { world, tabIds } = await twoGroups();
+      const [, other] = [...world.model.groups.values()];
 
       await world.sendTabToGroup(tabIds[0] ?? 0, 2);
 
       const tab = world.model.tabs.get(tabIds[0] ?? 0);
       expect(await world.groupState.getTabGroup(tabIds[0] ?? 0)).toBe(2);
-      expect(tab?.groupId).toBe(-1);
-      expect(tab?.hidden).toBe(true);
+      expect(other).toMatchObject({ title: 'G2', collapsed: true });
+      expect(tab?.groupId).toBe(other?.id);
+      expect(tab?.hidden).toBe(false);
       expect(world.logs.error).toEqual([]);
     });
   });
@@ -498,7 +573,7 @@ describe('user journeys with native tab groups', () => {
 
       expect(answer).toEqual({ success: true });
       expect(world.model.groups.has(deletedGroupsNative ?? 0)).toBe(false);
-      // The group that is shown now has a native group, as one that is shown does
+      // The other group keeps its own
       expect(
         [...world.model.groups.values()].map(({ windowId: where }) => where),
       ).toEqual([windowId]);
@@ -513,6 +588,18 @@ describe('user journeys with native tab groups', () => {
       ).toEqual([2]);
       expect(world.logs.error).toEqual([]);
     });
+
+    it('leaves the window showing the group it showed when another group, with tabs, is deleted', async () => {
+      const world = createWorld({ stored: { useNativeGroups: true } });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
+      await arrangeGroups(world, windowId, tabIds, [1, 2, 2, 3], 3);
+      await world.start();
+
+      await world.deleteGroup(windowId, 2);
+
+      expect(await world.groupState.getActiveGroup(windowId)).toBe(3);
+      expect(world.logs.error).toEqual([]);
+    });
   });
 
   describe('J13 in Chromium, which has native groups and cannot hide tabs', () => {
@@ -525,10 +612,33 @@ describe('user journeys with native tab groups', () => {
 
       expect(world.options.stored).toEqual({});
       expect((await world.options.load()).useNativeGroups).toBe(true);
-      expect(world.model.groups.size).toBe(1);
+      expect(world.model.groups.size).toBe(2);
       expect(world.model.tabsOf(windowId).some(({ hidden }) => hidden)).toBe(
         false,
       );
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('uses native groups even where the stored option says no, as nothing else can group tabs there', async () => {
+      const world = createWorld({
+        hasTabHide: false,
+        stored: { useNativeGroups: false },
+      });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b']);
+      await arrangeGroups(world, windowId, tabIds, [1, 2], 1);
+
+      await world.start();
+      await world.activateTab(tabIds[1] ?? 0);
+
+      expect(
+        [...world.model.groups.values()].map(({ title, collapsed }) => [
+          title,
+          collapsed,
+        ]),
+      ).toEqual([
+        ['G1', true],
+        ['G2', false],
+      ]);
       expect(world.logs.error).toEqual([]);
     });
   });
@@ -627,6 +737,481 @@ describe('user journeys with native tab groups', () => {
         world.model.tabsOf(mine.windowId).map(({ hidden }) => hidden),
       ).toEqual(hiddenBefore);
       expect(await world.groupState.getActiveGroup(mine.windowId)).toBe(1);
+      expect(world.logs.error).toEqual([]);
+    });
+  });
+
+  describe('J17 a hidden tab is moved to another window, native groups off', () => {
+    it('joins the group the window shows, and is shown with it', async () => {
+      const world = createWorld({ stored: { useNativeGroups: false } });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c']);
+      await arrangeGroups(world, windowId, tabIds, [1, 2, 1], 1);
+      await world.start();
+      const [, hidden = 0, third = 0] = tabIds;
+      // A switch to the group hides the tabs of the others
+      await world.activateTab(third);
+      const other = await world.openWindow(['d']);
+      expect(world.model.tabs.get(hidden)?.hidden).toBe(true);
+
+      // By another add-on, or the browser's own "Move to window" of a tab the person sees elsewhere
+      await world.moveTab(hidden, other.windowId);
+
+      const shown = await world.groupState.getActiveGroup(other.windowId);
+      expect(await world.groupState.getTabGroup(hidden)).toBe(shown);
+      expect(world.model.tabs.get(hidden)?.hidden).toBe(false);
+      expect(world.logs.error).toEqual([]);
+    });
+  });
+
+  describe('J18 automatic backups', () => {
+    const QUIET = 5000;
+    const HOUR = 60 * 60 * 1000;
+    const FIRST = 'panorama-tab-groups-backups/backup-1.json';
+
+    it('writes one a few seconds after start-up has put the groups together, from then on once an hour', async () => {
+      const world = createWorld();
+      const { windowId, tabIds } = world.seedWindow(['a', 'b']);
+      await arrangeGroups(world, windowId, tabIds, [1, 2], 1);
+
+      await world.start();
+      await world.wait(QUIET);
+
+      expect(world.backupFiles.written).toEqual([FIRST]);
+      const saved: unknown = JSON.parse(
+        world.backupFiles.files.get(FIRST) ?? '',
+      );
+      expect(saved).toMatchObject({
+        file: { type: 'tgvView', version: 1 },
+        windows: [
+          {
+            groups: [{ id: 1, name: 'G1' }, { id: 2, name: 'G2' }, { id: -2 }],
+            tabs: [
+              expect.objectContaining({ url: 'a', groupId: 1 }),
+              expect.objectContaining({ url: 'b', groupId: 2 }),
+            ],
+            activeGroup: 1,
+          },
+        ],
+      });
+
+      // Within the hour, a change is not backed up
+      await world.sendTabToGroup(tabIds[1] ?? 0, 1);
+      await world.wait(QUIET);
+      expect(world.backupFiles.written).toEqual([FIRST]);
+
+      // After it, the next one is, as it is then
+      await world.wait(HOUR);
+      await world.sendTabToGroup(tabIds[0] ?? 0, 2);
+      await world.wait(QUIET);
+      const second = 'panorama-tab-groups-backups/backup-2.json';
+      expect(world.backupFiles.written).toEqual([FIRST, second]);
+      expect(
+        JSON.parse(world.backupFiles.files.get(second) ?? ''),
+      ).toMatchObject({
+        // A tab moved to a group goes to the end of the window
+        windows: [
+          {
+            tabs: [
+              expect.objectContaining({ url: 'b', groupId: 1 }),
+              expect.objectContaining({ url: 'a', groupId: 2 }),
+            ],
+          },
+        ],
+      });
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('writes one at once when an update is waiting, and applies it once the view is closed', async () => {
+      const world = createWorld();
+      const { windowId } = world.seedWindow(['a']);
+      await world.start();
+      const view = await world.openTab(
+        windowId,
+        world.extension.urlOf('view.html'),
+        true,
+      );
+
+      await world.updateAvailable();
+
+      expect(world.backupFiles.written).toEqual([FIRST]);
+      expect(world.extension.reloads).toBe(0);
+
+      await world.closeTab(view);
+      await world.wait(0);
+
+      expect(world.extension.reloads).toBe(1);
+      expect(world.logs.error).toEqual([]);
+    });
+  });
+
+  describe('J19 an update from a version that stored no version', () => {
+    it('backs up the groups as they were, then brings each window to the current version', async () => {
+      const world = createWorld({ migrated: true });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b']);
+      // As versions before 2 stored them, with a container
+      await arrangeGroups(world, windowId, tabIds, [1, 2], 1);
+      expect(await world.groupsOf(windowId)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ containerId: 'firefox-default' }),
+        ]),
+      );
+
+      await world.start();
+
+      const [backup = ''] = world.backupFiles.written;
+      expect(backup).toBe('panorama-tab-groups-backups/backup-1.json');
+      expect(
+        JSON.parse(world.backupFiles.files.get(backup) ?? ''),
+      ).toMatchObject({
+        windows: [
+          {
+            groups: [{ id: 1 }, { id: 2 }, { id: -2 }],
+            tabs: [{ groupId: 1 }, { groupId: 2 }],
+          },
+        ],
+      });
+      const groups = await world.groupsOf(windowId);
+      expect(groups.map(({ id }) => id)).toEqual([1, 2, -2]);
+      groups.forEach((group) => {
+        expect(group).not.toHaveProperty('containerId');
+      });
+      expect(await world.groupState.getSchemaVersion(windowId)).toBe(
+        DATA_VERSION,
+      );
+      expect(await world.dataVersion.read()).toBe(DATA_VERSION);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('brings a window restored from before the update to the current version when it comes back', async () => {
+      const world = createWorld({ migrated: true });
+      world.seedWindow(['a', 'b']);
+      await world.start();
+      const closing = await world.openWindow(['c', 'd']);
+      // Closed with groups as an earlier version stored them
+      await world.groupState.setGroups(closing.windowId, [
+        {
+          id: 0,
+          name: 'Old',
+          containerId: 'firefox-default',
+          rect: { x: 0, y: 0, w: 1, h: 1 },
+        },
+      ]);
+      await world.groupState.setSchemaVersion(closing.windowId, 1);
+      await world.closeWindow(closing.windowId);
+
+      const restored = await world.restoreWindow();
+
+      const groups = await world.groupsOf(restored?.windowId ?? 0);
+      expect(groups.map(({ id }) => id)).toEqual([0, -2]);
+      groups.forEach((group) => {
+        expect(group).not.toHaveProperty('containerId');
+      });
+      expect(
+        await world.groupState.getSchemaVersion(restored?.windowId ?? 0),
+      ).toBe(DATA_VERSION);
+      expect(world.logs.error).toEqual([]);
+    });
+  });
+
+  describe('J20 an update of a Firefox profile in native mode, which hid the tabs of the groups not shown', () => {
+    it('shows every tab, in the native group of its group, collapsed where the group is not shown', async () => {
+      // Native groups on, migrated once already, by a version that gave the shown group alone a
+      // native group and hid the rest
+      const world = createWorld({
+        stored: { useNativeGroups: true },
+        migrated: true,
+      });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
+      await arrangeGroups(world, windowId, tabIds, [1, 1, 2, 2], 1);
+      await world.dataVersion.write(2);
+      world.model.hide([tabIds[2] ?? 0, tabIds[3] ?? 0]);
+
+      await world.start();
+
+      const [window] = await world.windows();
+      expect(window?.tabs.filter(({ hidden }) => hidden)).toEqual([]);
+      const natives = [...world.model.groups.values()];
+      expect(natives.map(({ title, collapsed }) => [title, collapsed])).toEqual(
+        [
+          ['G1', false],
+          ['G2', true],
+        ],
+      );
+      expect(
+        nativeGroupsOf(tabsInGroup(window ?? { id: 0, tabs: [] }, 2)),
+      ).toEqual([natives[1]?.id]);
+      expect(await world.dataVersion.read()).toBe(DATA_VERSION);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('hides no tab when the person switches to another group', async () => {
+      const world = createWorld({ stored: { useNativeGroups: true } });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
+      await arrangeGroups(world, windowId, tabIds, [1, 1, 2, 2], 1);
+      await world.start();
+
+      await world.activateTab(tabIds[2] ?? 0);
+
+      expect(world.model.tabsOf(windowId).some(({ hidden }) => hidden)).toBe(
+        false,
+      );
+      expect(
+        [...world.model.groups.values()].map(({ collapsed }) => collapsed),
+      ).toEqual([true, false]);
+      expect(world.logs.error).toEqual([]);
+    });
+  });
+
+  describe('J21 pinned tabs, which are in no group and are never passed to the browser’s grouping', () => {
+    async function withPinned(native: boolean, hasTabHide = true) {
+      const world = createWorld({
+        stored: { useNativeGroups: native },
+        hasTabHide,
+      });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
+      await arrangeGroups(world, windowId, tabIds, [1, 1, 2, 2], 1);
+      await world.start();
+      return { world, windowId, tabIds };
+    }
+
+    it('takes the group of a tab that is pinned, and leaves the tab pinned when its group gets a native group', async () => {
+      const { world, windowId, tabIds } = await withPinned(true);
+      const [first = 0, second = 0, third = 0, fourth = 0] = tabIds;
+
+      await world.setPinned(first, true);
+      // The group of the tab gets a native group again: it is made of the tabs that are in it
+      await world.setNativeGroups(false);
+      await world.setNativeGroups(true);
+
+      expect(world.model.tabs.get(first)).toMatchObject({
+        pinned: true,
+        groupId: -1,
+      });
+      expect(await world.groupState.getTabGroup(first)).toBeUndefined();
+      expect(world.model.unpinnedByGrouping).toEqual([]);
+      expect(await world.groupState.getTabGroup(second)).toBe(1);
+      expect(world.model.tabs.get(second)?.groupId).not.toBe(-1);
+      expect(
+        [third, fourth].map((id) => world.model.tabs.get(id)?.groupId),
+      ).not.toContain(-1);
+      expect(world.model.tabsOf(windowId)).toHaveLength(4);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('gives a tab that is unpinned no group in native mode, and puts it in no native group', async () => {
+      const { world, tabIds } = await withPinned(true);
+      const [first = 0] = tabIds;
+      await world.setPinned(first, true);
+
+      await world.setPinned(first, false);
+
+      expect(await world.groupState.getTabGroup(first)).toBe(-2);
+      expect(world.model.tabs.get(first)).toMatchObject({
+        pinned: false,
+        groupId: -1,
+        hidden: false,
+      });
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('puts a tab that is unpinned in the group the window shows, with tabs hidden, and shows it', async () => {
+      const { world, tabIds } = await withPinned(false);
+      const [first = 0, , third = 0] = tabIds;
+      await world.activateTab(third);
+      expect(world.model.tabs.get(first)?.hidden).toBe(true);
+      await world.setPinned(first, true);
+
+      await world.setPinned(first, false);
+
+      expect(await world.groupState.getTabGroup(first)).toBe(2);
+      expect(world.model.tabs.get(first)?.hidden).toBe(false);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('unpins a pinned tab sent to a group from the menu, then moves it there, and keeps it there', async () => {
+      const { world, tabIds } = await withPinned(true);
+      const [first = 0] = tabIds;
+      await world.setPinned(first, true);
+
+      await world.sendTabToGroup(first, 2);
+
+      expect(await world.groupState.getTabGroup(first)).toBe(2);
+      const tab = world.model.tabs.get(first);
+      expect(tab?.pinned).toBe(false);
+      const natives = [...world.model.groups.values()];
+      expect(natives.find(({ id }) => id === tab?.groupId)).toMatchObject({
+        title: 'G2',
+      });
+      expect(world.model.unpinnedByGrouping).toEqual([]);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('does the same in a browser that can hide tabs, with native groups off', async () => {
+      const { world, tabIds } = await withPinned(false);
+      const [first = 0] = tabIds;
+      await world.setPinned(first, true);
+
+      await world.sendTabToGroup(first, 2);
+
+      expect(await world.groupState.getTabGroup(first)).toBe(2);
+      expect(world.model.tabs.get(first)?.pinned).toBe(false);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('gives a pinned tab opened by the user no group, and no native group', async () => {
+      const { world, windowId } = await withPinned(true);
+
+      const opened = await world.openTab(windowId, 'https://p/', false, true);
+
+      expect(await world.groupState.getTabGroup(opened)).toBeUndefined();
+      expect(world.model.tabs.get(opened)).toMatchObject({
+        pinned: true,
+        groupId: -1,
+      });
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('gives a pinned tab dragged to another window no group there', async () => {
+      const { world, tabIds } = await withPinned(true);
+      const [first = 0] = tabIds;
+      await world.setPinned(first, true);
+      const other = await world.openWindow(['x']);
+
+      await world.moveTab(first, other.windowId);
+
+      expect(await world.groupState.getTabGroup(first)).toBeUndefined();
+      expect(world.model.tabs.get(first)?.pinned).toBe(true);
+      expect(world.model.unpinnedByGrouping).toEqual([]);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('keeps a pinned tab pinned and in no group when the browser is started again', async () => {
+      const { world, tabIds } = await withPinned(true);
+      const [first = 0] = tabIds;
+      await world.setPinned(first, true);
+
+      await world.restart();
+
+      const [window] = await world.windows();
+      const pinned = window?.tabs.find(
+        ({ id }) => world.model.tabs.get(id)?.pinned,
+      );
+      expect(pinned).toMatchObject({ group: undefined, nativeGroupId: -1 });
+      expect(world.model.unpinnedByGrouping).toEqual([]);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('takes the group of a pinned tab that an earlier version gave it, at the update', async () => {
+      const world = createWorld({
+        stored: { useNativeGroups: true },
+        migrated: true,
+      });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b']);
+      await arrangeGroups(world, windowId, tabIds, [1, 1], 1);
+      world.model.setPinned(tabIds[0] ?? 0, true);
+      await world.dataVersion.write(4);
+      await world.groupState.setSchemaVersion(windowId, 4);
+
+      await world.start();
+
+      expect(
+        await world.groupState.getTabGroup(tabIds[0] ?? 0),
+      ).toBeUndefined();
+      expect(await world.groupState.getTabGroup(tabIds[1] ?? 0)).toBe(1);
+      expect(world.model.tabs.get(tabIds[0] ?? 0)?.pinned).toBe(true);
+      expect(world.logs.error).toEqual([]);
+    });
+  });
+
+  describe('J22 found by the property test', () => {
+    it('shows every tab of a window closed with tabs hidden, and restored after native groups were switched on', async () => {
+      const world = createWorld({ stored: { useNativeGroups: false } });
+      world.seedWindow(['keep']);
+      const closing = world.seedWindow(['a', 'b', 'c', 'd']);
+      await arrangeGroups(
+        world,
+        closing.windowId,
+        closing.tabIds,
+        [1, 1, 2, 2],
+        1,
+      );
+      await world.start();
+      await world.activateTab(closing.tabIds[2] ?? 0);
+      await world.closeWindow(closing.windowId);
+      await world.setNativeGroups(true);
+
+      const restored = await world.restoreWindow();
+
+      expect(
+        world.model
+          .tabsOf(restored?.windowId ?? 0)
+          .some(({ hidden }) => hidden),
+      ).toBe(false);
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('shows the tabs of the group the window goes to when the group it showed is deleted, with tabs hidden', async () => {
+      const world = createWorld({ stored: { useNativeGroups: false } });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c']);
+      await arrangeGroups(world, windowId, tabIds, [1, 2, 1], 1);
+      await world.start();
+      await world.setPinned(tabIds[0] ?? 0, true);
+      await world.sendTabToGroup(tabIds[0] ?? 0, 2);
+
+      await world.deleteGroup(windowId, 1);
+
+      expect(await world.groupState.getActiveGroup(windowId)).toBe(2);
+      expect(world.model.tabsOf(windowId).some(({ hidden }) => hidden)).toBe(
+        false,
+      );
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('keeps the context menu for the focused window when two windows create, rename and delete groups with the same numbers', async () => {
+      const world = createWorld();
+      const first = world.seedWindow(['a1', 'a2']);
+      const second = world.seedWindow(['b1', 'b2']);
+      await arrangeGroups(world, first.windowId, first.tabIds, [0, 1], 0);
+      await arrangeGroups(world, second.windowId, second.tabIds, [0, 1], 0);
+      await world.start();
+
+      expect(world.model.focused()).toBe(second.windowId);
+      expect(world.menus.items.map(({ id }) => id)).toEqual([
+        'send-tab',
+        `${String(second.windowId)}:0`,
+        `${String(second.windowId)}:1`,
+        `${String(second.windowId)}:-2`,
+        'refresh-spacer',
+        'refresh-groups',
+      ]);
+
+      // Creating and renaming a group in the unfocused window does not touch or break the menu
+      const createdInFirst = await world.createGroup(first.windowId);
+      await world.renameGroup(first.windowId, createdInFirst, 'First Extra');
+      const createdInSecond = await world.createGroup(second.windowId);
+      await world.renameGroup(second.windowId, createdInSecond, 'Second Extra');
+      expect(createdInFirst).toBe(createdInSecond);
+      expect(
+        world.menus.items.find(
+          ({ id }) =>
+            id === `${String(second.windowId)}:${String(createdInSecond)}`,
+        )?.title,
+      ).toBe(`${String(createdInSecond)}: Second Extra`);
+
+      // Focusing the first window rebuilds the menu with the first window's groups
+      await world.focusWindow(first.windowId);
+      expect(
+        world.menus.items.find(
+          ({ id }) =>
+            id === `${String(first.windowId)}:${String(createdInFirst)}`,
+        )?.title,
+      ).toBe(`${String(createdInFirst)}: First Extra`);
+
+      // Sending a tab in the first window via its context menu item moves it in the first window
+      await world.sendTabToGroup(first.tabIds[0] ?? 0, createdInFirst);
+      expect(await world.groupState.getTabGroup(first.tabIds[0] ?? 0)).toBe(
+        createdInFirst,
+      );
       expect(world.logs.error).toEqual([]);
     });
   });

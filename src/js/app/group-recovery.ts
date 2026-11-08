@@ -130,8 +130,11 @@ export function createGroupRecovery({
     await groupState.setGroups(windowId, groups);
 
     const windowTabs = await tabs.listInWindow(windowId);
+    // A pinned tab is in no group, and recovery gives it none
     const tallies = await Promise.all(
-      windowTabs.map(({ id }) => recoverTab(id, groups, sessionAvailable)),
+      windowTabs
+        .filter(({ pinned }) => !pinned)
+        .map(({ id }) => recoverTab(id, groups, sessionAvailable)),
     );
     logger.debug(
       `[Initialization] Window ${String(windowId)}: processed ${String(windowTabs.length)} tabs`,
@@ -214,7 +217,9 @@ export function createGroupRecovery({
           return;
         }
 
-        const windowTabs = await tabs.listInWindow(windowId);
+        const windowTabs = (await tabs.listInWindow(windowId)).filter(
+          ({ pinned }) => !pinned,
+        );
         await Promise.all(
           windowTabs.map(async ({ id }) => {
             const groupId = await groupState.getTabGroup(id);

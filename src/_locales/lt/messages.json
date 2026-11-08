@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Naudoti naršyklės savąsias skirtukų grupes vaizdiniam tvarkymui ir sutraukimui."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Savosios skirtukų grupės šioje naršyklės versijoje nepalaikomos (reikalinga skirtukų slėpimo API)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Ši naršyklė visada naudoja savąsias skirtukų grupes, todėl šio nustatymo pakeisti negalima."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Savosios skirtukų grupės šioje naršyklės versijoje nepalaikomos. Atnaujinkite į „Firefox“ 139+ arba naudokite „Chrome“ 89+."

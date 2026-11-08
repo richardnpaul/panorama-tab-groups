@@ -76,7 +76,8 @@ export function planVisibility({
   const shown = switching.filter(({ groupId }) => groupId === activeGroup);
   const hidden = switching.filter(({ groupId }) => groupId !== activeGroup);
 
-  if (shown.length === 0 && hidden.length > 0) {
+  // Only where tabs are hidden: where they are not, a group with no tab to show is one to switch to
+  if (canHideTabs && shown.length === 0 && hidden.length > 0) {
     return { kind: 'abort', hiddenCount: hidden.length };
   }
 

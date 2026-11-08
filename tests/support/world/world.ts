@@ -1,6 +1,12 @@
 import { createBrowserGroupState } from '../../../src/js/adapters/browser/group-state.js';
+import { createSessionsEmulation } from '../../../src/js/adapters/browser/sessions-emulation.js';
+import { createFakeStorage } from '../fake-storage.js';
 import type { BackgroundHandlers } from '../../../src/js/adapters/browser/events.js';
+import { createMemoryBackupFiles } from '../../../src/js/adapters/memory/backup-files.js';
+import { createMemoryBackupLog } from '../../../src/js/adapters/memory/backup-log.js';
 import { createMemoryClock } from '../../../src/js/adapters/memory/clock.js';
+import { createMemoryDataVersion } from '../../../src/js/adapters/memory/data-version.js';
+import { createMemoryPendingUpdate } from '../../../src/js/adapters/memory/pending-update.js';
 import { createMemoryExtension } from '../../../src/js/adapters/memory/extension.js';
 import { createMemoryMenus } from '../../../src/js/adapters/memory/menus.js';
 import { createMemoryMessaging } from '../../../src/js/adapters/memory/messaging.js';
@@ -10,6 +16,7 @@ import { createMemoryOptions } from '../../../src/js/adapters/memory/options.js'
 import { createMemoryScheduler } from '../../../src/js/adapters/memory/scheduler.js';
 import { createMemorySessionHistory } from '../../../src/js/adapters/memory/session-history.js';
 import { createMemoryToolbar } from '../../../src/js/adapters/memory/toolbar.js';
+import { createGroupsStore } from '../../../src/js/app/groups-store.js';
 import { withUngroupedGroup } from '../../../src/js/app/with-ungrouped-group.js';
 import {
   type BackgroundPorts,
@@ -104,12 +111,17 @@ export function createWorld({
       case 'windowCreated':
         track(handlers.createGroupInWindowIfMissing(event.windowId));
         break;
+      case 'windowRemoved':
+        track(handlers.windowRemoved(event.windowId));
+        break;
       case 'tabCreated':
         track(
           handlers.tabCreated({
             id: event.tab.id,
             windowId: event.tab.windowId,
             active: event.tab.active,
+            pinned: event.tab.pinned,
+            hidden: event.tab.hidden,
             url: event.tab.url,
             pendingUrl: undefined,
             browserGroupId: event.tab.groupId,
@@ -131,13 +143,25 @@ export function createWorld({
         track(
           handlers.tabUpdated(
             event.tab.id,
-            {},
-            { url: event.tab.url, pendingUrl: undefined },
+            {
+              ...(event.change.pinned === undefined
+                ? {}
+                : { pinned: event.change.pinned }),
+              ...(event.change.groupId === undefined
+                ? {}
+                : { groupId: event.change.groupId }),
+            },
+            {
+              url: event.tab.url,
+              pendingUrl: undefined,
+              windowId: event.tab.windowId,
+              pinned: event.tab.pinned,
+            },
           ),
         );
         break;
       case 'tabRemoved':
-        handlers.tabRemoved(event.tabId);
+        track(handlers.tabRemoved(event.tabId));
         break;
       case 'groupRemoved':
         track(handlers.nativeGroupRemoved(groupEvent(event.group)));
@@ -151,6 +175,7 @@ export function createWorld({
   }
 
   const model = createBrowserModel(onEvent);
+  const emulationStorage = createFakeStorage();
   const clock = createMemoryClock(1_000_000);
   const options = createMemoryOptions({
     defaults: createDefaultOptions('1.0', hasTabGroups),
@@ -162,8 +187,25 @@ export function createWorld({
   const toolbar = createMemoryToolbar();
   const notifications = createMemoryNotifications();
   const extension = createMemoryExtension();
+  const backupFiles = createMemoryBackupFiles();
+  const backupLog = createMemoryBackupLog();
+  // As the profile of a user who has run the add-on before keeps it
+  const dataVersion = createMemoryDataVersion();
+  const scheduler = createMemoryScheduler();
+  // Where tabs cannot be hidden (Chromium) the values are kept under the id of their window or tab,
+  // which a restart or a window that is reopened changes, and nothing removes them
+  const emulation = createSessionsEmulation(() => emulationStorage.area);
+  const modelSessions = sessionsOfModel(model);
   const groupState = withUngroupedGroup(
-    createBrowserGroupState(() => sessionsOfModel(model)),
+    createBrowserGroupState(() =>
+      hasTabHide
+        ? modelSessions
+        : {
+            storage: modelSessions.storage,
+            sessions: emulation,
+            sessionsManagement: emulation,
+          },
+    ),
     clock,
   );
 
@@ -177,6 +219,8 @@ export function createWorld({
     ...tabs,
     hide: absent('tabs.hide'),
     show: absent('tabs.show'),
+    // Chromium refuses a query for hidden tabs, as it has none
+    hiddenIdsInWindow: absent('tabs.query hidden'),
   });
   const withoutNativeGroups = (): ReturnType<typeof nativeGroupsOfModel> => ({
     setCollapsed: absent('tabGroups.update'),
@@ -185,6 +229,7 @@ export function createWorld({
     createFromTabs: absent('tabs.group'),
     addTabs: absent('tabs.group'),
     removeTabs: absent('tabs.ungroup'),
+    setTitle: absent('tabGroups.update'),
     setAppearance: absent('tabGroups.update'),
     get: absent('tabGroups.get'),
   });
@@ -208,8 +253,13 @@ export function createWorld({
     messaging,
     sessionHistory: createMemorySessionHistory(),
     groupState,
+    backupFiles,
+    backupLog,
+    dataVersion,
+    pendingUpdate: createMemoryPendingUpdate(),
+    // The model has no private windows
     clock,
-    scheduler: createMemoryScheduler(),
+    scheduler,
     logger: {
       debug: (...args) => logs.debug.push(text(args)),
       warn: (...args) => logs.warn.push(text(args)),
@@ -227,6 +277,32 @@ export function createWorld({
     await settled();
   }
 
+  /** The groups of a window as its view has them: they ask the background for what is not theirs */
+  const viewGroups = (windowId: number) =>
+    createGroupsStore(
+      {
+        groupState,
+        messaging: {
+          send: (message) => {
+            const answer = Promise.resolve(handlers?.handleMessage(message));
+            pending.push(answer);
+            return answer;
+          },
+        },
+        nativeGroups: hasTabGroups
+          ? nativeGroupsOfModel(model)
+          : withoutNativeGroups(),
+        tabs: {
+          listIdsInCurrentWindow: () =>
+            Promise.resolve(model.tabsOf(windowId).map(({ id }) => id)),
+        },
+        clock,
+        i18n: ports().i18n,
+        logger: ports().logger,
+      },
+      windowId,
+    );
+
   const world = {
     model,
     options,
@@ -241,8 +317,17 @@ export function createWorld({
     /** The extension, as the browser knows it: it counts the times the options page was opened */
     extension,
     groupState,
+    /** Whether the browser can hide tabs (Firefox); the other keeps its values under ids (Chromium) */
+    hasTabHide,
     /** What the add-on logged; an error here is a bug found */
     logs,
+    /** The files the add-on wrote by itself: its automatic backups */
+    backupFiles,
+    clock,
+    /** The add-on's timers, which run only when a test moves time on */
+    scheduler,
+    /** The version of the stored data of the profile */
+    dataVersion,
 
     /** The add-on starts in the browser: the first run, or the browser starting */
     async start(): Promise<void> {
@@ -251,6 +336,9 @@ export function createWorld({
       await background.init();
       await settled();
     },
+
+    /** Everything the browser has told the add-on is done with: for a test that makes the browser act itself */
+    settle: settled,
 
     /** The browser is closed and opened again, and the add-on starts again */
     async restart(): Promise<void> {
@@ -272,10 +360,17 @@ export function createWorld({
       windowId: number,
       url = 'https://example.test/',
       active = false,
+      pinned = false,
     ) {
-      const id = model.openTab(windowId, url, active);
+      const id = model.openTab(windowId, url, active, pinned);
       await settled();
       return id;
+    },
+
+    /** The user pins a tab, or unpins it */
+    async setPinned(tabId: number, pinned: boolean): Promise<void> {
+      model.setPinned(tabId, pinned);
+      await settled();
     },
 
     async closeTab(tabId: number): Promise<void> {
@@ -299,15 +394,15 @@ export function createWorld({
     async sendTabToGroup(tabId: number, groupId: number): Promise<void> {
       const windowId = model.tabs.get(tabId)?.windowId;
       await handlers?.menuClicked(
-        { menuItemId: String(groupId) },
+        { menuItemId: `${String(windowId)}:${String(groupId)}` },
         { id: tabId, windowId },
       );
       await settled();
     },
 
     /**
-     * The user closes a group in the view, which asks the background to delete it and then, when the
-     * group had tabs, makes the first group that is left the one that is shown
+     * The user closes a group in the view, which asks the background to delete it; the background
+     * puts right what the window shows
      */
     async deleteGroup(windowId: number, groupId: number): Promise<unknown> {
       const group = (await groupState.getGroups(windowId))?.find(
@@ -330,18 +425,24 @@ export function createWorld({
         nativeGroupId: group?.nativeGroupId,
         tabIds,
       });
-      // The view went with its window, if the tabs were all there were in it
-      if (!model.windows.has(windowId)) {
-        return answer;
-      }
-      const [first] =
-        (await groupState.getGroups(windowId))?.filter(({ id }) => id >= 0) ??
-        [];
-      // As the view does, and only when the group had tabs
-      if (tabIds.length > 0 && first !== undefined) {
-        await groupState.setActiveGroup(windowId, first.id);
-      }
       return answer;
+    },
+
+    /** The user makes a group in the view of a window; the id of the group */
+    async createGroup(windowId: number): Promise<number> {
+      const { id } = await (await viewGroups(windowId)).create();
+      await settled();
+      return id;
+    },
+
+    /** The user gives a group of a window another name in the view */
+    async renameGroup(
+      windowId: number,
+      groupId: number,
+      name: string,
+    ): Promise<void> {
+      await (await viewGroups(windowId)).rename(groupId, name);
+      await settled();
     },
 
     async moveTab(tabId: number, windowId: number): Promise<void> {
@@ -356,6 +457,7 @@ export function createWorld({
 
     async focusWindow(windowId: number): Promise<void> {
       model.focusWindow(windowId);
+      await handlers?.windowFocused(windowId);
       await settled();
     },
 
@@ -395,6 +497,24 @@ export function createWorld({
     /** The user clicks a notification of the add-on */
     async clickNotification(id: string): Promise<void> {
       await handlers?.notificationClicked(id);
+      await settled();
+    },
+
+    /** The browser has a new version of the add-on to apply */
+    async updateAvailable(): Promise<void> {
+      await handlers?.updateAvailable();
+      await settled();
+    },
+
+    /** Time passes: the clock moves on, and the add-on's timers that come due run */
+    async wait(ms: number): Promise<void> {
+      clock.advance(ms);
+      scheduler.advance(ms);
+      // A timer's work is not an event the world tracks; the ports all answer at once, so it is
+      // done before the next task
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
       await settled();
     },
 

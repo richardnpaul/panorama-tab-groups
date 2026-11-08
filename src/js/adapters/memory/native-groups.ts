@@ -110,6 +110,15 @@ export function createMemoryNativeGroups(
       leaveGroups(tabIds);
       return Promise.resolve();
     },
+    setTitle(nativeGroupId, title) {
+      calls.push(`title ${String(nativeGroupId)} ${title}`);
+      const group = groups.get(nativeGroupId);
+      if (group === undefined) {
+        return Promise.reject(missing(nativeGroupId));
+      }
+      group.title = title;
+      return Promise.resolve();
+    },
     setAppearance(nativeGroupId, { title, color }) {
       calls.push(`appearance ${String(nativeGroupId)} ${title}`);
       const group = groups.get(nativeGroupId);
@@ -124,7 +133,11 @@ export function createMemoryNativeGroups(
       const group = groups.get(nativeGroupId);
       return group === undefined
         ? Promise.reject(missing(nativeGroupId))
-        : Promise.resolve({ windowId: group.windowId, title: group.title });
+        : Promise.resolve({
+            windowId: group.windowId,
+            title: group.title,
+            collapsed: collapsed.get(nativeGroupId) === true,
+          });
     },
   };
   return self;

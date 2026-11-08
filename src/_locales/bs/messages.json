@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Koristi izvorne grupe kartica preglednika za vizualno organiziranje i sažimanje."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Izvorne grupe kartica nisu podržane u ovoj verziji preglednika (potreban je API za skrivanje kartica)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Ovaj preglednik uvijek koristi izvorne grupe kartica, pa se ova postavka ne može promijeniti."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Izvorne grupe kartica nisu podržane u ovoj verziji preglednika. Ažurirajte na Firefox 139+ ili koristite Chrome 89+."

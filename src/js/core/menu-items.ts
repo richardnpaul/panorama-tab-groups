@@ -1,18 +1,29 @@
-import { isNumber, isString } from '../share/guards.js';
+const GROUP_ITEM = /^(\d+):(-?\d+)$/;
 
-const WHOLE_NUMBER = /^-?\d+$/;
+export interface GroupMenuItem {
+  readonly windowId: number;
+  readonly groupId: number;
+}
 
 /**
- * The group a context menu item stands for. The ids of the items that send a
- * tab to a group are the number of the group, as text; the other items have
- * ids that are words, and no group.
+ * The context-menu item id for a group in a window. Group numbers repeat
+ * across windows (each window starts at 0), and `menus` is extension-wide,
+ * so the item id carries both.
  */
-export function groupIdOfMenuItem(menuItemId: unknown): number | undefined {
-  if (isNumber(menuItemId)) {
-    return Number.isInteger(menuItemId) ? menuItemId : undefined;
-  }
-  return isString(menuItemId) && WHOLE_NUMBER.test(menuItemId)
-    ? Number(menuItemId)
+export function menuItemId(windowId: number, groupId: number): string {
+  return `${String(windowId)}:${String(groupId)}`;
+}
+
+/**
+ * The window and group a context-menu item stands for. Action items have
+ * word ids (`refresh-groups`, `send-tab`) and no group.
+ */
+export function groupOfMenuItem(
+  itemId: string | number,
+): GroupMenuItem | undefined {
+  const match = GROUP_ITEM.exec(String(itemId));
+  return match
+    ? { windowId: Number(match[1]), groupId: Number(match[2]) }
     : undefined;
 }
 

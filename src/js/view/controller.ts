@@ -189,31 +189,38 @@ export function createViewController({
   }
 
   async function addToGroup(tab: ViewTab, attempt = 0): Promise<void> {
+    // A pinned tab is in no group, and has none to wait for: it goes with the pinned tabs
+    if (tab.pinned) {
+      await groupNodes.insertTab(tab.id);
+      return;
+    }
     const groupId = await groupState.getTabGroup(tab.id);
     const group = groupId === undefined ? null : groups.get(groupId);
 
-    if (group === null) {
-      // The background may not have put the tab in a group yet, or the group
-      // may be one the view does not show
-      if (attempt < GROUP_LOOKUPS) {
-        logger.debug(
-          `[View] tabCreated: No group yet for tab ${String(tab.id)}, retrying (attempt ${String(attempt + 1)}/${String(GROUP_LOOKUPS)})...`,
-        );
-        await delay(GROUP_LOOKUP_DELAY_MS);
-        await addToGroup(tab, attempt + 1);
+    // The background may not have put the tab in a group yet, or the group may be one the view
+    // does not show. A tab from another window is in none for a moment, between the window it
+    // left and this one: the group read first can be the one it had there, and is read again when
+    // the tab is placed.
+    if (group !== null) {
+      logger.debug(
+        `[View] tabCreated: Adding tab ${String(tab.id)} to group ${String(group.id)} in view`,
+      );
+      if (await groupNodes.insertTab(tab.id)) {
+        groupNodes.updateFit(group);
         return;
       }
-      logger.warn(
-        `[View] tabCreated: Skipping tab ${String(tab.id)} - its group ${String(groupId)} not found in view`,
+    }
+    if (attempt < GROUP_LOOKUPS) {
+      logger.debug(
+        `[View] tabCreated: No group yet for tab ${String(tab.id)}, retrying (attempt ${String(attempt + 1)}/${String(GROUP_LOOKUPS)})...`,
       );
+      await delay(GROUP_LOOKUP_DELAY_MS);
+      await addToGroup(tab, attempt + 1);
       return;
     }
-
-    logger.debug(
-      `[View] tabCreated: Adding tab ${String(tab.id)} to group ${String(group.id)} in view`,
+    logger.warn(
+      `[View] tabCreated: Skipping tab ${String(tab.id)} - its group ${String(groupId)} not found in view`,
     );
-    await groupNodes.insertTab(tab.id);
-    groupNodes.updateFit(group);
   }
 
   async function tabCreated(tab: ViewTab): Promise<void> {

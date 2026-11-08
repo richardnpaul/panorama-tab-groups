@@ -8,6 +8,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 sudo mkdir -p "$PWD/node_modules" /home/vscode/.cache /home/vscode/.npm
 sudo chown -R vscode:vscode "$PWD/node_modules" /home/vscode/.cache /home/vscode/.npm
+sudo chown -R vscode:vscode /home/vscode/.claude
 
 npm ci
 npx playwright install firefox chromium

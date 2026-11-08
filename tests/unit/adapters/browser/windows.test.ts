@@ -280,3 +280,60 @@ describe('adapters/memory/windows.ts', () => {
     await expect(windows.exists(3)).resolves.toBe(true);
   });
 });
+
+describe('adapters/browser/windows.ts: listNonPrivateIds', () => {
+  it('gives the windows the browser does not say are private, from one look at them', async () => {
+    const getAll = vi
+      .fn()
+      .mockResolvedValue([
+        { id: 1, incognito: false },
+        { id: 2, incognito: true },
+        { id: 3 },
+        { id: 0, incognito: true },
+        { incognito: true },
+      ]);
+    const windows = createBrowserWindows(() =>
+      windowsApi(undefined, undefined, undefined, getAll),
+    );
+
+    await expect(windows.listNonPrivateIds()).resolves.toEqual([1, 3]);
+
+    expect(getAll).toHaveBeenCalledTimes(1);
+    expect(getAll).toHaveBeenCalledWith({});
+  });
+});
+
+describe('adapters/browser/windows.ts: listPrivateIds', () => {
+  it('gives the windows the browser says are private, from one look at them', async () => {
+    const getAll = vi
+      .fn()
+      .mockResolvedValue([
+        { id: 1, incognito: false },
+        { id: 2, incognito: true },
+        { id: 3 },
+        { id: 0, incognito: true },
+        { incognito: true },
+      ]);
+    const windows = createBrowserWindows(() =>
+      windowsApi(undefined, undefined, undefined, getAll),
+    );
+
+    await expect(windows.listPrivateIds()).resolves.toEqual([2, 0]);
+
+    expect(getAll).toHaveBeenCalledTimes(1);
+    expect(getAll).toHaveBeenCalledWith({});
+  });
+});
+
+describe('adapters/memory/windows.ts: private windows', () => {
+  it('leaves out the windows that were made private, which it opens if they were not', async () => {
+    const windows = createMemoryWindows(1);
+    windows.makePrivate(2);
+    windows.makePrivate(3);
+    windows.close(3);
+
+    await expect(windows.listNonPrivateIds()).resolves.toEqual([1]);
+    await expect(windows.listIds()).resolves.toEqual([1, 2]);
+    await expect(windows.listPrivateIds()).resolves.toEqual([2]);
+  });
+});

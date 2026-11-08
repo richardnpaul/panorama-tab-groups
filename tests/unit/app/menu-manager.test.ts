@@ -32,14 +32,15 @@ async function build(
   }
   const logger = { warn: vi.fn(), error: vi.fn() };
   const i18n = { getMessage: (name: string) => messages[name] ?? '' };
+  const windows = createMemoryWindows(WINDOW);
   const manager = createMenuManager({
     menus,
     groupState,
-    windows: createMemoryWindows(WINDOW),
+    windows,
     i18n,
     logger,
   });
-  return { manager, groupState, logger };
+  return { manager, groupState, windows, logger };
 }
 
 /** A manager over in-memory menus, which the test can look into */
@@ -161,15 +162,20 @@ describe('app/menu-manager.ts', () => {
 
       expect(menus.items).toEqual([
         { id: 'send-tab', title: 'Send tab to group', contexts: ['tab'] },
-        { id: '1', title: '1: Work', parentId: 'send-tab', contexts: ['tab'] },
         {
-          id: '2',
+          id: '3:1',
+          title: '1: Work',
+          parentId: 'send-tab',
+          contexts: ['tab'],
+        },
+        {
+          id: '3:2',
           title: '2: Play',
           parentId: 'send-tab',
           contexts: ['tab'],
         },
         {
-          id: '-2',
+          id: '3:-2',
           title: '-2: Ungrouped Tabs',
           parentId: 'send-tab',
           contexts: ['tab'],
@@ -189,29 +195,76 @@ describe('app/menu-manager.ts', () => {
 
       expect(ids(menus)).toEqual([
         'send-tab',
-        '1',
-        '2',
+        '3:1',
+        '3:2',
         'refresh-spacer',
         'refresh-groups',
       ]);
     });
 
-    it('stops after the send-tab menu when the window has no groups yet', async () => {
+    it('includes the refresh item even when the window has no groups yet', async () => {
       const { manager, menus, logger } = await setUp({ groups: null });
 
       await manager.createMenuList();
 
-      expect(ids(menus)).toEqual(['send-tab']);
+      expect(ids(menus)).toEqual([
+        'send-tab',
+        'refresh-spacer',
+        'refresh-groups',
+      ]);
       expect(logger.error).not.toHaveBeenCalled();
     });
 
-    it('uses the groups of the window it is in', async () => {
-      const { manager, menus, groupState } = await setUp();
-      await groupState.setGroups(WINDOW + 1, [group(50)]);
+    it('uses the groups of the window it is in, even when another window shares group numbers', async () => {
+      const { manager, menus, groupState, windows } = await setUp({
+        groups: [group(0, 'First Window Zero')],
+      });
+      await groupState.setGroups(WINDOW + 1, [group(0, 'Second Window Zero')]);
 
       await manager.createMenuList();
+      expect(ids(menus)).toEqual([
+        'send-tab',
+        '3:0',
+        'refresh-spacer',
+        'refresh-groups',
+      ]);
 
-      expect(ids(menus)).not.toContain('50');
+      windows.setCurrent(WINDOW + 1);
+      await manager.createMenuList();
+      expect(ids(menus)).toEqual([
+        'send-tab',
+        '4:0',
+        'refresh-spacer',
+        'refresh-groups',
+      ]);
+
+      await manager.createMenuList(WINDOW);
+      expect(ids(menus)).toEqual([
+        'send-tab',
+        '3:0',
+        'refresh-spacer',
+        'refresh-groups',
+      ]);
+    });
+
+    it('serializes overlapping menu rebuilds so their items do not interleave', async () => {
+      const { manager, menus, groupState, windows } = await setUp({
+        groups: [group(0, 'Win 3')],
+      });
+      await groupState.setGroups(WINDOW + 1, [group(0, 'Win 4')]);
+
+      const firstRebuild = manager.createMenuList();
+      windows.setCurrent(WINDOW + 1);
+      const secondRebuild = manager.createMenuList();
+
+      await Promise.all([firstRebuild, secondRebuild]);
+
+      expect(ids(menus)).toEqual([
+        'send-tab',
+        '4:0',
+        'refresh-spacer',
+        'refresh-groups',
+      ]);
     });
 
     it('works in a browser that has no tab context for menus', async () => {
@@ -223,8 +276,8 @@ describe('app/menu-manager.ts', () => {
 
       expect(ids(browserMenu)).toEqual([
         'send-tab',
-        '1',
-        '2',
+        '3:1',
+        '3:2',
         'refresh-spacer',
         'refresh-groups',
       ]);
@@ -274,36 +327,25 @@ describe('app/menu-manager.ts', () => {
 
       await manager.handleMenuChange({
         action: 'createMenuItem',
-        groupId: '7',
+        windowId: WINDOW,
+        groupId: 7,
         groupName: 'Seven',
       });
 
       expect(ids(menus)).toEqual([
         'send-tab',
-        '1',
-        '2',
-        '7',
+        '3:1',
+        '3:2',
+        '3:7',
         'refresh-spacer',
         'refresh-groups',
       ]);
-      expect(menus.items.find(({ id }) => id === '7')).toEqual({
-        id: '7',
+      expect(menus.items.find(({ id }) => id === '3:7')).toEqual({
+        id: '3:7',
         title: '7: Seven',
         parentId: 'send-tab',
         contexts: ['tab'],
       });
-    });
-
-    it('accepts a group id that is a number', async () => {
-      const { manager, menus } = await setUp();
-
-      await manager.handleMenuChange({
-        action: 'createMenuItem',
-        groupId: 7,
-        groupName: 'Seven',
-      });
-
-      expect(menus.items[0]?.id).toBe('7');
     });
 
     it('removes the item of a deleted group', async () => {
@@ -312,12 +354,13 @@ describe('app/menu-manager.ts', () => {
 
       await manager.handleMenuChange({
         action: 'removeMenuItem',
-        groupId: '1',
+        windowId: WINDOW,
+        groupId: 1,
       });
 
       expect(ids(menus)).toEqual([
         'send-tab',
-        '2',
+        '3:2',
         'refresh-spacer',
         'refresh-groups',
       ]);
@@ -327,13 +370,17 @@ describe('app/menu-manager.ts', () => {
       const { manager, logger } = await setUp();
 
       await expect(
-        manager.handleMenuChange({ action: 'removeMenuItem', groupId: 9 }),
+        manager.handleMenuChange({
+          action: 'removeMenuItem',
+          windowId: WINDOW,
+          groupId: 9,
+        }),
       ).resolves.toBeUndefined();
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).toHaveBeenCalledWith(
-        'Could not remove menu item 9:',
-        'Cannot find menu item with id 9',
+        'Could not remove menu item 3:9:',
+        'Cannot find menu item with id 3:9',
       );
     });
 
@@ -346,10 +393,14 @@ describe('app/menu-manager.ts', () => {
       };
       const { manager, logger } = await setUpWith(menus, {});
 
-      await manager.handleMenuChange({ action: 'removeMenuItem', groupId: 1 });
+      await manager.handleMenuChange({
+        action: 'removeMenuItem',
+        windowId: WINDOW,
+        groupId: 1,
+      });
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Could not remove menu item 1:',
+        'Could not remove menu item 3:1:',
         'plain text',
       );
     });
@@ -360,38 +411,67 @@ describe('app/menu-manager.ts', () => {
 
       await manager.handleMenuChange({
         action: 'updateMenuItem',
-        groupId: '2',
+        windowId: WINDOW,
+        groupId: 2,
         groupName: 'Renamed',
       });
 
-      expect(menus.items.find(({ id }) => id === '2')?.title).toBe(
+      expect(menus.items.find(({ id }) => id === '3:2')?.title).toBe(
         '2: Renamed',
       );
     });
 
-    it.each([
-      ['an action it does not know', { action: 'somethingElse', groupId: '1' }],
-      ['no action', { groupId: '1' }],
-      ['a message that is not an object', 'createMenuItem'],
-      ['no message', undefined],
-      ['a create without a name', { action: 'createMenuItem', groupId: '1' }],
-      ['a create without an id', { action: 'createMenuItem', groupName: 'x' }],
-      [
-        'a create with an id that is not text or a number',
-        { action: 'createMenuItem', groupId: true, groupName: 'x' },
-      ],
-      ['an update without a name', { action: 'updateMenuItem', groupId: '1' }],
-      ['a remove without an id', { action: 'removeMenuItem' }],
-    ])('ignores %s', async (_name, message) => {
+    it('ignores a change from a window that does not have the focus', async () => {
       const { manager, menus, logger } = await setUp();
       await manager.createMenuList();
       const before = JSON.stringify(menus.items);
 
-      await manager.handleMenuChange(message);
+      await manager.handleMenuChange({
+        action: 'createMenuItem',
+        windowId: WINDOW + 1,
+        groupId: 1,
+        groupName: 'Other Window Group',
+      });
+      await manager.handleMenuChange({
+        action: 'updateMenuItem',
+        windowId: WINDOW + 1,
+        groupId: 1,
+        groupName: 'Renamed Other',
+      });
+      await manager.handleMenuChange({
+        action: 'removeMenuItem',
+        windowId: WINDOW + 1,
+        groupId: 1,
+      });
 
       expect(JSON.stringify(menus.items)).toBe(before);
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('continues processing subsequent changes after a change rejects', async () => {
+      const { manager, menus } = await setUp();
+      await manager.createMenuList();
+
+      await expect(
+        manager.handleMenuChange({
+          action: 'updateMenuItem',
+          windowId: WINDOW,
+          groupId: 99,
+          groupName: 'Missing',
+        }),
+      ).rejects.toThrow('Cannot find menu item with id 3:99');
+
+      await manager.handleMenuChange({
+        action: 'updateMenuItem',
+        windowId: WINDOW,
+        groupId: 1,
+        groupName: 'Still Works',
+      });
+
+      expect(menus.items.find(({ id }) => id === '3:1')?.title).toBe(
+        '1: Still Works',
+      );
     });
   });
 });

@@ -1,42 +1,53 @@
 import { describe, expect, it } from 'vitest';
 import {
-  groupIdOfMenuItem,
+  groupOfMenuItem,
+  menuItemId,
   neighbourOf,
 } from '../../../src/js/core/menu-items.js';
 
 describe('core/menu-items.ts', () => {
-  describe('groupIdOfMenuItem', () => {
+  describe('menuItemId', () => {
     it.each([
-      ['3', 3],
-      ['0', 0],
-      ['-2', -2],
-      ['120', 120],
-      [7, 7],
-      [0, 0],
-      [-1, -1],
-    ])('reads %j as the group %j', (id, group) => {
-      expect(groupIdOfMenuItem(id)).toBe(group);
+      [1, 0, '1:0'],
+      [1, -2, '1:-2'],
+      [42, 7, '42:7'],
+    ])('names window %i group %i as %s', (windowId, groupId, expected) => {
+      expect(menuItemId(windowId, groupId)).toBe(expected);
+    });
+  });
+
+  describe('groupOfMenuItem', () => {
+    it.each([
+      ['1:3', { windowId: 1, groupId: 3 }],
+      ['1:0', { windowId: 1, groupId: 0 }],
+      ['1:-2', { windowId: 1, groupId: -2 }],
+      ['42:120', { windowId: 42, groupId: 120 }],
+    ])('reads %j as %j', (id, group) => {
+      expect(groupOfMenuItem(id)).toEqual(group);
     });
 
     it.each([
+      ['3'],
+      ['-2'],
       ['refresh-groups'],
       ['send-tab'],
       [''],
-      ['3a'],
-      ['a3'],
-      [' 3'],
-      ['3 '],
-      ['1.5'],
-      ['--1'],
-      ['+1'],
-      [1.5],
-      [Number.NaN],
-      [Number.POSITIVE_INFINITY],
-      [undefined],
-      [null],
-      [{}],
+      ['1:'],
+      [':1'],
+      ['-1:0'],
+      ['1:3a'],
+      ['a1:3'],
+      [' 1:3'],
+      ['1:3 '],
+      ['1:1.5'],
+      ['1:--1'],
+      ['1:+1'],
+      ['1:2:3'],
+      [7],
+      [0],
+      [-1],
     ])('does not read %j as a group', (id) => {
-      expect(groupIdOfMenuItem(id)).toBeUndefined();
+      expect(groupOfMenuItem(id)).toBeUndefined();
     });
   });
 

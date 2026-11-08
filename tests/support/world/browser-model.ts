@@ -8,12 +8,15 @@
  * - a tab can only join a group by its id when it is in the window of the group
  * - a group has no tabs when its last tab is taken out or closed, and then it is gone
  * - a tab that is moved to another window leaves its group
+ * - a tab is unpinned when it is put in a group; pinning a tab takes it out of its group and shows
+ *   it if it is hidden, and unpinning it does not put it back
  * - the active tab is not hidden
  * - when the tab in front of a window leaves it or is closed, the next one comes to the front, and the
  *   browser says it was activated
  * - the ids of tab groups are large numbers
  * - a window that was closed is restored with new ids for it and its tabs, its tab groups with
  *   their ids, names and colours, and the values the extension kept with it and its tabs
+ * - what extensions keep in `storage.session` is gone when the browser is closed
  *
  * It tells what happens as events, which a test world hands to the extension as the
  * browser does. The values of the extension's session are kept on its tabs and windows
@@ -51,11 +54,16 @@ export interface ModelGroup {
 
 export type BrowserEvent =
   | { type: 'windowCreated'; windowId: number }
+  | { type: 'windowRemoved'; windowId: number }
   | { type: 'tabCreated'; tab: ModelTab }
   | { type: 'tabAttached'; tabId: number; windowId: number }
   | { type: 'tabDetached'; tabId: number }
   | { type: 'tabActivated'; tabId: number }
-  | { type: 'tabUpdated'; tab: ModelTab; change: { groupId?: number } }
+  | {
+      type: 'tabUpdated';
+      tab: ModelTab;
+      change: { groupId?: number; pinned?: boolean };
+    }
   | { type: 'tabRemoved'; tabId: number }
   | { type: 'groupRemoved'; group: ModelGroup }
   | { type: 'groupUpdated'; group: ModelGroup };
@@ -70,6 +78,10 @@ export interface BrowserModel {
   readonly windows: ReadonlyMap<number, ModelWindow>;
   readonly tabs: ReadonlyMap<number, ModelTab>;
   readonly groups: ReadonlyMap<number, ModelGroup>;
+  /** The tabs a grouping unpinned, as `tabs.group` does: the browser's, not anyone's choice */
+  readonly unpinnedByGrouping: number[];
+  /** What extensions keep in `storage.session`, which is gone when the browser closes */
+  readonly sessionStorage: Map<string, unknown>;
   /** The window that has the focus */
   focused(): number;
   tabsOf(windowId: number): ModelTab[];
@@ -77,7 +89,12 @@ export interface BrowserModel {
   /** A window and its tabs as they were before the extension ran: nothing is told */
   seedWindow(urls: readonly string[]): { windowId: number; tabIds: number[] };
   openWindow(urls: readonly string[]): { windowId: number; tabIds: number[] };
-  openTab(windowId: number, url: string, active?: boolean): number;
+  openTab(
+    windowId: number,
+    url: string,
+    active?: boolean,
+    pinned?: boolean,
+  ): number;
   activateTab(tabId: number): void;
   closeTab(tabId: number): void;
   /** Close a window with all its tabs, which can be restored */
@@ -86,6 +103,10 @@ export interface BrowserModel {
   restoreWindow(): { windowId: number; tabIds: number[] } | undefined;
   moveTab(tabId: number, windowId: number): void;
   moveToEnd(tabId: number): void;
+  /** Put a tab next to another of its window */
+  moveBeside(tabId: number, besideTabId: number, before: boolean): void;
+  /** Pin or unpin a tab; a tab that is pinned leaves its group, and is not put back when unpinned */
+  setPinned(tabId: number, pinned: boolean): void;
   focusWindow(windowId: number): void;
 
   group(tabIds: readonly number[], target?: GroupTarget): number;
@@ -134,6 +155,8 @@ export function createBrowserModel(
   let nextGroupId = GROUP_ID_BASE;
   let restarts = 0;
   const recentlyClosed: ClosedWindow[] = [];
+  const sessionStorage = new Map<string, unknown>();
+  const unpinnedByGrouping: number[] = [];
 
   const windowOf = (windowId: number): ModelWindow => {
     const found = windows.get(windowId);
@@ -221,6 +244,7 @@ export function createBrowserModel(
     const window = windows.get(windowId);
     if (window?.tabIds.length === 0) {
       windows.delete(windowId);
+      emit({ type: 'windowRemoved', windowId });
       if (focusedWindow === windowId) {
         focusedWindow = [...windows.keys()][0] ?? 0;
       }
@@ -271,6 +295,8 @@ export function createBrowserModel(
     get groups() {
       return groups;
     },
+    sessionStorage,
+    unpinnedByGrouping,
     focused: () => focusedWindow,
     tabsOf,
 
@@ -290,7 +316,7 @@ export function createBrowserModel(
       return { windowId: window.id, tabIds: created.map(({ id }) => id) };
     },
 
-    openTab(windowId, url, active = false) {
+    openTab(windowId, url, active = false, pinned = false) {
       const window = windowOf(windowId);
       const tab: ModelTab = {
         id: nextTabId,
@@ -298,7 +324,7 @@ export function createBrowserModel(
         url,
         title: url,
         active: false,
-        pinned: false,
+        pinned,
         hidden: false,
         groupId: -1,
         values: {},
@@ -363,6 +389,7 @@ export function createBrowserModel(
           emit({ type: 'groupRemoved', group });
         });
       windows.delete(windowId);
+      emit({ type: 'windowRemoved', windowId });
       if (focusedWindow === windowId) {
         focusedWindow = [...windows.keys()][0] ?? 0;
       }
@@ -414,6 +441,28 @@ export function createBrowserModel(
       window.tabIds = [...window.tabIds.filter((id) => id !== tabId), tabId];
     },
 
+    moveBeside(tabId, besideTabId, before) {
+      const window = windowOf(tabOf(tabId).windowId);
+      const others = window.tabIds.filter((id) => id !== tabId);
+      const at = others.indexOf(tabOf(besideTabId).id) + (before ? 0 : 1);
+      window.tabIds = [...others.slice(0, at), tabId, ...others.slice(at)];
+    },
+
+    setPinned(tabId, pinned) {
+      const tab = tabOf(tabId);
+      if (tab.pinned === pinned) {
+        return;
+      }
+      tab.pinned = pinned;
+      emit({ type: 'tabUpdated', tab, change: { pinned } });
+      // Pinned tabs are not in groups: pinning takes the tab out, and unpinning does not put it
+      // back; and pinning shows a hidden tab
+      if (pinned) {
+        tab.hidden = false;
+        setGroupOf(tab, -1);
+      }
+    },
+
     focusWindow(windowId) {
       windowOf(windowId);
       focusedWindow = windowId;
@@ -426,6 +475,13 @@ export function createBrowserModel(
         );
       }
       const members = tabIds.map(tabOf);
+      // Grouping unpins: the browser does it, before it groups
+      members
+        .filter((tab) => tab.pinned)
+        .forEach((tab) => {
+          unpinnedByGrouping.push(tab.id);
+          model.setPinned(tab.id, false);
+        });
 
       if (target.groupId !== undefined) {
         const group = groups.get(target.groupId);
@@ -496,6 +552,7 @@ export function createBrowserModel(
 
     restart() {
       restarts += 1;
+      sessionStorage.clear();
       const windowIds = new Map<number, number>();
       const tabIds = new Map<number, number>();
       const groupIds = new Map<number, number>();

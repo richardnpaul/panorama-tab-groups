@@ -8,10 +8,14 @@ export function createFakeStorage(initial: Record<string, unknown> = {}) {
   const calls: string[] = [];
 
   const area: StorageArea = {
-    get: (key) => {
-      calls.push(`get ${key}`);
+    get: (keys) => {
+      calls.push(`get ${keys.join(',')}`);
       return Promise.resolve(
-        data.has(key) ? { [key]: structuredClone(data.get(key)) } : {},
+        Object.fromEntries(
+          keys.flatMap((key) =>
+            data.has(key) ? [[key, structuredClone(data.get(key))]] : [],
+          ),
+        ),
       );
     },
     set: (items) => {

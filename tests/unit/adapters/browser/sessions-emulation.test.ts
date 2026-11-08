@@ -6,10 +6,34 @@ import {
 } from '../../../../src/js/adapters/browser/sessions-emulation.js';
 import { createExclusively } from '../../../../src/js/adapters/browser/exclusive.js';
 import { createFakeLocks } from '../../../support/fake-locks.js';
+import { createFakeSessionArea } from '../../../support/fake-session-area.js';
 import { createFakeStorage } from '../../../support/fake-storage.js';
-import { describeGroupStateContract } from '../../../support/group-state-contract.js';
+import {
+  describeGroupStateContract,
+  describeStoredIdsContract,
+} from '../../../support/group-state-contract.js';
 
 const KEY = '__mock_sessions';
+const PRIVATE_KEY = 'privateSessions';
+
+// Values kept apart for the windows and tabs that are private, as the polyfill sets it up
+function setUpWithPrivate(
+  isPrivate: (scope: 'tabs' | 'windows', id: number) => Promise<boolean>,
+  initial: Record<string, unknown> = {},
+) {
+  const storage = createFakeStorage(initial);
+  const asked = vi.fn(isPrivate);
+  const sessions = createSessionsEmulation(
+    () => storage.area,
+    undefined,
+    asked,
+  );
+  return { sessions, asked, ...storage };
+}
+
+// Window 1 and tab 10 are private
+const privateOnes = (scope: 'tabs' | 'windows', id: number) =>
+  Promise.resolve(id === (scope === 'tabs' ? 10 : 1));
 
 function setUp(initial: Record<string, unknown> = {}) {
   const storage = createFakeStorage(initial);
@@ -17,13 +41,103 @@ function setUp(initial: Record<string, unknown> = {}) {
   return { sessions, ...storage };
 }
 
-// The emulation must hold up as the sessions of a real GroupState
-describeGroupStateContract('sessions emulated in extension storage', () => {
+const emulated = () => {
   const { sessions } = setUp();
-  return createBrowserGroupState(() => ({ sessions }));
-});
+  const { area } = createFakeSessionArea();
+  return createBrowserGroupState(() => ({
+    sessions,
+    sessionsManagement: sessions,
+    storage: { session: area },
+  }));
+};
+
+// The emulation must hold up as the sessions of a real GroupState
+describeGroupStateContract('sessions emulated in extension storage', emulated);
+describeGroupStateContract(
+  'sessions of private windows emulated under their own key',
+  () => {
+    const { sessions } = setUpWithPrivate(() => Promise.resolve(true));
+    const { area } = createFakeSessionArea();
+    return createBrowserGroupState(() => ({
+      sessions,
+      sessionsManagement: sessions,
+      storage: { session: area },
+    }));
+  },
+);
+describeStoredIdsContract('sessions emulated in extension storage', emulated);
 
 describe('adapters/browser/sessions-emulation.ts', () => {
+  describe('the ids it keeps values under', () => {
+    it('lists the windows and the tabs, as numbers', async () => {
+      const { sessions } = setUp();
+      await sessions.setWindowValue(3, 'a', 1);
+      await sessions.setWindowValue(8, 'a', 1);
+      await sessions.setTabValue(20, 'a', 1);
+
+      expect((await sessions.windowIds()).sort()).toEqual([3, 8]);
+      expect(await sessions.tabIds()).toEqual([20]);
+    });
+
+    it('leaves out an id that is not a whole number', async () => {
+      const { sessions } = setUp({
+        [KEY]: {
+          tabs: {
+            '5': { a: 1 },
+            '-1': { a: 1 },
+            '': { a: 1 },
+            ' 5': { a: 1 },
+            '5 ': { a: 1 },
+            '5x': { a: 1 },
+            x5: { a: 1 },
+            '1.5': { a: 1 },
+          },
+          windows: {},
+        },
+      });
+
+      expect(await sessions.tabIds()).toEqual([5, -1]);
+    });
+
+    it('forgets a window, and a tab, with everything in it, and no other', async () => {
+      const { sessions, data } = setUp();
+      await sessions.setWindowValue(3, 'a', 1);
+      await sessions.setWindowValue(3, 'b', 2);
+      await sessions.setWindowValue(4, 'a', 1);
+      await sessions.setTabValue(20, 'a', 1);
+      await sessions.setTabValue(21, 'a', 1);
+
+      await sessions.removeWindow(3);
+      await sessions.removeTab(20);
+
+      expect(data.get(KEY)).toEqual({
+        windows: { '4': { a: 1 } },
+        tabs: { '21': { a: 1 } },
+      });
+    });
+
+    it('writes nothing to forget what it has no values for', async () => {
+      const { sessions, calls } = setUp();
+
+      await sessions.removeWindow(3);
+      await sessions.removeTab(3);
+
+      expect(calls.filter((call) => call.startsWith('set'))).toEqual([]);
+    });
+
+    it('drops the entry of a window or tab when its last value is removed', async () => {
+      const { sessions, data } = setUp();
+      await sessions.setTabValue(20, 'a', 1);
+      await sessions.setTabValue(20, 'b', 2);
+
+      await sessions.removeTabValue(20, 'a');
+      expect(data.get(KEY)).toMatchObject({ tabs: { '20': { b: 2 } } });
+
+      await sessions.removeTabValue(20, 'b');
+      expect(data.get(KEY)).toEqual({ tabs: {}, windows: {} });
+    });
+  });
+
   describe('window values', () => {
     it('gives back what was stored for a window and key', async () => {
       const { sessions } = setUp();
@@ -307,8 +421,8 @@ describe('adapters/browser/sessions-emulation.ts', () => {
   describe('from several contexts of the extension', () => {
     // A storage that is slow to read, as it is when others are busy with it
     const slowStorage = (storage: ReturnType<typeof createFakeStorage>) => ({
-      get: async (key: string) => {
-        const stored = await storage.area.get(key);
+      get: async (keys: string[]) => {
+        const stored = await storage.area.get(keys);
         await Promise.resolve();
         await Promise.resolve();
         return stored;
@@ -352,6 +466,205 @@ describe('adapters/browser/sessions-emulation.ts', () => {
 
       await expect(page.getWindowValue(1, 'groups')).resolves.toEqual(['a']);
       await expect(background.getTabValue(2, 'groupId')).resolves.toBe(3);
+    });
+  });
+
+  describe('the values of private windows and tabs', () => {
+    it('keeps them under a key of their own, and the others where they were', async () => {
+      const { sessions, data } = setUpWithPrivate(privateOnes);
+
+      await sessions.setWindowValue(1, 'groups', ['private']);
+      await sessions.setTabValue(10, 'groupId', 1);
+      await sessions.setWindowValue(2, 'groups', ['normal']);
+      await sessions.setTabValue(20, 'groupId', 2);
+
+      expect(data.get(PRIVATE_KEY)).toEqual({
+        windows: { 1: { groups: ['private'] } },
+        tabs: { 10: { groupId: 1 } },
+      });
+      expect(data.get(KEY)).toEqual({
+        windows: { 2: { groups: ['normal'] } },
+        tabs: { 20: { groupId: 2 } },
+      });
+    });
+
+    it('gives them back, each from where it is', async () => {
+      const { sessions } = setUpWithPrivate(privateOnes);
+      await sessions.setWindowValue(1, 'groups', ['private']);
+      await sessions.setWindowValue(2, 'groups', ['normal']);
+
+      await expect(sessions.getWindowValue(1, 'groups')).resolves.toEqual([
+        'private',
+      ]);
+      await expect(sessions.getWindowValue(2, 'groups')).resolves.toEqual([
+        'normal',
+      ]);
+      await expect(
+        sessions.getWindowValue(1, 'other'),
+      ).resolves.toBeUndefined();
+    });
+
+    it('lists the windows and tabs that are kept apart from those that are kept', async () => {
+      const { sessions } = setUpWithPrivate(privateOnes);
+      await sessions.setWindowValue(1, 'a', 1);
+      await sessions.setWindowValue(2, 'a', 1);
+      await sessions.setTabValue(10, 'a', 1);
+      await sessions.setTabValue(20, 'a', 1);
+
+      expect(await sessions.windowIds()).toEqual([2]);
+      expect(await sessions.tabIds()).toEqual([20]);
+      expect(await sessions.privateWindowIds()).toEqual([1]);
+      expect(await sessions.privateTabIds()).toEqual([10]);
+    });
+
+    it('asks whether a window or tab is private once, when its first value is stored', async () => {
+      const { sessions, asked } = setUpWithPrivate(privateOnes);
+
+      await sessions.setWindowValue(1, 'a', 1);
+      await sessions.setWindowValue(1, 'b', 2);
+      await sessions.setTabValue(20, 'a', 1);
+      await sessions.setTabValue(20, 'b', 2);
+      await sessions.getWindowValue(5, 'a');
+      await sessions.removeTabValue(30, 'a');
+      await sessions.removeWindow(6);
+
+      expect(asked.mock.calls).toEqual([
+        ['windows', 1],
+        ['tabs', 20],
+      ]);
+    });
+
+    it('keeps apart what cannot be asked about, as a window that has closed', async () => {
+      const { sessions, data } = setUpWithPrivate(() =>
+        Promise.reject(new Error('No window with id: 4')),
+      );
+
+      await sessions.setWindowValue(4, 'closedAt', 9);
+
+      expect(data.get(PRIVATE_KEY)).toEqual({
+        windows: { 4: { closedAt: 9 } },
+        tabs: {},
+      });
+      expect(data.has(KEY)).toBe(false);
+    });
+
+    it('removes a value of a private window where it is, and its entry with the last', async () => {
+      const { sessions, data } = setUpWithPrivate(privateOnes);
+      await sessions.setWindowValue(1, 'a', 1);
+      await sessions.setWindowValue(1, 'b', 2);
+
+      await sessions.removeWindowValue(1, 'a');
+      expect(data.get(PRIVATE_KEY)).toEqual({
+        windows: { 1: { b: 2 } },
+        tabs: {},
+      });
+
+      await sessions.removeWindowValue(1, 'b');
+      expect(data.get(PRIVATE_KEY)).toEqual({ windows: {}, tabs: {} });
+      expect(data.has(KEY)).toBe(false);
+    });
+
+    it('forgets a private window and tab with everything in them', async () => {
+      const { sessions, data } = setUpWithPrivate(privateOnes);
+      await sessions.setWindowValue(1, 'a', 1);
+      await sessions.setTabValue(10, 'a', 1);
+
+      await sessions.removeWindow(1);
+      await sessions.removeTab(10);
+
+      expect(data.get(PRIVATE_KEY)).toEqual({ windows: {}, tabs: {} });
+      await expect(sessions.getWindowValue(1, 'a')).resolves.toBeUndefined();
+    });
+
+    it('reads both keys in one call, and writes only the one that changed, to store a value', async () => {
+      const { sessions, calls } = setUpWithPrivate(privateOnes);
+
+      await sessions.setWindowValue(2, 'a', 1);
+      await sessions.setWindowValue(1, 'a', 1);
+
+      expect(calls).toEqual([
+        `get ${KEY},${PRIVATE_KEY}`,
+        `set ${KEY}`,
+        `get ${KEY},${PRIVATE_KEY}`,
+        `set ${PRIVATE_KEY}`,
+      ]);
+    });
+
+    it('moves values apart in one write of both keys', async () => {
+      const { sessions, calls } = setUpWithPrivate(privateOnes, {
+        [KEY]: { windows: { 1: { a: 1 } }, tabs: {} },
+      });
+
+      await sessions.setPrivate([1], []);
+
+      expect(calls).toEqual([
+        `get ${KEY},${PRIVATE_KEY}`,
+        `set ${PRIVATE_KEY},${KEY}`,
+      ]);
+    });
+
+    it('forgets and erases an id wherever it has values, as one that a version that stopped halfway left in both', async () => {
+      const both = { windows: { 1: { a: 1, b: 2 } }, tabs: { 10: { a: 1 } } };
+      const { sessions, data } = setUpWithPrivate(privateOnes, {
+        [KEY]: both,
+        [PRIVATE_KEY]: both,
+      });
+
+      await sessions.removeTab(10);
+      await sessions.removeWindowValue(1, 'a');
+
+      expect(data.get(KEY)).toEqual({ windows: { 1: { b: 2 } }, tabs: {} });
+      expect(data.get(PRIVATE_KEY)).toEqual({
+        windows: { 1: { b: 2 } },
+        tabs: {},
+      });
+      await expect(sessions.getWindowValue(1, 'a')).resolves.toBeUndefined();
+    });
+  });
+
+  describe('moving the values of private windows apart, as an earlier version stored them with the others', () => {
+    const stored = {
+      [KEY]: {
+        windows: { 1: { groups: ['private'] }, 2: { groups: ['normal'] } },
+        tabs: { 10: { groupId: 1 }, 20: { groupId: 2 } },
+      },
+      [PRIVATE_KEY]: { windows: { 3: { a: 1 } }, tabs: { 30: { a: 1 } } },
+    };
+
+    it('moves those of the windows and tabs given, and leaves the others', async () => {
+      const { sessions, data } = setUpWithPrivate(privateOnes, stored);
+
+      await sessions.setPrivate([1], [10]);
+
+      expect(data.get(PRIVATE_KEY)).toEqual({
+        windows: { 1: { groups: ['private'] }, 3: { a: 1 } },
+        tabs: { 10: { groupId: 1 }, 30: { a: 1 } },
+      });
+      expect(data.get(KEY)).toEqual({
+        windows: { 2: { groups: ['normal'] } },
+        tabs: { 20: { groupId: 2 } },
+      });
+      await expect(sessions.getWindowValue(1, 'groups')).resolves.toEqual([
+        'private',
+      ]);
+    });
+
+    it('moves a tab alone, or a window alone', async () => {
+      const { sessions } = setUpWithPrivate(privateOnes, stored);
+
+      await sessions.setPrivate([], [10]);
+      await sessions.setPrivate([1], []);
+
+      expect(await sessions.privateWindowIds()).toEqual([1, 3]);
+      expect(await sessions.privateTabIds()).toEqual([10, 30]);
+    });
+
+    it('writes nothing when none of them has values stored with the others', async () => {
+      const { sessions, calls } = setUpWithPrivate(privateOnes, stored);
+
+      await sessions.setPrivate([3, 7], [30, 70]);
+
+      expect(calls.filter((call) => call.startsWith('set'))).toEqual([]);
     });
   });
 });

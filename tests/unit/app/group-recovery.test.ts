@@ -481,6 +481,33 @@ describe('app/group-recovery.ts', () => {
     });
   });
 
+  describe('pinned tabs, which are in no group', () => {
+    it('are left as they are by the recovery, which gives no tab of them a group', async () => {
+      const env = setUp();
+      await env.groupState.setGroups(1, [group(1)]);
+      env.tabs.setDetails([{ ...tab(10, 1), pinned: true }, tab(11, 1)]);
+      await env.groupState.setTabGroup(10, 1);
+
+      await env.recovery.initializeTabGroupAssignments();
+
+      // Left as it is: the update takes a group from a pinned tab, not the recovery
+      expect(await env.groupState.getTabGroup(10)).toBe(1);
+      expect(await env.groupState.getTabGroup(11)).toBe(-2);
+    });
+
+    it('are given no group when the groupless tabs are salvaged', async () => {
+      const env = setUp();
+      await env.groupState.setGroups(1, [group(1), group(2)]);
+      await env.groupState.setActiveGroup(1, 2);
+      env.tabs.setDetails([{ ...tab(10, 1), pinned: true }, tab(11, 1)]);
+
+      await env.recovery.salvageGrouplessTabs();
+
+      expect(await env.groupState.getTabGroup(10)).toBeUndefined();
+      expect(await env.groupState.getTabGroup(11)).toBe(2);
+    });
+  });
+
   describe('salvageGrouplessTabs', () => {
     it('puts a tab that has no group in the active group of its window', async () => {
       const env = setUp();

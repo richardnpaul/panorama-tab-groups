@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "ਦ੍ਰਿਸ਼ਟੀਗਤ ਤਰਤੀਬ ਅਤੇ ਸਮੇਟਣ ਲਈ ਬ੍ਰਾਊਜ਼ਰ ਦੇ ਆਪਣੇ ਟੈਬ ਗਰੁੱਪ ਵਰਤੋ।"
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਵਰਜਨ ਵਿੱਚ ਆਪਣੇ ਟੈਬ ਗਰੁੱਪ ਸਮਰਥਿਤ ਨਹੀਂ ਹਨ (ਟੈਬ ਲੁਕਾਉਣ ਵਾਲਾ API ਚਾਹੀਦਾ ਹੈ)।"
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "ਇਹ ਬ੍ਰਾਊਜ਼ਰ ਹਮੇਸ਼ਾ ਆਪਣੇ ਟੈਬ ਗਰੁੱਪ ਵਰਤਦਾ ਹੈ, ਇਸ ਲਈ ਇਹ ਸੈਟਿੰਗ ਬਦਲੀ ਨਹੀਂ ਜਾ ਸਕਦੀ।"
   },
   "optionsNativeGroupsLegacy": {
     "message": "ਇਸ ਬ੍ਰਾਊਜ਼ਰ ਵਰਜਨ ਵਿੱਚ ਆਪਣੇ ਟੈਬ ਗਰੁੱਪ ਸਮਰਥਿਤ ਨਹੀਂ ਹਨ। ਕਿਰਪਾ ਕਰਕੇ Firefox 139+ ਉੱਤੇ ਅੱਪਡੇਟ ਕਰੋ ਜਾਂ Chrome 89+ ਵਰਤੋ।"

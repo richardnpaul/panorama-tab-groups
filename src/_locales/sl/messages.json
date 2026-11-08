@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Uporabi izvorne skupine zavihkov brskalnika za vizualno organizacijo in strnjevanje."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Izvorne skupine zavihkov v tej različici brskalnika niso podprte (zahtevajo API za skrivanje zavihkov)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Ta brskalnik vedno uporablja izvorne skupine zavihkov, zato te nastavitve ni mogoče spremeniti."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Izvorne skupine zavihkov v tej različici brskalnika niso podprte. Posodobite na Firefox 139+ ali uporabite Chrome 89+."

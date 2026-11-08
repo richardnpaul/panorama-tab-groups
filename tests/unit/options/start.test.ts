@@ -4,6 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createFakeSessions } from '../../support/fake-sessions.js';
 import { markedMessage, textsOutsideMessages } from '../../support/messages.js';
 
+// Each test imports the page's modules afresh, which a full run under Istanbul on every core can take longer than the default 5 s to do
+vi.setConfig({ testTimeout: 30_000 });
+
 const backupJson = JSON.stringify({
   file: { type: 'tgvView', version: 1 },
   windows: [

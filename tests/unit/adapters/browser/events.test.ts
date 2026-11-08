@@ -24,6 +24,8 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     onClicked: emitter<[unknown]>(),
     onCommand: emitter<[string]>(),
     windowCreated: emitter<[{ id?: number | undefined }]>(),
+    windowRemoved: emitter<[number]>(),
+    windowFocusChanged: emitter<[number]>(),
     tabCreated: emitter<
       [
         {
@@ -52,6 +54,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
       boolean
     >(),
     external: emitter<[unknown]>(),
+    updateAvailable: emitter<[unknown]>(),
     notificationClicked: emitter<[string]>(),
     menuClicked:
       emitter<
@@ -64,7 +67,11 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
   const api: EventsApi = {
     action: { onClicked: events.onClicked },
     commands: { onCommand: events.onCommand },
-    windows: { onCreated: events.windowCreated },
+    windows: {
+      onCreated: events.windowCreated,
+      onRemoved: events.windowRemoved,
+      onFocusChanged: events.windowFocusChanged,
+    },
     tabs: {
       onCreated: events.tabCreated,
       onAttached: events.tabAttached,
@@ -85,6 +92,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     runtime: {
       onMessage: events.message,
       onMessageExternal: events.external,
+      onUpdateAvailable: events.updateAvailable,
     },
     contextMenus: { onClicked: events.menuClicked },
     notifications: { onClicked: events.notificationClicked },
@@ -93,15 +101,18 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     toggleView: vi.fn().mockResolvedValue(undefined),
     triggerCommand: vi.fn().mockResolvedValue(undefined),
     createGroupInWindowIfMissing: vi.fn().mockResolvedValue(undefined),
+    windowRemoved: vi.fn().mockResolvedValue(undefined),
+    windowFocused: vi.fn().mockResolvedValue(undefined),
     tabCreated: vi.fn().mockResolvedValue(undefined),
     tabAttached: vi.fn().mockResolvedValue(undefined),
     tabDetached: vi.fn().mockResolvedValue(undefined),
     tabActivated: vi.fn().mockResolvedValue(undefined),
     tabUpdated: vi.fn().mockResolvedValue(undefined),
-    tabRemoved: vi.fn(),
+    tabRemoved: vi.fn().mockResolvedValue(undefined),
     menuClicked: vi.fn().mockResolvedValue(undefined),
     handleMessage: vi.fn().mockResolvedValue('answer'),
     handleExternalMessage: vi.fn().mockResolvedValue(undefined),
+    updateAvailable: vi.fn().mockResolvedValue(undefined),
     storageChanged: vi.fn().mockResolvedValue(undefined),
     nativeGroupRemoved: vi.fn().mockResolvedValue(undefined),
     nativeGroupUpdated: vi.fn().mockResolvedValue(undefined),
@@ -167,6 +178,16 @@ describe('adapters/browser/events.ts', () => {
 
     expect(handlers.createGroupInWindowIfMissing).toHaveBeenCalledTimes(1);
     expect(handlers.createGroupInWindowIfMissing).toHaveBeenCalledWith(5);
+  });
+
+  it('tells when a window is given the focus, and ignores when all windows lose focus', () => {
+    const { events, handlers } = setUp();
+
+    events.windowFocusChanged.fire(5);
+    events.windowFocusChanged.fire(-1);
+
+    expect(handlers.windowFocused).toHaveBeenCalledTimes(1);
+    expect(handlers.windowFocused).toHaveBeenCalledWith(5);
   });
 
   it('gives what is known of a tab that was created, and nothing else of it', () => {
@@ -308,6 +329,38 @@ describe('adapters/browser/events.ts', () => {
     );
   });
 
+  it('tells of a window that was closed, and logs a failure to handle it', async () => {
+    const { events, handlers, logger } = setUp();
+    const failure = new Error('no storage');
+    handlers.windowRemoved.mockRejectedValueOnce(failure);
+
+    events.windowRemoved.fire(7);
+    await settle();
+
+    expect(handlers.windowRemoved).toHaveBeenCalledTimes(1);
+    expect(handlers.windowRemoved).toHaveBeenCalledWith(7);
+    expect(logger.error).toHaveBeenCalledWith(
+      '[windows.onRemoved] handler failed:',
+      failure,
+    );
+  });
+
+  it('tells of an update that is waiting, and logs a failure to handle it', async () => {
+    const { events, handlers, logger } = setUp();
+    const failure = new Error('no backup');
+    handlers.updateAvailable.mockRejectedValueOnce(failure);
+
+    events.updateAvailable.fire({ version: '2.0' });
+    await settle();
+
+    expect(handlers.updateAvailable).toHaveBeenCalledTimes(1);
+    expect(handlers.updateAvailable).toHaveBeenCalledWith();
+    expect(logger.error).toHaveBeenCalledWith(
+      '[runtime.onUpdateAvailable] handler failed:',
+      failure,
+    );
+  });
+
   describe('messages from the extension pages', () => {
     it('answers with what the handler gives, and keeps the channel open for it', async () => {
       const { events, handlers } = setUp();
@@ -370,11 +423,14 @@ describe('adapters/browser/events.ts', () => {
 
       events.onCommand.fire('c');
       events.windowCreated.fire({ id: 1 });
+      events.windowRemoved.fire(1);
+      events.windowFocusChanged.fire(1);
       events.tabCreated.fire({ id: 1, windowId: 1 });
       events.tabAttached.fire(1, { newWindowId: 1 });
       events.tabDetached.fire(1);
       events.tabActivated.fire({ tabId: 1 });
       events.tabUpdated.fire(1, {}, {});
+      events.tabRemoved.fire(1, {});
       events.groupRemoved.fire({ id: 1, windowId: 1 });
       events.groupUpdated.fire({ id: 1, windowId: 1 });
       events.storageChanged.fire({}, 'sync');
@@ -386,11 +442,14 @@ describe('adapters/browser/events.ts', () => {
       expect(logger.error.mock.calls.map((call) => String(call[0]))).toEqual([
         '[commands.onCommand] handler failed:',
         '[windows.onCreated] handler failed:',
+        '[windows.onRemoved] handler failed:',
+        '[windows.onFocusChanged] handler failed:',
         '[tabs.onCreated] handler failed:',
         '[tabs.onAttached] handler failed:',
         '[tabs.onDetached] handler failed:',
         '[tabs.onActivated] handler failed:',
         '[tabs.onUpdated] handler failed:',
+        '[tabs.onRemoved] handler failed:',
         '[tabGroups.onRemoved] handler failed:',
         '[tabGroups.onUpdated] handler failed:',
         '[storage.onChanged] handler failed:',

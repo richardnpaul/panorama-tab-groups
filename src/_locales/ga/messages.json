@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Úsáid grúpaí cluaisíní dúchasacha an bhrabhsálaí le haghaidh eagrúchán amhairc agus laghdú."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Ní thacaítear le grúpaí cluaisíní dúchasacha sa leagan brabhsálaí seo (teastaíonn API folaithe cluaisíní)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Úsáideann an brabhsálaí seo grúpaí cluaisíní dúchasacha i gcónaí, mar sin ní féidir an socrú seo a athrú."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Ní thacaítear le grúpaí cluaisíní dúchasacha sa leagan brabhsálaí seo. Nuashonraigh go Firefox 139+ nó úsáid Chrome 89+."

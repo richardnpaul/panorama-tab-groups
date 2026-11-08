@@ -18,6 +18,7 @@ const KEPT_AS: Record<string, string> = {
   'value of a window': 'window',
   'value of a tab': 'tab',
   'storage.local': 'local',
+  'storage.session': 'session',
   'storage.sync': 'sync',
 };
 
@@ -44,15 +45,25 @@ function keysInCode(): string[] {
   ].map(([, scope = '', key = '']) => `${scope.toLowerCase()}:${key}`);
   const local = [
     ...code.matchAll(
-      /(?:const KEY|const STORAGE_KEY) = [^'\n;]*?'([A-Za-z_]+)'/gu,
+      /(?:const KEY|const STORAGE_KEY|const PRIVATE_KEY) = [^'\n;]*?'([A-Za-z_]+)'/gu,
     ),
   ].map(([, key = '']) => `local:${key}`);
+  // Each link to a native group is a key of its own, which starts with this
+  const session = [
+    ...code.matchAll(/const SESSION_KEY_PREFIX = [^'\n;]*?'([A-Za-z_]+)'/gu),
+  ].map(([, key = '']) => `session:${key}`);
+  // And the keys of the flags it keeps there, one to a constant
+  const flags = [
+    ...code.matchAll(/const SESSION_KEY = [^'\n;]*?'([A-Za-z_]+)'/gu),
+  ].map(([, key = '']) => `session:${key}`);
   // The options are the keys of the defaults; the one older versions kept is still read
   const sync = [
     ...Object.keys(createDefaultOptions('1.0', true)),
     ...(/useDarkTheme/u.test(code) ? ['useDarkTheme'] : []),
   ].map((key) => `sync:${key}`);
-  return [...new Set([...sessionValues, ...local, ...sync])];
+  return [
+    ...new Set([...sessionValues, ...local, ...session, ...flags, ...sync]),
+  ];
 }
 
 describe('what the extension stores', () => {

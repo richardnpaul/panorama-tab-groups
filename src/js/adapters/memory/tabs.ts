@@ -83,6 +83,22 @@ export function createMemoryTabs(
           .filter(({ id }) => !hiddenIds.has(id))
           .map(({ id }) => id),
       ),
+    hiddenIdsInWindow: (windowId) =>
+      Promise.resolve(
+        inWindow(windowId)
+          .filter(({ id }) => hiddenIds.has(id))
+          .map(({ id }) => id),
+      ),
+    idsOfAddressesUnder: (prefix) =>
+      Promise.resolve(
+        details
+          .filter(
+            ({ url, pendingUrl }) =>
+              url?.startsWith(prefix) === true ||
+              pendingUrl?.startsWith(prefix) === true,
+          )
+          .map(({ id }) => id),
+      ),
     activate(tabId) {
       calls.push(`activate ${String(tabId)}`);
       return Promise.resolve();
@@ -97,10 +113,33 @@ export function createMemoryTabs(
       tabIds.forEach((id) => hiddenIds.delete(id));
       return Promise.resolve();
     },
+    unpin(tabId) {
+      calls.push(`unpin ${String(tabId)}`);
+      const found = details.find(({ id }) => id === tabId);
+      if (found === undefined) {
+        return Promise.reject(new Error(`Invalid tab ID: ${String(tabId)}`));
+      }
+      found.pinned = false;
+      return Promise.resolve();
+    },
     moveToEnd(tabId) {
       calls.push(`move ${String(tabId)}`);
       const moved = details.filter(({ id }) => id === tabId);
       details = [...details.filter(({ id }) => id !== tabId), ...moved];
+      return Promise.resolve();
+    },
+    moveBeside(tabId, besideTabId, before) {
+      calls.push(
+        `move ${String(tabId)} ${before ? 'before' : 'after'} ${String(besideTabId)}`,
+      );
+      const moved = details.filter(({ id }) => id === tabId);
+      const others = details.filter(({ id }) => id !== tabId);
+      const at = others.findIndex(({ id }) => id === besideTabId);
+      details = [
+        ...others.slice(0, before ? at : at + 1),
+        ...moved,
+        ...others.slice(before ? at : at + 1),
+      ];
       return Promise.resolve();
     },
     close(tabId) {

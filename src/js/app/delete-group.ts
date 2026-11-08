@@ -1,21 +1,32 @@
+import { isReservedGroupId } from '../core/constants.js';
+import { menuItemId } from '../core/menu-items.js';
+import { fallbackActiveGroup } from '../core/tab-assignment.js';
 import type { GroupDeletionRequest as GroupDeletion } from '../core/messages.js';
-import type { GroupState } from '../ports/group-state.js';
+import type { Group, GroupState } from '../ports/group-state.js';
 import type { Logger } from '../ports/logger.js';
 import type { Menus } from '../ports/menus.js';
 import type { NativeGroups } from '../ports/native-groups.js';
 import type { Tabs } from '../ports/tabs.js';
 import { messageOf } from '../share/guards.js';
+import type { OwnMoves } from './own-moves.js';
 import type { WindowGroups } from './window-groups.js';
 
 export interface DeleteGroupDeps {
   tabs: Pick<Tabs, 'listInWindow' | 'close'>;
   nativeGroups: Pick<NativeGroups, 'removeTabs'>;
-  groupState: Pick<GroupState, 'getGroups' | 'setGroups'>;
+  groupState: Pick<
+    GroupState,
+    'getGroups' | 'setGroups' | 'getActiveGroup' | 'setActiveGroup'
+  >;
   windowGroups: Pick<WindowGroups, 'createGroupInWindow'>;
   menus: Pick<Menus, 'remove'>;
   // Whether the browser has native tab groups at all
   hasTabGroups: boolean;
-  logger: Pick<Logger, 'debug' | 'error'>;
+  // Shows the tabs of a group in a window, and hides the rest
+  toggleVisibleTabs: (activeGroup: number, windowId: number) => Promise<void>;
+  // What the browser says of a tab the add-on ungroups to close is not the person's doing
+  ownMoves: Pick<OwnMoves, 'during'>;
+  logger: Pick<Logger, 'debug' | 'warn' | 'error'>;
 }
 
 export type DeletionResult =
@@ -32,6 +43,8 @@ export function createGroupDeletion({
   windowGroups,
   menus,
   hasTabGroups,
+  toggleVisibleTabs,
+  ownMoves,
   logger,
 }: DeleteGroupDeps): (deletion: GroupDeletion) => Promise<DeletionResult> {
   // Taken out first, so the browser does not keep a group of closed tabs
@@ -52,7 +65,7 @@ export function createGroupDeletion({
         ),
       );
       if (inGroup.length > 0) {
-        await nativeGroups.removeTabs(inGroup);
+        await ownMoves.during(inGroup, () => nativeGroups.removeTabs(inGroup));
         logger.debug(
           `Ungrouped ${String(inGroup.length)} tabs from native group ${String(nativeGroupId)}`,
         );
@@ -78,6 +91,30 @@ export function createGroupDeletion({
     );
   }
 
+  // The window shows a group that exists once one is taken from it: if it was the one shown (its
+  // tabs closed with it, or it had none because a pinned tab was all it had), the first of the
+  // others is; if it was the last of the user's, a new first group is made
+  async function putRight(
+    windowId: number,
+    groupId: number,
+    left: readonly Group[],
+  ): Promise<void> {
+    // The group for ungrouped tabs stays, and is not one of the user's
+    if (left.every(({ id }) => isReservedGroupId(id))) {
+      logger.debug('Last group deleted, creating new initial group...');
+      await windowGroups.createGroupInWindow(windowId);
+      return;
+    }
+    if ((await groupState.getActiveGroup(windowId)) === groupId) {
+      // The group for ungrouped tabs is among them, and is not a group a window shows
+      const next = fallbackActiveGroup(left);
+      await groupState.setActiveGroup(windowId, next);
+      await toggleVisibleTabs(next, windowId).catch((error: unknown) => {
+        logger.warn(`Could not show group ${String(next)}:`, error);
+      });
+    }
+  }
+
   async function forgetGroup({
     groupId,
     windowId,
@@ -88,11 +125,14 @@ export function createGroupDeletion({
     }
     const left = groups.filter(({ id }) => id !== groupId);
     await groupState.setGroups(windowId, left);
-
-    if (left.length === 0) {
-      logger.debug('Last group deleted, creating new initial group...');
-      await windowGroups.createGroupInWindow(windowId);
-    }
+    // The group is gone for good once the groups are stored without it: what fails after is no
+    // failure to delete, or a page would keep the group and store it again
+    await putRight(windowId, groupId, left).catch((error: unknown) => {
+      logger.warn(
+        `Group ${String(groupId)} is deleted, but window ${String(windowId)} could not be put right after it:`,
+        error,
+      );
+    });
   }
 
   return async function deleteGroup(deletion) {
@@ -103,14 +143,14 @@ export function createGroupDeletion({
     try {
       await ungroupTabs(deletion);
       await closeTabs(deletion.tabIds);
-      await forgetGroup(deletion);
 
       try {
-        await menus.remove(String(deletion.groupId));
+        await menus.remove(menuItemId(deletion.windowId, deletion.groupId));
       } catch (error) {
         // The menu item may not exist
         logger.debug(`Could not remove menu item: ${messageOf(error)}`);
       }
+      await forgetGroup(deletion);
       return { success: true };
     } catch (error) {
       logger.error(

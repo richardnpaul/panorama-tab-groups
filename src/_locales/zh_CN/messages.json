@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "使用浏览器原生标签页组进行可视化整理和折叠。"
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "此浏览器版本不支持原生标签页组（需要标签页隐藏 API）。"
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "此浏览器始终使用原生标签页组，因此无法更改此设置。"
   },
   "optionsNativeGroupsLegacy": {
     "message": "此浏览器版本不支持原生标签页组。请更新到 Firefox 139+ 或使用 Chrome 89+。"

@@ -4,6 +4,9 @@ import { readFileSync } from 'node:fs';
 import { createFakeSessions } from '../../support/fake-sessions.js';
 import { markedMessage, textsOutsideMessages } from '../../support/messages.js';
 
+// Each test imports the page's modules afresh, which a full run under Istanbul on every core can take longer than the default 5 s to do
+vi.setConfig({ testTimeout: 30_000 });
+
 const WINDOW = 1;
 const VIEW_TAB = 99;
 
@@ -60,6 +63,8 @@ async function load(
     tabGroups?: Record<number, number>;
     groups?: ReturnType<typeof group>[];
     stored?: Record<string, unknown>;
+    // The links of the groups to native groups, as `storage.session` keeps them
+    links?: Record<string, number>;
     path?: string;
     // The markup of the page, where the test is about what the page itself says
     page?: string;
@@ -75,6 +80,7 @@ async function load(
     tabGroups = { 1: 0, 2: 1, [VIEW_TAB]: -1 },
     groups = [group(0, 'First'), group(1, 'Second')],
     stored = {},
+    links,
     page = PAGE,
   } = options;
   document.body.className = '';
@@ -115,7 +121,17 @@ async function load(
         set: vi.fn().mockResolvedValue(undefined),
       },
       onChanged: events.storageChanged,
+      ...(links === undefined
+        ? {}
+        : {
+            session: {
+              get: vi.fn(() => Promise.resolve({ ...links })),
+              set: vi.fn().mockResolvedValue(undefined),
+              remove: vi.fn().mockResolvedValue(undefined),
+            },
+          }),
     },
+    tabGroups: { update: vi.fn().mockResolvedValue(undefined) },
     sessions: sessions.api.sessions,
     windows: { getCurrent: vi.fn().mockResolvedValue({ id: WINDOW }) },
     tabs: {
@@ -385,6 +401,29 @@ describe('view/start.ts', () => {
       }
     });
 
+    it('gives the native group of a group that is renamed the new name as its title', async () => {
+      const env = await load({
+        links: { [`nativeGroup:${String(WINDOW)}:0`]: 50 },
+      });
+      await env.startView();
+      const header = element('#groups > .group .header');
+      header.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+      const input = header.querySelector('input');
+      if (input === null) {
+        throw new Error('No input to rename the group in');
+      }
+      input.value = 'Renamed';
+      input.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+      );
+      await settle();
+
+      expect(env.browser.tabGroups.update).toHaveBeenCalledWith(50, {
+        title: 'Renamed',
+      });
+      expect(groupNames()).toEqual(['Renamed', 'Second']);
+    });
+
     it('asks before closing a group that has tabs', async () => {
       const env = await load();
       await env.startView();
@@ -403,6 +442,8 @@ describe('view/start.ts', () => {
       const env = await load();
       await env.startView();
       vi.spyOn(window, 'confirm').mockReturnValue(true);
+      // The background deletes it
+      env.browser.runtime.sendMessage.mockResolvedValue({ success: true });
 
       element('#groups > .group .header .close').dispatchEvent(
         new MouseEvent('click', { bubbles: true, cancelable: true }),
@@ -417,6 +458,35 @@ describe('view/start.ts', () => {
           tabIds: [1],
         }),
       );
+    });
+
+    it('asks the background to put a tab dropped in a group there', async () => {
+      const env = await load();
+      await env.startView();
+      env.browser.runtime.sendMessage.mockResolvedValue({ success: true });
+      const transfer = {
+        dropEffect: '',
+        effectAllowed: '',
+        setData: vi.fn(),
+        setDragImage: vi.fn(),
+      };
+      const start = new Event('dragstart', { bubbles: true });
+      Object.defineProperty(start, 'dataTransfer', { value: transfer });
+      element('.tab[tabId="1"]').dispatchEvent(start);
+
+      const drop = new Event('drop', { bubbles: true, cancelable: true });
+      Object.defineProperty(drop, 'dataTransfer', { value: transfer });
+      const [, second] = document.querySelectorAll('#groups > .group .content');
+      second?.dispatchEvent(drop);
+      await settle();
+
+      expect(env.browser.runtime.sendMessage).toHaveBeenCalledWith({
+        action: 'placeTab',
+        tabId: 1,
+        groupId: 1,
+        windowId: WINDOW,
+        beside: undefined,
+      });
     });
 
     it('lets a group be moved by pressing in it, while the layout is the free one', async () => {

@@ -548,6 +548,30 @@ describe('popup-view/groups-frame.ts', () => {
       expect(items().map((item) => item.id)).toEqual(['group-1', 'group-2']);
     });
 
+    it('shows the groups again when the last is removed, with the first group the background made', async () => {
+      const env = setUp({ groups: [group(3, 'Empty', [])], lastUsed: null });
+      await env.render();
+      env.service.snapshot.mockResolvedValue({
+        groups: [group(5, 'Fresh', [])],
+        lastUsed: null,
+      });
+
+      click(closeButtonOf(0));
+      await flush();
+
+      expect(items().map((item) => item.id)).toEqual(['group-5']);
+    });
+
+    it('does not show the groups again while some are left', async () => {
+      const env = setUp();
+      await env.render();
+
+      click(closeButtonOf(2));
+      await flush();
+
+      expect(env.service.snapshot).toHaveBeenCalledTimes(1);
+    });
+
     it('leaves the group in the list when it could not be removed', async () => {
       const env = setUp();
       env.service.removeGroup.mockResolvedValue(false);

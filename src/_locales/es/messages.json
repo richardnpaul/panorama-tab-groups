@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Usar los grupos de pestañas nativos del navegador para la organización visual y el plegado."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Los grupos de pestañas nativos no son compatibles con esta versión del navegador (requiere la API para ocultar pestañas)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Este navegador siempre usa los grupos de pestañas nativos, así que este ajuste no se puede cambiar."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Los grupos de pestañas nativos no son compatibles con esta versión del navegador. Actualiza a Firefox 139+ o usa Chrome 89+."

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Erabili nabigatzailearen fitxa-talde natiboak antolaketa bisualerako eta tolesteko."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Fitxa-talde natiboak ez dira onartzen nabigatzailearen bertsio honetan (fitxak ezkutatzeko APIa behar da)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Nabigatzaile honek beti erabiltzen ditu fitxa-talde natiboak; beraz, ezarpen hau ezin da aldatu."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Fitxa-talde natiboak ez dira onartzen nabigatzailearen bertsio honetan. Eguneratu Firefox 139+ bertsiora edo erabili Chrome 89+."

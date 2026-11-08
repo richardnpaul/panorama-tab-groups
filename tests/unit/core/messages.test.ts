@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import {
   openEnvelope,
   parseGroupDeletion,
+  parseMenuChange,
   parseOpeningBackup,
+  parseTabPlacement,
+  isSuccess,
 } from '../../../src/js/core/messages.js';
 
 const valid = {
@@ -79,6 +82,60 @@ describe('core/messages.ts', () => {
     });
   });
 
+  describe('parseTabPlacement', () => {
+    const asked = { tabId: 11, groupId: 0, windowId: 1 };
+
+    it('reads a tab dropped in a group', () => {
+      expect(parseTabPlacement(asked)).toEqual({ ...asked, beside: undefined });
+    });
+
+    it('reads a tab dropped next to another, before or after it', () => {
+      expect(
+        parseTabPlacement({ ...asked, beside: { tabId: 12, before: false } }),
+      ).toEqual({ ...asked, beside: { tabId: 12, before: false } });
+    });
+
+    it('keeps nothing else of what it is given next to', () => {
+      expect(
+        parseTabPlacement({
+          ...asked,
+          beside: { tabId: 12, before: true, extra: 1 },
+        })?.beside,
+      ).toEqual({ tabId: 12, before: true });
+    });
+
+    it.each([
+      [{ groupId: 0, windowId: 1 }],
+      [{ tabId: 11, windowId: 1 }],
+      [{ tabId: 11, groupId: 0 }],
+      [{ ...asked, tabId: 1.5 }],
+      [{ ...asked, groupId: '0' }],
+      [{ ...asked, windowId: null }],
+      [{ ...asked, beside: 12 }],
+      [{ ...asked, beside: { tabId: '12', before: true } }],
+      [{ ...asked, beside: { tabId: 12 } }],
+      [{ ...asked, beside: null }],
+    ])('refuses %j', (message) => {
+      expect(parseTabPlacement(message)).toBeUndefined();
+    });
+  });
+
+  describe('isSuccess', () => {
+    it('is true for an answer that says it succeeded', () => {
+      expect(isSuccess({ success: true })).toBe(true);
+    });
+
+    it.each([
+      [{ success: false }],
+      [{ success: 'true' }],
+      [{}],
+      [undefined],
+      ['ok'],
+    ])('is false for %j', (answer) => {
+      expect(isSuccess(answer)).toBe(false);
+    });
+  });
+
   describe('parseOpeningBackup', () => {
     it.each([[true], [false]])('reads %s', (value) => {
       expect(parseOpeningBackup({ key: 'openingBackup', value })).toBe(value);
@@ -110,5 +167,56 @@ describe('core/messages.ts', () => {
         expect(openEnvelope(message)).toBeUndefined();
       },
     );
+  });
+
+  describe('parseMenuChange', () => {
+    it.each(['createMenuItem', 'updateMenuItem'] as const)(
+      'reads a %s message and leaves out extra fields',
+      (action) => {
+        expect(
+          parseMenuChange({
+            action,
+            windowId: 1,
+            groupId: 2,
+            groupName: 'Work',
+            extra: true,
+          }),
+        ).toStrictEqual({
+          action,
+          windowId: 1,
+          groupId: 2,
+          groupName: 'Work',
+        });
+      },
+    );
+
+    it('reads a removeMenuItem message and leaves out extra fields', () => {
+      expect(
+        parseMenuChange({
+          action: 'removeMenuItem',
+          windowId: 1,
+          groupId: 2,
+          extra: true,
+        }),
+      ).toStrictEqual({
+        action: 'removeMenuItem',
+        windowId: 1,
+        groupId: 2,
+      });
+    });
+
+    it.each([
+      [{ action: 'createMenuItem', windowId: '1', groupId: 2, groupName: 'A' }],
+      [{ action: 'createMenuItem', windowId: 1.5, groupId: 2, groupName: 'A' }],
+      [{ action: 'createMenuItem', windowId: 1, groupId: '2', groupName: 'A' }],
+      [{ action: 'createMenuItem', windowId: 1, groupId: 1.5, groupName: 'A' }],
+      [{ action: 'createMenuItem', windowId: 1, groupId: 2, groupName: 99 }],
+      [{ action: 'updateMenuItem', windowId: 1, groupId: 2 }],
+      [{ action: 'removeMenuItem', windowId: '1', groupId: 2 }],
+      [{ action: 'removeMenuItem', windowId: 1, groupId: '2' }],
+      [{ action: 'otherAction', windowId: 1, groupId: 2, groupName: 'A' }],
+    ])('refuses %j', (message) => {
+      expect(parseMenuChange(message)).toBeUndefined();
+    });
   });
 });

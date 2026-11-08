@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Nota eigin flipahópa vafrans fyrir sjónræna skipulagningu og samanbrot."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Eigin flipahópar eru ekki studdir í þessari útgáfu vafrans (krefst forritaskilsins til að fela flipa)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Þessi vafri notar alltaf eigin flipahópa, svo ekki er hægt að breyta þessari stillingu."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Eigin flipahópar eru ekki studdir í þessari útgáfu vafrans. Uppfærðu í Firefox 139+ eða notaðu Chrome 89+."

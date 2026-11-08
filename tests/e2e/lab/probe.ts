@@ -30,6 +30,14 @@ const isCommand = (value: unknown): value is Command =>
 
 /** Call the function at the path with the arguments, as the extension would */
 function call({ path, args }: Command): Promise<unknown> {
+  // Not an API: a link to a text made in this background, as a background of the add-on would
+  if (path === 'lab.objectUrl') {
+    return Promise.resolve(
+      URL.createObjectURL(
+        new Blob([String(args[0])], { type: 'application/json' }),
+      ),
+    );
+  }
   const names = path.split('.');
   const method = names.pop() ?? '';
   const owner = names.reduce<unknown>(

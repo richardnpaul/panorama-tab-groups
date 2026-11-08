@@ -62,10 +62,11 @@ function fakeGroups(initial: Group[]) {
     remove: (id) => {
       calls.push(`remove ${String(id)}`);
       const index = list.findIndex((each) => each.id === id);
-      if (index !== -1) {
-        list.splice(index, 1);
+      if (index === -1) {
+        return Promise.resolve(false);
       }
-      return Promise.resolve();
+      list.splice(index, 1);
+      return Promise.resolve(true);
     },
     rename: (id, name) => {
       calls.push(`rename ${String(id)} ${name}`);
@@ -340,6 +341,41 @@ describe('view/group-nodes.ts', () => {
       await settle();
     };
 
+    it('draws the first group the background made when the last was deleted', async () => {
+      const env = await setUp();
+      // Each other group the page has is drawn already
+      env.groups.list
+        .filter(({ id }) => id !== 1)
+        .forEach((each) => {
+          env.groupsNode.appendChild(env.nodes.make(each));
+        });
+      const node = env.nodes.make(group(1));
+      env.groupsNode.appendChild(node);
+      const remove = env.groups.remove.bind(env.groups);
+      env.groups.remove = async (id) => {
+        const deleted = await remove(id);
+        // A new first group, numbered 0, and the group for ungrouped tabs, which is not drawn
+        env.groups.list.push(
+          group(0, { name: 'Fresh' }),
+          group(-2, { name: 'Ungrouped' }),
+        );
+        return deleted;
+      };
+
+      await closeIt(env, node);
+
+      expect(node.isConnected).toBe(false);
+      expect(
+        [...env.groupsNode.querySelectorAll('.group .header .name')].map(
+          (name) => name.textContent,
+        ),
+      ).toEqual(['Group 2', 'Fresh']);
+      const fresh =
+        env.groupsNode.querySelector<HTMLElement>('.group:last-child');
+      // It is placed, as every group is
+      expect(fresh?.style.left).not.toBe('');
+    });
+
     it('deletes a group with no tabs at once, and takes its node away', async () => {
       const env = await setUp();
       const node = env.nodes.make(group(1));
@@ -396,7 +432,7 @@ describe('view/group-nodes.ts', () => {
       expect(env.confirm).toHaveBeenCalledWith('Закрыть вкладок?');
     });
 
-    it('deletes it when the user agrees, and makes the first group of those left the active one', async () => {
+    it('deletes it when the user agrees, and leaves the group the window shows to the background', async () => {
       const env = await setUp();
       const node = env.nodes.make(group(1));
       env.groupsNode.appendChild(node);
@@ -407,7 +443,7 @@ describe('view/group-nodes.ts', () => {
 
       await closeIt(env, node);
 
-      expect(env.groups.calls).toEqual(['remove 1', 'setActive 2']);
+      expect(env.groups.calls).toEqual(['remove 1']);
       expect(node.isConnected).toBe(false);
     });
 
@@ -476,6 +512,20 @@ describe('view/group-nodes.ts', () => {
       await closeIt(env, node);
 
       expect(reached).not.toHaveBeenCalled();
+    });
+
+    it('keeps a group the background did not delete, and shows no other', async () => {
+      const env = await setUp();
+      env.groups.list.push(group(1), group(2));
+      env.groups.remove = () => Promise.resolve(false);
+      const node = env.nodes.make(group(1));
+      env.groupsNode.appendChild(node);
+
+      await closeIt(env, node);
+
+      expect(node.isConnected).toBe(true);
+      expect(env.groups.calls).not.toContain('setActive 1');
+      expect(env.groups.calls).not.toContain('setActive 2');
     });
 
     it('says so when the group cannot be deleted', async () => {
@@ -710,6 +760,42 @@ describe('view/group-nodes.ts', () => {
         '[View] A group handler failed:',
         failure,
       );
+    });
+
+    it('shows the name it had again when the group cannot be renamed', async () => {
+      const env = await setUp();
+      env.groups.rename = () => Promise.reject(new Error('no'));
+      const node = env.nodes.make(group(1, { name: 'Work' }));
+      const header = part(node, '.header');
+      const input = inputOf(header);
+      header.dispatchEvent(new MouseEvent('dblclick'));
+      input.value = 'Other';
+
+      input.dispatchEvent(new FocusEvent('blur'));
+      await settle();
+
+      expect(part(header, '.name').textContent).toBe('Work');
+      expect(input.value).toBe('Work');
+    });
+
+    it('shows the name the group has when the rename fails, which a later rename may have given it', async () => {
+      const env = await setUp();
+      const shown = group(1, { name: 'Work' });
+      env.groups.rename = () => {
+        shown.name = 'Later';
+        return Promise.reject(new Error('no'));
+      };
+      const node = env.nodes.make(shown);
+      const header = part(node, '.header');
+      const input = inputOf(header);
+      header.dispatchEvent(new MouseEvent('dblclick'));
+      input.value = 'Other';
+
+      input.dispatchEvent(new FocusEvent('blur'));
+      await settle();
+
+      expect(part(header, '.name').textContent).toBe('Later');
+      expect(input.value).toBe('Later');
     });
   });
 
@@ -1374,7 +1460,7 @@ describe('view/group-nodes.ts', () => {
         content.insertBefore(element, part(content, '.newtab'));
       }
 
-      await env.nodes.insertTab(12);
+      await expect(env.nodes.insertTab(12)).resolves.toBe(true);
 
       expect(tabIdsIn(env, 1)).toEqual(['10', '12', '11', 'newtab']);
     });
@@ -1439,6 +1525,34 @@ describe('view/group-nodes.ts', () => {
       expect(tabIdsIn(env, 1)).toEqual(['10', '11', 'newtab']);
     });
 
+    it('puts a pinned tab among the pinned tabs, in its place in the window, whatever group is stored for it', async () => {
+      const env = await setUp({
+        groups: [group(1)],
+        tabs: [0, 1, 2].map((at) => tab(10 + at, { pinned: true, index: at })),
+        tabGroups: { 11: 1 },
+      });
+      await env.nodes.init(env.groupsNode, env.pinned);
+      // Tab 11 arrives
+      env.elements.get(11)?.remove();
+
+      await expect(env.nodes.insertTab(11)).resolves.toBe(true);
+
+      expect(Array.from(env.pinned.children).map(labelOf)).toEqual([
+        '10',
+        '11',
+        '12',
+      ]);
+      expect(env.nodes.contentOf(1)?.children).toHaveLength(1);
+    });
+
+    it('does not place a pinned tab before the pinned tabs are shown', async () => {
+      const env = await setUp({ tabs: [tab(10, { pinned: true })] });
+
+      await expect(env.nodes.insertTab(10)).resolves.toBe(false);
+
+      expect(env.pinned.children).toHaveLength(0);
+    });
+
     it('moves a tab to its group when its group changed', async () => {
       const env = await shownGroup(
         [
@@ -1468,7 +1582,7 @@ describe('view/group-nodes.ts', () => {
       });
       await env.nodes.init(env.groupsNode, env.pinned);
 
-      await env.nodes.insertTab(10);
+      await expect(env.nodes.insertTab(10)).resolves.toBe(false);
 
       expect(env.nodes.contentOf(1)?.children).toHaveLength(1);
     });
@@ -1482,7 +1596,7 @@ describe('view/group-nodes.ts', () => {
       await env.nodes.init(env.groupsNode, env.pinned);
       env.elements.delete(10);
 
-      await env.nodes.insertTab(10);
+      await expect(env.nodes.insertTab(10)).resolves.toBe(false);
 
       expect(tabIdsIn(env, 1)).toEqual(['10', 'newtab']);
     });

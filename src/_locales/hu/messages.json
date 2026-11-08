@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "A böngésző natív lapcsoportjainak használata a vizuális rendezéshez és az összecsukáshoz."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "A natív lapcsoportok nem támogatottak a böngésző ezen verziójában (a lapok elrejtésére szolgáló API szükséges)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Ez a böngésző mindig a natív lapcsoportokat használja, ezért ez a beállítás nem módosítható."
   },
   "optionsNativeGroupsLegacy": {
     "message": "A natív lapcsoportok nem támogatottak a böngésző ezen verziójában. Frissítsen Firefox 139+ verzióra, vagy használjon Chrome 89+ verziót."

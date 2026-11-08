@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Gebruik de eigen tabbladgroepen van de browser voor visuele ordening en het samenvouwen."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Eigen tabbladgroepen worden niet ondersteund in deze browserversie (de API voor het verbergen van tabbladen is vereist)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Deze browser gebruikt altijd zijn eigen tabbladgroepen, dus deze instelling kan niet worden gewijzigd."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Eigen tabbladgroepen worden niet ondersteund in deze browserversie. Werk bij naar Firefox 139+ of gebruik Chrome 89+."

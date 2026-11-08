@@ -18,7 +18,6 @@ const userGroup = (id: number): Group => ({
 const ungrouped: Group = {
   id: -2,
   name: 'Ungrouped Tabs',
-  containerId: 'browser-default',
   nativeGroupId: null,
   rect: { x: 0, y: 0, w: 0, h: 0 },
   lastMoved: NOW,

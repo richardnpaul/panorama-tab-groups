@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "שימוש בקבוצות הלשוניות המובנות של הדפדפן לארגון חזותי ולכיווץ."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "קבוצות לשוניות מובנות אינן נתמכות בגרסת הדפדפן הזו (נדרש ממשק API להסתרת לשוניות)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "דפדפן זה משתמש תמיד בקבוצות הלשוניות המובנות שלו, ולכן לא ניתן לשנות הגדרה זו."
   },
   "optionsNativeGroupsLegacy": {
     "message": "קבוצות לשוניות מובנות אינן נתמכות בגרסת הדפדפן הזו. יש לעדכן ל-Firefox 139 ומעלה או להשתמש ב-Chrome 89 ומעלה."

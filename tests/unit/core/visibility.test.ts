@@ -133,6 +133,26 @@ describe('core/visibility.ts', () => {
         expect(plan).toEqual({ kind: 'abort', hiddenCount: 3 });
       });
 
+      it('does not abort where tabs are not hidden, for a group with none to show is one to switch to', () => {
+        const plan = planVisibility(
+          input({
+            activeGroup: 2,
+            canHideTabs: false,
+            tabs: [tab(1, 1), tab(2, 1)],
+            groups: [group(1, 101), group(2, 102)],
+          }),
+        );
+
+        expect(plan).toMatchObject({
+          kind: 'apply',
+          hide: [],
+          show: [],
+          // The group with no tab has no native group to expand
+          collapse: [101],
+          expand: undefined,
+        });
+      });
+
       it('does not abort when at least one tab stays', () => {
         const plan = planVisibility(input({ tabs: [tab(1, 1), tab(2, 2)] }));
 

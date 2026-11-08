@@ -5,6 +5,7 @@ function setUp() {
   const deps = {
     handleMenuChange: vi.fn().mockResolvedValue(undefined),
     deleteGroup: vi.fn().mockResolvedValue({ success: true }),
+    tabMoves: { placeTab: vi.fn().mockResolvedValue(undefined) },
     nativeGroupsSync: {
       migrate: vi.fn().mockResolvedValue(true),
       cleanup: vi.fn().mockResolvedValue(undefined),
@@ -16,17 +17,27 @@ function setUp() {
       clear: vi.fn(),
     },
     setOpeningBackup: vi.fn(),
-    logger: { error: vi.fn() },
+    autoBackup: { changed: vi.fn() },
+    logger: { warn: vi.fn(), error: vi.fn() },
   };
   return { handle: createMessageHandler(deps), deps };
 }
 
 describe('app/message-handler.ts', () => {
-  it.each([['createMenuItem'], ['updateMenuItem'], ['removeMenuItem']])(
+  it.each([
+    [
+      'createMenuItem',
+      { action: 'createMenuItem', windowId: 1, groupId: 3, groupName: 'Work' },
+    ],
+    [
+      'updateMenuItem',
+      { action: 'updateMenuItem', windowId: 1, groupId: 3, groupName: 'Work' },
+    ],
+    ['removeMenuItem', { action: 'removeMenuItem', windowId: 1, groupId: 3 }],
+  ])(
     'passes the message of %s to the menu, and answers nothing',
-    async (action) => {
+    async (_action, message) => {
       const { handle, deps } = setUp();
-      const message = { action, groupId: 3, groupName: 'Work' };
 
       await expect(handle(message)).resolves.toBeUndefined();
 
@@ -34,6 +45,67 @@ describe('app/message-handler.ts', () => {
       expect(deps.handleMenuChange).toHaveBeenCalledWith(message);
     },
   );
+
+  it('refuses a menu change message that is not complete', async () => {
+    const { handle, deps } = setUp();
+    const message = { action: 'createMenuItem', groupId: 3, groupName: 'Work' };
+
+    await expect(handle(message)).resolves.toEqual({
+      error: 'Invalid menu change message',
+    });
+
+    expect(deps.handleMenuChange).not.toHaveBeenCalled();
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      'Invalid menu change message:',
+      message,
+    );
+  });
+
+  describe('placeTab', () => {
+    it('places the tab as the view asks, and says it did', async () => {
+      const { handle, deps } = setUp();
+
+      await expect(
+        handle({
+          action: 'placeTab',
+          tabId: 11,
+          groupId: 2,
+          windowId: 1,
+          beside: { tabId: 12, before: true },
+        }),
+      ).resolves.toEqual({ success: true });
+
+      expect(deps.tabMoves.placeTab).toHaveBeenCalledWith(11, 2, 1, {
+        tabId: 12,
+        before: true,
+      });
+    });
+
+    it('refuses a message that does not say where', async () => {
+      const { handle, deps } = setUp();
+
+      await expect(
+        handle({ action: 'placeTab', tabId: 11, windowId: 1 }),
+      ).resolves.toEqual({ success: false, error: 'Invalid placeTab message' });
+
+      expect(deps.tabMoves.placeTab).not.toHaveBeenCalled();
+    });
+
+    it('says so when the tab cannot be placed', async () => {
+      const { handle, deps } = setUp();
+      const failure = new Error('No tab with id: 11');
+      deps.tabMoves.placeTab.mockRejectedValue(failure);
+
+      await expect(
+        handle({ action: 'placeTab', tabId: 11, groupId: 2, windowId: 1 }),
+      ).resolves.toEqual({ success: false, error: 'No tab with id: 11' });
+
+      expect(deps.logger.error).toHaveBeenCalledWith(
+        '[Message] Tab 11 could not be placed:',
+        failure,
+      );
+    });
+  });
 
   describe('deleteGroup', () => {
     const message = {
@@ -198,6 +270,18 @@ describe('app/message-handler.ts', () => {
       ).resolves.toEqual({ error: 'Invalid setBackgroundState message' });
 
       expect(deps.setOpeningBackup).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('groupsChanged', () => {
+    it('tells the automatic backups of a change a page stored, and answers nothing', async () => {
+      const { handle, deps } = setUp();
+
+      await expect(
+        handle({ action: 'groupsChanged' }),
+      ).resolves.toBeUndefined();
+
+      expect(deps.autoBackup.changed).toHaveBeenCalledTimes(1);
     });
   });
 

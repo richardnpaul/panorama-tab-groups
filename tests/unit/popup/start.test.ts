@@ -4,6 +4,9 @@ import { createFakeSessions } from '../../support/fake-sessions.js';
 import { markedMessage, textsOutsideMessages } from '../../support/messages.js';
 import { setUpPopupPage } from '../../support/popup-page.js';
 
+// Each test imports the page's modules afresh, which a full run under Istanbul on every core can take longer than the default 5 s to do
+vi.setConfig({ testTimeout: 30_000 });
+
 const WINDOW = 1;
 
 const group = (id: number, name: string) => ({
@@ -78,7 +81,16 @@ async function load(
         set: vi.fn().mockResolvedValue(undefined),
       },
       onChanged: { addListener: vi.fn() },
+      // Group 1 is linked to native group 60
+      session: {
+        get: vi.fn(() =>
+          Promise.resolve({ [`nativeGroup:${String(WINDOW)}:1`]: 60 }),
+        ),
+        set: vi.fn().mockResolvedValue(undefined),
+        remove: vi.fn().mockResolvedValue(undefined),
+      },
     },
+    tabGroups: { update: vi.fn().mockResolvedValue(undefined) },
     sessions: sessions.api.sessions,
     windows: { getCurrent: vi.fn().mockResolvedValue({ id: WINDOW }) },
     tabs: {
@@ -247,6 +259,28 @@ describe('popup-view/start.ts', () => {
     );
   });
 
+  it('gives the native group of a group renamed in it the new name as its title', async () => {
+    const env = await load();
+    await env.startPopup();
+    element('#group-1 .list__link--extend').click();
+    await settle();
+
+    element('#aside-frame .group-edit').click();
+    const input = element('#aside-frame .group-edit-input input');
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error('No field for the name');
+    }
+    input.value = 'Renamed';
+    input.dispatchEvent(
+      new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }),
+    );
+    await settle();
+
+    expect(env.browser.tabGroups.update).toHaveBeenCalledWith(60, {
+      title: 'Renamed',
+    });
+  });
+
   it('says so when a frame cannot be shown', async () => {
     const env = await load();
     await env.startPopup();
@@ -317,7 +351,7 @@ describe('popup-view/start.ts', () => {
     ).toHaveLength(3);
   });
 
-  it('removes a group after asking', async () => {
+  it('removes a group after asking, and leaves the group shown next to the background', async () => {
     const env = await load();
     await env.startPopup();
 
@@ -329,7 +363,8 @@ describe('popup-view/start.ts', () => {
       expect.objectContaining({ action: 'deleteGroup', groupId: 0 }),
     );
     expect(document.getElementById('group-0')).toBeNull();
-    expect(env.browser.tabs.update).toHaveBeenCalledWith(2, { active: true });
+    // The background gives the window the group it shows next
+    expect(env.browser.tabs.update).not.toHaveBeenCalled();
   });
 
   it('puts the groups in a new order', async () => {

@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import type { BackgroundHandlers } from '../../../src/js/adapters/browser/events.js';
 import { createFakeSessions } from '../../support/fake-sessions.js';
 
@@ -119,6 +127,12 @@ function fakeBrowser(tabs: FakeTab[], { withTabGroups = true } = {}) {
       create: vi.fn().mockResolvedValue('id'),
       clear: vi.fn().mockResolvedValue(true),
     },
+    downloads: {
+      download: vi.fn().mockResolvedValue(3),
+      search: vi.fn().mockResolvedValue([{ state: 'complete' }]),
+      erase: vi.fn().mockResolvedValue([3]),
+      onChanged: { addListener: vi.fn(), removeListener: vi.fn() },
+    },
     ...(withTabGroups
       ? {
           tabGroups: {
@@ -147,6 +161,13 @@ async function compose(
 }
 
 describe('background/compose.ts', () => {
+  // The first import reads every module of the background, which can take longer than a test is
+  // given while the whole suite runs with coverage; it is done once, here, and each test then
+  // imports its own copy from the modules already read
+  beforeAll(async () => {
+    await import('../../../src/js/background/compose.js');
+  }, 30_000);
+
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -164,6 +185,8 @@ describe('background/compose.ts', () => {
       'toggleView',
       'triggerCommand',
       'createGroupInWindowIfMissing',
+      'windowRemoved',
+      'windowFocused',
       'tabCreated',
       'tabAttached',
       'tabDetached',
@@ -176,6 +199,7 @@ describe('background/compose.ts', () => {
       'storageChanged',
       'nativeGroupRemoved',
       'nativeGroupUpdated',
+      'updateAvailable',
     ];
     names.forEach((name) => {
       expect(typeof handlers[name]).toBe('function');
@@ -302,7 +326,7 @@ describe('background/compose.ts', () => {
     ]);
     await init();
 
-    await handlers.menuClicked({ menuItemId: '0' }, { id: 5, windowId: 1 });
+    await handlers.menuClicked({ menuItemId: '1:0' }, { id: 5, windowId: 1 });
 
     expect(sessions.tabValues.get(sessions.slot(5, 'groupId'))).toBe(0);
     expect(browser.tabs.move).toHaveBeenCalledWith(5, { index: -1 });
@@ -318,13 +342,50 @@ describe('background/compose.ts', () => {
     expect(browser.contextMenus.removeAll).toHaveBeenCalled();
   });
 
-  it('deletes a group, with its tabs and its menu item, when the view asks', async () => {
-    const { handlers, init, browser } = await compose([tab(1), tab(5)]);
+  it('rebuilds the menu when focus changes, a window opens or closes, or the last group is deleted', async () => {
+    const { handlers, init, browser, sessions } = await compose([
+      tab(1, { active: true }),
+      tab(5),
+    ]);
     await init();
+
+    browser.contextMenus.removeAll.mockClear();
+    await handlers.windowFocused(1);
+    expect(browser.contextMenus.removeAll).toHaveBeenCalledTimes(1);
+
+    browser.contextMenus.removeAll.mockClear();
+    await handlers.createGroupInWindowIfMissing(2);
+    expect(browser.contextMenus.removeAll).toHaveBeenCalledTimes(1);
+
+    browser.contextMenus.removeAll.mockClear();
+    await handlers.windowRemoved(2);
+    expect(browser.contextMenus.removeAll).toHaveBeenCalledTimes(1);
+
+    await sessions.api.sessions.setTabValue(1, 'groupId', 0);
+    await sessions.api.sessions.setTabValue(5, 'groupId', 4);
+    await sessions.api.sessions.setWindowValue(1, 'groups', [
+      { id: 0, name: 'A', containerId: 'c', rect: { x: 0, y: 0, w: 1, h: 1 } },
+      { id: 4, name: 'B', containerId: 'c', rect: { x: 0, y: 0, w: 1, h: 1 } },
+    ]);
+    await sessions.api.sessions.setWindowValue(1, 'activeGroup', 0);
+
+    browser.contextMenus.removeAll.mockClear();
+    await expect(
+      handlers.handleMessage({
+        action: 'deleteGroup',
+        groupId: 0,
+        windowId: 1,
+        nativeGroupId: null,
+        tabIds: [1],
+      }),
+    ).resolves.toEqual({ success: true });
+    expect(browser.contextMenus.remove).toHaveBeenCalledWith('1:0');
+    expect(browser.contextMenus.removeAll).not.toHaveBeenCalled();
+    expect(sessions.windowValues.get(sessions.slot(1, 'activeGroup'))).toBe(4);
 
     const answer = await handlers.handleMessage({
       action: 'deleteGroup',
-      groupId: 0,
+      groupId: 4,
       windowId: 1,
       nativeGroupId: null,
       tabIds: [5],
@@ -332,7 +393,8 @@ describe('background/compose.ts', () => {
 
     expect(answer).toEqual({ success: true });
     expect(browser.tabs.remove).toHaveBeenCalledWith(5);
-    expect(browser.contextMenus.remove).toHaveBeenCalledWith('0');
+    expect(browser.contextMenus.remove).toHaveBeenCalledWith('1:4');
+    expect(browser.contextMenus.removeAll).toHaveBeenCalledTimes(1);
   });
 
   it('switches to the next group for the shortcut', async () => {
@@ -369,11 +431,28 @@ describe('background/compose.ts', () => {
     expect(sessions.tabValues.get(sessions.slot(5, 'groupId'))).toBe(-1);
   });
 
-  it('shows the group of the tab that was activated and hides the others', async () => {
+  it('shows the group of the tab that was activated, and hides no tab, as native groups are on', async () => {
     const { handlers, init, browser, sessions } = await compose([
       tab(5, { active: true }),
       tab(6),
     ]);
+    await init();
+    await sessions.api.sessions.setTabValue(5, 'groupId', 0);
+    await sessions.api.sessions.setTabValue(6, 'groupId', 7);
+    browser.tabs.hide.mockClear();
+
+    await handlers.tabActivated({ tabId: 5 });
+
+    expect(browser.tabs.hide).not.toHaveBeenCalled();
+    expect(browser.action.setTitle).toHaveBeenCalled();
+  });
+
+  it('hides the tabs of the other groups with native groups off', async () => {
+    const { handlers, init, browser, sessions, sync } = await compose([
+      tab(5, { active: true }),
+      tab(6),
+    ]);
+    sync.useNativeGroups = false;
     await init();
     await sessions.api.sessions.setTabValue(5, 'groupId', 0);
     await sessions.api.sessions.setTabValue(6, 'groupId', 7);
@@ -382,6 +461,41 @@ describe('background/compose.ts', () => {
 
     expect(browser.tabs.hide).toHaveBeenCalledWith([6]);
     expect(browser.tabs.show).toHaveBeenCalledWith([5]);
+  });
+
+  it('stops waiting for a view tab that was closed before it showed up', async () => {
+    const { handlers, init, sessions } = await compose();
+    await init();
+    // The view asked for is tab 99, which is closed at once
+    await handlers.toggleView();
+
+    await handlers.tabRemoved(99);
+    await handlers.tabCreated({ id: 7, windowId: 1, url: 'https://site7/' });
+
+    // A tab opened in the window just after is not taken for the view
+    expect(await sessions.api.sessions.getTabValue(7, 'groupId')).toBe(0);
+  });
+
+  it('backs the groups up to a file by itself, a few seconds after they change', async () => {
+    const { handlers, init, browser } = await compose();
+    await init();
+
+    await handlers.tabDetached(1);
+    await vi.advanceTimersByTimeAsync(5000);
+
+    expect(browser.downloads.download).toHaveBeenCalledTimes(1);
+    expect(browser.downloads.download).toHaveBeenCalledWith(
+      expect.objectContaining({
+        filename: 'panorama-tab-groups-backups/backup-1.json',
+        conflictAction: 'overwrite',
+        saveAs: false,
+      }),
+    );
+    expect(browser.downloads.erase).toHaveBeenCalledWith({ id: 3 });
+    // The clock is the timers' fake one, which has moved on to when it was written
+    expect(browser.storage.local.set).toHaveBeenCalledWith({
+      automaticBackups: { next: 2, last: Date.now() },
+    });
   });
 
   it('works in a browser without native tab groups', async () => {

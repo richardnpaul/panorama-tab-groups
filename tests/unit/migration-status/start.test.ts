@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createFakeSessionArea } from '../../support/fake-session-area.js';
 import { createFakeSessions } from '../../support/fake-sessions.js';
 import { readFileSync } from 'node:fs';
 import {
@@ -8,6 +9,9 @@ import {
   textsOutsideMessages,
 } from '../../support/messages.js';
 import { flush } from '../../support/popup-page.js';
+
+// Each test imports the page's modules afresh, which a full run under Istanbul on every core can take longer than the default 5 s to do
+vi.setConfig({ testTimeout: 30_000 });
 
 const WINDOW = 2;
 
@@ -50,9 +54,11 @@ async function load(
       name: real ? '#1' : 'Work',
       containerId: 'firefox-default',
       rect: { x: 0, y: 0, w: 1, h: 1 },
-      nativeGroupId: 5,
     },
   ]);
+  // The link to its native group, which is kept apart from the group
+  const session = createFakeSessionArea();
+  await session.area.set({ [`nativeGroup:${String(WINDOW)}:1`]: 5 });
   const browserFake = {
     runtime: {
       getManifest: () => ({ version: '2.0' }),
@@ -64,6 +70,7 @@ async function load(
           .fn()
           .mockResolvedValue({ hybridGroupsMigrationComplete: complete }),
       },
+      session: session.area,
     },
     i18n: {
       getMessage: vi.fn(real ? markedMessage : englishMessage),

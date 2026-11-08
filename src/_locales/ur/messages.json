@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "بصری ترتیب اور سمیٹنے کے لیے براؤزر کے اپنے ٹیب گروپس استعمال کریں۔"
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "اس براؤزر ورژن میں اپنے ٹیب گروپس معاون نہیں ہیں (ٹیب چھپانے والا API درکار ہے)۔"
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "یہ براؤزر ہمیشہ اپنے ٹیب گروپس استعمال کرتا ہے، اس لیے یہ ترتیب تبدیل نہیں کی جا سکتی۔"
   },
   "optionsNativeGroupsLegacy": {
     "message": "اس براؤزر ورژن میں اپنے ٹیب گروپس معاون نہیں ہیں۔ براہ کرم Firefox 139+ پر اپ ڈیٹ کریں یا Chrome 89+ استعمال کریں۔"

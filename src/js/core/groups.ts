@@ -24,7 +24,6 @@ export function ensureUngroupedGroup(
       {
         id: UNGROUPED_GROUP_ID,
         name: UNGROUPED_GROUP_NAME,
-        containerId: 'browser-default',
         nativeGroupId: null, // Never has a native group
         rect: { x: 0, y: 0, w: 0, h: 0 }, // No position in the grid
         lastMoved: now,

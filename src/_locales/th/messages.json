@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "ใช้กลุ่มแท็บดั้งเดิมของเบราว์เซอร์เพื่อจัดระเบียบด้วยภาพและพับเก็บ"
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "เบราว์เซอร์รุ่นนี้ไม่รองรับกลุ่มแท็บดั้งเดิม (ต้องใช้ API ซ่อนแท็บ)"
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "เบราว์เซอร์นี้ใช้กลุ่มแท็บดั้งเดิมเสมอ จึงไม่สามารถเปลี่ยนการตั้งค่านี้ได้"
   },
   "optionsNativeGroupsLegacy": {
     "message": "เบราว์เซอร์รุ่นนี้ไม่รองรับกลุ่มแท็บดั้งเดิม โปรดอัปเดตเป็น Firefox 139+ หรือใช้ Chrome 89+"

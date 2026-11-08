@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Usar os grupos de lapelas nativos do navegador para a organización visual e o pregado."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Os grupos de lapelas nativos non son compatibles con esta versión do navegador (require a API para agochar lapelas)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Este navegador sempre usa os grupos de lapelas nativos, polo que este axuste non se pode cambiar."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Os grupos de lapelas nativos non son compatibles con esta versión do navegador. Actualiza a Firefox 139+ ou usa Chrome 89+."

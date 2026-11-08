@@ -176,17 +176,22 @@ describe('what is read from outside is read the same way for any input', () => {
         isSystemGroup: fc.boolean(),
         tabCount: fc.integer({ min: 0, max: 1000 }),
       },
-      { requiredKeys: ['id', 'name', 'containerId', 'rect'] },
+      { requiredKeys: ['id', 'name', 'rect'] },
     );
 
-    it('give back the groups that were kept, as they were, whatever fields they have', async () => {
+    it('give back the groups that were kept, as they were, but for a link to a native group given with them', async () => {
       await fc.assert(
         fc.asyncProperty(fc.array(group, { maxLength: 6 }), async (groups) => {
           const state = await stateWith({});
 
           await state.setGroups(1, groups);
 
-          expect(await state.getGroups(1)).toEqual(groups);
+          // A link is kept apart, by `setNativeGroupLink`; `null` (none yet) stays with the group
+          expect(await state.getGroups(1)).toEqual(
+            groups.map(({ nativeGroupId, ...rest }) =>
+              nativeGroupId === null ? { ...rest, nativeGroupId } : rest,
+            ),
+          );
         }),
       );
     });

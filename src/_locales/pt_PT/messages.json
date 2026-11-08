@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Utilizar os grupos de separadores nativos do navegador para organização visual e para os fechar."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Os grupos de separadores nativos não são suportados nesta versão do navegador (requer a API de ocultação de separadores)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Este navegador utiliza sempre os grupos de separadores nativos, pelo que esta definição não pode ser alterada."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Os grupos de separadores nativos não são suportados nesta versão do navegador. Atualize para o Firefox 139+ ou utilize o Chrome 89+."

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Käytä selaimen omia välilehtiryhmiä visuaaliseen järjestämiseen ja tiivistämiseen."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Selaimen omia välilehtiryhmiä ei tueta tässä selainversiossa (vaatii välilehtien piilotus -rajapinnan)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Tämä selain käyttää aina omia välilehtiryhmiään, joten tätä asetusta ei voi muuttaa."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Selaimen omia välilehtiryhmiä ei tueta tässä selainversiossa. Päivitä Firefox 139+ -versioon tai käytä Chrome 89+ -versiota."

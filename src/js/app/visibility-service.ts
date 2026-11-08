@@ -24,7 +24,7 @@ export interface VisibilityDeps {
   toolbar: {
     updateActionTitle: (windowId: number, activeGroup: number) => Promise<void>;
   };
-  // Whether the browser can hide tabs at all
+  // Whether the browser can hide tabs at all; they are hidden only while native groups are off
   canHideTabs: boolean;
   // Whether native tab groups are available and switched on
   useNativeGroups: () => Promise<boolean>;
@@ -100,16 +100,18 @@ export function createVisibilityService({
           ? await tabs.listInCurrentWindow()
           : await tabs.listSummariesInWindow(forWindow);
       const groupedTabs = await Promise.all(windowTabs.map(withGroup));
-      const groups = (await useNativeGroups())
+      const native = await useNativeGroups();
+      const groups = native
         ? ((await groupState.getGroups(windowId)) ?? [])
         : [];
 
+      // Native mode collapses the groups not shown, and hides no tab
       const plan = planVisibility({
         activeGroup: check.activeGroup,
         noTabSelected: noTabSelected ?? false,
         tabs: groupedTabs.filter((tab) => tab !== undefined),
         groups,
-        canHideTabs,
+        canHideTabs: canHideTabs && !native,
       });
 
       if (plan.kind === 'abort') {

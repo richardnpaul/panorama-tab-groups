@@ -28,6 +28,11 @@
       "type": "volume"
     },
     {
+      "source": "tgv-tmp",
+      "target": "/tmp",
+      "type": "volume"
+    },
+    {
       "source": "user-home-data",
       "target": "/home/vscode",
       "type": "volume"

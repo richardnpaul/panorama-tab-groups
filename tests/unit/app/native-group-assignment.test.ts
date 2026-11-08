@@ -75,7 +75,6 @@ describe('app/native-group-assignment.ts', () => {
     const outcome = await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1, 'Work'),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -91,6 +90,62 @@ describe('app/native-group-assignment.ts', () => {
     );
   });
 
+  it('makes the group expanded unless it is told to make it collapsed', async () => {
+    const env = await setUp([{ tab: tab(1), group: 1 }]);
+
+    await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(1, 'Work'),
+      label: 'TabCreated',
+    });
+    expect(env.nativeGroups.calls).toEqual([
+      'create 1',
+      'appearance 1000 Work',
+    ]);
+
+    const other = await setUp([{ tab: tab(1), group: 1 }]);
+    await other.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(1, 'Work'),
+      label: 'TabCreated',
+      collapsed: true,
+    });
+    expect(other.nativeGroups.calls).toEqual([
+      'create 1',
+      'appearance 1000 Work',
+      'collapse 1000',
+    ]);
+  });
+
+  it('leaves a pinned tab out of the native group, which would unpin it', async () => {
+    const env = await setUp([
+      { tab: tab(1), group: 1 },
+      { tab: { ...tab(2), pinned: true }, group: 1 },
+      { tab: tab(3), group: 1 },
+    ]);
+
+    await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(1, 'Work'),
+      label: 'TabCreated',
+    });
+
+    expect(await env.nativeGroups.tabIdsIn(1000)).toEqual([1, 3]);
+  });
+
+  it('makes no native group of a group whose tabs are all pinned', async () => {
+    const env = await setUp([{ tab: { ...tab(1), pinned: true }, group: 1 }]);
+
+    const outcome = await env.service.createNativeGroup({
+      windowId: WINDOW,
+      group: group(1, 'Work'),
+      label: 'TabCreated',
+    });
+
+    expect(outcome).toEqual({ kind: 'no-tabs' });
+    expect(env.nativeGroups.calls).toEqual([]);
+  });
+
   it('asks for the group in the window of the tabs, so that the browser does not make it in the window that has the focus and move the tabs there', async () => {
     const env = await setUp([
       { tab: tab(1), group: 1 },
@@ -101,7 +156,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1, 'Work'),
-      groups: env.groups,
       label: 'Migration',
     });
 
@@ -118,7 +172,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: env.groups[0] ?? group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -139,7 +192,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: env.groups[1] ?? group(2),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -155,7 +207,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(2, ''),
-      groups: env.groups,
       label: 'TabActivated',
     });
 
@@ -190,7 +241,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(2, ''),
-      groups: [{ ...group(1, 'Work'), nativeGroupId: 77 }, group(2, '')],
       label: 'TabMoved',
     });
 
@@ -217,7 +267,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(2, ''),
-      groups: env.groups,
       label: 'TabActivated',
     });
 
@@ -232,7 +281,6 @@ describe('app/native-group-assignment.ts', () => {
     const outcome = await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -253,7 +301,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -269,7 +316,6 @@ describe('app/native-group-assignment.ts', () => {
     const outcome = await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabActivated',
     });
 
@@ -287,7 +333,6 @@ describe('app/native-group-assignment.ts', () => {
     const outcome = await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -308,7 +353,6 @@ describe('app/native-group-assignment.ts', () => {
     const outcome = await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -331,7 +375,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -354,6 +397,8 @@ describe('app/native-group-assignment.ts', () => {
         createFromTabs: (ids, windowId) =>
           env.nativeGroups.createFromTabs(ids, windowId),
         setAppearance: (id, look) => env.nativeGroups.setAppearance(id, look),
+        setCollapsed: (id, collapsed) =>
+          env.nativeGroups.setCollapsed(id, collapsed),
         get: (id) => env.nativeGroups.get(id),
         removeTabs: () => Promise.reject(failure),
       },
@@ -364,7 +409,6 @@ describe('app/native-group-assignment.ts', () => {
     const outcome = await service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -384,7 +428,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 
@@ -407,6 +450,8 @@ describe('app/native-group-assignment.ts', () => {
         createFromTabs: (ids, windowId) =>
           env.nativeGroups.createFromTabs(ids, windowId),
         setAppearance: (id, look) => env.nativeGroups.setAppearance(id, look),
+        setCollapsed: (id, collapsed) =>
+          env.nativeGroups.setCollapsed(id, collapsed),
         get: () => Promise.reject(failure),
         removeTabs: (ids) => env.nativeGroups.removeTabs(ids),
       },
@@ -417,7 +462,6 @@ describe('app/native-group-assignment.ts', () => {
     const outcome = await service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabActivated',
     });
 
@@ -444,6 +488,8 @@ describe('app/native-group-assignment.ts', () => {
       nativeGroups: {
         createFromTabs: () => Promise.reject(failure),
         setAppearance: (id, look) => env.nativeGroups.setAppearance(id, look),
+        setCollapsed: (id, collapsed) =>
+          env.nativeGroups.setCollapsed(id, collapsed),
         get: (id) => env.nativeGroups.get(id),
         removeTabs: (ids) => env.nativeGroups.removeTabs(ids),
       },
@@ -455,7 +501,6 @@ describe('app/native-group-assignment.ts', () => {
       service.createNativeGroup({
         windowId: WINDOW,
         group: group(1),
-        groups: env.groups,
         label: 'TabCreated',
       }),
     ).rejects.toBe(failure);
@@ -471,7 +516,6 @@ describe('app/native-group-assignment.ts', () => {
     await env.service.createNativeGroup({
       windowId: WINDOW,
       group: group(1),
-      groups: env.groups,
       label: 'TabCreated',
     });
 

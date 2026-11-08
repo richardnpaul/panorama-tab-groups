@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Utiliser les groupes d'onglets natifs du navigateur pour l'organisation visuelle et le repli."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Les groupes d'onglets natifs ne sont pas pris en charge par cette version du navigateur (l'API de masquage des onglets est requise)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Ce navigateur utilise toujours les groupes d'onglets natifs, ce paramètre ne peut donc pas être modifié."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Les groupes d'onglets natifs ne sont pas pris en charge par cette version du navigateur. Veuillez passer à Firefox 139+ ou utiliser Chrome 89+."

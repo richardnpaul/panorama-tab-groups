@@ -83,6 +83,39 @@ test.describe('Values kept in Chromium', () => {
     };
 
     return {
+      /** Put tabs in a new native group, with a title, as the user would */
+      group: (tabIds: number[], windowId: number, title: string) =>
+        page.evaluate(
+          async (args) => {
+            const id = await browser.tabs.group({
+              tabIds: args.tabIds,
+              createProperties: { windowId: args.windowId },
+            });
+            await browser.tabGroups.update(id, { title: args.title });
+          },
+          { tabIds, windowId, title },
+        ),
+      /** One value of a window or a tab, as the emulation keeps it */
+      valueOf: async (scope: 'tabs' | 'windows', id: number, key: string) => {
+        const values = (await scopeOf(scope))[String(id)];
+        return isRecord(values) ? values[key] : undefined;
+      },
+      /** The links of the groups of a window to native groups, in `storage.session` */
+      links: (windowId: number): Promise<Record<string, unknown>> =>
+        page.evaluate(async (id) => {
+          const stored = await browser.storage.session.get(null);
+          return Object.fromEntries(
+            Object.entries(stored).filter(([key]) =>
+              key.startsWith(`nativeGroup:${String(id)}:`),
+            ),
+          );
+        }, windowId),
+      /** The native group a tab is in, or -1 */
+      nativeGroupOf: (tabId: number) =>
+        page.evaluate(
+          async (id) => (await browser.tabs.get(id)).groupId,
+          tabId,
+        ),
       tabs: () =>
         page.evaluate(async () => {
           const tabs = await browser.tabs.query({});
@@ -122,7 +155,7 @@ test.describe('Values kept in Chromium', () => {
       setTimeout(resolve, 2000);
     });
 
-  test('keeps the values of tabs that are closed, and of windows that are, for ever', async () => {
+  test('lets go of the values of a tab when it is closed, and keeps those of a window that is for a while', async () => {
     test.setTimeout(90000);
     const { context, extensionId } = await launch();
     try {
@@ -148,17 +181,36 @@ test.describe('Values kept in Chromium', () => {
       await Promise.all(pages.map((page) => page.close()));
       await settle();
 
-      // The tabs are gone; their values are not
+      // The tabs are gone, and so are their values: a tab that comes back has a new id
       const remaining = Object.keys(await look.stored('tabs'));
       open.forEach(({ id }) => {
-        expect(remaining).toContain(String(id));
+        expect(remaining).not.toContain(String(id));
       });
+
+      // A window that closes is dated and kept, for a window that comes back to be given its groups
+      const closing = await context.newPage();
+      await closing.goto(`chrome-extension://${extensionId}/options.html`);
+      const windowId = await closing.evaluate(async () => {
+        const created = await browser.windows.create({ url: 'about:blank' });
+        return created.id ?? 0;
+      });
+      await settle();
+      expect(Object.keys(await look.stored('windows'))).toContain(
+        String(windowId),
+      );
+      await closing.evaluate(async (id) => {
+        await browser.windows.remove(id);
+      }, windowId);
+      await settle();
+
+      const dated = await look.valueOf('windows', windowId, 'closedAt');
+      expect(typeof dated).toBe('number');
     } finally {
       await context.close();
     }
   });
 
-  test('gives a tab and a window that are restored new ids, so the values under the old ones do not reach them', async () => {
+  test('gives a tab and a window that are restored new ids, and lets go of the values under the old ones once the window has used them', async () => {
     test.setTimeout(90000);
     const first = await launch();
     let original:
@@ -202,16 +254,106 @@ test.describe('Values kept in Chromium', () => {
 
       const tabs = await look.stored('tabs');
       const windows = await look.stored('windows');
-      // What was stored under the old ids is still there, where nothing will ask for it...
-      expect(tabs[String(original?.id)]).toMatchObject({ groupId: 7 });
-      expect(windows[String(original?.windowId)]).toMatchObject({
-        activeGroup: 7,
-      });
-      // ...and the restored tab and window have what the add-on made for them since
+      // What was stored under the old ids is not: the window's groups went to the window that came
+      // back (the next test), and the tab's values with no tab to reach are let go of
+      expect(tabs[String(original?.id)]).toBeUndefined();
+      expect(windows[String(original?.windowId)]).toBeUndefined();
+      // The restored tab has the group the add-on found for it, not the one the old tab had
       expect(tabs[String(restored?.id)]).not.toMatchObject({ groupId: 7 });
-      expect(windows[String(restored?.windowId)]).not.toMatchObject({
-        activeGroup: 7,
+      expect(windows[String(restored?.windowId)]).toMatchObject({
+        groups: expect.arrayContaining([expect.objectContaining({ id: 0 })]),
       });
+    } finally {
+      await second.context.close();
+    }
+  });
+
+  test('rebuilds the groups of a window that is restored from its native groups and what was kept of the window', async () => {
+    test.setTimeout(90000);
+    const rects = {
+      Grp0: { x: 0, y: 0, w: 0.5, h: 0.5 },
+      Alpha: { x: 0.1, y: 0.2, w: 0.3, h: 0.4 },
+      Beta: { x: 0.5, y: 0.1, w: 0.2, h: 0.2 },
+      Empty: { x: 0.6, y: 0.6, w: 0.1, h: 0.1 },
+    };
+    const first = await launch();
+    try {
+      await settle();
+      const look = await inspector(first.context, first.extensionId);
+      await Promise.all(
+        ['a1', 'a2', 'b1'].map(async (name) => {
+          const page = await first.context.newPage();
+          await page.goto(`http://127.0.0.1:${String(port)}/${name}`);
+        }),
+      );
+      await settle();
+      const open = await look.tabs();
+      const idOf = (name: string): number =>
+        open.find(({ url }) => url?.endsWith(`/${name}`))?.id ?? 0;
+      const windowId =
+        open.find(({ url }) => url?.endsWith('/a1'))?.windowId ?? 0;
+
+      // As the user would have made them: two native groups with titles, and groups of the add-on's
+      // with places of their own, one of which has no tab
+      await look.group([idOf('a1'), idOf('a2')], windowId, 'Alpha');
+      await look.group([idOf('b1')], windowId, 'Beta');
+      await look.keep('windows', windowId, 'groups', [
+        // The group the add-on made for the tabs the window began with
+        { id: 0, name: 'Grp0', rect: rects.Grp0 },
+        { id: 3, name: 'Alpha', rect: rects.Alpha },
+        { id: 5, name: 'Beta', rect: rects.Beta },
+        { id: 8, name: 'Empty', rect: rects.Empty },
+      ]);
+      await look.keep('windows', windowId, 'activeGroup', 3);
+      await look.keep('windows', windowId, 'groupIndex', 9);
+      await look.keep('tabs', idOf('a1'), 'groupId', 3);
+      await look.keep('tabs', idOf('a2'), 'groupId', 3);
+      await look.keep('tabs', idOf('b1'), 'groupId', 5);
+      await settle();
+    } finally {
+      await first.context.close();
+    }
+
+    const second = await launch(true);
+    try {
+      await settle();
+      const look = await inspector(second.context, second.extensionId);
+      const restored = await look.tabs();
+      const idOf = (name: string): number =>
+        restored.find(({ url }) => url?.endsWith(`/${name}`))?.id ?? 0;
+      const windowId =
+        restored.find(({ url }) => url?.endsWith('/a1'))?.windowId ?? 0;
+
+      const groups = (await look.stored('windows'))[String(windowId)];
+      expect(groups).toMatchObject({
+        groups: [
+          { id: 0, name: 'Grp0', rect: rects.Grp0 },
+          { id: 3, name: 'Alpha', rect: rects.Alpha },
+          { id: 5, name: 'Beta', rect: rects.Beta },
+          { id: 8, name: 'Empty', rect: rects.Empty },
+          { id: -2 },
+        ],
+      });
+      expect(
+        Number(await look.valueOf('windows', windowId, 'groupIndex')),
+      ).toBeGreaterThanOrEqual(9);
+      const tabs = await look.stored('tabs');
+      expect(
+        ['a1', 'a2', 'b1'].map((name) => tabs[String(idOf(name))]),
+      ).toMatchObject([{ groupId: 3 }, { groupId: 3 }, { groupId: 5 }]);
+      // Each group is linked to the native group its tabs are in
+      const links = await look.links(windowId);
+      expect(Object.keys(links).sort()).toEqual([
+        `nativeGroup:${String(windowId)}:0`,
+        `nativeGroup:${String(windowId)}:3`,
+        `nativeGroup:${String(windowId)}:5`,
+      ]);
+      expect(await look.nativeGroupOf(idOf('a1'))).toBe(
+        links[`nativeGroup:${String(windowId)}:3`],
+      );
+      expect(await look.nativeGroupOf(idOf('b1'))).toBe(
+        links[`nativeGroup:${String(windowId)}:5`],
+      );
     } finally {
       await second.context.close();
     }

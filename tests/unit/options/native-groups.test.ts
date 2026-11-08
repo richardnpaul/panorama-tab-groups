@@ -39,7 +39,9 @@ const optionsWith = (useNativeGroups: boolean): Options => ({
 
 const PAGE = `
   <div id="nativeGroupsContainer">
-    <input type="checkbox" id="useNativeGroups" />
+    <label id="nativeGroupsLabel">
+      <input type="checkbox" id="useNativeGroups" />
+    </label>
     <span id="nativeGroupsWarning"></span>
   </div>
   <div id="nativeGroupsFeedback" style="display: none"></div>
@@ -90,10 +92,11 @@ describe('options/native-groups.ts', () => {
     },
     {
       mode: 'collapse-only' as const,
-      disabled: false,
-      className: 'warning-text',
+      // Native groups are the only kind there, so not a choice
+      disabled: true,
+      className: 'info-text',
       opacity: '0.5',
-      message: markedMessage('optionsNativeGroupsCollapseOnly'),
+      message: markedMessage('optionsNativeGroupsAlwaysOn'),
     },
     {
       mode: 'legacy' as const,
@@ -117,11 +120,13 @@ describe('options/native-groups.ts', () => {
       expect(html('nativeGroupsWarning')?.className).toBe(className);
     });
 
-    it('enables or disables the checkbox and dims the container', async () => {
+    it('enables or disables the checkbox and dims it, and not its explanation', async () => {
       await setUp(mode);
 
       expect(checkbox().disabled).toBe(disabled);
-      expect(html('nativeGroupsContainer')?.style.opacity).toBe(opacity);
+      expect(html('nativeGroupsLabel')?.style.opacity).toBe(opacity);
+      expect(html('nativeGroupsContainer')?.style.opacity).toBe('');
+      expect(html('nativeGroupsWarning')?.style.opacity).toBe('');
     });
   });
 

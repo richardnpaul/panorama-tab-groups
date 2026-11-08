@@ -21,7 +21,6 @@ export interface ViewTabsApi {
     getCurrent(): Promise<{ id?: number | undefined } | undefined>;
     update(tabId: number, updateProperties: { active: true }): Promise<unknown>;
     remove(tabId: number): Promise<unknown>;
-    move(tabId: number, moveProperties: { index: number }): Promise<unknown>;
     create(createProperties: {
       active: true;
     }): Promise<{ id?: number | undefined }>;
@@ -73,9 +72,6 @@ export function createBrowserViewTabs(getApi: () => ViewTabsApi): ViewTabs {
     },
     async close(tabId) {
       await tabs().remove(tabId);
-    },
-    async moveTo(tabId, index) {
-      await tabs().move(tabId, { index });
     },
     async openNew() {
       const { id } = await tabs().create({ active: true });

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "استخدام مجموعات ألسنة المتصفح الأصلية للتنظيم المرئي والطي."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "مجموعات الألسنة الأصلية غير مدعومة في إصدار المتصفح هذا (تتطلب واجهة إخفاء الألسنة)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "يستخدم هذا المتصفح مجموعات الألسنة الأصلية دائمًا، لذا لا يمكن تغيير هذا الإعداد."
   },
   "optionsNativeGroupsLegacy": {
     "message": "مجموعات الألسنة الأصلية غير مدعومة في إصدار المتصفح هذا. يُرجى التحديث إلى Firefox 139 أو أحدث أو استخدام Chrome 89 أو أحدث."

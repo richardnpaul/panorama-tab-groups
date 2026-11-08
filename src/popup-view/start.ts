@@ -3,6 +3,7 @@ import { createAppearanceSettings } from '../js/adapters/browser/appearance-sett
 import { createBrowserExtension } from '../js/adapters/browser/extension.js';
 import { createBrowserI18n } from '../js/adapters/browser/i18n.js';
 import { createBrowserMessaging } from '../js/adapters/browser/messaging.js';
+import { createBrowserNativeGroups } from '../js/adapters/browser/native-groups.js';
 import { createBrowserTabs } from '../js/adapters/browser/tabs.js';
 import { createBrowserViewTabs } from '../js/adapters/browser/view-tabs.js';
 import { createBrowserWindows } from '../js/adapters/browser/windows.js';
@@ -11,6 +12,8 @@ import { createSystemScheduler } from '../js/adapters/system/scheduler.js';
 import { createGroupsStore } from '../js/app/groups-store.js';
 import { createPopupService } from '../js/app/popup-service.js';
 import { stateManager } from '../js/background/StateManager.js';
+import { withBackupNotice } from '../js/app/page-backup-notice.js';
+import { waitForStoredGroups } from '../js/app/stored-groups-wait.js';
 import { requireElementById } from '../js/share/dom.js';
 import { createLate } from '../js/view/late.js';
 import { applyAppearance } from '../js/view/theme.js';
@@ -34,12 +37,22 @@ export async function startPopup(): Promise<void> {
 
   const logger = console;
   const viewTabs = createBrowserViewTabs(() => browser);
+  const messaging = createBrowserMessaging(() => browser);
+  const groupState = withBackupNotice(stateManager, messaging, logger);
   const windowId = await createBrowserWindows(() => browser).currentWindowId();
 
+  // Once the background has made the window's groups
+  await waitForStoredGroups(
+    groupState,
+    createSystemScheduler(),
+    logger,
+    windowId,
+  );
   const groups = await createGroupsStore(
     {
-      groupState: stateManager,
-      messaging: createBrowserMessaging(() => browser),
+      groupState,
+      messaging,
+      nativeGroups: createBrowserNativeGroups(() => browser),
       tabs: createBrowserTabs(() => browser),
       clock: systemClock,
       i18n,
@@ -49,7 +62,7 @@ export async function startPopup(): Promise<void> {
   );
   const service = createPopupService({
     groups,
-    groupState: stateManager,
+    groupState,
     tabs: viewTabs,
   });
 

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Gunakan grup tab asli peramban untuk pengaturan visual dan pelipatan."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Grup tab asli tidak didukung di versi peramban ini (memerlukan API penyembunyian tab)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Peramban ini selalu menggunakan grup tab asli, jadi pengaturan ini tidak dapat diubah."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Grup tab asli tidak didukung di versi peramban ini. Harap perbarui ke Firefox 139+ atau gunakan Chrome 89+."

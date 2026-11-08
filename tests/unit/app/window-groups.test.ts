@@ -21,10 +21,13 @@ function setUp({
   openingBackup = false,
   windowIds = [1],
   withUngrouped = true,
+  rebuilds = false,
 }: {
   openingBackup?: boolean;
   windowIds?: number[];
   withUngrouped?: boolean;
+  /** Whether the window gets its groups from its native groups */
+  rebuilds?: boolean;
 } = {}) {
   const clock = createMemoryClock(NOW);
   const memoryState = createMemoryGroupState();
@@ -38,6 +41,10 @@ function setUp({
     windows.open(id);
   });
   const order: string[] = [];
+  const rebuildWindow = vi.fn((windowId: number) => {
+    order.push(`rebuild ${String(windowId)}`);
+    return Promise.resolve(rebuilds);
+  });
   const waitForInitialization = vi.fn(() => {
     order.push('waited');
     return Promise.resolve();
@@ -53,9 +60,11 @@ function setUp({
       toolbar: createToolbarService({ groupState, toolbar, logger }),
       waitForInitialization,
       isOpeningBackup: () => openingBackup,
+      rebuildWindow,
       logger,
     }),
     groupState,
+    rebuildWindow,
     toolbar,
     logger,
     waitForInitialization,
@@ -74,7 +83,6 @@ describe('app/window-groups.ts', () => {
         {
           id: 0,
           name: 'Group 0',
-          containerId: 'browser-default',
           nativeGroupId: null,
           rect: { x: 0, y: 0, w: 0.5, h: 0.5 },
           lastMoved: NOW,
@@ -129,6 +137,42 @@ describe('app/window-groups.ts', () => {
       expect(env.waitForInitialization).toHaveBeenCalledTimes(1);
     });
 
+    it('lets a window with native groups be rebuilt from them before it makes a group', async () => {
+      const env = setUp({ rebuilds: true });
+
+      await env.groups.createGroupInWindowIfMissing(1);
+
+      expect(env.order).toEqual(['waited', 'rebuild 1']);
+      // The rebuild is what gave the window its groups, so no first group is made
+      expect(await env.groupState.getGroups(1)).toBeUndefined();
+    });
+
+    it('makes the first group when nothing could be rebuilt', async () => {
+      const env = setUp({ rebuilds: false });
+
+      await env.groups.createGroupInWindowIfMissing(1);
+
+      expect(env.rebuildWindow).toHaveBeenCalledWith(1);
+      expect(await env.groupState.getActiveGroup(1)).toBe(0);
+    });
+
+    it('does not rebuild a window that has groups already', async () => {
+      const env = setUp({ rebuilds: true });
+      await env.groups.createGroupInWindow(1);
+
+      await env.groups.createGroupInWindowIfMissing(1);
+
+      expect(env.rebuildWindow).not.toHaveBeenCalled();
+    });
+
+    it('does not rebuild while a backup is being opened, which brings its own groups', async () => {
+      const env = setUp({ rebuilds: true, openingBackup: true });
+
+      await env.groups.createGroupInWindowIfMissing(1);
+
+      expect(env.rebuildWindow).not.toHaveBeenCalled();
+    });
+
     it('gives a window without groups its first, and says so', async () => {
       const env = setUp();
 
@@ -150,6 +194,21 @@ describe('app/window-groups.ts', () => {
       expect((await env.groupState.getGroups(1))?.map(({ id }) => id)).toEqual([
         0,
       ]);
+    });
+
+    it('gives a window that has only the group for ungrouped tabs its first, as one whose last group was deleted', async () => {
+      const env = setUp();
+      await env.groupState.setGroups(1, []);
+      expect((await env.groupState.getGroups(1))?.map(({ id }) => id)).toEqual([
+        -2,
+      ]);
+
+      await env.groups.createGroupInWindowIfMissing(1);
+
+      expect(await env.groupState.getActiveGroup(1)).toBe(0);
+      expect(
+        (await env.groupState.getGroups(1))?.map(({ id }) => id).sort(),
+      ).toEqual([-2, 0]);
     });
 
     it('leaves the groups of a window that has some', async () => {

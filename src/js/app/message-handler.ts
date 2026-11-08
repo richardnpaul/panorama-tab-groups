@@ -1,25 +1,34 @@
 import {
   openEnvelope,
   parseGroupDeletion,
+  parseMenuChange,
   parseOpeningBackup,
+  parseTabPlacement,
   type GroupDeletionRequest,
+  type MenuChange,
 } from '../core/messages.js';
 import type { Logger } from '../ports/logger.js';
 import type { MigrationFlag } from '../ports/migration-flag.js';
 import type { DeletionResult } from './delete-group.js';
 import type { NativeGroupsSync } from './native-groups-sync.js';
+import type { TabMoves } from './tab-moves.js';
 import { messageOf } from '../share/guards.js';
 import type { ViewRefresh } from './view-refresh.js';
+import type { AutoBackup } from './auto-backup.js';
 
 export interface MessageHandlerDeps {
   // Create, rename or remove the menu item of a group
-  handleMenuChange: (message: unknown) => Promise<void>;
+  handleMenuChange: (change: MenuChange) => Promise<void>;
   deleteGroup: (deletion: GroupDeletionRequest) => Promise<DeletionResult>;
+  // A tab the view dropped is moved here, where what the browser says of the move is known to be
+  // the add-on's own doing
+  tabMoves: Pick<TabMoves, 'placeTab'>;
   nativeGroupsSync: Pick<NativeGroupsSync, 'migrate' | 'cleanup'>;
   migrationFlag: Pick<MigrationFlag, 'setComplete'>;
   viewRefresh: Pick<ViewRefresh, 'refreshView' | 'isOrdered' | 'clear'>;
   setOpeningBackup: (opening: boolean) => void;
-  logger: Pick<Logger, 'error'>;
+  autoBackup: Pick<AutoBackup, 'changed'>;
+  logger: Pick<Logger, 'warn' | 'error'>;
 }
 
 type Handler = (message: Record<string, unknown>) => Promise<unknown>;
@@ -31,13 +40,22 @@ type Handler = (message: Record<string, unknown>) => Promise<unknown>;
 export function createMessageHandler({
   handleMenuChange,
   deleteGroup,
+  tabMoves,
   nativeGroupsSync,
   migrationFlag,
   viewRefresh,
   setOpeningBackup,
+  autoBackup,
   logger,
 }: MessageHandlerDeps): (message: unknown) => Promise<unknown> {
-  const changeMenu: Handler = (message) => handleMenuChange(message);
+  const changeMenu: Handler = (message) => {
+    const change = parseMenuChange(message);
+    if (change === undefined) {
+      logger.warn('Invalid menu change message:', message);
+      return Promise.resolve({ error: 'Invalid menu change message' });
+    }
+    return handleMenuChange(change);
+  };
 
   const handlers = new Map<string, Handler>([
     ['createMenuItem', changeMenu],
@@ -54,6 +72,27 @@ export function createMessageHandler({
               error: 'Invalid deleteGroup message',
             })
           : deleteGroup(deletion);
+      },
+    ],
+
+    [
+      'placeTab',
+      async (message) => {
+        const placement = parseTabPlacement(message);
+        if (placement === undefined) {
+          return { success: false, error: 'Invalid placeTab message' };
+        }
+        const { tabId, groupId, windowId, beside } = placement;
+        try {
+          await tabMoves.placeTab(tabId, groupId, windowId, beside);
+          return { success: true };
+        } catch (error) {
+          logger.error(
+            `[Message] Tab ${String(tabId)} could not be placed:`,
+            error,
+          );
+          return { success: false, error: messageOf(error) };
+        }
       },
     ],
 
@@ -100,6 +139,16 @@ export function createMessageHandler({
           });
         }
         setOpeningBackup(opening);
+        return Promise.resolve(undefined);
+      },
+    ],
+
+    // A page stored groups itself; the message carries nothing to check, and a backup is only ever
+    // written once the changes stop and the last one is old enough
+    [
+      'groupsChanged',
+      () => {
+        autoBackup.changed();
         return Promise.resolve(undefined);
       },
     ],

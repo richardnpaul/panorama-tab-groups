@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Sebenzisa amaqela eethebhu esiXelisi ngokwaso ukulungiselela okubonakalayo nokubumba."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Amaqela eethebhu esiXelisi ngokwaso akaxhaswa kolu hlobo lwesiXelisi (kufuneka i-API yokufihla iithebhu)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Esi siphequluli sisoloko sisebenzisa amaqela eethebhu aso, ngoko olu seto alunakutshintshwa."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Amaqela eethebhu esiXelisi ngokwaso akaxhaswa kolu hlobo lwesiXelisi. Nceda uhlaziye ukuya kwi-Firefox 139+ okanye usebenzise i-Chrome 89+."

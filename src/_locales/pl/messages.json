@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Używaj natywnych grup kart przeglądarki do wizualnego porządkowania i zwijania."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Natywne grupy kart nie są obsługiwane w tej wersji przeglądarki (wymagany jest interfejs API do ukrywania kart)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Ta przeglądarka zawsze używa natywnych grup kart, więc tego ustawienia nie można zmienić."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Natywne grupy kart nie są obsługiwane w tej wersji przeglądarki. Zaktualizuj do Firefoksa 139+ lub użyj Chrome 89+."

@@ -161,8 +161,8 @@
   "optionsNativeGroupsHybrid": {
     "message": "Tumia vikundi asilia vya vichupo vya kivinjari kwa mpangilio wa kuona na kukunja."
   },
-  "optionsNativeGroupsCollapseOnly": {
-    "message": "Vikundi asilia vya vichupo havitumiki katika toleo hili la kivinjari (vinahitaji API ya kuficha vichupo)."
+  "optionsNativeGroupsAlwaysOn": {
+    "message": "Kivinjari hiki hutumia vikundi asilia vya vichupo kila wakati, kwa hivyo mpangilio huu hauwezi kubadilishwa."
   },
   "optionsNativeGroupsLegacy": {
     "message": "Vikundi asilia vya vichupo havitumiki katika toleo hili la kivinjari. Tafadhali sasisha hadi Firefox 139+ au tumia Chrome 89+."
