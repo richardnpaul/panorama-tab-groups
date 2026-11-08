@@ -34,6 +34,9 @@ interface RawNativeGroup {
   title?: string | undefined;
 }
 
+/** What the browser gives when no browser window has the focus */
+const WINDOW_ID_NONE = -1;
+
 /** The events of the browser that the background listens to */
 export interface EventsApi {
   action: { onClicked: Emitter<[unknown]> };
@@ -41,6 +44,7 @@ export interface EventsApi {
   windows: {
     onCreated: Emitter<[{ id?: number | undefined }]>;
     onRemoved: Emitter<[number]>;
+    onFocusChanged: Emitter<[number]>;
   };
   tabs: {
     onCreated: Emitter<[RawTab]>;
@@ -83,6 +87,8 @@ export interface BackgroundHandlers {
   createGroupInWindowIfMissing: (windowId: number) => Promise<void>;
   /** A window was closed */
   windowRemoved: (windowId: number) => Promise<void>;
+  /** Another window was given the focus */
+  windowFocused: (windowId: number) => Promise<void>;
   tabCreated: (tab: CreatedTab) => Promise<void>;
   tabAttached: (
     tabId: number,
@@ -154,6 +160,11 @@ export function registerListeners(
 
   api.windows.onRemoved.addListener((windowId) => {
     run('windows.onRemoved', handlers.windowRemoved(windowId));
+  });
+  api.windows.onFocusChanged.addListener((windowId) => {
+    if (windowId !== WINDOW_ID_NONE) {
+      run('windows.onFocusChanged', handlers.windowFocused(windowId));
+    }
   });
 
   api.tabs.onCreated.addListener((raw) => {

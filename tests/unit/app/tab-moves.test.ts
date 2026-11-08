@@ -166,7 +166,7 @@ describe('app/tab-moves.ts', () => {
       const env = await setUp({ useNative: false, currentWindow: 4 });
       await env.groupState.setGroups(WINDOW, [group(1)]);
 
-      await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+      await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
       expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
     });
@@ -567,6 +567,15 @@ describe('app/tab-moves.ts', () => {
       expect(env.toggleVisibleTabs).toHaveBeenCalledWith(1, WINDOW);
     });
 
+    it('puts a tab dropped on its own group at the end of the window, in its native group', async () => {
+      const env = await setUp({ tabGroups: { 10: 2, 11: 2 } });
+
+      await env.moves.placeTab(10, 2, WINDOW);
+
+      expect(env.tabs.calls).toEqual(['move 10']);
+      expect(env.nativeGroups.calls).toEqual(['add 10 to 60']);
+    });
+
     it('then puts it next to the tab it was dropped by', async () => {
       const env = await setUp({
         tabGroups: { 11: 1, 12: 2 },
@@ -689,7 +698,7 @@ describe('app/tab-moves.ts', () => {
       expect(env.order).toEqual(['removeAll', 'createMenuList']);
     });
 
-    it.each([['send-tab'], ['']])(
+    it.each([['send-tab'], [''], ['2'], [3]])(
       'ignores a click on the item %j, which is no group',
       async (menuItemId) => {
         const env = await setUp();
@@ -699,7 +708,7 @@ describe('app/tab-moves.ts', () => {
         expect(env.tabs.calls).toEqual([]);
         expect(env.createMenuList).not.toHaveBeenCalled();
         expect(env.logger.debug).toHaveBeenCalledWith(
-          `Ignored a click on the menu item ${menuItemId}`,
+          `Ignored a click on the menu item ${String(menuItemId)}`,
         );
       },
     );
@@ -707,7 +716,7 @@ describe('app/tab-moves.ts', () => {
     it('ignores a click that is not on a tab', async () => {
       const env = await setUp();
 
-      await env.moves.menuClicked({ menuItemId: '2' }, undefined);
+      await env.moves.menuClicked({ menuItemId: '1:2' }, undefined);
 
       expect(env.tabs.calls).toEqual([]);
       expect(await env.groupState.getTabGroup(11)).toBeUndefined();
@@ -716,16 +725,28 @@ describe('app/tab-moves.ts', () => {
     it('ignores a tab that has no id or no window', async () => {
       const env = await setUp();
 
-      await env.moves.menuClicked({ menuItemId: '2' }, { windowId: WINDOW });
-      await env.moves.menuClicked({ menuItemId: '2' }, { id: 11 });
+      await env.moves.menuClicked({ menuItemId: '1:2' }, { windowId: WINDOW });
+      await env.moves.menuClicked({ menuItemId: '1:2' }, { id: 11 });
 
       expect(env.tabs.calls).toEqual([]);
+    });
+
+    it('ignores a click on a menu item from another window', async () => {
+      const env = await setUp();
+
+      await env.moves.menuClicked({ menuItemId: '9:2' }, tab(11));
+
+      expect(env.tabs.calls).toEqual([]);
+      expect(await env.groupState.getTabGroup(11)).toBeUndefined();
+      expect(env.logger.debug).toHaveBeenCalledWith(
+        'Ignored a click on the menu item 9:2',
+      );
     });
 
     it('sends the tab that was clicked to the group', async () => {
       const env = await setUp({ useNative: false });
 
-      await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+      await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
       expect(await env.groupState.getTabGroup(11)).toBe(2);
       expect(env.tabs.calls).toEqual(['move 11']);
@@ -737,17 +758,9 @@ describe('app/tab-moves.ts', () => {
         tabs: [tab(10, { active: true }), tab(0)],
       });
 
-      await env.moves.menuClicked({ menuItemId: '2' }, tab(0));
+      await env.moves.menuClicked({ menuItemId: '1:2' }, tab(0));
 
       expect(await env.groupState.getTabGroup(0)).toBe(2);
-    });
-
-    it('sends the group by its number, whether it is a number or text', async () => {
-      const env = await setUp({ useNative: false });
-
-      await env.moves.menuClicked({ menuItemId: 3 }, tab(11));
-
-      expect(await env.groupState.getTabGroup(11)).toBe(3);
     });
 
     describe('for the active tab', () => {
@@ -757,7 +770,7 @@ describe('app/tab-moves.ts', () => {
           tabs: [tab(10), tab(11, { active: true }), tab(12)],
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
         expect(env.tabs.calls).toEqual(['activate 10', 'move 11']);
         expect(await env.groupState.getTabGroup(11)).toBe(2);
@@ -769,7 +782,7 @@ describe('app/tab-moves.ts', () => {
           tabs: [tab(10, { active: true }), tab(11)],
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(10));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(10));
 
         expect(env.tabs.calls).toEqual(['activate 11', 'move 10']);
       });
@@ -781,7 +794,7 @@ describe('app/tab-moves.ts', () => {
           tabGroups: { 10: 3, 11: 1, 12: 1 },
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
         expect(env.tabs.calls).toEqual(['activate 12', 'move 11']);
       });
@@ -793,7 +806,7 @@ describe('app/tab-moves.ts', () => {
           tabGroups: { 10: 3, 11: 1 },
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
         expect(env.tabs.calls).toEqual(['activate 11', 'move 11']);
       });
@@ -805,7 +818,7 @@ describe('app/tab-moves.ts', () => {
           tabGroups: { 10: 1, 11: 1 },
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(9));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(9));
 
         expect(env.tabs.calls).toEqual(['activate 10', 'unpin 9', 'move 9']);
         expect(await env.groupState.getTabGroup(9)).toBe(2);
@@ -823,7 +836,7 @@ describe('app/tab-moves.ts', () => {
           tabGroups: { 10: 1 },
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(9));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(9));
 
         expect(env.tabs.calls[0]).toBe('activate 8');
       });
@@ -836,7 +849,7 @@ describe('app/tab-moves.ts', () => {
         await env.tabs.hide([10]);
         env.tabs.calls.length = 0;
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
         expect(env.tabs.calls).toEqual(['activate 9', 'move 11']);
       });
@@ -852,7 +865,7 @@ describe('app/tab-moves.ts', () => {
           ],
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(10));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(10));
 
         expect(env.tabs.calls).toEqual(['activate 11', 'move 10']);
       });
@@ -862,7 +875,7 @@ describe('app/tab-moves.ts', () => {
       it('does not change which tab is active', async () => {
         const env = await setUp({ useNative: false });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(12));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(12));
 
         expect(env.tabs.calls).toEqual(['move 12']);
       });
@@ -876,7 +889,7 @@ describe('app/tab-moves.ts', () => {
           highlighted: [11, 12],
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
         expect(env.tabs.calls).toEqual(['move 11', 'move 12']);
         expect(await env.groupState.getTabGroup(10)).toBeUndefined();
@@ -892,7 +905,7 @@ describe('app/tab-moves.ts', () => {
           highlighted: [11, 12],
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
         expect(env.order).toEqual(['toggle', 'toggle']);
       });
@@ -907,7 +920,7 @@ describe('app/tab-moves.ts', () => {
           ],
         });
 
-        await env.moves.menuClicked({ menuItemId: '2' }, tab(11));
+        await env.moves.menuClicked({ menuItemId: '1:2' }, tab(11));
 
         expect(env.tabs.calls).toEqual(['move 11']);
         expect(await env.groupState.getTabGroup(20)).toBeUndefined();
@@ -923,7 +936,7 @@ describe('app/tab-moves.ts', () => {
         env.tabs.moveToEnd = () => Promise.reject(failure);
 
         await expect(
-          env.moves.menuClicked({ menuItemId: '2' }, tab(11)),
+          env.moves.menuClicked({ menuItemId: '1:2' }, tab(11)),
         ).rejects.toBe(failure);
 
         expect(await env.groupState.getTabGroup(12)).toBeUndefined();

@@ -364,7 +364,12 @@ export function composeBackgroundFrom({
     tabs,
     nativeGroups,
     groupState,
-    windowGroups,
+    windowGroups: {
+      createGroupInWindow: async (windowId) => {
+        await windowGroups.createGroupInWindow(windowId);
+        await createMenuList();
+      },
+    },
     menus,
     hasTabGroups: capabilities.hasTabGroups,
     toggleVisibleTabs: (activeGroup, windowId) =>
@@ -388,8 +393,15 @@ export function composeBackgroundFrom({
     handlers: {
       toggleView: createViewToggle({ tabs, windows, extension, viewOpening }),
       triggerCommand,
-      createGroupInWindowIfMissing: windowGroups.createGroupInWindowIfMissing,
-      windowRemoved: closedWindows.windowClosed,
+      createGroupInWindowIfMissing: async (windowId) => {
+        await windowGroups.createGroupInWindowIfMissing(windowId);
+        await createMenuList();
+      },
+      windowRemoved: async (windowId) => {
+        await closedWindows.windowClosed(windowId);
+        await createMenuList();
+      },
+      windowFocused: createMenuList,
       tabCreated: lifecycle.tabCreated,
       tabAttached: lifecycle.tabAttached,
       tabDetached: lifecycle.tabDetached,

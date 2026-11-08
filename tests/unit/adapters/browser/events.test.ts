@@ -25,6 +25,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     onCommand: emitter<[string]>(),
     windowCreated: emitter<[{ id?: number | undefined }]>(),
     windowRemoved: emitter<[number]>(),
+    windowFocusChanged: emitter<[number]>(),
     tabCreated: emitter<
       [
         {
@@ -69,6 +70,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     windows: {
       onCreated: events.windowCreated,
       onRemoved: events.windowRemoved,
+      onFocusChanged: events.windowFocusChanged,
     },
     tabs: {
       onCreated: events.tabCreated,
@@ -100,6 +102,7 @@ function setUp({ withTabGroups = true }: { withTabGroups?: boolean } = {}) {
     triggerCommand: vi.fn().mockResolvedValue(undefined),
     createGroupInWindowIfMissing: vi.fn().mockResolvedValue(undefined),
     windowRemoved: vi.fn().mockResolvedValue(undefined),
+    windowFocused: vi.fn().mockResolvedValue(undefined),
     tabCreated: vi.fn().mockResolvedValue(undefined),
     tabAttached: vi.fn().mockResolvedValue(undefined),
     tabDetached: vi.fn().mockResolvedValue(undefined),
@@ -175,6 +178,16 @@ describe('adapters/browser/events.ts', () => {
 
     expect(handlers.createGroupInWindowIfMissing).toHaveBeenCalledTimes(1);
     expect(handlers.createGroupInWindowIfMissing).toHaveBeenCalledWith(5);
+  });
+
+  it('tells when a window is given the focus, and ignores when all windows lose focus', () => {
+    const { events, handlers } = setUp();
+
+    events.windowFocusChanged.fire(5);
+    events.windowFocusChanged.fire(-1);
+
+    expect(handlers.windowFocused).toHaveBeenCalledTimes(1);
+    expect(handlers.windowFocused).toHaveBeenCalledWith(5);
   });
 
   it('gives what is known of a tab that was created, and nothing else of it', () => {
@@ -411,6 +424,7 @@ describe('adapters/browser/events.ts', () => {
       events.onCommand.fire('c');
       events.windowCreated.fire({ id: 1 });
       events.windowRemoved.fire(1);
+      events.windowFocusChanged.fire(1);
       events.tabCreated.fire({ id: 1, windowId: 1 });
       events.tabAttached.fire(1, { newWindowId: 1 });
       events.tabDetached.fire(1);
@@ -429,6 +443,7 @@ describe('adapters/browser/events.ts', () => {
         '[commands.onCommand] handler failed:',
         '[windows.onCreated] handler failed:',
         '[windows.onRemoved] handler failed:',
+        '[windows.onFocusChanged] handler failed:',
         '[tabs.onCreated] handler failed:',
         '[tabs.onAttached] handler failed:',
         '[tabs.onDetached] handler failed:',

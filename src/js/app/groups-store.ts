@@ -147,7 +147,8 @@ export async function createGroupsStore(
         groups.push(group);
         updateMenu({
           action: 'createMenuItem',
-          groupId: id.toString(),
+          windowId,
+          groupId: id,
           groupName: group.name,
         });
         return group;
@@ -234,7 +235,8 @@ export async function createGroupsStore(
         group.name = newName;
         updateMenu({
           action: 'updateMenuItem',
-          groupId: id.toString(),
+          windowId,
+          groupId: id,
           groupName: newName,
         });
       }),

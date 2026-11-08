@@ -1,4 +1,5 @@
 import { isReservedGroupId } from '../core/constants.js';
+import { menuItemId } from '../core/menu-items.js';
 import { fallbackActiveGroup } from '../core/tab-assignment.js';
 import type { GroupDeletionRequest as GroupDeletion } from '../core/messages.js';
 import type { Group, GroupState } from '../ports/group-state.js';
@@ -142,14 +143,14 @@ export function createGroupDeletion({
     try {
       await ungroupTabs(deletion);
       await closeTabs(deletion.tabIds);
-      await forgetGroup(deletion);
 
       try {
-        await menus.remove(String(deletion.groupId));
+        await menus.remove(menuItemId(deletion.windowId, deletion.groupId));
       } catch (error) {
         // The menu item may not exist
         logger.debug(`Could not remove menu item: ${messageOf(error)}`);
       }
+      await forgetGroup(deletion);
       return { success: true };
     } catch (error) {
       logger.error(

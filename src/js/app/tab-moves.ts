@@ -1,6 +1,6 @@
 import { isReservedGroupId } from '../core/constants.js';
 import { nativeGroupIdOf } from '../core/groups.js';
-import { groupIdOfMenuItem, neighbourOf } from '../core/menu-items.js';
+import { groupOfMenuItem, neighbourOf } from '../core/menu-items.js';
 import type { GroupState } from '../ports/group-state.js';
 import type { Logger } from '../ports/logger.js';
 import type { Menus } from '../ports/menus.js';
@@ -211,7 +211,10 @@ export function createTabMoves({
     windowId: number,
     beside?: { tabId: number; before: boolean },
   ): Promise<void> {
-    if ((await groupState.getTabGroup(tabId)) !== groupId) {
+    if (
+      beside === undefined ||
+      (await groupState.getTabGroup(tabId)) !== groupId
+    ) {
       await moveTab(tabId, groupId, windowId);
     }
     if (beside === undefined) {
@@ -278,11 +281,11 @@ export function createTabMoves({
       return;
     }
 
-    const groupId = groupIdOfMenuItem(info.menuItemId);
+    const target = groupOfMenuItem(info.menuItemId);
     if (
-      groupId === undefined ||
+      target === undefined ||
       tab?.id === undefined ||
-      tab.windowId === undefined
+      tab.windowId !== target.windowId
     ) {
       logger.debug(
         `Ignored a click on the menu item ${String(info.menuItemId)}`,
@@ -290,6 +293,7 @@ export function createTabMoves({
       return;
     }
     const { id: tabId, windowId } = tab;
+    const { groupId } = target;
 
     const selected = await tabs.highlightedIdsInWindow(windowId);
     const activeTabId = (await tabs.listInWindow(windowId)).find(

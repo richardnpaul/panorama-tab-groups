@@ -1,4 +1,4 @@
-import { isBoolean, isNumber, isRecord } from '../share/guards.js';
+import { isBoolean, isNumber, isRecord, isString } from '../share/guards.js';
 
 /** What the view asks for when the user deletes a group */
 export interface GroupDeletionRequest {
@@ -90,4 +90,34 @@ export function openEnvelope(message: unknown): Envelope | undefined {
   return isRecord(message) && typeof message.action === 'string'
     ? { action: message.action, message }
     : undefined;
+}
+
+/** What the view asks for when a group's context-menu item changes */
+export type MenuChange =
+  | {
+      action: 'createMenuItem' | 'updateMenuItem';
+      windowId: number;
+      groupId: number;
+      groupName: string;
+    }
+  | { action: 'removeMenuItem'; windowId: number; groupId: number };
+
+/** The menu change that was asked for, or nothing if the message does not ask for one */
+export function parseMenuChange(
+  message: Record<string, unknown>,
+): MenuChange | undefined {
+  const { action, windowId, groupId, groupName } = message;
+  if (!isId(windowId) || !isId(groupId)) {
+    return undefined;
+  }
+  if (action === 'removeMenuItem') {
+    return { action, windowId, groupId };
+  }
+  if (
+    (action === 'createMenuItem' || action === 'updateMenuItem') &&
+    isString(groupName)
+  ) {
+    return { action, windowId, groupId, groupName };
+  }
+  return undefined;
 }

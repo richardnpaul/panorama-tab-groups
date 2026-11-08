@@ -1,9 +1,11 @@
 import {
   openEnvelope,
   parseGroupDeletion,
+  parseMenuChange,
   parseOpeningBackup,
   parseTabPlacement,
   type GroupDeletionRequest,
+  type MenuChange,
 } from '../core/messages.js';
 import type { Logger } from '../ports/logger.js';
 import type { MigrationFlag } from '../ports/migration-flag.js';
@@ -16,7 +18,7 @@ import type { AutoBackup } from './auto-backup.js';
 
 export interface MessageHandlerDeps {
   // Create, rename or remove the menu item of a group
-  handleMenuChange: (message: unknown) => Promise<void>;
+  handleMenuChange: (change: MenuChange) => Promise<void>;
   deleteGroup: (deletion: GroupDeletionRequest) => Promise<DeletionResult>;
   // A tab the view dropped is moved here, where what the browser says of the move is known to be
   // the add-on's own doing
@@ -46,7 +48,12 @@ export function createMessageHandler({
   autoBackup,
   logger,
 }: MessageHandlerDeps): (message: unknown) => Promise<unknown> {
-  const changeMenu: Handler = (message) => handleMenuChange(message);
+  const changeMenu: Handler = (message) => {
+    const change = parseMenuChange(message);
+    return change === undefined
+      ? Promise.resolve(undefined)
+      : handleMenuChange(change);
+  };
 
   const handlers = new Map<string, Handler>([
     ['createMenuItem', changeMenu],

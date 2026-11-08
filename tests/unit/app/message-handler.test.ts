@@ -24,11 +24,20 @@ function setUp() {
 }
 
 describe('app/message-handler.ts', () => {
-  it.each([['createMenuItem'], ['updateMenuItem'], ['removeMenuItem']])(
+  it.each([
+    [
+      'createMenuItem',
+      { action: 'createMenuItem', windowId: 1, groupId: 3, groupName: 'Work' },
+    ],
+    [
+      'updateMenuItem',
+      { action: 'updateMenuItem', windowId: 1, groupId: 3, groupName: 'Work' },
+    ],
+    ['removeMenuItem', { action: 'removeMenuItem', windowId: 1, groupId: 3 }],
+  ])(
     'passes the message of %s to the menu, and answers nothing',
-    async (action) => {
+    async (_action, message) => {
       const { handle, deps } = setUp();
-      const message = { action, groupId: 3, groupName: 'Work' };
 
       await expect(handle(message)).resolves.toBeUndefined();
 
@@ -36,6 +45,16 @@ describe('app/message-handler.ts', () => {
       expect(deps.handleMenuChange).toHaveBeenCalledWith(message);
     },
   );
+
+  it('ignores a menu change message that is not complete', async () => {
+    const { handle, deps } = setUp();
+
+    await expect(
+      handle({ action: 'createMenuItem', groupId: 3, groupName: 'Work' }),
+    ).resolves.toBeUndefined();
+
+    expect(deps.handleMenuChange).not.toHaveBeenCalled();
+  });
 
   describe('placeTab', () => {
     it('places the tab as the view asks, and says it did', async () => {

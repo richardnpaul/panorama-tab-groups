@@ -224,7 +224,12 @@ describe('app/groups-store.ts', () => {
       await store.create();
 
       expect(messaging.sent).toEqual([
-        { action: 'createMenuItem', groupId: '3', groupName: 'Group 3' },
+        {
+          action: 'createMenuItem',
+          windowId: WINDOW,
+          groupId: 3,
+          groupName: 'Group 3',
+        },
       ]);
     });
 
@@ -263,7 +268,12 @@ describe('app/groups-store.ts', () => {
       expect(store.getName(2)).toBe('Renamed');
       expect((await groupState.getGroups(WINDOW))?.[1]?.name).toBe('Renamed');
       expect(messaging.sent).toEqual([
-        { action: 'updateMenuItem', groupId: '2', groupName: 'Renamed' },
+        {
+          action: 'updateMenuItem',
+          windowId: WINDOW,
+          groupId: 2,
+          groupName: 'Renamed',
+        },
       ]);
     });
 

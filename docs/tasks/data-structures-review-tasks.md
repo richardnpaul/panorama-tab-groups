@@ -1,23 +1,24 @@
 # Task Breakdown: `data-structures-review.md` Post-Review Fixes
 
 > **Purpose:** Track the resolution of findings from the codebase audit against [`docs/plans/data-structures-review.md`](../plans/data-structures-review.md).
-> Tasks are partitioned into **9 self-contained chunks** with disjoint file scopes so each chunk can be implemented, tested, and verified independently without merge or logical conflicts.
+> Tasks are partitioned into **10 self-contained chunks** with disjoint file scopes so each chunk can be implemented, tested, and verified independently without merge or logical conflicts.
 
 ---
 
 ## Chunk Overview & Independence Matrix
 
-| Chunk       | Scope                                                          | Primary Production Files Touched                                                                                    | Overlaps With Other Chunks?                                         | Status      |
-| :---------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------ | :---------- |
-| **Chunk 1** | Governance & External Agent Hygiene                            | `.agents/agents/code-reviewer.md`                                                                                   | None                                                                | `[x] Done`  |
-| **Chunk 2** | View & Popup Store / UI Edge Cases                             | `src/js/app/stored-groups-wait.ts`                                                                                  | None                                                                | `[x] Done`  |
-| **Chunk 3** | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                           | None                                                                | `[x] Done`  |
-| **Chunk 4** | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`                                                                                      | None                                                                | `[x] Done`  |
-| **Chunk 5** | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                                         | None                                                                | `[x] Done`  |
-| **Chunk 6** | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                  | None                                                                | `[x] Done`  |
-| **Chunk 7** | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                         | None                                                                | `[x] Done`  |
-| **Chunk 8** | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                   | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[x] Done`  |
-| **Chunk 9** | Test Model (`world.ts`), Property Generator & Test Timeouts    | `tests/support/world/world.ts`, `tests/unit/journeys/random-actions.property.test.ts`, `tests/unit/*/start.test.ts` | None (best run after Chunks 2–8)                                    | `[ ] To Do` |
+| Chunk        | Scope                                                          | Primary Production Files Touched                                                                                                                                                      | Overlaps With Other Chunks?                                         | Status      |
+| :----------- | :------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------ | :---------- |
+| **Chunk 1**  | Governance & External Agent Hygiene                            | `.agents/agents/code-reviewer.md`                                                                                                                                                     | None                                                                | `[x] Done`  |
+| **Chunk 2**  | View & Popup Store / UI Edge Cases                             | `src/js/app/stored-groups-wait.ts`                                                                                                                                                    | None                                                                | `[x] Done`  |
+| **Chunk 3**  | Automatic Backups & Add-on Update Concurrency                  | `src/js/app/addon-update.ts`, `src/js/app/auto-backup.ts`                                                                                                                             | None                                                                | `[x] Done`  |
+| **Chunk 4**  | Chromium Window Rebuild Matching & Toolbar Sync                | `src/js/app/window-rebuild.ts`                                                                                                                                                        | None                                                                | `[x] Done`  |
+| **Chunk 5**  | Startup, Migrations & Emulation Zombie Prevention              | `src/js/app/migrations.ts`, `src/js/adapters/browser/sessions-emulation.ts`                                                                                                           | None                                                                | `[x] Done`  |
+| **Chunk 6**  | Native Group Sync (`relinkWindow` & Firefox `cleanup`)         | `src/js/app/native-groups-sync.ts`                                                                                                                                                    | None                                                                | `[x] Done`  |
+| **Chunk 7**  | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                                                                                           | None                                                                | `[x] Done`  |
+| **Chunk 8**  | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                                                                                     | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[x] Done`  |
+| **Chunk 9**  | Test Model (`world.ts`), Property Generator & Test Timeouts    | `tests/support/world/world.ts`, `tests/unit/journeys/random-actions.property.test.ts`, `tests/unit/*/start.test.ts`                                                                   | None (best run after Chunks 2–8)                                    | `[x] Done`  |
+| **Chunk 10** | Context Menu per Window (`window id + group id`)               | `src/js/app/menu-manager.ts`, `src/js/core/menu-items.ts`, `src/js/app/delete-group.ts`, `src/js/app/groups-store.ts`, `src/js/app/tab-moves.ts`, `src/js/adapters/browser/events.ts` | Run after Chunk 9 (removes its two property-test guards)            | `[ ] To Do` |
 
 ---
 
@@ -225,18 +226,79 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
 
 ### Chunk 9: Test Model (`world.ts`), Property Generator & Test Timeouts
 
-- **Status:** `[ ] To Do`
+- **Status:** `[x] Done`
 - **Touched Files:**
   - `tests/support/world/world.ts`
   - `tests/unit/journeys/random-actions.property.test.ts`
+  - `tests/unit/journeys/native-groups.test.ts`
   - `tests/unit/view/start.test.ts`
   - `tests/unit/popup/start.test.ts`
   - `tests/unit/options/start.test.ts`
   - `tests/unit/migration-status/start.test.ts`
 - **Findings Addressed:**
-  - **9.1 (LOW — `world.deleteGroup` still simulates the pre-Round-11 view bug):** In `tests/support/world/world.ts:405-412`, `world.deleteGroup` still overwrites `activeGroup` with `first.id` when `tabIds.length > 0`, which was removed from `src/js/view/group-nodes.ts` in Review Round 11.
-    - _Fix:_ Remove lines 405–412 in `tests/support/world/world.ts` so `world.deleteGroup` matches the real view and popup.
-  - **9.2 (LOW — `random-actions.property.test.ts` lacks `createGroup` and `renameGroup` actions):** Adding `createGroup` and `renameGroup` exercises 3+ groups per window and custom group titles across restarts.
-  - **9.3 (LOW — Dynamic `import()` timeout in `tests/unit/*/start.test.ts` under heavy parallel Istanbul coverage):** Increase the timeout (or pre-import) on the initial `start.test.ts` test cases so `npm test` under full CPU load never hits the 5,000 ms default timeout.
+  - **9.1 (LOW — `world.deleteGroup` still simulates the pre-Round-11 view bug):** In `tests/support/world/world.ts`, `world.deleteGroup` overwrote `activeGroup` with `first.id` when `tabIds.length > 0`, which was removed from `src/js/view/group-nodes.ts` in Review Round 11.
+    - _Fixed:_ removed the overwrite, so the background's `putRight` (`delete-group.ts`) alone decides what the window shows, as in the real view and popup. Red first: `native-groups.test.ts` (`J12`, `leaves the window showing the group it showed when another group, with tabs, is deleted`) failed with the active group 1 instead of 3 before the change.
+  - **9.2 (LOW — `random-actions.property.test.ts` lacks `createGroup` and `renameGroup` actions):**
+    - _Fixed:_ `world.createGroup` and `world.renameGroup` use the real `createGroupsStore` with the world's ports (the background answers its messages). The property test gains both actions (3+ groups per window, titles with non-ASCII text across restarts) and a new invariant: a group's native group has the group's name as its title. 3000 runs pass (the committed `numRuns` stays 60).
+    - _Limit found, fixed in Chunk 10 (production, out of scope for a test-only chunk):_ the context menu is built once for one window and names its items by group number alone (`menu-manager.ts` `groupItem`). With two windows, a second window's `createGroup` can hit `ID already exists: <n>`, and `renameGroup` on a group the menu has no item for hits `Cannot find menu item with id <n>`; the view logs both (`groups-store.ts` `updateMenu`) and carries on. The generator skips those two cases with a comment.
+  - **9.3 (LOW — Dynamic `import()` timeout in `tests/unit/*/start.test.ts` under heavy parallel Istanbul coverage):**
+    - _Fixed:_ `vi.setConfig({ testTimeout: 30_000 })` at the top of each of the four `start.test.ts` files (every test there re-imports the page's modules after `vi.resetModules()`, so a pre-import would not help).
 - **Verification:**
-  - [ ] `npm test`
+  - [x] `npm test` (lint, then 4634 tests; 100% statements, branches, functions, lines)
+  - [x] `npm run lint` (0 errors, 0 warnings)
+  - [x] Mutation: not applicable, only test files changed (`stryker` mutates `src/`)
+
+---
+
+### Chunk 10: Context Menu per Window (`window id + group id`)
+
+- **Status:** `[x] Done`
+- **Touched Files:**
+  - `src/js/core/menu-items.ts`, `src/js/core/messages.ts`
+  - `src/js/app/menu-manager.ts`, `src/js/app/delete-group.ts`, `src/js/app/groups-store.ts`, `src/js/app/tab-moves.ts`,
+    `src/js/app/message-handler.ts`
+  - `src/js/adapters/browser/events.ts`, `src/js/background/compose.ts`
+  - `tests/unit/core/menu-items.test.ts`, `tests/unit/core/messages.test.ts`, `tests/unit/app/menu-manager.test.ts`,
+    `tests/unit/app/delete-group.test.ts`, `tests/unit/app/groups-store.test.ts`, `tests/unit/app/tab-moves.test.ts`,
+    `tests/unit/app/message-handler.test.ts`, `tests/unit/adapters/browser/events.test.ts`,
+    `tests/unit/background/compose.test.ts`
+  - `tests/support/world/world.ts`, `tests/unit/journeys/random-actions.property.test.ts`,
+    `tests/unit/journeys/native-groups.test.ts`
+  - `tests/e2e/group-switching.spec.ts`
+  - `docs/plans/data-structures-review.md` (a note under F5)
+- **Findings Addressed:**
+  - **10.1 (MEDIUM — Context menu item ids collide across windows):** group ids are unique per window, not globally (F5,
+    accepted in the plan), but `groupItem` (`src/js/app/menu-manager.ts`) names an item `String(groupId)` and the browser has one
+    menu namespace for the whole extension. A second window's `createGroup` (`createMenuItem`, `groups-store.ts`) fails with
+    `ID already exists: <n>` when another window has an item of that number; the view logs it and the new group has no menu
+    item. `renameGroup` (`updateMenuItem`) fails the other way with `Cannot find menu item with id <n>`. Found by the property
+    test of Chunk 9.2, whose generator skips both cases until this chunk.
+    - _Fix:_ name an item `<windowId>:<groupId>`, built and parsed by one pair of functions in `src/js/core/menu-items.ts` (nothing
+      else formats or splits it). The create, update and remove messages carry the `windowId` they act for
+      (`parseMenuChange` validates it at the boundary), so a change can only name the item of its own window.
+  - **10.2 (MEDIUM — `deleteGroup` removes another window's menu item):** `src/js/app/delete-group.ts:148` removes
+    `String(deletion.groupId)`, so deleting group 1 of window 2 removes the item that stands for group 1 of window 1.
+    - _Fix:_ remove the item of the deleted group's own window (`<windowId>:<groupId>`).
+  - **10.3 (MEDIUM — The menu lists the groups of the wrong window, and a click goes by the tab's window):** `createMenuList`
+    runs at start and on the "Refresh" item, for `currentWindowId()` at that moment only, so another window shows that
+    window's groups until the user presses "Refresh". `menuClicked` (`src/js/app/tab-moves.ts`) sends the tab to the group of that
+    number in the _tab's_ window, which may be another group or none.
+    - _Fix:_ the background rebuilds the menu for the window that gets the focus (`windows.onFocusChanged`, ignoring
+      `WINDOW_ID_NONE`; a new handler in `src/js/adapters/browser/events.ts`, wired in `src/js/background/compose.ts`). A create, update or
+      remove for a window other than the focused one is dropped, as the rebuild on its focus lists its groups from storage.
+      Rebuilds and changes take their turn one after the other (as `inTurn` does elsewhere), so two cannot interleave
+      between `removeAll` and `create`. `menuClicked` takes the window and the group from the item id, ignores (debug log) an
+      item whose window is not the clicked tab's window, and no longer matches a bare number. "Refresh" stays as the user's way
+      to rebuild by hand.
+    - _TDD tests:_ two windows with a group of the same number can each create, rename and delete theirs, and the other's item is
+      untouched; a click on another window's item is ignored; a focus change rebuilds the menu for the new window; two
+      overlapping rebuilds leave one complete menu. The two guards of Chunk 9.2 are removed from the property test, with a
+      new invariant: after each step the menu holds exactly the items of the groups of the window that has the focus.
+- **Verification:**
+  - [x] `npm run format` and `npm run lint` (0 errors, 0 warnings)
+  - [x] `npx vitest run --coverage --maxWorkers=2` (100% Statements, Branches, Functions, Lines)
+  - [x] `MUTATE="src/js/core/menu-items.ts,src/js/core/messages.ts,src/js/app/menu-manager.ts,src/js/app/delete-group.ts,src/js/app/groups-store.ts,src/js/app/tab-moves.ts,src/js/app/message-handler.ts,src/js/adapters/browser/events.ts,src/js/background/compose.ts" npm run test:mutation` (100% mutation score)
+  - [x] `npm run test:e2e` (full suite); `group-switching.spec.ts` clicks the new item id, and a new Chromium test with two windows that
+        each have a group of the same number shows that each menu lists only its own groups and a tab sent from window 2 goes
+        to window 2's group (real Chromium; the Firefox page tests have no background, so they cannot show the menu)
+  - [x] Note under F5 in `docs/plans/data-structures-review.md`: "ids per window" also holds for the context menu

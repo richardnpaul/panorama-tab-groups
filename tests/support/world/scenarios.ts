@@ -20,6 +20,10 @@ export async function arrangeGroups(
     rect: { x: 0, y: 0, w: 0.3, h: 0.3 },
   }));
   await world.groupState.setGroups(windowId, made);
+  await world.groupState.setGroupIndex(
+    windowId,
+    Math.max(0, ...ids.map((id) => id + 1)),
+  );
   await Promise.all(
     tabIds.map((tabId, place) =>
       world.groupState.setTabGroup(tabId, assignments[place] ?? 0),

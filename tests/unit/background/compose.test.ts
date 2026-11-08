@@ -185,6 +185,8 @@ describe('background/compose.ts', () => {
       'toggleView',
       'triggerCommand',
       'createGroupInWindowIfMissing',
+      'windowRemoved',
+      'windowFocused',
       'tabCreated',
       'tabAttached',
       'tabDetached',
@@ -324,7 +326,7 @@ describe('background/compose.ts', () => {
     ]);
     await init();
 
-    await handlers.menuClicked({ menuItemId: '0' }, { id: 5, windowId: 1 });
+    await handlers.menuClicked({ menuItemId: '1:0' }, { id: 5, windowId: 1 });
 
     expect(sessions.tabValues.get(sessions.slot(5, 'groupId'))).toBe(0);
     expect(browser.tabs.move).toHaveBeenCalledWith(5, { index: -1 });
@@ -340,13 +342,50 @@ describe('background/compose.ts', () => {
     expect(browser.contextMenus.removeAll).toHaveBeenCalled();
   });
 
-  it('deletes a group, with its tabs and its menu item, when the view asks', async () => {
-    const { handlers, init, browser } = await compose([tab(1), tab(5)]);
+  it('rebuilds the menu when focus changes, a window opens or closes, or the last group is deleted', async () => {
+    const { handlers, init, browser, sessions } = await compose([
+      tab(1, { active: true }),
+      tab(5),
+    ]);
     await init();
+
+    browser.contextMenus.removeAll.mockClear();
+    await handlers.windowFocused(1);
+    expect(browser.contextMenus.removeAll).toHaveBeenCalledTimes(1);
+
+    browser.contextMenus.removeAll.mockClear();
+    await handlers.createGroupInWindowIfMissing(2);
+    expect(browser.contextMenus.removeAll).toHaveBeenCalledTimes(1);
+
+    browser.contextMenus.removeAll.mockClear();
+    await handlers.windowRemoved(2);
+    expect(browser.contextMenus.removeAll).toHaveBeenCalledTimes(1);
+
+    await sessions.api.sessions.setTabValue(1, 'groupId', 0);
+    await sessions.api.sessions.setTabValue(5, 'groupId', 4);
+    await sessions.api.sessions.setWindowValue(1, 'groups', [
+      { id: 0, name: 'A', containerId: 'c', rect: { x: 0, y: 0, w: 1, h: 1 } },
+      { id: 4, name: 'B', containerId: 'c', rect: { x: 0, y: 0, w: 1, h: 1 } },
+    ]);
+    await sessions.api.sessions.setWindowValue(1, 'activeGroup', 0);
+
+    browser.contextMenus.removeAll.mockClear();
+    await expect(
+      handlers.handleMessage({
+        action: 'deleteGroup',
+        groupId: 0,
+        windowId: 1,
+        nativeGroupId: null,
+        tabIds: [1],
+      }),
+    ).resolves.toEqual({ success: true });
+    expect(browser.contextMenus.remove).toHaveBeenCalledWith('1:0');
+    expect(browser.contextMenus.removeAll).not.toHaveBeenCalled();
+    expect(sessions.windowValues.get(sessions.slot(1, 'activeGroup'))).toBe(4);
 
     const answer = await handlers.handleMessage({
       action: 'deleteGroup',
-      groupId: 0,
+      groupId: 4,
       windowId: 1,
       nativeGroupId: null,
       tabIds: [5],
@@ -354,7 +393,8 @@ describe('background/compose.ts', () => {
 
     expect(answer).toEqual({ success: true });
     expect(browser.tabs.remove).toHaveBeenCalledWith(5);
-    expect(browser.contextMenus.remove).toHaveBeenCalledWith('0');
+    expect(browser.contextMenus.remove).toHaveBeenCalledWith('1:4');
+    expect(browser.contextMenus.removeAll).toHaveBeenCalledTimes(1);
   });
 
   it('switches to the next group for the shortcut', async () => {

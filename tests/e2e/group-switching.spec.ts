@@ -304,7 +304,7 @@ test.describe('Switching groups by activating tabs', () => {
         throw new Error('The event of the menu cannot be fired from here');
       }
       Reflect.apply(dispatch, event, [
-        { menuItemId: '1' },
+        { menuItemId: `${String(windowId)}:1` },
         { id: lone, windowId },
       ]);
     }, sent);
@@ -451,5 +451,192 @@ test.describe('Switching groups by activating tabs', () => {
     }, arranged);
 
     expect(result).toEqual({ left: false, group: 0 });
+  });
+
+  test('two windows that share group numbers each get only their own groups in the menu, and sending a tab from the second window moves it to the second window’s group', async ({
+    page,
+    context,
+  }) => {
+    const arranged = await page.evaluate(async () => {
+      const sleep = (ms: number) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      const isTruthy = (value: unknown): boolean => Boolean(value);
+      const until = async <T>(
+        read: () => Promise<T>,
+        attempts = 50,
+      ): Promise<T> => {
+        const value = await read();
+        if (isTruthy(value) || attempts <= 1) return value;
+        await sleep(100);
+        return until(read, attempts - 1);
+      };
+      const group = (id: number, name: string) => ({
+        id,
+        name,
+        rect: { x: 0, y: 0, w: 0.5, h: 0.5 },
+      });
+      const idOf = ({ id }: { id?: number | undefined }): number => {
+        if (id === undefined) throw new Error('The browser gave no id');
+        return id;
+      };
+
+      const makeWindow = async (
+        firstGroupName: string,
+        secondGroupName: string,
+      ) => {
+        const created = await browser.windows.create({
+          url: 'about:blank',
+          focused: true,
+        });
+        const windowId = idOf(created);
+        const [firstTab] = created.tabs ?? [];
+        if (firstTab === undefined)
+          throw new Error('The new window has no tab');
+        await until(() =>
+          browser.sessions.getTabValue(idOf(firstTab), 'groupId'),
+        );
+        await browser.sessions.setWindowValue(windowId, 'groups', [
+          group(0, firstGroupName),
+          group(1, secondGroupName),
+          { ...group(-2, 'Ungrouped Tabs'), isSystemGroup: true },
+        ]);
+        await browser.sessions.setWindowValue(windowId, 'activeGroup', 0);
+        await browser.sessions.setTabValue(idOf(firstTab), 'groupId', 0);
+        const secondTab = await browser.tabs.create({
+          windowId,
+          url: 'about:blank',
+          active: false,
+        });
+        await until(() =>
+          browser.sessions.getTabValue(idOf(secondTab), 'groupId'),
+        );
+        await sleep(500);
+        await browser.sessions.setTabValue(idOf(secondTab), 'groupId', 1);
+        return {
+          windowId,
+          firstTabId: idOf(firstTab),
+          secondTabId: idOf(secondTab),
+        };
+      };
+
+      const first = await makeWindow('Win1 Group0', 'Win1 Group1');
+      const second = await makeWindow('Win2 Group0', 'Win2 Group1');
+      return { first, second };
+    });
+
+    const [worker] = context.serviceWorkers();
+    if (worker === undefined) {
+      throw new Error('The extension has no service worker');
+    }
+
+    const menuCheck = await worker.evaluate(async ({ first, second }) => {
+      const read = (value: unknown, key: string): unknown =>
+        typeof value === 'object' && value !== null
+          ? Reflect.get(value, key)
+          : undefined;
+      const chromeObj = read(globalThis, 'chrome');
+      const contextMenus = read(chromeObj, 'contextMenus');
+      const windows = read(chromeObj, 'windows');
+      const focusEvent = read(windows, 'onFocusChanged');
+      const dispatchFocus = read(focusEvent, 'dispatch');
+      const clickEvent = read(contextMenus, 'onClicked');
+      const dispatchClick = read(clickEvent, 'dispatch');
+      const updateMenu = read(contextMenus, 'update');
+      if (
+        typeof dispatchFocus !== 'function' ||
+        typeof dispatchClick !== 'function' ||
+        typeof updateMenu !== 'function'
+      ) {
+        throw new Error('Menu or window events cannot be fired from here');
+      }
+
+      const itemExists = async (itemId: string): Promise<boolean> => {
+        try {
+          await Reflect.apply(updateMenu, contextMenus, [itemId, {}]);
+          return true;
+        } catch {
+          return false;
+        }
+      };
+
+      const waitForMenu = async (
+        presentId: string,
+        absentId: string,
+        attempts = 40,
+      ): Promise<boolean> => {
+        if ((await itemExists(presentId)) && !(await itemExists(absentId))) {
+          return true;
+        }
+        if (attempts <= 1) {
+          return false;
+        }
+        await new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        });
+        return waitForMenu(presentId, absentId, attempts - 1);
+      };
+
+      await browser.windows.update(first.windowId, { focused: true });
+      Reflect.apply(dispatchFocus, focusEvent, [first.windowId]);
+      const firstMenuIsolated = await waitForMenu(
+        `${String(first.windowId)}:1`,
+        `${String(second.windowId)}:1`,
+      );
+
+      await browser.windows.update(second.windowId, { focused: true });
+      Reflect.apply(dispatchFocus, focusEvent, [second.windowId]);
+      const secondMenuIsolated = await waitForMenu(
+        `${String(second.windowId)}:1`,
+        `${String(first.windowId)}:1`,
+      );
+
+      Reflect.apply(dispatchClick, clickEvent, [
+        { menuItemId: `${String(second.windowId)}:1` },
+        { id: second.firstTabId, windowId: second.windowId },
+      ]);
+
+      return { firstMenuIsolated, secondMenuIsolated };
+    }, arranged);
+
+    expect(menuCheck).toEqual({
+      firstMenuIsolated: true,
+      secondMenuIsolated: true,
+    });
+
+    const groupsAfterClick = await page.evaluate(async ({ first, second }) => {
+      const sleep = (ms: number) =>
+        new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      const isTruthy = (value: unknown): boolean => Boolean(value);
+      const until = async <T>(
+        read: () => Promise<T>,
+        attempts = 50,
+      ): Promise<T> => {
+        const value = await read();
+        if (isTruthy(value) || attempts <= 1) return value;
+        await sleep(100);
+        return until(read, attempts - 1);
+      };
+      const movedInSecond = await until(async () => {
+        const g: unknown = await browser.sessions.getTabValue(
+          second.firstTabId,
+          'groupId',
+        );
+        return g === 1;
+      });
+      const firstWindowTabGroup: unknown = await browser.sessions.getTabValue(
+        first.firstTabId,
+        'groupId',
+      );
+      return { movedInSecond, firstWindowTabGroup };
+    }, arranged);
+
+    expect(groupsAfterClick).toEqual({
+      movedInSecond: true,
+      firstWindowTabGroup: 0,
+    });
   });
 });

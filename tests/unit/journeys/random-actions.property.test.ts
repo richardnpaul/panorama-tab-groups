@@ -20,6 +20,8 @@ type Action =
   | { kind: 'ungroupNative'; group: number }
   | { kind: 'setNative'; on: boolean }
   | { kind: 'deleteGroup'; window: number; group: number }
+  | { kind: 'createGroup'; window: number }
+  | { kind: 'renameGroup'; window: number; group: number; name: string }
   | { kind: 'focusWindow'; window: number }
   | { kind: 'restart' };
 
@@ -63,6 +65,13 @@ const action: fc.Arbitrary<Action> = fc.oneof(
     kind: fc.constant<'deleteGroup'>('deleteGroup'),
     window: index,
     group: index,
+  }),
+  fc.record({ kind: fc.constant<'createGroup'>('createGroup'), window: index }),
+  fc.record({
+    kind: fc.constant<'renameGroup'>('renameGroup'),
+    window: index,
+    group: index,
+    name: fc.constantFrom('Work', 'Home', 'Reading', 'Ünïcode ✓'),
   }),
   fc.record({ kind: fc.constant<'focusWindow'>('focusWindow'), window: index }),
   fc.constant<Action>({ kind: 'restart' }),
@@ -197,6 +206,29 @@ async function perform(
       await world.deleteGroup(window.id, group.id);
       return `deleteGroup ${String(group.id)} of w${String(window.id)}`;
     }
+    case 'createGroup': {
+      if (window === undefined) {
+        return undefined;
+      }
+      const created = await world.createGroup(window.id);
+      return `createGroup ${String(created)} in w${String(window.id)}`;
+    }
+    case 'renameGroup': {
+      if (window === undefined) {
+        return undefined;
+      }
+      const group = pick(
+        (await world.groupsOf(window.id)).filter(
+          ({ id: groupId }) => groupId >= 0,
+        ),
+        step.group,
+      );
+      if (group === undefined) {
+        return undefined;
+      }
+      await world.renameGroup(window.id, group.id, step.name);
+      return `renameGroup ${String(group.id)} of w${String(window.id)} to ${step.name}`;
+    }
     case 'focusWindow':
       if (window === undefined) {
         return undefined;
@@ -245,6 +277,10 @@ async function violation(world: World): Promise<string | undefined> {
           } else if (native.windowId !== window.id) {
             problems.push(
               `window ${String(window.id)}: group ${String(group.id)} refers to a native group of window ${String(native.windowId)}`,
+            );
+          } else if (native.title !== group.name) {
+            problems.push(
+              `window ${String(window.id)}: group ${String(group.id)} is called ${group.name}, and its native group ${String(reference)} ${native.title}`,
             );
           }
         }
@@ -325,6 +361,28 @@ async function violation(world: World): Promise<string | undefined> {
   if (native && hidden.length > 0) {
     problems.push(
       `native groups are on, and tabs ${hidden.map(({ id }) => id).join()} are hidden`,
+    );
+  }
+  const focused = world.model.focused();
+  const focusedGroups = await world.groupsOf(focused);
+  const expectedMenu = focusedGroups
+    .map(
+      ({ id, name }) =>
+        `${String(focused)}:${String(id)}=${String(id)}: ${name}`,
+    )
+    .sort();
+  const actualMenu = world.menus.items
+    .slice(1, -2)
+    .map(({ id, title }) => `${id}=${title ?? ''}`)
+    .sort();
+  if (
+    world.menus.items[0]?.id !== 'send-tab' ||
+    world.menus.items.at(-2)?.id !== 'refresh-spacer' ||
+    world.menus.items.at(-1)?.id !== 'refresh-groups' ||
+    actualMenu.join('|') !== expectedMenu.join('|')
+  ) {
+    problems.push(
+      `menu has [${world.menus.items.map(({ id, title }) => `${id}=${title ?? ''}`).join(', ')}], expected [${expectedMenu.join(', ')}] for focused window ${String(focused)}`,
     );
   }
   if (world.logs.error.length > 0) {

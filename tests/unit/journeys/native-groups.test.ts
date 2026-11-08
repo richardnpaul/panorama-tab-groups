@@ -588,6 +588,18 @@ describe('user journeys with native tab groups', () => {
       ).toEqual([2]);
       expect(world.logs.error).toEqual([]);
     });
+
+    it('leaves the window showing the group it showed when another group, with tabs, is deleted', async () => {
+      const world = createWorld({ stored: { useNativeGroups: true } });
+      const { windowId, tabIds } = world.seedWindow(['a', 'b', 'c', 'd']);
+      await arrangeGroups(world, windowId, tabIds, [1, 2, 2, 3], 3);
+      await world.start();
+
+      await world.deleteGroup(windowId, 2);
+
+      expect(await world.groupState.getActiveGroup(windowId)).toBe(3);
+      expect(world.logs.error).toEqual([]);
+    });
   });
 
   describe('J13 in Chromium, which has native groups and cannot hide tabs', () => {
@@ -1151,6 +1163,54 @@ describe('user journeys with native tab groups', () => {
       expect(await world.groupState.getActiveGroup(windowId)).toBe(2);
       expect(world.model.tabsOf(windowId).some(({ hidden }) => hidden)).toBe(
         false,
+      );
+      expect(world.logs.error).toEqual([]);
+    });
+
+    it('keeps the context menu for the focused window when two windows create, rename and delete groups with the same numbers', async () => {
+      const world = createWorld();
+      const first = world.seedWindow(['a1', 'a2']);
+      const second = world.seedWindow(['b1', 'b2']);
+      await arrangeGroups(world, first.windowId, first.tabIds, [0, 1], 0);
+      await arrangeGroups(world, second.windowId, second.tabIds, [0, 1], 0);
+      await world.start();
+
+      expect(world.model.focused()).toBe(second.windowId);
+      expect(world.menus.items.map(({ id }) => id)).toEqual([
+        'send-tab',
+        `${String(second.windowId)}:0`,
+        `${String(second.windowId)}:1`,
+        `${String(second.windowId)}:-2`,
+        'refresh-spacer',
+        'refresh-groups',
+      ]);
+
+      // Creating and renaming a group in the unfocused window does not touch or break the menu
+      const createdInFirst = await world.createGroup(first.windowId);
+      await world.renameGroup(first.windowId, createdInFirst, 'First Extra');
+      const createdInSecond = await world.createGroup(second.windowId);
+      await world.renameGroup(second.windowId, createdInSecond, 'Second Extra');
+      expect(createdInFirst).toBe(createdInSecond);
+      expect(
+        world.menus.items.find(
+          ({ id }) =>
+            id === `${String(second.windowId)}:${String(createdInSecond)}`,
+        )?.title,
+      ).toBe(`${String(createdInSecond)}: Second Extra`);
+
+      // Focusing the first window rebuilds the menu with the first window's groups
+      await world.focusWindow(first.windowId);
+      expect(
+        world.menus.items.find(
+          ({ id }) =>
+            id === `${String(first.windowId)}:${String(createdInFirst)}`,
+        )?.title,
+      ).toBe(`${String(createdInFirst)}: First Extra`);
+
+      // Sending a tab in the first window via its context menu item moves it in the first window
+      await world.sendTabToGroup(first.tabIds[0] ?? 0, createdInFirst);
+      expect(await world.groupState.getTabGroup(first.tabIds[0] ?? 0)).toBe(
+        createdInFirst,
       );
       expect(world.logs.error).toEqual([]);
     });

@@ -43,8 +43,8 @@ async function setUp({ hasTabGroups = true }: { hasTabGroups?: boolean } = {}) {
   const nativeGroups = createMemoryNativeGroups([50, 60], WINDOW);
   nativeGroups.seed(50, WINDOW, [10, 11]);
   const menus = createMemoryMenus();
-  menus.create({ id: '1', title: 'G1', contexts: ['tab'] });
-  menus.create({ id: '2', title: 'G2', contexts: ['tab'] });
+  menus.create({ id: '1:1', title: 'G1', contexts: ['tab'] });
+  menus.create({ id: '1:2', title: 'G2', contexts: ['tab'] });
   const logger = { debug: vi.fn(), warn: vi.fn(), error: vi.fn() };
   const windowGroups = createWindowGroups({
     groupState,
@@ -113,7 +113,7 @@ describe('app/delete-group.ts', () => {
     expect((await env.groupState.getGroups(WINDOW))?.map((g) => g.id)).toEqual([
       2,
     ]);
-    expect(env.menus.items.map((item) => item.id)).toEqual(['2']);
+    expect(env.menus.items.map((item) => item.id)).toEqual(['1:2']);
   });
 
   it('takes out only the tabs that are still in the native group', async () => {
@@ -216,14 +216,14 @@ describe('app/delete-group.ts', () => {
 
   it('carries on when the menu item does not exist', async () => {
     const env = await setUp();
-    await env.menus.remove('1');
+    await env.menus.remove('1:1');
 
     await expect(env.deleteGroup(request())).resolves.toEqual({
       success: true,
     });
 
     expect(env.logger.debug).toHaveBeenCalledWith(
-      'Could not remove menu item: Cannot find menu item with id 1',
+      'Could not remove menu item: Cannot find menu item with id 1:1',
     );
   });
 
@@ -323,7 +323,7 @@ describe('app/delete-group.ts', () => {
       expect(
         (await env.groupState.getGroups(WINDOW))?.map(({ id }) => id),
       ).toEqual([2]);
-      expect(env.menus.items.some(({ id }) => id === '1')).toBe(false);
+      expect(env.menus.items.some(({ id }) => id === '1:1')).toBe(false);
       expect(env.logger.warn).toHaveBeenCalledWith(
         `Group 1 is deleted, but window ${String(WINDOW)} could not be put right after it:`,
         failure,
@@ -367,7 +367,7 @@ describe('app/delete-group.ts', () => {
       success: true,
     });
 
-    expect(env.menus.items.some(({ id }) => id === '1')).toBe(false);
+    expect(env.menus.items.some(({ id }) => id === '1:1')).toBe(false);
     expect(env.logger.warn).toHaveBeenCalledWith(
       `Group 1 is deleted, but window ${String(WINDOW)} could not be put right after it:`,
       failure,

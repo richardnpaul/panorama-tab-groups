@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   openEnvelope,
   parseGroupDeletion,
+  parseMenuChange,
   parseOpeningBackup,
   parseTabPlacement,
   isSuccess,
@@ -166,5 +167,56 @@ describe('core/messages.ts', () => {
         expect(openEnvelope(message)).toBeUndefined();
       },
     );
+  });
+
+  describe('parseMenuChange', () => {
+    it.each(['createMenuItem', 'updateMenuItem'] as const)(
+      'reads a %s message and leaves out extra fields',
+      (action) => {
+        expect(
+          parseMenuChange({
+            action,
+            windowId: 1,
+            groupId: 2,
+            groupName: 'Work',
+            extra: true,
+          }),
+        ).toStrictEqual({
+          action,
+          windowId: 1,
+          groupId: 2,
+          groupName: 'Work',
+        });
+      },
+    );
+
+    it('reads a removeMenuItem message and leaves out extra fields', () => {
+      expect(
+        parseMenuChange({
+          action: 'removeMenuItem',
+          windowId: 1,
+          groupId: 2,
+          extra: true,
+        }),
+      ).toStrictEqual({
+        action: 'removeMenuItem',
+        windowId: 1,
+        groupId: 2,
+      });
+    });
+
+    it.each([
+      [{ action: 'createMenuItem', windowId: '1', groupId: 2, groupName: 'A' }],
+      [{ action: 'createMenuItem', windowId: 1.5, groupId: 2, groupName: 'A' }],
+      [{ action: 'createMenuItem', windowId: 1, groupId: '2', groupName: 'A' }],
+      [{ action: 'createMenuItem', windowId: 1, groupId: 1.5, groupName: 'A' }],
+      [{ action: 'createMenuItem', windowId: 1, groupId: 2, groupName: 99 }],
+      [{ action: 'updateMenuItem', windowId: 1, groupId: 2 }],
+      [{ action: 'removeMenuItem', windowId: '1', groupId: 2 }],
+      [{ action: 'removeMenuItem', windowId: 1, groupId: '2' }],
+      [{ action: 'otherAction', windowId: 1, groupId: 2, groupName: 'A' }],
+    ])('refuses %j', (message) => {
+      expect(parseMenuChange(message)).toBeUndefined();
+    });
   });
 });

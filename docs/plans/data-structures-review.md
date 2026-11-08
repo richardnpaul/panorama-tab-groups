@@ -280,7 +280,7 @@ Done on `review/data-structures`; nothing is committed, and **no product code wa
   `lastMoved` is read (the stacking in `core/layout.ts`); `isSystemGroup` is set only for the ungrouped group.
 - **F4, the system groups are in the list of the user's groups: confirmed in use.** Every list of a window ends with `-2`, so
   code that lists groups has to leave it out (the journeys of the native-groups branch do, in `referencesOf`).
-- **F5, ids are per window: confirmed by the code** (`groupIndex` counts for each window); not tested further.
+- **F5, ids are per window: confirmed by the code** (`groupIndex` counts for each window); "ids per window" also holds for the context menu, where items are keyed by `<windowId>:<groupId>` and rebuilt for the focused window.
 - **F6, the link from a tab to its group is on the tab: confirmed, with the cost of F1 in Chromium.** There is no way to ask for
   the tabs of a group but to read each tab.
 - **F7, no version on the stored data: confirmed;** only the backup has one.
@@ -663,7 +663,7 @@ assumed.
      rebuild the groups of a restored window, and decision 1 does not use its addresses.
 
 The other findings: **F5** (ids per window) is accepted. Ids are numbers by design, are kept in the reserved ids -1 and -2, the
-ids of the context menu and the backup format, and a group never leaves its window; it is reopened when a feature moves groups
+ids of the context menu (`<windowId>:<groupId>`, per window like `groupIndex`) and the backup format, and a group never leaves its window; it is reopened when a feature moves groups
 between windows. **F10** (distinct id types) is cheap and independent, and can be done at any time. **F6** and **F9** are
 accepted as they are for now.
 

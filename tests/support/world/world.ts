@@ -16,6 +16,7 @@ import { createMemoryOptions } from '../../../src/js/adapters/memory/options.js'
 import { createMemoryScheduler } from '../../../src/js/adapters/memory/scheduler.js';
 import { createMemorySessionHistory } from '../../../src/js/adapters/memory/session-history.js';
 import { createMemoryToolbar } from '../../../src/js/adapters/memory/toolbar.js';
+import { createGroupsStore } from '../../../src/js/app/groups-store.js';
 import { withUngroupedGroup } from '../../../src/js/app/with-ungrouped-group.js';
 import {
   type BackgroundPorts,
@@ -276,6 +277,32 @@ export function createWorld({
     await settled();
   }
 
+  /** The groups of a window as its view has them: they ask the background for what is not theirs */
+  const viewGroups = (windowId: number) =>
+    createGroupsStore(
+      {
+        groupState,
+        messaging: {
+          send: (message) => {
+            const answer = Promise.resolve(handlers?.handleMessage(message));
+            pending.push(answer);
+            return answer;
+          },
+        },
+        nativeGroups: hasTabGroups
+          ? nativeGroupsOfModel(model)
+          : withoutNativeGroups(),
+        tabs: {
+          listIdsInCurrentWindow: () =>
+            Promise.resolve(model.tabsOf(windowId).map(({ id }) => id)),
+        },
+        clock,
+        i18n: ports().i18n,
+        logger: ports().logger,
+      },
+      windowId,
+    );
+
   const world = {
     model,
     options,
@@ -367,15 +394,15 @@ export function createWorld({
     async sendTabToGroup(tabId: number, groupId: number): Promise<void> {
       const windowId = model.tabs.get(tabId)?.windowId;
       await handlers?.menuClicked(
-        { menuItemId: String(groupId) },
+        { menuItemId: `${String(windowId)}:${String(groupId)}` },
         { id: tabId, windowId },
       );
       await settled();
     },
 
     /**
-     * The user closes a group in the view, which asks the background to delete it and then, when the
-     * group had tabs, makes the first group that is left the one that is shown
+     * The user closes a group in the view, which asks the background to delete it; the background
+     * puts right what the window shows
      */
     async deleteGroup(windowId: number, groupId: number): Promise<unknown> {
       const group = (await groupState.getGroups(windowId))?.find(
@@ -398,18 +425,24 @@ export function createWorld({
         nativeGroupId: group?.nativeGroupId,
         tabIds,
       });
-      // The view went with its window, if the tabs were all there were in it
-      if (!model.windows.has(windowId)) {
-        return answer;
-      }
-      const [first] =
-        (await groupState.getGroups(windowId))?.filter(({ id }) => id >= 0) ??
-        [];
-      // As the view does, and only when the group had tabs
-      if (tabIds.length > 0 && first !== undefined) {
-        await groupState.setActiveGroup(windowId, first.id);
-      }
       return answer;
+    },
+
+    /** The user makes a group in the view of a window; the id of the group */
+    async createGroup(windowId: number): Promise<number> {
+      const { id } = await (await viewGroups(windowId)).create();
+      await settled();
+      return id;
+    },
+
+    /** The user gives a group of a window another name in the view */
+    async renameGroup(
+      windowId: number,
+      groupId: number,
+      name: string,
+    ): Promise<void> {
+      await (await viewGroups(windowId)).rename(groupId, name);
+      await settled();
     },
 
     async moveTab(tabId: number, windowId: number): Promise<void> {
@@ -424,6 +457,7 @@ export function createWorld({
 
     async focusWindow(windowId: number): Promise<void> {
       model.focusWindow(windowId);
+      await handlers?.windowFocused(windowId);
       await settled();
     },
 
