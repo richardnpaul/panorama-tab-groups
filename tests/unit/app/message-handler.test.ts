@@ -18,7 +18,7 @@ function setUp() {
     },
     setOpeningBackup: vi.fn(),
     autoBackup: { changed: vi.fn() },
-    logger: { error: vi.fn() },
+    logger: { warn: vi.fn(), error: vi.fn() },
   };
   return { handle: createMessageHandler(deps), deps };
 }
@@ -46,14 +46,19 @@ describe('app/message-handler.ts', () => {
     },
   );
 
-  it('ignores a menu change message that is not complete', async () => {
+  it('refuses a menu change message that is not complete', async () => {
     const { handle, deps } = setUp();
+    const message = { action: 'createMenuItem', groupId: 3, groupName: 'Work' };
 
-    await expect(
-      handle({ action: 'createMenuItem', groupId: 3, groupName: 'Work' }),
-    ).resolves.toBeUndefined();
+    await expect(handle(message)).resolves.toEqual({
+      error: 'Invalid menu change message',
+    });
 
     expect(deps.handleMenuChange).not.toHaveBeenCalled();
+    expect(deps.logger.warn).toHaveBeenCalledWith(
+      'Invalid menu change message:',
+      message,
+    );
   });
 
   describe('placeTab', () => {

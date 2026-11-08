@@ -6,6 +6,7 @@ import type { Messaging } from '../ports/messaging.js';
 import type { NativeGroups } from '../ports/native-groups.js';
 import type { Tabs } from '../ports/tabs.js';
 import { nativeGroupIdOf } from '../core/groups.js';
+import type { MenuChange } from '../core/messages.js';
 import { moveGroupTo } from '../core/popup.js';
 import { isRecord, isString } from '../share/guards.js';
 
@@ -109,7 +110,7 @@ export async function createGroupsStore(
     );
 
   // The menu is updated by the background; the view does not wait for it
-  const updateMenu = (message: object): void => {
+  const updateMenu = (message: MenuChange): void => {
     messaging.send(message).catch((error: unknown) => {
       logger.error('Failed to update the menu:', error);
     });

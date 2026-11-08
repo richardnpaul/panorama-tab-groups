@@ -28,7 +28,7 @@ export interface MessageHandlerDeps {
   viewRefresh: Pick<ViewRefresh, 'refreshView' | 'isOrdered' | 'clear'>;
   setOpeningBackup: (opening: boolean) => void;
   autoBackup: Pick<AutoBackup, 'changed'>;
-  logger: Pick<Logger, 'error'>;
+  logger: Pick<Logger, 'warn' | 'error'>;
 }
 
 type Handler = (message: Record<string, unknown>) => Promise<unknown>;
@@ -50,9 +50,11 @@ export function createMessageHandler({
 }: MessageHandlerDeps): (message: unknown) => Promise<unknown> {
   const changeMenu: Handler = (message) => {
     const change = parseMenuChange(message);
-    return change === undefined
-      ? Promise.resolve(undefined)
-      : handleMenuChange(change);
+    if (change === undefined) {
+      logger.warn('Invalid menu change message:', message);
+      return Promise.resolve({ error: 'Invalid menu change message' });
+    }
+    return handleMenuChange(change);
   };
 
   const handlers = new Map<string, Handler>([
