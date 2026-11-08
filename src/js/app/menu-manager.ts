@@ -95,11 +95,7 @@ export function createMenuManager({
           const windowId = forWindowId ?? (await windows.currentWindowId());
           const groups = await groupState.getGroups(windowId);
           // The window may not have its groups yet
-          if (groups === undefined) {
-            return;
-          }
-
-          groups.forEach(({ id, name }) => {
+          groups?.forEach(({ id, name }) => {
             menus.create(groupItem(windowId, id, name));
           });
           await addRefreshMenuItem();

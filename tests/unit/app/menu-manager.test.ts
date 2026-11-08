@@ -202,12 +202,16 @@ describe('app/menu-manager.ts', () => {
       ]);
     });
 
-    it('stops after the send-tab menu when the window has no groups yet', async () => {
+    it('includes the refresh item even when the window has no groups yet', async () => {
       const { manager, menus, logger } = await setUp({ groups: null });
 
       await manager.createMenuList();
 
-      expect(ids(menus)).toEqual(['send-tab']);
+      expect(ids(menus)).toEqual([
+        'send-tab',
+        'refresh-spacer',
+        'refresh-groups',
+      ]);
       expect(logger.error).not.toHaveBeenCalled();
     });
 

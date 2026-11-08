@@ -332,7 +332,6 @@ export function composeBackgroundFrom({
     groupState,
     nativeGroups,
     assignment,
-    menus,
     createMenuList,
     toggleVisibleTabs: (activeGroup, windowId) =>
       visibility.toggleVisibleTabs(activeGroup, undefined, windowId),

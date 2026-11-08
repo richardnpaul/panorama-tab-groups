@@ -3,7 +3,6 @@ import { nativeGroupIdOf } from '../core/groups.js';
 import { groupOfMenuItem, neighbourOf } from '../core/menu-items.js';
 import type { GroupState } from '../ports/group-state.js';
 import type { Logger } from '../ports/logger.js';
-import type { Menus } from '../ports/menus.js';
 import type { NativeGroups } from '../ports/native-groups.js';
 import type { Tabs } from '../ports/tabs.js';
 import type { Windows } from '../ports/windows.js';
@@ -36,7 +35,6 @@ export interface TabMovesDeps {
   >;
   nativeGroups: Pick<NativeGroups, 'addTabs' | 'removeTabs'>;
   assignment: Pick<NativeGroupAssignment, 'createNativeGroup'>;
-  menus: Pick<Menus, 'removeAll'>;
   // Make the menu items for the groups of the window again
   createMenuList: () => Promise<void>;
   toggleVisibleTabs: (
@@ -83,7 +81,6 @@ export function createTabMoves({
   groupState,
   nativeGroups,
   assignment,
-  menus,
   createMenuList,
   toggleVisibleTabs,
   useNativeGroups,
@@ -276,7 +273,6 @@ export function createTabMoves({
     tab: ClickedTab | undefined,
   ): Promise<void> {
     if (info.menuItemId === REFRESH_GROUPS) {
-      await menus.removeAll();
       await createMenuList();
       return;
     }

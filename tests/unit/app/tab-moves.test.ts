@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createMemoryGroupState } from '../../../src/js/adapters/memory/group-state.js';
-import { createMemoryMenus } from '../../../src/js/adapters/memory/menus.js';
 import { createMemoryNativeGroups } from '../../../src/js/adapters/memory/native-groups.js';
 import { createMemoryTabs } from '../../../src/js/adapters/memory/tabs.js';
 import { createMemoryWindows } from '../../../src/js/adapters/memory/windows.js';
@@ -71,7 +70,6 @@ async function setUp(options: Options = {}) {
     ),
   );
   const nativeGroups = createMemoryNativeGroups(nativeGroupIds, WINDOW);
-  const menus = createMemoryMenus();
   const order: string[] = [];
   const createMenuList = vi.fn(() => {
     order.push('createMenuList');
@@ -97,7 +95,6 @@ async function setUp(options: Options = {}) {
       i18n: { getMessage: englishMessage },
       logger,
     }),
-    menus,
     createMenuList,
     toggleVisibleTabs,
     useNativeGroups: () => Promise.resolve(useNative),
@@ -110,7 +107,6 @@ async function setUp(options: Options = {}) {
     tabs,
     groupState,
     nativeGroups,
-    menus,
     createMenuList,
     toggleVisibleTabs,
     logger,
@@ -677,25 +673,10 @@ describe('app/tab-moves.ts', () => {
   describe('menuClicked', () => {
     it('makes the menu again when asked to refresh the groups', async () => {
       const env = await setUp();
-      env.menus.create({ id: 'x', contexts: ['all'] });
 
       await env.moves.menuClicked({ menuItemId: 'refresh-groups' }, undefined);
 
-      expect(env.menus.items).toEqual([]);
       expect(env.createMenuList).toHaveBeenCalledTimes(1);
-    });
-
-    it('removes the old menu before making the new one', async () => {
-      const env = await setUp();
-      const removeAll = env.menus.removeAll.bind(env.menus);
-      env.menus.removeAll = () => {
-        env.order.push('removeAll');
-        return removeAll();
-      };
-
-      await env.moves.menuClicked({ menuItemId: 'refresh-groups' }, undefined);
-
-      expect(env.order).toEqual(['removeAll', 'createMenuList']);
     });
 
     it.each([['send-tab'], [''], ['2'], [3]])(
