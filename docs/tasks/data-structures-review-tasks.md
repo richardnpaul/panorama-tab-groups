@@ -18,7 +18,9 @@
 | **Chunk 7**  | Background Tab Lifecycle, `deleteGroup` & `onTabUpdated` Races | `src/js/app/browser-events.ts`, `src/js/app/tab-lifecycle.ts`, `src/js/app/delete-group.ts`                                                                                           | None                                                                | `[x] Done`  |
 | **Chunk 8**  | View Drag Native Sync & Context Menu Pinned Active Move        | `src/js/app/tab-moves.ts`, `src/js/view/drag.ts`, `src/js/app/message-handler.ts`                                                                                                     | None (run after Chunk 7 if sharing `ownMoves` / `moveTab` patterns) | `[x] Done`  |
 | **Chunk 9**  | Test Model (`world.ts`), Property Generator & Test Timeouts    | `tests/support/world/world.ts`, `tests/unit/journeys/random-actions.property.test.ts`, `tests/unit/*/start.test.ts`                                                                   | None (best run after Chunks 2–8)                                    | `[x] Done`  |
-| **Chunk 10** | Context Menu per Window (`window id + group id`)               | `src/js/app/menu-manager.ts`, `src/js/core/menu-items.ts`, `src/js/app/delete-group.ts`, `src/js/app/groups-store.ts`, `src/js/app/tab-moves.ts`, `src/js/adapters/browser/events.ts` | Run after Chunk 9 (removes its two property-test guards)            | `[ ] To Do` |
+| **Chunk 10** | Context Menu per Window (`window id + group id`)               | `src/js/app/menu-manager.ts`, `src/js/core/menu-items.ts`, `src/js/app/delete-group.ts`, `src/js/app/groups-store.ts`, `src/js/app/tab-moves.ts`, `src/js/adapters/browser/events.ts` | Run after Chunk 9 (removes its two property-test guards)            | `[x] Done`  |
+| **Chunk 11** | Context Menu Reliability & Teardown Cleanup                    | `src/js/app/menu-manager.ts`, `src/js/app/tab-moves.ts`, `src/js/background/compose.ts`                                                                                               | None (builds on Chunk 10)                                           | `[x] Done`  |
+| **Chunk 12** | Boundary Validation Logging & Outbound Type Narrowing          | `src/js/app/message-handler.ts`, `src/js/app/groups-store.ts`                                                                                                                         | None (builds on Chunk 10)                                           | `[ ] To Do` |
 
 ---
 
@@ -302,3 +304,47 @@ Every chunk must follow the repository's TDD and Verification & Validation rules
         each have a group of the same number shows that each menu lists only its own groups and a tab sent from window 2 goes
         to window 2's group (real Chromium; the Firefox page tests have no background, so they cannot show the menu)
   - [x] Note under F5 in `docs/plans/data-structures-review.md`: "ids per window" also holds for the context menu
+
+---
+
+### Chunk 11: Context Menu Reliability & Teardown Cleanup
+
+- **Status:** `[x] Done`
+- **Touched Files:**
+  - `src/js/app/menu-manager.ts`
+  - `src/js/app/tab-moves.ts`
+  - `src/js/background/compose.ts`
+  - `tests/unit/app/menu-manager.test.ts`
+  - `tests/unit/app/tab-moves.test.ts`
+- **Findings Addressed:**
+  - **11.1 (LOW — Partial context menu state when window has no stored groups yet):** In `createMenuList` (`src/js/app/menu-manager.ts:86-108`), `menus.removeAll()` and `menus.create({ id: SEND_TAB, ... })` are called before reading groups for the window. If `groupState.getGroups(windowId)` returns `undefined` (e.g. before initial groups are written or if window storage is temporarily unavailable), `createMenuList` returns early without calling `addRefreshMenuItem()`. This leaves an empty `send-tab` parent item without child options or a `refresh-groups` item.
+    - _Fix:_ Use `groups?.forEach(...)` and always call `await addRefreshMenuItem()`, so the menu is never left in an un-refreshable empty state.
+  - **11.2 (INFO — Redundant unserialized `menus.removeAll()` outside queue):** In `menuClicked` (`src/js/app/tab-moves.ts:278-281`), clicking `REFRESH_GROUPS` awaits `menus.removeAll()` directly before invoking `createMenuList()`. `createMenuList()` already executes `await menus.removeAll()` inside the `inTurn` serialized queue (`menu-manager.ts:87`). The direct call bypasses the serialization queue and causes an unnecessary double teardown.
+    - _Fix:_ Remove the redundant `await menus.removeAll()` in `tab-moves.ts` (and the unused `menus` dependency in `TabMovesDeps` and `compose.ts`), delegating teardown and rebuild entirely to the queued `createMenuList()`.
+- **Verification:**
+  - [x] `npm run format` and `npm run lint` (0 errors, 0 warnings)
+  - [x] `npx vitest run --coverage --maxWorkers=2` (100% Statements, Branches, Functions, Lines)
+  - [x] `MUTATE="src/js/app/menu-manager.ts,src/js/app/tab-moves.ts,src/js/background/compose.ts" npm run test:mutation` (100% mutation score)
+  - [x] `npm run test:e2e`
+
+---
+
+### Chunk 12: Boundary Validation Logging & Outbound Type Narrowing
+
+- **Status:** `[ ] To Do`
+- **Touched Files:**
+  - `src/js/app/message-handler.ts`
+  - `src/js/app/groups-store.ts`
+  - `tests/unit/app/message-handler.test.ts`
+- **Findings Addressed:**
+  - **12.1 (LOW — Incomplete menu change messages dropped without warning):** In `src/js/app/message-handler.ts:51-56`, `changeMenu` returns `Promise.resolve(undefined)` when `parseMenuChange(message)` fails to parse an incomplete message. Unlike other message handlers (`deleteGroup`, `placeTab`) which log errors or report invalid payloads, malformed menu change payloads are silently dropped without diagnostics.
+    - _Fix:_ Add diagnostic logging (`logger.warn`) or return an error object when a menu action is received but `parseMenuChange` returns `undefined`, aiding debugging while keeping invalid state from propagating.
+  - **12.2 (Closed as False Positive — Defense-in-depth sender verification for `runtime.onMessage`):** In `src/js/adapters/browser/events.ts:204`, `runtime.onMessage` does not inspect `_sender`.
+    - _Closing Evidence:_ Per `.agents/rules/verification-validation-rules.md` Section 3.4 ("Guards, boundaries and mutants"), a guard for a state that neither the types nor any caller can produce is dead code and must not be added. In WebExtensions (Firefox and Chromium), `runtime.onMessage` only fires for messages from the extension itself (external senders trigger `runtime.onMessageExternal`), and `src/manifest.json` declares neither `content_scripts` nor `externally_connectable`. Thus the browser boundary already guarantees every `runtime.onMessage` event originates from the extension's own privileged pages.
+  - **12.3 (INFO — Type narrowing for outbound menu messages):** In `src/js/app/groups-store.ts:112`, helper `updateMenu(message: object)` takes a loose `object`.
+    - _Fix:_ Narrow the parameter type to `MenuChange` for compile-time safety on outbound messages.
+- **Verification:**
+  - [ ] `npm run format` and `npm run lint` (0 errors, 0 warnings)
+  - [ ] `npx vitest run --coverage --maxWorkers=2` (100% Statements, Branches, Functions, Lines)
+  - [ ] `MUTATE="src/js/app/message-handler.ts,src/js/app/groups-store.ts" npm run test:mutation` (100% mutation score)
+  - [ ] `npm run test:e2e`
