@@ -32,8 +32,28 @@ describe('scripts/lib/firefox-build.ts', () => {
         manifest_version: 3,
         name: 'Tab Groups Viewer',
         action: { default_title: 'Toggle' },
+        host_permissions: ['<all_urls>'],
       });
       expect(background).toBeDefined();
+    });
+
+    it('asks for the host permission that the thumbnails need', () => {
+      expect(firefoxManifestOf(manifest).host_permissions).toEqual([
+        '<all_urls>',
+      ]);
+    });
+
+    it('keeps the host permissions it has, and does not ask twice', () => {
+      expect(
+        firefoxManifestOf({
+          ...manifest,
+          host_permissions: ['https://example.org/*'],
+        }).host_permissions,
+      ).toEqual(['https://example.org/*', '<all_urls>']);
+      expect(
+        firefoxManifestOf({ ...manifest, host_permissions: ['<all_urls>'] })
+          .host_permissions,
+      ).toEqual(['<all_urls>']);
     });
 
     it('does not change the manifest it was given', () => {
